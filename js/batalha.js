@@ -65,7 +65,9 @@ const Batalha = (() => {
     }
     s.zona = document.createElement('div');
     s.zona.className = 'zona-proibida';
+    s.zona.innerHTML = '<div class="zona-lado esq"></div><div class="zona-lado dir"></div>';
     arena.appendChild(s.zona);
+    atualizarZona();
     arena.onpointerdown = tocarArena;
     $('btn-sair').onclick = desistir;
     document.querySelector('.selo-previa').textContent = modo === 'elixir2x' ? 'Evento: elixir em dobro' : 'Batalha';
@@ -154,6 +156,31 @@ const Batalha = (() => {
     document.addEventListener('pointercancel', soltar);
   }
 
+  // ---------- Onde cada time pode colocar tropas ----------
+  const BOLSO_AZUL = 150, BOLSO_VERMELHO = 470; // até onde dá pra ir no lado inimigo depois de derrubar a torre
+  const torreViva = (id) => s.ent.some((e) => e.torre && e.id === id);
+
+  function podeColocar(time, x, y) {
+    if (x < 26 || x > W - 26) return false;
+    const esq = x < W / 2;
+    if (time === 'azul') {
+      if (y > H - 30) return false;
+      if (y >= RIO_BASE + 6) return true;
+      const caiu = !torreViva(esq ? 'esq-vermelho' : 'dir-vermelho');
+      return caiu && y >= BOLSO_AZUL && y <= RIO_TOPO - 6;
+    }
+    if (y < 30) return false;
+    if (y <= RIO_TOPO - 6) return true;
+    const caiu = !torreViva(esq ? 'esq-azul' : 'dir-azul');
+    return caiu && y <= BOLSO_VERMELHO - 40 && y >= RIO_BASE + 6;
+  }
+
+  function atualizarZona() {
+    const alt = (lado) => (torreViva(`${lado}-vermelho`) ? RIO_BASE + 6 : BOLSO_AZUL);
+    s.zona.querySelector('.esq').style.height = `${(alt('esq') / H) * 100}%`;
+    s.zona.querySelector('.dir').style.height = `${(alt('dir') / H) * 100}%`;
+  }
+
   function tocarArena(ev) {
     if (s.selecionada === null || s.acabou) return;
     const r = s.arena.getBoundingClientRect();
@@ -161,8 +188,8 @@ const Batalha = (() => {
     const y = ((ev.clientY - r.top) / r.height) * H;
     const id = s.azul.fila[s.selecionada];
     const c = Estado.carta(id);
-    if (!c.feitico && (y < RIO_BASE + 6 || y > H - 30 || x < 26 || x > W - 26)) {
-      UI.toast('Coloque tropas no seu lado da arena');
+    if (!c.feitico && !podeColocar('azul', x, y)) {
+      UI.toast('Coloque tropas fora da área vermelha');
       return;
     }
     if (c.custo > s.azul.elixir) { UI.toast('Elixir insuficiente'); return; }
@@ -317,6 +344,8 @@ const Batalha = (() => {
     coroaVoando(t);
     s.ent = s.ent.filter((x) => x !== t);
     const vencedor = t.time === 'azul' ? 'vermelho' : 'azul';
+    atualizarZona();
+    if (t.time === 'vermelho' && t.tipo === 'princesa') setTimeout(() => s && !s.acabou && UI.toast('Área liberada! Agora dá pra colocar tropas na frente da torre 🎯'), 1200);
     if (t.tipo === 'rei') {
       s[vencedor].coroas = 3;
       atualizarPlacar();
@@ -370,6 +399,21 @@ const Batalha = (() => {
     return melhor;
   }
 
+  // empurra a tropa para fora das torres (ela desliza em volta)
+  function evitarTorres(t) {
+    for (const e of s.ent) {
+      if (!e.torre) continue;
+      const dx = t.x - e.x, dy = t.y - e.y;
+      const d0 = Math.hypot(dx, dy) || 0.01;
+      const min = e.raio + t.raio + 2;
+      if (d0 < min) {
+        const k = (min - d0) / d0;
+        t.x += dx * k;
+        t.y += dy * k;
+      }
+    }
+  }
+
   function moverPara(t, alvo, dt) {
     let px = alvo.x, py = alvo.y;
     const meuLado = t.y > PONTE_Y ? 'baixo' : 'cima';
@@ -382,8 +426,28 @@ const Batalha = (() => {
     }
     const dx = px - t.x, dy = py - t.y, d0 = Math.hypot(dx, dy) || 1;
     const passo = Math.min(d0, t.vel * dt);
-    t.x += (dx / d0) * passo;
-    t.y += (dy / d0) * passo;
+    let vx = dx / d0, vy = dy / d0;
+    // se tem uma torre no caminho (que não é o alvo), desvia pelo lado mais curto
+    for (const e of s.ent) {
+      if (!e.torre || e === alvo) continue;
+      const ex = e.x - t.x, ey = e.y - t.y;
+      const frente = ex * vx + ey * vy; // distância da torre "à frente" da tropa
+      if (frente <= 0 || frente > 60) continue;
+      const lateral = ex * vy - ey * vx; // de que lado a torre está
+      const folga = e.raio + t.raio + 4;
+      if (Math.abs(lateral) < folga) {
+        const lado = lateral > 0 ? 1 : -1; // desvia para o lado oposto ao da torre
+        const peso = (1 - frente / 60) * 1.4;
+        const nx = -(dy / d0) * lado, ny = (dx / d0) * lado;
+        vx = dx / d0 + nx * peso;
+        vy = dy / d0 + ny * peso;
+        const n = Math.hypot(vx, vy) || 1;
+        vx /= n; vy /= n;
+      }
+    }
+    t.x += vx * passo;
+    t.y += vy * passo;
+    evitarTorres(t);
   }
 
   function atacar(atacante, alvo) {
@@ -426,7 +490,11 @@ const Batalha = (() => {
       const iF = mao.findIndex((id, i) => Estado.carta(id).feitico && podeJogar(i));
       if (iF >= 0 && (vizinhos >= 2 || alvo.vida > 600) && Math.random() < 0.7) return jogar('vermelho', iF, alvo.x, alvo.y - 10);
       const iT = mao.findIndex((id, i) => !Estado.carta(id).feitico && podeJogar(i));
-      if (iT >= 0) return jogar('vermelho', iT, Math.max(30, Math.min(330, alvo.x + (Math.random() * 40 - 20))), Math.max(60, Math.min(RIO_TOPO - 10, alvo.y - 50)));
+      if (iT >= 0) {
+        const x = Math.max(30, Math.min(330, alvo.x + (Math.random() * 40 - 20)));
+        const y = Math.max(60, Math.min(RIO_TOPO - 10, alvo.y - 50));
+        if (podeColocar('vermelho', x, y)) return jogar('vermelho', iT, x, y);
+      }
       return;
     }
     // ataca quando tem bastante elixir
@@ -434,8 +502,11 @@ const Batalha = (() => {
       const tropas = mao.map((id, i) => i).filter((i) => !Estado.carta(mao[i]).feitico && podeJogar(i));
       if (!tropas.length) return;
       const i = tropas[Math.floor(Math.random() * tropas.length)];
-      const x = PONTES[Math.floor(Math.random() * 2)] + (Math.random() * 30 - 15);
-      jogar('vermelho', i, x, 150 + Math.random() * 90);
+      const lado = Math.floor(Math.random() * 2);
+      const x = PONTES[lado] + (Math.random() * 30 - 15);
+      const bolso = !torreViva(lado ? 'dir-azul' : 'esq-azul');
+      const y = bolso && Math.random() < 0.7 ? RIO_BASE + 20 + Math.random() * 60 : 150 + Math.random() * 90;
+      if (podeColocar('vermelho', x, y)) jogar('vermelho', i, x, y);
     }
   }
 
@@ -496,6 +567,7 @@ const Batalha = (() => {
         }
       }
     }
+    tropas.forEach(evitarTorres);
     tropas.forEach(posicionar);
 
     // torres

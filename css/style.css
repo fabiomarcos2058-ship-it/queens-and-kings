@@ -736,3 +736,9 @@ button.item-loja:active, button.slot-bau:active, .slot-carta:active { transform:
 .msg span { font-size: 14px; overflow-wrap: anywhere; }
 .chat-enviar { display: flex; gap: 6px; margin-top: 8px; }
 .chat-enviar input { flex: 1; min-width: 0; padding: 10px 12px; border-radius: 10px; border: 2px solid #141a40; background: #1d2350; color: #fff; font-family: inherit; font-size: 15px; }
+
+/* Zona onde não pode colocar tropas (abre o bolso quando a torre inimiga cai) */
+.zona-proibida { height: 100%; background: none; }
+.zona-lado { position: absolute; top: 0; width: 50%; background: repeating-linear-gradient(45deg, #E24B4A40 0 12px, #E24B4A1c 12px 24px); border-bottom: 2px dashed #F09595; transition: height 0.5s ease-out; }
+.zona-lado.esq { left: 0; }
+.zona-lado.dir { right: 0; }
