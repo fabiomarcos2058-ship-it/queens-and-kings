@@ -752,6 +752,45 @@
         "recarga": 14,
         "descricao": "Por 6s causa +70% de dano e seus ataques atingem em área."
       }
+    },
+    {
+      "id": "goku_ui",
+      "nome": "Goku (Instinto Superior)",
+      "raridade": "lendaria",
+      "custo": 4,
+      "tipo": "Lendário exclusivo",
+      "descricao": "Exclusivo e absurdamente forte. Só pode lutar em 4 partidas, então use com sabedoria!",
+      "trofeus": 0,
+      "exclusivo": [
+        "twJXL5kpGtUVwrx7Br3xCq26ZDG3"
+      ],
+      "nivelInicial": 9,
+      "usos": 4,
+      "rosto": [
+        440,
+        480,
+        150
+      ],
+      "arte": [
+        58,
+        200,
+        620
+      ],
+      "vida": 4000,
+      "dano": 620,
+      "velocidade": 62,
+      "alcance": 20,
+      "cadencia": 0.75,
+      "alvo": "tudo",
+      "area": 30,
+      "habilidade": {
+        "nome": "Kamehameha",
+        "tipo": "kamehameha",
+        "custo": 2,
+        "recarga": 12,
+        "dano": 1600,
+        "descricao": "Dispara um Kamehameha gigante que atravessa tudo em linha reta."
+      }
     }
   ]
-        }
+}

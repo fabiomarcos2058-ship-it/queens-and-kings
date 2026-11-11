@@ -22,7 +22,11 @@ def original(id_):
 for c in json.loads((PASTA / 'cartas.json').read_text(encoding='utf-8'))['cartas']:
     if c.get('feitico') or c.get('imagem') or c.get('token'):
         continue  # feitiços, barril e minis usam imagens próprias
-    img = original(c['id'])
+    try:
+        img = original(c['id'])
+    except FileNotFoundError as e:
+        print('pulando:', e)
+        continue
     x, y, w = c['arte']
     h = round(w * 4 / 3)
     img.crop((x, y, x + w, y + h)).resize((360, 480), Image.LANCZOS).save(PASTA / f"{c['id']}.jpg", quality=88)

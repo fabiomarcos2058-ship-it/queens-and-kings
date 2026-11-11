@@ -32,6 +32,26 @@ const Estado = (() => {
     const n = cfg.princesa || 1, f = Math.pow(1.1, n - 1);
     return { nivel: n, tropa: cfg.tropa in TROPAS_TORRE ? cfg.tropa : 'princesa', vida: Math.round(BASE_TORRE.princesa.vida * t.vida * f), dano: Math.round(t.dano * f), cadencia: t.cadencia, alcance: t.alcance };
   }
+  // conta uma partida para cartas com usos limitados que estavam no deck; devolve as que acabaram agora
+  function contarUsos() {
+    const acabaram = [];
+    for (const id of [...d.deck]) {
+      const c = carta(id);
+      if (!c || !c.usos) continue;
+      d.usos[id] = (d.usos[id] || 0) + 1;
+      if (d.usos[id] >= c.usos) {
+        acabaram.push(c);
+        if (!d.esgotadas.includes(id)) d.esgotadas.push(id);
+        d.deck = d.deck.filter((x) => x !== id);
+        if (d.avatar === id) d.avatar = 'coroa';
+      }
+    }
+    if (acabaram.length) catalogo = todas.filter(visivel);
+    salvar();
+    return acabaram;
+  }
+  const usosRestantes = (id) => { const c = carta(id); return c && c.usos ? Math.max(0, c.usos - ((d.usos && d.usos[id]) || 0)) : null; };
+
   function podeEvoluirTorre() {
     const n = d.torres.princesa;
     if (n >= NIVEL_MAX) return { ok: false, motivo: 'Nível máximo' };
@@ -65,7 +85,7 @@ const Estado = (() => {
   let todas = []; // cartas.json inteiro
   let catalogo = []; // só as cartas que este jogador pode ver (as exclusivas aparecem só para os IDs da carta)
   const meuUid = () => (typeof Conta !== 'undefined' && Conta.uid ? Conta.uid() : null);
-  const visivel = (c) => !c.token && (!c.exclusivo || c.exclusivo.includes(meuUid())); // tokens (ex.: minis do barril) não são cartas
+  const visivel = (c) => !c.token && (!c.exclusivo || c.exclusivo.includes(meuUid())) && !(d && d.esgotadas && d.esgotadas.includes(c.id)); // tokens (ex.: minis do barril) não são cartas
   let d = null;
 
   function novo() {
@@ -112,10 +132,15 @@ const Estado = (() => {
     for (const c of catalogo.filter((x) => x.exclusivo)) {
       if (d.presentes.includes(c.id)) continue;
       d.colecao[c.id].tem = true;
+      if (c.nivelInicial) d.colecao[c.id].nivel = Math.max(d.colecao[c.id].nivel, c.nivelInicial);
       d.presentes.push(c.id);
       d.presenteNovo = c.id;
       if (d.deck.length < 8 && !d.deck.includes(c.id)) d.deck.push(c.id);
     }
+    // cartas com partidas limitadas que já acabaram saem do deck
+    if (!d.usos) d.usos = {};
+    if (!d.esgotadas) d.esgotadas = [];
+    d.deck = d.deck.filter((id) => !d.esgotadas.includes(id));
     if (!d.id) d.id = Math.random().toString(36).slice(2) + Date.now().toString(36);
     if (!d.baus) {
       // cada jogador ganha 8 cartas básicas sorteadas (sempre com pelo menos 1 feitiço)
@@ -274,6 +299,7 @@ const Estado = (() => {
   return {
     get d() { return d; }, carregar, salvar, apagar, importar, recarregarCatalogo, aoSalvar, carta, stats, catalogo: () => catalogo, tem, liberada, disponiveis, proximaLiberacao,
     COPIAS, OURO, NIVEL_MAX, BAUS, XP_NIVEL,
+    contarUsos, usosRestantes,
     TORRE_OURO, TROPAS_TORRE, nivelRei, minhasTorres, statsTorre, podeEvoluirTorre, evoluirTorre, escolherTropaTorre,
     ganharXp, podeEvoluir, evoluir, abrirBau, tempoRestante, sortearCopias, ofertasDoDia, sorteio,
   };

@@ -572,12 +572,31 @@
       html: `<div class="placar-final"><span class="coroa azul">${r.coroas}</span><small>x</small><span class="coroa vermelha">${r.coroasInimigo}</span></div>
         <p>Partida amistosa: troféus não mudam.</p>
         <p class="x1-placar">X1: <b>${st.v}</b> vitórias · <b>${st.d}</b> derrotas</p>`,
-      botoes: [{ texto: 'OK', classe: 'principal', acao: () => { Batalha.fechar(); tudo(); irPara('batalha'); } }],
+      botoes: [{ texto: 'OK', classe: 'principal', acao: () => { Batalha.fechar(); tudo(); irPara('batalha'); cartasEsgotadas(); } }],
     });
   }
 
   function fimDeBatalha(r) {
+    esgotadas = esgotadas.concat(Estado.contarUsos());
     if (r.modo === 'x1' || r.modo === 'x1c') { fimX1(r); return; }
+    fimDeBatalhaNormal(r);
+  }
+
+  let esgotadas = [];
+  function cartasEsgotadas() {
+    const lista = esgotadas;
+    esgotadas = [];
+    if (!lista.length) return;
+    UI.modal({
+      titulo: 'Última partida!',
+      classe: 'modal-liberadas',
+      html: `<div class="liberadas">${lista.map((c) => `<div class="liberada esgotada">${Cartas.html(c, { mini: true })}<b>${c.nome}</b></div>`).join('')}</div>
+        <p>${lista.map((c) => c.nome).join(' e ')} já lutou todas as partidas e voltou pro treino. Obrigado pela ajuda! 💪</p>`,
+      botoes: [{ texto: 'Valeu!', classe: 'principal', acao: () => { tudo(); } }],
+    });
+  }
+
+  function fimDeBatalhaNormal(r) {
     const vitoria = r.resultado === 'vitoria';
     let trofeus = 0, ouro = 0, bau = null;
     if (vitoria) {
@@ -619,7 +638,7 @@
         ${bau ? `<p class="ganhou-bau"><img data-asset="ui/bau_${bau}" alt="" /> Você ganhou um ${Estado.BAUS[bau].nome.toLowerCase()}!</p>` : vitoria ? '<p class="aviso">Seus espaços de baú estão cheios.</p>' : ''}
         <p class="passe-ganho">🎟️ +${passe.ganho} pontos do passe${passe.subiu ? ` · <b>nível ${Passe.nivel()} do passe!</b>` : ''}</p>
         <div class="xp-resultado"><div class="nivel" data-n="${nivelAntes}"></div><div class="perfil-xp"><i id="xp-anim" style="width:${(xpAntes / Estado.XP_NIVEL(nivelAntes)) * 100}%"></i><small>+${xpGanho} XP</small></div></div>`,
-      botoes: [{ texto: 'OK', classe: 'principal', acao: () => { Batalha.fechar(); tudo(); irPara('batalha'); subiuNivel(niveis, () => cartasLiberadas(liberadas)); } }],
+      botoes: [{ texto: 'OK', classe: 'principal', acao: () => { Batalha.fechar(); tudo(); irPara('batalha'); subiuNivel(niveis, () => { cartasLiberadas(liberadas); cartasEsgotadas(); }); } }],
     });
     Assets.fill();
     setTimeout(() => {
@@ -781,6 +800,8 @@
     const etiqueta = (id) => {
       const col = d().colecao[id];
       const prec = Estado.COPIAS[col.nivel];
+      const u = Estado.usosRestantes(id);
+      if (u !== null) return `Nível ${col.nivel} · ${u} partida${u === 1 ? '' : 's'}`;
       return col.nivel >= Estado.NIVEL_MAX ? `Nível ${col.nivel} · máx` : `Nível ${col.nivel}`;
     };
     const barraCopias = (id) => {
@@ -848,7 +869,7 @@
       ? [['Dano', c.dano], ['Dano em torres', Math.round(c.dano * 0.35)], ['Raio', c.area]]
       : [['Vida', c.vida], ['Dano', c.dano], ['Velocidade', c.velocidade >= 55 ? 'Rápida' : c.velocidade >= 40 ? 'Média' : 'Lenta'],
          ['Alcance', c.alcance > 40 ? 'Longo' : 'Corpo a corpo'], ['Ataque a cada', `${c.cadencia}s`], ['Alvo', c.alvo === 'construcoes' ? 'Torres' : 'Tudo'],
-         ...(c.area ? [['Dano em área', 'Sim']] : [])];
+         ...(c.area ? [['Dano em área', 'Sim']] : []), ...(c.usos ? [['Partidas restantes', `${Estado.usosRestantes(id)} de ${c.usos}`]] : [])];
     const botoes = [];
     if (noDeck) botoes.push({ texto: 'Tirar do deck', classe: 'secundario', desativado: d().deck.length <= 1, motivo: 'O deck precisa de pelo menos 1 carta',
       acao: () => { d().deck = d().deck.filter((x) => x !== id); Estado.salvar(); cartas(); } });
@@ -1130,7 +1151,8 @@
       titulo: '🎁 Presente exclusivo!',
       classe: 'modal-liberadas',
       html: `<div class="evo-raios"></div><div class="liberadas"><div class="liberada">${Cartas.html(c, { mini: true })}<b>${c.nome}</b></div></div>
-        <p>Você ganhou uma carta <b>exclusiva</b> que só existe na sua conta!</p>`,
+        <p>Você ganhou uma carta <b>exclusiva</b> que só existe na sua conta!${c.nivelInicial ? ` Ela já vem no <b>nível ${c.nivelInicial}</b>.` : ''}</p>
+        ${c.usos ? `<p class="aviso">⚠️ Ela só pode lutar em <b>${c.usos} partidas</b>. Depois disso, ela vai embora. Use com sabedoria!</p>` : ''}`,
       botoes: [{ texto: 'Que demais!', classe: 'principal' }],
     });
   }
