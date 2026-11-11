@@ -33,7 +33,7 @@ const Cartas = (() => {
   async function iniciar() {
     let lista = [];
     try {
-      lista = (await (await fetch('assets/cartas/cartas.json')).json()).cartas;
+      lista = (await (await fetch('assets/cartas/cartas.json', { cache: 'no-store' })).json()).cartas;
     } catch (e) {
       return; // sem cartas ainda
     }
