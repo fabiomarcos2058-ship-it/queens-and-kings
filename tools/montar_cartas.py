@@ -34,4 +34,12 @@ for c in json.loads((PASTA / 'cartas.json').read_text(encoding='utf-8'))['cartas
     medalhao = rosto.convert('RGBA')
     medalhao.putalpha(mascara.resize((256, 256), Image.LANCZOS))
     medalhao.save(PASTA / f"{c['id']}_medalhao.png")
+
+    # faixa horizontal com o rosto (usada na tela de título)
+    W, H = img.size
+    fw = min(W, round(r * 4.2))
+    fh = round(fw / 3)
+    x0 = max(0, min(W - fw, cx - fw // 2))
+    y0 = max(0, min(H - fh, cy - fh // 2 - round(r * 0.1)))
+    img.crop((x0, y0, x0 + fw, y0 + fh)).resize((720, 240), Image.LANCZOS).save(PASTA / f"{c['id']}_faixa.jpg", quality=85)
     print('ok', c['id'])

@@ -568,3 +568,48 @@ button.item-loja:active, button.slot-bau:active, .slot-carta:active { transform:
 .baus.chamando { animation: chamando 0.4s ease-in-out 3; }
 @keyframes chamando { 50% { transform: scale(1.06); } }
 .boas-vindas { font-size: 56px; animation: pulo 1.4s ease-in-out infinite; }
+
+/* ================= Tela de título ================= */
+.titulo { position: absolute; inset: 0; z-index: 200; background: #10142e; overflow: hidden; cursor: pointer; transition: opacity 0.5s, transform 0.5s; }
+.titulo.saindo { opacity: 0; transform: scale(1.08); }
+.titulo-faixas { position: absolute; inset: -4% -6%; display: flex; flex-direction: column; gap: 6px; transform: rotate(-6deg); }
+.titulo-faixa { flex: 1; min-height: 0; overflow: hidden; position: relative; border-radius: 4px; box-shadow: 0 0 0 3px #fff, 0 6px 14px #0008; animation: faixaEntra 0.7s calc(var(--i) * 0.09s) cubic-bezier(0.2, 0.9, 0.3, 1.2) backwards; }
+.titulo-faixa.lendaria { box-shadow: 0 0 0 3px #9FE1CB, 0 0 18px #5DCAA588, 0 6px 14px #0008; }
+.titulo-faixa.epica { box-shadow: 0 0 0 3px #CECBF6, 0 6px 14px #0008; }
+.titulo-faixa img { position: absolute; top: 0; height: 100%; width: 118%; object-fit: cover; }
+.titulo-faixa.esq img { animation: panEsq 14s ease-in-out infinite alternate; }
+.titulo-faixa.dir img { animation: panDir 14s ease-in-out infinite alternate; }
+@keyframes panEsq { from { left: 0; } to { left: -18%; } }
+@keyframes panDir { from { left: -18%; } to { left: 0; } }
+@keyframes faixaEntra { from { transform: translateX(var(--de, -110%)); } }
+.titulo-faixa.dir { --de: 110%; }
+.titulo-escuro { position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 46%, #10142ecc 0, #10142e88 32%, transparent 60%), linear-gradient(transparent 70%, #10142ee6); pointer-events: none; }
+.titulo-logo { position: absolute; left: 0; right: 0; top: 36%; display: flex; flex-direction: column; align-items: center; animation: logoEntra 0.9s 0.5s cubic-bezier(0.3, 1.6, 0.6, 1) backwards; }
+@keyframes logoEntra { from { transform: scale(0.3); opacity: 0; } }
+.titulo-coroa { width: 74px; height: 74px; margin-bottom: -8px; filter: drop-shadow(0 4px 0 #26215C); animation: pulo 2s ease-in-out infinite; }
+.logo-texto.grande span { font-size: 46px; }
+.logo-texto.grande small { font-size: 22px; }
+.logo-texto.grande { flex-direction: column; align-items: center; gap: 0; line-height: 0.95; }
+.titulo-toque { position: absolute; left: 0; right: 0; bottom: 13%; text-align: center; font-family: 'Lilita One', 'Fredoka', sans-serif; font-size: 24px; color: #fff; text-shadow: 0 2px 0 #26215C, 2px 0 0 #26215C, -2px 0 0 #26215C, 0 -2px 0 #26215C, 0 4px 10px #000; animation: piscar 1.4s ease-in-out infinite; }
+@keyframes piscar { 50% { opacity: 0.35; transform: scale(0.96); } }
+.titulo-rodape { position: absolute; left: 0; right: 0; bottom: 3%; text-align: center; font-size: 11px; color: #B5D4F4; opacity: 0.8; padding: 0 20px; }
+.titulo-brilho { position: absolute; bottom: -10px; left: var(--x); width: 6px; height: 6px; border-radius: 50%; background: #FAC775; box-shadow: 0 0 8px #FAC775; animation: brilhoSobe 5s var(--d) linear infinite; pointer-events: none; }
+@keyframes brilhoSobe { to { transform: translateY(-110vh); opacity: 0; } }
+
+/* ================= Tela de conta ================= */
+.tela-conta { position: absolute; inset: 0; z-index: 150; background: radial-gradient(circle at 50% 20%, #4a56b0, #10142e 75%); display: flex; align-items: center; justify-content: center; padding: 18px; animation: fade 0.3s; overflow-y: auto; }
+.tela-conta.saindo { opacity: 0; transition: opacity 0.3s; }
+.conta-caixa { width: 100%; max-width: 360px; background: linear-gradient(#3b4596, #2a3170); border: 3px solid #141a40; border-radius: 20px; padding: 18px 16px; box-shadow: 0 6px 0 #0d1130; display: flex; flex-direction: column; gap: 10px; }
+.conta-caixa > .logo-texto { justify-content: center; margin-bottom: 4px; }
+.conta-abas { display: flex; background: #1d2350; border-radius: 12px; padding: 4px; }
+.conta-abas button { flex: 1; padding: 8px; border-radius: 9px; background: none; color: #B5D4F4; font-weight: 600; font-size: 15px; }
+.conta-abas button.ativa { background: #534AB7; color: #fff; box-shadow: 0 2px 0 #26215C; }
+.conta-form { display: flex; flex-direction: column; gap: 8px; }
+.conta-form .oculto { display: none; }
+.conta-erro { color: #F09595; font-size: 13px; min-height: 0; margin: 0; }
+.conta-erro:empty { display: none; }
+.conta-ou { display: flex; align-items: center; gap: 10px; color: #85B7EB; font-size: 13px; }
+.conta-ou::before, .conta-ou::after { content: ''; flex: 1; height: 2px; background: #3b4596; }
+.btn-google { background: #fff; color: #2C2C2A; border-bottom-color: #B4B2A9; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.btn-google b { color: #378ADD; font-size: 18px; }
+.tela-conta .aviso { text-align: center; margin: 0; font-size: 12px; }

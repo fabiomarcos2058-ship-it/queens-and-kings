@@ -534,10 +534,12 @@
   tudo();
   irPara('batalha');
   setInterval(() => { if (d().baus.some((b) => b && b.inicio)) baus(); }, 1000);
+  await Titulo.mostrar();
+  await Conta.tela();
   if (!d().boasVindas) {
     d().boasVindas = true; Estado.salvar();
     UI.modal({
-      titulo: 'Bem-vinda ao Queens and Kings!',
+      titulo: 'Boas-vindas ao Queens and Kings!',
       html: `<div class="boas-vindas">👑</div><p>Você ainda não tem nenhuma carta. Abra seus <b>4 baús iniciais</b> para ganhar as <b>8 cartas básicas</b> e montar seu primeiro deck!</p>
         <p class="aviso">Depois, vença batalhas para ganhar troféus e liberar cartas novas.</p>`,
       botoes: [{ texto: 'Vamos lá!', classe: 'principal' }],
