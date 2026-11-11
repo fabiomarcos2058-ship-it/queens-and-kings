@@ -19,7 +19,7 @@
         600
       ],
       "vida": 700,
-      "dano": 110,
+      "dano": 198,
       "velocidade": 48,
       "alcance": 16,
       "cadencia": 1.1,
@@ -45,7 +45,7 @@
         640
       ],
       "vida": 320,
-      "dano": 70,
+      "dano": 126,
       "velocidade": 64,
       "alcance": 16,
       "cadencia": 0.8,
@@ -71,7 +71,7 @@
         600
       ],
       "vida": 400,
-      "dano": 75,
+      "dano": 135,
       "velocidade": 46,
       "alcance": 115,
       "cadencia": 0.9,
@@ -88,7 +88,7 @@
       "descricao": "Pétalas cortantes que acertam todos numa área grande.",
       "feitico": true,
       "imagem": "chuva.svg",
-      "dano": 150,
+      "dano": 240,
       "area": 60,
       "trofeus": 0,
       "inicial": true
@@ -111,7 +111,7 @@
         600
       ],
       "vida": 1050,
-      "dano": 80,
+      "dano": 144,
       "velocidade": 40,
       "alcance": 16,
       "cadencia": 1.2,
@@ -137,7 +137,7 @@
         620
       ],
       "vida": 1700,
-      "dano": 95,
+      "dano": 171,
       "velocidade": 34,
       "alcance": 16,
       "cadencia": 1.4,
@@ -163,7 +163,7 @@
         600
       ],
       "vida": 620,
-      "dano": 115,
+      "dano": 207,
       "velocidade": 44,
       "alcance": 105,
       "cadencia": 1.6,
@@ -181,7 +181,7 @@
       "descricao": "Uma lanterna em chamas que explode com muito dano.",
       "feitico": true,
       "imagem": "lanterna.svg",
-      "dano": 360,
+      "dano": 576,
       "area": 42,
       "trofeus": 0,
       "inicial": true
@@ -206,7 +206,7 @@
         620
       ],
       "vida": 420,
-      "dano": 80,
+      "dano": 144,
       "velocidade": 46,
       "alcance": 112,
       "cadencia": 1.0,
@@ -232,7 +232,7 @@
         620
       ],
       "vida": 340,
-      "dano": 72,
+      "dano": 130,
       "velocidade": 64,
       "alcance": 16,
       "cadencia": 0.8,
@@ -258,7 +258,7 @@
         500
       ],
       "vida": 650,
-      "dano": 100,
+      "dano": 180,
       "velocidade": 52,
       "alcance": 16,
       "cadencia": 1.0,
@@ -283,7 +283,7 @@
         620
       ],
       "vida": 360,
-      "dano": 75,
+      "dano": 135,
       "velocidade": 62,
       "alcance": 16,
       "cadencia": 0.8,
@@ -307,7 +307,7 @@
         600
       ],
       "vida": 820,
-      "dano": 135,
+      "dano": 243,
       "velocidade": 54,
       "alcance": 16,
       "cadencia": 0.9,
@@ -333,7 +333,7 @@
         500
       ],
       "vida": 600,
-      "dano": 110,
+      "dano": 198,
       "velocidade": 44,
       "alcance": 100,
       "cadencia": 1.6,
@@ -359,7 +359,7 @@
         611
       ],
       "vida": 450,
-      "dano": 85,
+      "dano": 153,
       "velocidade": 48,
       "alcance": 110,
       "cadencia": 1.0,
@@ -384,7 +384,7 @@
         620
       ],
       "vida": 650,
-      "dano": 120,
+      "dano": 216,
       "velocidade": 46,
       "alcance": 90,
       "cadencia": 1.5,
@@ -409,7 +409,7 @@
         600
       ],
       "vida": 860,
-      "dano": 200,
+      "dano": 360,
       "velocidade": 62,
       "alcance": 18,
       "cadencia": 1.1,
@@ -435,7 +435,7 @@
         480
       ],
       "vida": 480,
-      "dano": 95,
+      "dano": 171,
       "velocidade": 50,
       "alcance": 115,
       "cadencia": 0.9,
@@ -460,7 +460,7 @@
         399
       ],
       "vida": 1000,
-      "dano": 150,
+      "dano": 270,
       "velocidade": 50,
       "alcance": 16,
       "cadencia": 1.0,
@@ -485,7 +485,7 @@
         620
       ],
       "vida": 750,
-      "dano": 170,
+      "dano": 306,
       "velocidade": 44,
       "alcance": 105,
       "cadencia": 1.7,
@@ -510,7 +510,7 @@
         600
       ],
       "vida": 700,
-      "dano": 150,
+      "dano": 270,
       "velocidade": 40,
       "alcance": 100,
       "cadencia": 1.8,
@@ -537,7 +537,7 @@
         446
       ],
       "vida": 1800,
-      "dano": 230,
+      "dano": 414,
       "velocidade": 46,
       "alcance": 18,
       "cadencia": 1.3,

@@ -613,3 +613,93 @@ button.item-loja:active, button.slot-bau:active, .slot-carta:active { transform:
 .btn-google { background: #fff; color: #2C2C2A; border-bottom-color: #B4B2A9; display: flex; align-items: center; justify-content: center; gap: 8px; }
 .btn-google b { color: #378ADD; font-size: 18px; }
 .tela-conta .aviso { text-align: center; margin: 0; font-size: 12px; }
+
+/* ================= Barras de vida bonitas ================= */
+.hp { position: relative; height: 100%; background: #1a1430; border-radius: 99px; overflow: hidden; box-shadow: inset 0 2px 3px #0009; }
+.hp i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 99px; display: block; }
+.hp-rastro { background: #FFF3C4; transition: width 0.45s ease-in 0.3s; }
+.hp-fill { background: linear-gradient(#B8F5A0 0%, #5BD94A 40%, #2FA82B 100%); transition: width 0.12s ease-out, filter 0.3s; box-shadow: inset 0 -2px 0 #1E7A1E66; }
+.hp-brilho { left: 3px !important; right: 3px; top: 1px !important; bottom: auto !important; height: 35%; background: linear-gradient(#ffffffaa, #ffffff22); border-radius: 99px; pointer-events: none; }
+.hp.media .hp-fill { background: linear-gradient(#FFE9A0 0%, #F5C23A 45%, #D99A12 100%); box-shadow: inset 0 -2px 0 #8A5A0066; }
+.hp.baixa .hp-fill { background: linear-gradient(#FFB3A8 0%, #F05A4A 45%, #C42E22 100%); animation: hpPisca 0.6s ease-in-out infinite; }
+@keyframes hpPisca { 50% { filter: brightness(1.35); } }
+
+/* barra das tropas: moldura na cor do time, aparece quando leva dano */
+.tropa > .hp { width: 86%; height: 7px; margin-bottom: 3px; border: 1.5px solid #378ADD; box-sizing: content-box; opacity: 0; transform: scaleY(0.4); transition: opacity 0.2s, transform 0.2s; }
+.tropa.vermelho > .hp { border-color: #E24B4A; }
+.tropa.ferido > .hp { opacity: 1; transform: none; }
+.tropa-vida { display: none; }
+
+/* barra das torres */
+.vida-torre { display: flex; align-items: center; gap: 2px; width: 20%; height: 12px; background: none; border: none; padding: 0; transform: translate(-50%, 0); }
+.vida-torre.rei { width: 25%; height: 14px; }
+.vida-torre .hp { flex: 1; border: 2px solid #378ADD; box-shadow: inset 0 2px 3px #0009, 0 2px 0 #0d1130; }
+.vida-torre.vermelho .hp { border-color: #E24B4A; }
+.vida-torre .hp-icone { font-size: 11px; line-height: 1; filter: drop-shadow(0 1px 0 #000); }
+.vida-torre b { position: absolute; top: -14px; left: 14px; right: 0; text-align: center; font-size: 11px; font-family: 'Lilita One', 'Fredoka', sans-serif; color: #fff; text-shadow: 0 1px 0 #000, 1px 0 0 #000, -1px 0 0 #000, 0 -1px 0 #000; }
+.vida-torre.levou { animation: barraTreme 0.25s; }
+@keyframes barraTreme { 25% { transform: translate(calc(-50% - 2px), 0); } 75% { transform: translate(calc(-50% + 2px), 0); } }
+
+/* ================= Animações da batalha ================= */
+.tropa-corpo { position: relative; width: 100%; }
+.tropa .tropa-medalhao { animation: andar 0.7s ease-in-out infinite; transform-origin: 50% 100%; }
+@keyframes andar { 0%, 100% { transform: translateY(0) rotate(-3deg); } 50% { transform: translateY(-3px) rotate(3deg); } }
+.tropa.atacando .tropa-corpo { animation: investida 0.22s ease-out; }
+@keyframes investida { 40% { transform: translate(var(--lx), var(--ly)) scale(1.08); } }
+.tropa.atirando .tropa-corpo { animation: recuo 0.2s ease-out; }
+@keyframes recuo { 40% { transform: translateY(3px) scale(0.94); } }
+.tropa.levou .tropa-medalhao img { animation: flashDano 0.25s; }
+@keyframes flashDano { 0% { filter: brightness(2.6) saturate(0.2); } 100% { filter: none; } }
+.tropa.levou .tropa-corpo { animation: tremidinha 0.2s; }
+@keyframes tremidinha { 25% { transform: translateX(-2px); } 75% { transform: translateX(2px); } }
+.tropa.surgindo .tropa-corpo { animation: cairDoCeu 0.65s cubic-bezier(0.5, 0, 0.8, 0.6) both; }
+@keyframes cairDoCeu { 0% { transform: translateY(-60px) scale(0.6); opacity: 0; } 80% { transform: translateY(0) scale(1.08, 0.9); opacity: 1; } 100% { transform: none; } }
+.tropa.morrendo { opacity: 0; transform: translate(-50%, -60%) scale(0.2) rotate(40deg); transition: all 0.4s ease-in; }
+
+.onda-surgir, .onda-pouso, .poof, .mira-feitico, .explosao-torre { position: absolute; transform: translate(-50%, -50%); border-radius: 50%; pointer-events: none; z-index: 1600; aspect-ratio: 1; }
+.onda-surgir { width: 18%; border: 3px dashed #85B7EB; animation: girarSome 0.7s linear forwards; }
+.onda-surgir.vermelho { border-color: #F09595; }
+@keyframes girarSome { from { transform: translate(-50%, -50%) rotate(0) scale(0.6); opacity: 1; } to { transform: translate(-50%, -50%) rotate(180deg) scale(1); opacity: 0; } }
+.onda-pouso { width: 6%; border: 3px solid #fff; animation: ondaAbre 0.5s ease-out forwards; }
+@keyframes ondaAbre { to { transform: translate(-50%, -50%) scale(4); opacity: 0; } }
+.poof { width: 14%; background: radial-gradient(#fff, #ffffff88 40%, transparent 70%); animation: ondaAbre 0.5s ease-out forwards; }
+.particula { position: absolute; width: 6px; height: 6px; border-radius: 50%; transform: translate(-50%, -50%); z-index: 1750; pointer-events: none; animation: voarParticula 0.6s cubic-bezier(0.2, 0.7, 0.4, 1) forwards; box-shadow: 0 0 4px #fff8; }
+@keyframes voarParticula { to { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy) + 14px)) scale(0.2); opacity: 0; } }
+
+.projetil { width: 9px; height: 9px; box-shadow: 0 0 8px 2px #fff, 0 0 14px 4px currentColor; }
+.projetil.azul { color: #378ADD; background: #CDE6FF; }
+.projetil.vermelho { color: #E24B4A; background: #FFD3CF; }
+.projetil.de-torre { width: 5px; height: 14px; color: #EF9F27; background: #FFF3C4; box-shadow: 0 0 6px 2px #FAC775; }
+.explosao { background: radial-gradient(#fff 0%, #FAC775 30%, #E24B4A88 55%, transparent 72%); }
+.explosao.azul { background: radial-gradient(#fff 0%, #85B7EB 35%, #378ADD88 55%, transparent 72%); }
+.golpe { border-color: #FFF3C4; box-shadow: 0 0 10px #FAC775; }
+.golpe::before, .golpe::after { content: ''; position: absolute; left: 50%; top: 50%; width: 140%; height: 3px; background: #fff; transform: translate(-50%, -50%) rotate(45deg); border-radius: 2px; }
+.golpe::after { transform: translate(-50%, -50%) rotate(-45deg); }
+
+.dano-num { font-size: 14px; color: #FFF3C4; animation: danoPula 0.7s cubic-bezier(0.2, 1.4, 0.5, 1) forwards; }
+.dano-num.grande { font-size: 19px; color: #FAC775; }
+@keyframes danoPula { 0% { transform: translate(-50%, -50%) scale(0.4); } 25% { transform: translate(-50%, -110%) scale(1.25); } 100% { transform: translate(-50%, -230%) scale(1); opacity: 0; } }
+
+.mira-feitico { border: 2px dashed #fff; background: #ffffff18; animation: mira 0.65s ease-out forwards; }
+.mira-feitico.vermelho { border-color: #F09595; }
+@keyframes mira { from { transform: translate(-50%, -50%) scale(1.4); opacity: 0; } 50% { opacity: 1; } to { transform: translate(-50%, -50%) scale(1); opacity: 0.6; } }
+.lanterna-caindo { position: absolute; width: 26px; height: 32px; transform: translate(-50%, -50%); z-index: 1800; background: url('../assets/avatares/lanterna.svg') center/contain no-repeat; filter: drop-shadow(0 0 10px #FAC775); animation: lanternaCai 0.46s cubic-bezier(0.6, 0, 1, 0.6) forwards; pointer-events: none; }
+@keyframes lanternaCai { from { transform: translate(-50%, -400%) rotate(-30deg) scale(1.4); } to { transform: translate(-50%, -50%) rotate(10deg) scale(1); } }
+.petala-feitico { position: absolute; width: 9px; height: 6px; background: #F4C0D1; border-radius: 60% 0 60% 0; z-index: 1800; pointer-events: none; transform: translate(-50%, -50%); animation: petalaCai 0.8s ease-in both; box-shadow: 0 0 3px #fff; }
+@keyframes petalaCai { from { transform: translate(-50%, -500%) rotate(0); opacity: 0; } 30% { opacity: 1; } to { transform: translate(-50%, -50%) rotate(540deg); opacity: 0.2; } }
+.feitico { animation: feitico 0.7s ease-out forwards; }
+
+.explosao-torre { width: 40%; background: radial-gradient(#fff 0%, #FAC775 25%, #E24B4A 45%, #44444188 62%, transparent 72%); animation: explodeTorre 0.9s ease-out forwards; }
+@keyframes explodeTorre { 0% { transform: translate(-50%, -50%) scale(0.2); } 40% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; } 100% { transform: translate(-50%, -50%) scale(1.4); opacity: 0; } }
+.arena-peca.torre-levou { animation: torreTreme 0.22s; }
+@keyframes torreTreme { 30% { transform: translateX(-2px); filter: brightness(1.4); } 70% { transform: translateX(2px); } }
+.arena-peca.destruida { animation: torreCai 0.6s ease-in forwards; }
+@keyframes torreCai { to { filter: grayscale(1) brightness(0.45); transform: scale(0.8) translateY(6%); } }
+.arena.tremendo { animation: tela 0.25s; }
+.arena.tremendo-forte { animation: telaForte 0.5s; }
+@keyframes tela { 25% { transform: translate(-3px, 2px); } 50% { transform: translate(3px, -2px); } 75% { transform: translate(-2px, -1px); } }
+@keyframes telaForte { 10% { transform: translate(-7px, 4px) rotate(-0.6deg); } 30% { transform: translate(7px, -4px) rotate(0.6deg); } 50% { transform: translate(-5px, 3px); } 70% { transform: translate(4px, -2px); } 90% { transform: translate(-2px, 1px); } }
+.coroa-voando { position: absolute; z-index: 95; font-size: 34px; transform: translate(-50%, -50%) scale(1.6); filter: drop-shadow(0 0 10px #FAC775); transition: left 0.9s cubic-bezier(0.5, -0.4, 0.6, 1), top 0.9s cubic-bezier(0.3, 0, 0.7, 1), transform 0.9s; pointer-events: none; }
+.coroa-voando.indo { transform: translate(-50%, -50%) scale(0.6) rotate(360deg); }
+.coroa.pulou { animation: pop 0.4s cubic-bezier(0.3, 1.8, 0.6, 1); }
+.vida-torre .hp-icone { display: inline-block; width: auto; height: auto; background: none !important; border-radius: 0; }

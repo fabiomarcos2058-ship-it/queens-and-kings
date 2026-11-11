@@ -19,7 +19,7 @@ const Batalha = (() => {
     const t = (id, time, tipo, x, y) => ({
       id, time, tipo, x, y, torre: true, raio: tipo === 'rei' ? 26 : 20,
       vida: tipo === 'rei' ? 2400 : 1400, max: tipo === 'rei' ? 2400 : 1400,
-      alcance: tipo === 'rei' ? 125 : 120, dano: tipo === 'rei' ? 60 : 48, cadencia: tipo === 'rei' ? 1 : 0.8,
+      alcance: tipo === 'rei' ? 125 : 120, dano: tipo === 'rei' ? 80 : 62, cadencia: tipo === 'rei' ? 1 : 0.8,
       cd: 0, ativa: tipo !== 'rei',
     });
     return [
@@ -60,7 +60,7 @@ const Batalha = (() => {
       t.el = document.createElement('div');
       t.el.className = `vida-torre ${t.time} ${t.tipo}`;
       Object.assign(t.el.style, pct(t.x, t.y + (t.tipo === 'rei' ? 40 : 34)));
-      t.el.innerHTML = `<span></span><b>${t.vida}</b>`;
+      t.el.innerHTML = `<span class="hp-icone">${t.tipo === 'rei' ? '👑' : '🏰'}</span>${barraHp()}<b>${t.vida}</b>`;
       arena.appendChild(t.el);
     }
     s.zona = document.createElement('div');
@@ -188,6 +188,42 @@ const Batalha = (() => {
     }
   }
 
+  // ---------- Barras de vida e efeitos ----------
+  const barraHp = () => '<div class="hp"><i class="hp-rastro" style="width:100%"></i><i class="hp-fill" style="width:100%"></i><i class="hp-brilho"></i></div>';
+
+  function atualizarHp(e) {
+    const p = Math.max(0, e.vida / e.max);
+    const hp = e.el.querySelector('.hp');
+    hp.querySelector('.hp-fill').style.width = `${p * 100}%`;
+    hp.querySelector('.hp-rastro').style.width = `${p * 100}%`;
+    hp.classList.toggle('media', p < 0.5 && p >= 0.25);
+    hp.classList.toggle('baixa', p < 0.25);
+    e.el.classList.toggle('ferido', p < 1);
+  }
+
+  function efeito(classe, x, y, ms, estilo = {}) {
+    const el = document.createElement('div');
+    el.className = classe;
+    Object.assign(el.style, pct(x, y), estilo);
+    s.arena.appendChild(el);
+    setTimeout(() => el.remove(), ms);
+    return el;
+  }
+
+  function particulas(x, y, cor, qtd = 8, forca = 26) {
+    for (let i = 0; i < qtd; i++) {
+      const a = (i / qtd) * Math.PI * 2 + Math.random() * 0.5;
+      const d = forca * (0.6 + Math.random() * 0.6);
+      efeito('particula', x, y, 600, { '--dx': `${Math.cos(a) * d}px`, '--dy': `${Math.sin(a) * d - 8}px`, background: cor });
+    }
+  }
+
+  function tremer(forte = false) {
+    s.arena.classList.remove('tremendo', 'tremendo-forte');
+    void s.arena.offsetWidth;
+    s.arena.classList.add(forte ? 'tremendo-forte' : 'tremendo');
+  }
+
   // ---------- Entidades ----------
   function criarTropa(time, c, x, y, f, nivel) {
     const t = {
@@ -198,21 +234,32 @@ const Batalha = (() => {
     };
     t.el = document.createElement('div');
     t.el.className = `tropa ${time} surgindo`;
-    t.el.innerHTML = `<div class="tropa-vida"><span></span></div>
-      <div class="tropa-medalhao"><img src="assets/cartas/${c.id}_medalhao.png" alt="" /><b>${nivel}</b></div><div class="tropa-sombra"></div>`;
+    t.el.innerHTML = `${barraHp()}
+      <div class="tropa-corpo"><div class="tropa-medalhao"><img src="assets/cartas/${c.id}_medalhao.png" alt="" /><b>${nivel}</b></div></div><div class="tropa-sombra"></div>`;
     s.arena.appendChild(t.el);
     s.ent.push(t);
     posicionar(t);
+    efeito(`onda-surgir ${time}`, x, y, 700);
+    setTimeout(() => { if (s && !s.acabou) { efeito(`onda-pouso ${time}`, t.x, t.y, 500); particulas(t.x, t.y + 4, '#ffffffcc', 6, 18); } }, 650);
   }
 
   function lancarFeitico(time, c, x, y, dano) {
-    const el = document.createElement('div');
-    el.className = `feitico ${c.id}`;
-    Object.assign(el.style, pct(x, y), { width: `${((c.area * 2) / W) * 100}%` });
-    s.arena.appendChild(el);
-    s.efeitos.push({ el, vida: 0.9 });
+    const largura = { width: `${((c.area * 2) / W) * 100}%` };
+    efeito(`mira-feitico ${time}`, x, y, 650, largura);
+    if (c.id === 'lanterna') {
+      // lanterna cai do céu e explode
+      efeito('lanterna-caindo', x, y, 460);
+    } else {
+      for (let i = 0; i < 16; i++) {
+        const a = Math.random() * Math.PI * 2, r = Math.random() * c.area;
+        efeito('petala-feitico', x + Math.cos(a) * r, y + Math.sin(a) * r * 0.7, 800, { animationDelay: `${Math.random() * 0.3}s` });
+      }
+    }
     setTimeout(() => {
       if (!s || s.acabou) return;
+      efeito(`feitico ${c.id}`, x, y, 700, largura);
+      particulas(x, y, c.id === 'lanterna' ? '#FAC775' : '#F4C0D1', 12, c.area);
+      if (c.id === 'lanterna') tremer();
       for (const e of [...s.ent]) {
         if (e.time === time || e.vida <= 0) continue;
         if (dist(e, { x, y }) <= c.area + e.raio) ferir(e, e.torre ? Math.round(dano * 0.35) : dano, time);
@@ -229,29 +276,29 @@ const Batalha = (() => {
     if (e.vida <= 0) return;
     e.vida -= dano;
     numero(e, dano);
+    atualizarHp(e);
+    e.el.classList.remove('levou');
+    void e.el.offsetWidth;
+    e.el.classList.add('levou');
     if (e.torre) {
       if (e.tipo === 'rei') e.ativa = true;
       e.el.querySelector('b').textContent = Math.max(0, Math.round(e.vida));
-      e.el.querySelector('span').style.width = `${Math.max(0, e.vida / e.max) * 100}%`;
-      e.el.classList.add('levou');
-      setTimeout(() => e.el && e.el.classList.remove('levou'), 120);
+      const img = s.arena.querySelector(`[data-torre="${e.id}"]`);
+      if (img) { img.classList.remove('torre-levou'); void img.offsetWidth; img.classList.add('torre-levou'); }
       if (e.vida <= 0) destruirTorre(e, deTime);
-    } else {
-      e.el.querySelector('.tropa-vida span').style.width = `${Math.max(0, e.vida / e.max) * 100}%`;
-      e.el.classList.add('levou');
-      setTimeout(() => e.el && e.el.classList.remove('levou'), 120);
-      if (e.vida <= 0) {
-        e.el.classList.add('morrendo');
-        const el = e.el;
-        setTimeout(() => el.remove(), 350);
-        s.ent = s.ent.filter((x) => x !== e);
-      }
+    } else if (e.vida <= 0) {
+      e.el.classList.add('morrendo');
+      const el = e.el;
+      efeito(`poof ${e.time}`, e.x, e.y, 500);
+      particulas(e.x, e.y, e.time === 'azul' ? '#85B7EB' : '#F09595', 10, 30);
+      setTimeout(() => el.remove(), 400);
+      s.ent = s.ent.filter((x) => x !== e);
     }
   }
 
   function numero(e, dano) {
     const n = document.createElement('div');
-    n.className = 'dano-num';
+    n.className = `dano-num${dano >= 250 ? ' grande' : ''}`;
     n.textContent = dano;
     Object.assign(n.style, pct(e.x + (Math.random() * 16 - 8), e.y - 22));
     s.arena.appendChild(n);
@@ -263,6 +310,11 @@ const Batalha = (() => {
     const img = s.arena.querySelector(`[data-torre="${t.id}"]`);
     if (img) img.classList.add('destruida');
     t.el.remove();
+    efeito('explosao-torre', t.x, t.y, 900);
+    particulas(t.x, t.y, '#B4B2A9', 16, 50);
+    particulas(t.x, t.y, '#FAC775', 10, 36);
+    tremer(true);
+    coroaVoando(t);
     s.ent = s.ent.filter((x) => x !== t);
     const vencedor = t.time === 'azul' ? 'vermelho' : 'azul';
     if (t.tipo === 'rei') {
@@ -277,6 +329,25 @@ const Batalha = (() => {
     atualizarPlacar();
     UI.toast(t.time === 'azul' ? 'Você perdeu uma torre!' : 'Torre derrubada! 👑');
     if (s.prorrogacao) terminar();
+  }
+
+  function coroaVoando(t) {
+    const vencedor = t.time === 'azul' ? 'vermelho' : 'azul';
+    const alvo = document.querySelector(`.coroa.${vencedor}`).getBoundingClientRect();
+    const r = s.arena.getBoundingClientRect();
+    const app = document.getElementById('app').getBoundingClientRect();
+    const el = document.createElement('div');
+    el.className = 'coroa-voando';
+    el.textContent = '👑';
+    el.style.left = `${r.left - app.left + (t.x / W) * r.width}px`;
+    el.style.top = `${r.top - app.top + (t.y / H) * r.height}px`;
+    document.getElementById('app').appendChild(el);
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      el.style.left = `${alvo.left - app.left + alvo.width / 2}px`;
+      el.style.top = `${alvo.top - app.top + alvo.height / 2}px`;
+      el.classList.add('indo');
+    }));
+    setTimeout(() => { el.remove(); const c = document.querySelector(`.coroa.${vencedor}`); c.classList.remove('pulou'); void c.offsetWidth; c.classList.add('pulou'); }, 950);
   }
 
   function atualizarPlacar() {
@@ -317,11 +388,18 @@ const Batalha = (() => {
 
   function atacar(atacante, alvo) {
     if (atacante.alcance > 40 || atacante.torre) {
+      if (!atacante.torre) { atacante.el.classList.remove('atirando'); void atacante.el.offsetWidth; atacante.el.classList.add('atirando'); }
       const p = document.createElement('div');
       p.className = `projetil ${atacante.time}${atacante.torre ? ' de-torre' : ''}`;
       s.arena.appendChild(p);
       s.proj.push({ x: atacante.x, y: atacante.y - 14, alvo, dano: atacante.dano, area: atacante.area || 0, time: atacante.time, el: p });
     } else {
+      const dx = alvo.x - atacante.x, dy = alvo.y - atacante.y, d0 = Math.hypot(dx, dy) || 1;
+      atacante.el.style.setProperty('--lx', `${(dx / d0) * 9}px`);
+      atacante.el.style.setProperty('--ly', `${(dy / d0) * 9}px`);
+      atacante.el.classList.remove('atacando');
+      void atacante.el.offsetWidth;
+      atacante.el.classList.add('atacando');
       ferir(alvo, atacante.dano, atacante.time);
       const golpe = document.createElement('div');
       golpe.className = 'golpe';
@@ -439,7 +517,7 @@ const Batalha = (() => {
           if (p.area) {
             for (const e of [...s.ent]) if (e.time !== p.time && dist(e, p.alvo) <= p.area + e.raio) ferir(e, p.dano, p.time);
             const ex = document.createElement('div');
-            ex.className = 'explosao';
+            ex.className = `explosao ${p.time}`;
             Object.assign(ex.style, pct(p.alvo.x, p.alvo.y), { width: `${((p.area * 2) / W) * 100}%` });
             s.arena.appendChild(ex);
             setTimeout(() => ex.remove(), 400);
