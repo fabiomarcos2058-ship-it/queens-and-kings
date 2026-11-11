@@ -55,7 +55,7 @@ const Batalha = (() => {
       modo, t: 0, prorrogacao: false, acabou: false, pausa: false,
       azul: lado(deck), vermelho: lado(deckIA),
       ent: torres(minhas, delas), proj: [], efeitos: [], selecionada: null, iaTimer: 2, id: 0,
-      nivelIA: Math.max(1, Math.min(9, Math.round(deck.reduce((a, id) => a + Estado.d.colecao[id].nivel, 0) / deck.length))),
+      nivelIA: Math.max(1, Math.min(9, Math.round(deck.reduce((a, id) => a + Estado.d.colecao[id].nivel, 0) / deck.length) - (Mod.deckApelao() ? 0 : 1))),
       rede, niveisV: rede ? rede.convidado.niveis : null, eventos: [], snapTimer: 0,
     };
     montar(rede ? `X1 contra ${rede.convidado.nome}` : modo === 'elixir2x' ? 'Evento: elixir em dobro' : 'Batalha');
@@ -230,7 +230,7 @@ const Batalha = (() => {
     L.elixir -= c.custo;
     L.fila.splice(indice, 1);
     L.fila.push(id);
-    const nivel = time === 'azul' ? Estado.d.colecao[id].nivel : s.niveisV ? (s.niveisV[id] || 1) : s.nivelIA;
+    const nivel = time === 'azul' ? Estado.d.colecao[id].nivel : s.niveisV ? (s.niveisV[id] || 1) : nivelCartaIA(id);
     const f = Math.pow(1.1, nivel - 1) * (time === 'azul' && Mod.flag('danoX5') ? 5 : 1);
     if (c.feitico) {
       lancarFeitico(time, c, x, y, Math.round(c.dano * f));
@@ -711,11 +711,18 @@ const Batalha = (() => {
 
 
 
-  // torres da IA: mesmo nível de rei que você e torres de princesa parecidas com as suas
+  // cartas da IA: em volta de 1 nível abaixo da média do seu deck; algumas ficam 2 abaixo (sorteado uma vez por partida)
+  function nivelCartaIA(id) {
+    if (!s.niveisIA) s.niveisIA = {};
+    if (!(id in s.niveisIA)) s.niveisIA[id] = Math.max(1, s.nivelIA - (!Mod.deckApelao() && Math.random() < 0.4 ? 1 : 0));
+    return s.niveisIA[id];
+  }
+
+  // torres da IA: mesmo nível de rei que você e torres de princesa iguais ou um pouco abaixo das suas
   function torresIA(m) {
     const apelao = !!Mod.deckApelao();
     const rei = Math.min(Estado.NIVEL_MAX, m.rei + (apelao ? 1 : 0));
-    const princesa = Math.max(1, Math.min(rei, m.princesa + (apelao ? 1 : Math.floor(Math.random() * 3) - 1)));
+    const princesa = Math.max(1, Math.min(rei, m.princesa + (apelao ? 1 : -Math.floor(Math.random() * 2))));
     const tropas = Object.entries(Estado.TROPAS_TORRE).filter(([, t]) => t.rei <= rei).map(([id]) => id);
     return { rei, princesa, tropa: tropas[Math.floor(Math.random() * tropas.length)] };
   }

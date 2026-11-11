@@ -1,6 +1,7 @@
 // Presentes da criadora (Firestore): presentes/{uid}/itens/{id}
 // A criadora manda pelo mod menu; o jogador recebe quando abrir o jogo logado (ou na hora, se já estiver jogando).
 // Tipos: passe { passe: 'plus'|'ultra', temporada }, carta { carta, nivel, copias }, ouro { qtd }, gemas { qtd }.
+// Remoção (só a criadora, aplicada em silêncio): remover { alvo: 'carta'|'nivel'|'ouro'|'gemas'|'trofeus'|'passe', carta?, nivel?, qtd? }
 const Presentes = (() => {
   const fb = () => Conta.fb();
   let parar = null;
@@ -15,10 +16,21 @@ const Presentes = (() => {
     const snap = await fb().getDocs(col(uid));
     return snap.docs.map((x) => ({ id: x.id, ...x.data() }));
   }
+  // inventário do jogador (só a criadora pode ler, pelas regras do Firebase)
+  async function inventario(uid) {
+    const s = await fb().getDoc(fb().doc(fb().db, 'jogadores', uid));
+    if (!s.exists()) return null;
+    try { return JSON.parse(s.data().dados); } catch (e) { return null; }
+  }
   const cancelar = (uid, id) => fb().deleteDoc(fb().doc(fb().db, 'presentes', uid, 'itens', id));
 
   // texto bonitinho do presente
   function descrever(p) {
+    if (p.tipo === 'remover') {
+      const c = p.carta && Estado.carta(p.carta);
+      return { carta: `🗑️ Tirar a carta ${c ? c.nome : p.carta}`, nivel: `⬇️ ${c ? c.nome : p.carta} para o nível ${p.nivel}`, ouro: `🗑️ Tirar ${UI.fmt(p.qtd)} de ouro`,
+        gemas: `🗑️ Tirar ${UI.fmt(p.qtd)} gemas`, trofeus: `🗑️ Tirar ${UI.fmt(p.qtd)} troféus`, passe: '🗑️ Tirar o passe Plus/Ultra' }[p.alvo] || '🗑️ Remoção';
+    }
     if (p.tipo === 'passe') return `🎟️ Passe ${p.passe === 'ultra' ? 'Ultra' : 'Plus'} (${p.temporada})`;
     if (p.tipo === 'ouro') return `🪙 ${UI.fmt(p.qtd)} de ouro`;
     if (p.tipo === 'gemas') return `💎 ${UI.fmt(p.qtd)} gemas`;
@@ -27,8 +39,31 @@ const Presentes = (() => {
   }
 
   // ---------- Jogador ----------
+  function remover(p) {
+    const d = Estado.d;
+    if (p.alvo === 'ouro') { d.ouro = Math.max(0, d.ouro - Math.round(p.qtd || 0)); return true; }
+    if (p.alvo === 'gemas') { d.gemas = Math.max(0, d.gemas - Math.round(p.qtd || 0)); return true; }
+    if (p.alvo === 'trofeus') { d.trofeus = Math.max(0, d.trofeus - Math.round(p.qtd || 0)); return true; }
+    if (p.alvo === 'passe') { const ps = Passe.dados(); ps.plus = false; ps.ultra = false; ps.presenteUltra = true; if (!Passe.podeEstilo(d.estiloNome)) d.estiloNome = ''; return true; }
+    const c = p.carta && Estado.carta(p.carta);
+    if (!c) return false;
+    const col = d.colecao[c.id];
+    if (p.alvo === 'nivel') { if (col) col.nivel = Math.max(1, Math.min(col.nivel, Math.round(p.nivel || 1))); return true; }
+    if (p.alvo === 'carta') {
+      d.deck = d.deck.filter((x) => x !== c.id);
+      if (d.avatar === c.id) d.avatar = 'coroa';
+      if (d.cartasExtras) d.cartasExtras = d.cartasExtras.filter((x) => x !== c.id);
+      if (c.exclusivo) { if (!d.esgotadas) d.esgotadas = []; if (!d.esgotadas.includes(c.id)) d.esgotadas.push(c.id); } // exclusiva some de vez
+      if (col) { col.tem = false; col.nivel = 1; col.copias = 0; }
+      Estado.recarregarCatalogo();
+      return true;
+    }
+    return false;
+  }
+
   function aplicar(p) {
     const d = Estado.d;
+    if (p.tipo === 'remover') return remover(p);
     if (p.tipo === 'ouro') { d.ouro += Math.max(0, Math.round(p.qtd || 0)); return true; }
     if (p.tipo === 'gemas') { d.gemas += Math.max(0, Math.round(p.qtd || 0)); return true; }
     if (p.tipo === 'passe') {
@@ -82,5 +117,5 @@ const Presentes = (() => {
 
   function pararDeOuvir() { if (parar) parar(); parar = null; }
 
-  return { enviar, pendentes, cancelar, descrever, ouvir, parar: pararDeOuvir };
+  return { enviar, pendentes, cancelar, descrever, ouvir, inventario, parar: pararDeOuvir };
 })();

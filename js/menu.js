@@ -304,7 +304,7 @@
 
   // ---------- Presentes da criadora ----------
   function chegaramPresentes(lista) {
-    const ok = lista.filter((p) => p.ok), msgs = [...new Set(lista.map((p) => p.mensagem).filter(Boolean))];
+    const ok = lista.filter((p) => p.ok && p.tipo !== 'remover'), msgs = [...new Set(lista.filter((p) => p.tipo !== 'remover').map((p) => p.mensagem).filter(Boolean))];
     tudo();
     if (!ok.length) return;
     const cartasP = ok.filter((p) => p.tipo === 'carta').map((p) => ({ c: Estado.carta(p.carta), nivel: p.nivel })).filter((x) => x.c);
@@ -1226,6 +1226,92 @@
     };
   }
 
+  // ---------- Remover itens de um jogador (só a criadora; o jogador não é avisado) ----------
+  function telaRemover() {
+    if (!Mod.ehCriador()) return;
+    let alvo = null, inv = null;
+    const md = UI.modal({
+      titulo: '🗑️ Remover itens',
+      classe: 'modal-presentear modal-remover',
+      html: `<p class="aviso">Só você vê isto. A remoção é aplicada em silêncio, mesmo se a pessoa estiver jogando agora.</p>
+        <div class="pres-passo"><b>1. De quem?</b>
+          <div class="busca-amigo"><input id="rem-busca" maxlength="40" placeholder="Nome ou ID do jogador" autocomplete="off" /><button class="btn-modal principal" id="rem-buscar">🔍</button></div>
+          <div id="rem-resultados"></div><div id="rem-amigos" class="pres-chips"></div><div id="rem-alvo" class="pres-alvo oculto"></div>
+        </div>
+        <div id="rem-inv"></div>`,
+      botoes: [{ texto: 'Fechar', classe: 'secundario' }],
+    });
+    const el = md.el, $q = (s) => el.querySelector(s);
+    const mandar = async (item, txt) => {
+      try { await Presentes.enviar(alvo.uid, { tipo: 'remover', ...item }); UI.toast(`🤫 ${txt}`); return true; } catch (e) { UI.toast(e.code ? erroNuvem(e) : e.message); return false; }
+    };
+
+    const desenhar = () => {
+      const caixa = $q('#rem-inv');
+      if (!alvo) { caixa.innerHTML = ''; return; }
+      if (!inv) { caixa.innerHTML = '<p class="aviso">Não consegui ler a conta dessa pessoa. Confira se as regras novas do Firebase foram publicadas, ou se ela já jogou logada alguma vez.</p>'; return; }
+      const ps = inv.passe && inv.passe.temporada === Passe.dados().temporada ? inv.passe : null;
+      const cartasDela = Object.entries(inv.colecao || {}).filter(([id, c]) => c.tem && Estado.carta(id) && !(inv.esgotadas || []).includes(id))
+        .map(([id, c]) => ({ c: Estado.carta(id), nivel: c.nivel })).sort((a, b) => b.nivel - a.nivel || a.c.nome.localeCompare(b.c.nome));
+      const recurso = (k, ic, nome, v) => `<div class="rem-recurso"><span>${ic} ${nome}: <b>${fmt(v || 0)}</b></span><input type="number" min="1" data-qtd="${k}" placeholder="quanto" /><button class="btn-peq perigo" data-tirar="${k}">Tirar</button></div>`;
+      caixa.innerHTML = `<div class="pres-passo"><b>2. O que tirar?</b>
+          ${recurso('ouro', '🪙', 'Ouro', inv.ouro)}${recurso('gemas', '💎', 'Gemas', inv.gemas)}${recurso('trofeus', '🏆', 'Troféus', inv.trofeus)}
+          <div class="rem-recurso"><span>🎟️ Passe: <b>${ps && ps.ultra ? 'Ultra' : ps && ps.plus ? 'Plus' : 'nenhum'}</b></span>${ps && (ps.plus || ps.ultra) ? '<button class="btn-peq perigo" id="rem-passe">Tirar passe</button>' : ''}</div>
+        </div>
+        <div class="pres-passo"><b>🃏 Cartas (${cartasDela.length})</b>
+          <div class="lista-jogadores">${cartasDela.map(({ c, nivel }) => `<div class="linha-jogador rem-carta"><img src="assets/cartas/${c.id}_medalhao.png" alt="" /><div class="lj-nome"><b>${c.nome}</b><small>Nível ${nivel}${(inv.deck || []).includes(c.id) ? ' · no deck' : ''}</small></div>
+            <select data-nv="${c.id}">${Array.from({ length: nivel }, (_, i) => `<option ${i + 1 === nivel ? 'selected' : ''}>${i + 1}</option>`).join('')}</select>
+            <button class="btn-peq" data-baixar="${c.id}" title="Baixar nível">⬇️</button><button class="btn-peq perigo" data-tirar-carta="${c.id}" title="Tirar a carta">🗑️</button></div>`).join('') || '<p class="aviso">Nenhuma carta.</p>'}</div>
+        </div>`;
+      caixa.querySelectorAll('[data-tirar]').forEach((b) => (b.onclick = async () => {
+        const k = b.dataset.tirar, q = Math.round(+caixa.querySelector(`[data-qtd="${k}"]`).value || 0);
+        if (q <= 0) { UI.toast('Coloque quanto quer tirar'); return; }
+        if (await mandar({ alvo: k, qtd: q }, 'Removido em segredo')) { inv[k] = Math.max(0, (inv[k] || 0) - q); desenhar(); }
+      }));
+      const bp = caixa.querySelector('#rem-passe');
+      if (bp) bp.onclick = async () => { if (await mandar({ alvo: 'passe' }, 'Passe removido em segredo')) { inv.passe.plus = false; inv.passe.ultra = false; desenhar(); } };
+      caixa.querySelectorAll('[data-baixar]').forEach((b) => (b.onclick = async () => {
+        const id = b.dataset.baixar, nv = +caixa.querySelector(`[data-nv="${id}"]`).value;
+        if (nv >= inv.colecao[id].nivel) { UI.toast('Escolha um nível menor que o atual'); return; }
+        if (await mandar({ alvo: 'nivel', carta: id, nivel: nv }, `Nível baixado para ${nv} em segredo`)) { inv.colecao[id].nivel = nv; desenhar(); }
+      }));
+      caixa.querySelectorAll('[data-tirar-carta]').forEach((b) => (b.onclick = async () => {
+        const id = b.dataset.tirarCarta;
+        if (!confirm(`Tirar ${Estado.carta(id).nome} dessa conta?`)) return;
+        if (await mandar({ alvo: 'carta', carta: id }, 'Carta removida em segredo')) { inv.colecao[id].tem = false; inv.deck = (inv.deck || []).filter((x) => x !== id); desenhar(); }
+      }));
+    };
+
+    const escolher = async (p) => {
+      alvo = p; inv = null;
+      $q('#rem-resultados').innerHTML = '';
+      $q('#rem-alvo').classList.remove('oculto');
+      $q('#rem-alvo').innerHTML = `<img src="${avatarDe(p.avatar)}" alt="" /><div><b>${Passe.nomeHtml(p.nome || 'Jogador', p.estiloNome)}</b><small>${p.uid}</small></div><button class="btn-peq" id="rem-trocar">trocar</button>`;
+      $q('#rem-trocar').onclick = () => { alvo = null; inv = null; $q('#rem-alvo').classList.add('oculto'); desenhar(); };
+      $q('#rem-inv').innerHTML = '<div class="x1-carregando"></div>';
+      try { inv = await Presentes.inventario(p.uid); } catch (e) { inv = null; }
+      desenhar();
+    };
+    Amigos.listar().then((lista) => {
+      $q('#rem-amigos').innerHTML = lista.length ? `<small>Seus amigos:</small> ${lista.map((p) => `<button class="pres-chip" data-u="${p.uid}">${Passe.nomeHtml(p.nome || 'Jogador', p.estiloNome)}</button>`).join('')}` : '';
+      $q('#rem-amigos').querySelectorAll('[data-u]').forEach((b) => (b.onclick = () => escolher(lista.find((p) => p.uid === b.dataset.u))));
+    }).catch(() => {});
+    const buscar = async () => {
+      const t = $q('#rem-busca').value.trim();
+      if (!t) return;
+      const res = $q('#rem-resultados');
+      res.innerHTML = '<div class="x1-carregando"></div>';
+      try {
+        let lista = await Amigos.buscar(t);
+        if (!lista.length && t.length >= 20) lista = [{ uid: t, nome: 'Jogador (sem perfil público)' }];
+        res.innerHTML = lista.length ? `<div class="lista-jogadores">${lista.map((p) => `<div class="linha-jogador clicavel" data-u="${p.uid}"><div class="lj-avatar"><img src="${avatarDe(p.avatar)}" alt="" /></div><div class="lj-nome"><b>${Passe.nomeHtml(p.nome || 'Jogador', p.estiloNome)}</b><small>${p.uid}</small></div></div>`).join('')}</div>` : '<p class="aviso">Ninguém encontrado. Tente colar o ID.</p>';
+        res.querySelectorAll('[data-u]').forEach((b) => (b.onclick = () => escolher(lista.find((p) => p.uid === b.dataset.u))));
+      } catch (e) { res.innerHTML = `<p class="aviso">${erroNuvem(e)}</p>`; }
+    };
+    $q('#rem-buscar').onclick = buscar;
+    $q('#rem-busca').onkeydown = (e) => { if (e.key === 'Enter') buscar(); };
+  }
+
   function telaEstiloNome() {
     const tem = Passe.temTrilha('plus'), ultra = Passe.temTrilha('ultra'), atual = Passe.estiloNome();
     const grupos = ['Cor', 'Gradiente', 'Animado'];
@@ -1310,6 +1396,7 @@
   }
 
   window.telaPresentear = telaPresentear; // usado pelo mod menu
+  window.telaRemover = telaRemover;
   function tudo() {
     Mod.mostrarBotao(tudo);
     if (Conta.logado()) Amigos.ouvir({ aoMudarPedidos: mudouPedidos, aoConvite: conviteX1 });

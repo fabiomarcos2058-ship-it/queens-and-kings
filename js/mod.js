@@ -58,7 +58,8 @@ const Mod = (() => {
           <div class="mod-vel">Velocidade da batalha: ${[1, 2, 3].map((v) => `<button class="btn-peq ${flags.vel === v ? 'ativo' : ''}" data-vel="${v}">${v}x</button>`).join('')}</div>
           <button class="btn-peq" id="mod-vencer">👑 Vencer a batalha agora</button>
         </div>
-        <div class="mod-grupo"><b>🎁 Presentes</b><button class="btn-modal principal" id="mod-presentear">🎁 Presentear um jogador</button><small class="aviso">Passes, cartas (com o nível que você quiser), ouro e gemas.</small></div>
+        <div class="mod-grupo"><b>🎁 Presentes</b><button class="btn-modal principal" id="mod-presentear">🎁 Presentear um jogador</button><small class="aviso">Passes, cartas (com o nível que você quiser), ouro e gemas.</small>
+          <button class="btn-modal perigo" id="mod-remover">🗑️ Remover itens de um jogador</button><small class="aviso">Veja o inventário e tire o que quiser, em segredo.</small></div>
         <div class="mod-grupo"><b>⚠️ Outros</b><div class="mod-botoes">
           <button class="btn-peq" id="mod-limpar">Voltar a aparecer no top</button>
           <button class="btn-peq perigo" id="mod-reset">Apagar meu progresso</button></div></div>`,
@@ -78,6 +79,7 @@ const Mod = (() => {
       el.querySelectorAll('[data-vel]').forEach((x) => x.classList.toggle('ativo', x === b));
     }));
     el.querySelector('#mod-vencer').onclick = () => { if (Batalha.vencerAgora()) { marcar(); m.fechar(); } else UI.toast('Abra uma batalha primeiro'); };
+    el.querySelector('#mod-remover').onclick = () => { m.fechar(); if (window.telaRemover) window.telaRemover(); };
     el.querySelector('#mod-presentear').onclick = () => { m.fechar(); if (window.telaPresentear) window.telaPresentear(); };
     el.querySelector('#mod-limpar').onclick = () => { Estado.d.modUsado = false; Estado.salvar(); UI.toast('Você volta a aparecer no top na próxima vez que o jogo salvar'); };
     el.querySelector('#mod-reset').onclick = () => { if (confirm('Apagar todo o progresso?')) { Estado.apagar(); location.reload(); } };
