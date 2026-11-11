@@ -45,7 +45,7 @@ const Batalha = (() => {
     ao_fim = fim;
     const deck = Estado.d.deck;
     // o computador só usa cartas já liberadas para o seu número de troféus
-    const deckIA = embaralhar(Mod.deckApelao() || Estado.disponiveis().map((c) => c.id)).slice(0, 8);
+    const deckIA = embaralhar(Mod.deckApelao() || deckAleatorioIA()).slice(0, 8);
     s = {
       modo, t: 0, prorrogacao: false, acabou: false, pausa: false,
       azul: lado(deck), vermelho: lado(deckIA),
@@ -597,21 +597,83 @@ const Batalha = (() => {
   }
 
   // ---------- Oponente (computador) ----------
-  // Estratégia: finaliza torres com feitiço, defende com a carta certa no lugar certo,
-  // não desperdiça elixir, monta ataques com tanque na frente e apoio atrás e ataca a torre mais fraca.
-  const ehTanque = (c) => !c.feitico && (c.vida >= 1000 || c.alvo === 'construcoes');
-  const dps = (c) => (c.dano || 0) / (c.cadencia || 1);
-  const valor = (e) => e.vida + e.dano * 3;
+  const ehTanque = (c) => !c.feitico && !c.barril && (c.vida >= 900 || c.alvo === 'construcoes');
+  const dpsC = (c) => (c.dano || 0) / (c.cadencia || 1);
+  const dpsE = (e) => (e.dano || 0) / (e.cadencia || 1);
+
+  // deck aleatório e equilibrado: 1 tanque, 2 feitiços/barril, 1 dano em área, 1 atiradora e o resto sorteado
+  function deckAleatorioIA() {
+    const pool = embaralhar(Estado.catalogo().filter((c) => !c.exclusivo && !c.token));
+    const deck = [];
+    const pega = (filtro, n) => { for (const c of pool) { if (deck.length >= 8 || n <= 0) break; if (!deck.includes(c) && filtro(c)) { deck.push(c); n--; } } };
+    pega(ehTanque, 1);
+    pega((c) => c.feitico || c.barril, 2);
+    pega((c) => c.area && !c.feitico, 1);
+    pega((c) => c.alcance > 40 && !c.area, 1);
+    pega((c) => c.custo <= 2 && !c.feitico, 1);
+    pega(() => true, 8);
+    return deck.map((c) => c.id);
+  }
 
   function iaJogar(m, x, y) {
-    if (!podeColocar('vermelho', x, y) && !m.c.feitico && !m.c.barril) {
-      // procura um lugar válido perto do pedido
-      for (let k = 0; k < 6 && !podeColocar('vermelho', x, y); k++) y -= 20;
+    if (!m.c.feitico && !m.c.barril) {
+      for (let k = 0; k < 8 && !podeColocar('vermelho', x, y); k++) y -= 15;
       if (!podeColocar('vermelho', x, y)) return false;
     }
     jogar('vermelho', m.i, Math.max(28, Math.min(W - 28, x)), y);
-    s.iaTimer = 0.6 + Math.random() * 0.4;
+    s.iaTimer = 0.45 + Math.random() * 0.3;
     return true;
+  }
+
+  // onde a tropa vai estar daqui a "seg" segundos
+  function prever(e, seg) {
+    if (e.torre || !e.alvo || e.surgir > 0) return { x: e.x, y: e.y };
+    const dx = e.alvo.x - e.x, dy = e.alvo.y - e.y, d0 = Math.hypot(dx, dy) || 1;
+    const anda = Math.min(Math.max(0, d0 - (e.alcance + e.alvo.raio + e.raio)), e.vel * seg);
+    return { x: e.x + (dx / d0) * anda, y: e.y + (dy / d0) * anda };
+  }
+
+  // melhor ponto para um feitiço: soma o dano útil em tropas e torres
+  function melhorFeitico(m, nivel, inimigos, torres) {
+    const dano = m.c.dano * nivel;
+    const area = m.c.area;
+    let melhor = null;
+    const candidatos = [...inimigos.map((e) => prever(e, 0.55)), ...torres.map((t) => ({ x: t.x, y: t.y }))];
+    for (const p of candidatos) {
+      let v = 0;
+      for (const e of inimigos) {
+        const q = prever(e, 0.55);
+        if (Math.hypot(q.x - p.x, q.y - p.y) > area + e.raio) continue;
+        v += Math.min(e.vida, dano) + (e.vida <= dano ? 120 + dpsE(e) * 3 : 0);
+      }
+      for (const t of torres) {
+        if (Math.hypot(t.x - p.x, t.y - p.y) > area + t.raio) continue;
+        const dt0 = dano * 0.35;
+        v += t.vida <= dt0 ? 5000 : dt0 * 0.8;
+      }
+      if (!melhor || v > melhor.v) melhor = { ...p, v };
+    }
+    return melhor;
+  }
+
+  // quanto a carta "m" ganha da ameaça (maior = melhor defesa)
+  function notaDefesa(m, grupo, nivel) {
+    const c = m.c;
+    if (c.feitico || c.alvo === 'construcoes') return -999;
+    if (c.barril) {
+      const mini = Estado.carta(c.barril.tropa);
+      return grupo.every((e) => e.alcance > 40) ? 60 - c.custo * 10 : 10 - c.custo * 10;
+    }
+    const vidaGrupo = grupo.reduce((a, e) => a + e.vida, 0);
+    const dpsGrupo = grupo.reduce((a, e) => a + dpsE(e), 0) || 1;
+    const alvos = c.area ? Math.min(grupo.length, 3) : 1;
+    const matar = vidaGrupo / (dpsC(c) * nivel * alvos + 1);
+    const aguentar = (c.vida * nivel) / dpsGrupo;
+    let nota = (aguentar / matar) * 100 - c.custo * 14;
+    if (grupo.some((e) => e.alcance > 40) && c.velocidade >= 55) nota += 40; // corre atrás das atiradoras
+    if (c.alcance > 40) nota += 25; // atirador fica protegido atrás da torre
+    if (grupo.every((e) => e.alvoTipo === 'construcoes')) nota += dpsC(c) / 4; // tanque: precisa de muito dano
+    return nota;
   }
 
   function ia(dt) {
@@ -619,17 +681,17 @@ const Batalha = (() => {
     const L = s.vermelho;
     s.iaTimer -= dt;
     if (s.iaTimer > 0) return;
-    s.iaTimer = 0.3 + Math.random() * 0.4; // reage rápido
+    s.iaTimer = 0.25 + Math.random() * 0.25; // reage muito rápido
 
-    // usa habilidades das campeãs na hora certa
+    // 0) habilidades das campeãs
     for (const t of s.ent.filter((e) => !e.torre && e.time === 'vermelho' && e.habilidade && e.recarga <= 0 && e.surgir <= 0)) {
       const h = t.habilidade;
       if (L.elixir < h.custo) continue;
-      const pertoAlvo = t.alvo && t.alvo.vida > 0 && dist(t, t.alvo) < t.alcance + 60;
-      const usar = (h.tipo === 'cura' && t.vida < t.max * 0.4)
-        || (h.tipo === 'fenix' && t.vida < t.max * 0.35)
-        || ((h.tipo === 'golpes' || h.tipo === 'furia') && pertoAlvo)
-        || (h.tipo === 'kamehameha' && t.alvo && dist(t, t.alvo) < 220);
+      const perto = t.alvo && t.alvo.vida > 0 && dist(t, t.alvo) < t.alcance + 60;
+      const usar = (h.tipo === 'cura' && t.vida < t.max * 0.45)
+        || (h.tipo === 'fenix' && t.vida < t.max * 0.4)
+        || ((h.tipo === 'golpes' || h.tipo === 'furia') && perto && (t.alvo.torre || t.alvo.vida > t.dano))
+        || (h.tipo === 'kamehameha' && t.alvo && dist(t, t.alvo) < 240);
       if (usar && ativarHabilidade(t)) return;
     }
 
@@ -638,92 +700,90 @@ const Batalha = (() => {
     const nivel = Math.pow(1.1, s.nivelIA - 1);
     const torresAzuis = s.ent.filter((e) => e.torre && e.time === 'azul');
     const inimigos = s.ent.filter((e) => !e.torre && e.time === 'azul' && e.vida > 0);
+    const meus = s.ent.filter((e) => !e.torre && e.time === 'vermelho' && e.vida > 0);
     const resta = DURACAO + (s.prorrogacao ? PRORROGACAO : 0) - s.t;
     const dobro = s.modo === 'elixir2x' || s.prorrogacao || resta <= 60;
+    const ganhando = s.vermelho.coroas > s.azul.coroas;
+    const perdendo = s.vermelho.coroas < s.azul.coroas;
 
-    // 1) Finaliza torre com feitiço
+    // 1) feitiço que vale a pena (finaliza torre, acerta grupo, mata atiradora/campeã)
     for (const m of pode.filter((x) => x.c.feitico)) {
-      const danoTorre = Math.round(m.c.dano * nivel * 0.35);
-      const t = torresAzuis.find((x) => x.vida <= danoTorre);
-      if (t) return iaJogar(m, t.x, t.y);
+      const p = melhorFeitico(m, nivel, inimigos, torresAzuis);
+      const minimo = m.c.custo * (perdendo && resta < 45 ? 70 : 130);
+      if (p && p.v >= minimo) return iaJogar(m, p.x, p.y);
     }
 
-    // 2) Defesa: ameaças do meu lado do rio (ou chegando na ponte)
-    const ameacas = inimigos.filter((e) => e.y < RIO_BASE + 40);
+    // 2) defesa
+    const ameacas = inimigos.filter((e) => e.y < RIO_BASE + 45 || (e.alvo && e.alvo.torre && e.alvo.time === 'vermelho'));
     if (ameacas.length) {
-      const alvo = ameacas.reduce((a, b) => (valor(b) > valor(a) ? b : a));
-      const grupo = ameacas.filter((e) => dist(e, alvo) < 60);
-      const cx = grupo.reduce((a, e) => a + e.x, 0) / grupo.length;
-      const cy = grupo.reduce((a, e) => a + e.y, 0) / grupo.length;
+      const alvo = ameacas.reduce((a, b) => (b.y < a.y ? b : a)); // a que está mais perto das minhas torres
+      const grupo = ameacas.filter((e) => dist(e, alvo) < 70);
+      const perigo = grupo.reduce((a, e) => a + e.vida + dpsE(e) * 6, 0);
+      const defensores = meus.filter((e) => dist(e, alvo) < 110);
+      const jaDefendido = defensores.reduce((a, e) => a + e.vida + dpsE(e) * 6, 0) > perigo * 1.2;
+      const atravessou = alvo.y < RIO_TOPO - 6;
 
-      // feitiço quando pega vários, ou mata um atirador/tropa cara
-      const f = pode.filter((m) => m.c.feitico).sort((a, b) => b.c.dano - a.c.dano)[0];
-      if (f) {
-        const danoF = f.c.dano * nivel;
-        const pega = ameacas.filter((e) => Math.hypot(e.x - cx, e.y - cy) <= f.c.area + e.raio);
-        const mata = pega.filter((e) => e.vida <= danoF).length;
-        if (pega.length >= 2 || mata >= 1 && pega.some((e) => e.alcance > 40 || e.max > 700)) {
-          return iaJogar(f, cx, cy - 8); // mira um pouco à frente (as tropas andam pra cima)
+      if (!jaDefendido) {
+        const opcoes = pode.filter((m) => !m.c.feitico).map((m) => ({ m, nota: notaDefesa(m, grupo, nivel) })).sort((a, b) => b.nota - a.nota);
+        const melhor = opcoes[0];
+        const vale = melhor && (melhor.nota > 15 || perigo > 900);
+        if (vale) {
+          const c = melhor.m.c;
+          const ladoX = alvo.x < W / 2 ? 90 : 270;
+          if (c.barril) return iaJogar(melhor.m, alvo.x, alvo.y - 10);
+          if (c.alcance > 40) return iaJogar(melhor.m, ladoX + (alvo.x < ladoX ? -16 : 16), 72); // atrás da torre
+          // tropa que só ataca torre ou corpo a corpo: puxa para o meio, entre as duas torres
+          if (!atravessou && grupo.every((e) => e.alcance <= 40 && e.alvoTipo !== 'construcoes') && c.custo <= 3) {
+            return iaJogar(melhor.m, W / 2 + (alvo.x < W / 2 ? -20 : 20), 150);
+          }
+          // espera o tanque atravessar para a torre ajudar; contra os outros, vai direto
+          if (!atravessou && grupo.every((e) => e.alvoTipo === 'construcoes')) { s.iaTimer = 0.2; return; }
+          const q = prever(alvo, 0.6);
+          return iaJogar(melhor.m, q.x + (Math.random() * 12 - 6), Math.max(130, Math.min(RIO_TOPO - 10, q.y - 30)));
         }
       }
+      if (L.elixir < 9.4) return; // guarda elixir para continuar defendendo
+    }
 
-      // escolhe a melhor tropa para defender
-      const tropas = pode.filter((m) => !m.c.feitico);
-      if (tropas.length) {
-        const tanqueInimigo = alvo.alvoTipo === 'construcoes' || alvo.max >= 1000;
-        const pontua = (m) => {
-          const c = m.c;
-          let p = dps(c) * 2;
-          if (grupo.length >= 2 && c.area) p += 160;
-          if (tanqueInimigo && !c.area) p += dps(c) * 1.5; // muito dano num alvo só
-          if (c.alcance > 40) p += 60; // atirador defende atrás da torre
-          if (c.alvo === 'construcoes') p -= 400; // tanque que só bate em torre não defende
-          p -= c.custo * 25;
-          return p;
-        };
-        const m = tropas.sort((a, b) => pontua(b) - pontua(a))[0];
-        if (pontua(m) > -200) {
-          const lado = alvo.x < W / 2 ? 90 : 270;
-          if (m.c.alcance > 40) return iaJogar(m, lado + (alvo.x < lado ? -14 : 14), 74); // atrás da torre
-          // corpo a corpo: na frente da ameaça, perto da torre para ela ajudar
-          const y = Math.max(140, Math.min(RIO_TOPO - 12, alvo.y - 40));
-          return iaJogar(m, alvo.x + (Math.random() * 16 - 8), y);
-        }
+    // 3) contra-ataque e apoio: ajuda as minhas tropas que estão atacando
+    const atacando = meus.filter((e) => e.y > RIO_TOPO - 40 && e.vida > e.max * 0.35);
+    if (atacando.length && L.elixir >= 3) {
+      const lider = atacando.reduce((a, b) => (b.max > a.max ? b : a));
+      const apoio = pode.filter((m) => !m.c.feitico && !m.c.barril && !ehTanque(m.c)).sort((a, b) => dpsC(b.c) - dpsC(a.c))[0];
+      const defesaAzul = inimigos.filter((e) => dist(e, lider) < 120).length;
+      if (apoio && (lider.max >= 900 || defesaAzul > 0)) {
+        return iaJogar(apoio, lider.x + (Math.random() * 20 - 10), Math.max(60, Math.min(lider.y - 34, RIO_TOPO - 8)));
       }
-      if (L.elixir < 9.5) return; // guarda elixir para defender
     }
 
-    // 3) Apoio: se tenho um tanque atacando, coloca ajuda atrás dele
-    const meuTanque = s.ent.find((e) => !e.torre && e.time === 'vermelho' && e.max >= 1000 && e.y > 110 && e.y < RIO_BASE + 60);
-    if (meuTanque && L.elixir >= 3) {
-      const apoio = pode.filter((m) => !m.c.feitico && !ehTanque(m.c)).sort((a, b) => dps(b.c) - dps(a.c))[0];
-      if (apoio) return iaJogar(apoio, meuTanque.x + (Math.random() * 20 - 10), Math.max(60, meuTanque.y - 34));
-    }
+    // 4) estratégia de fim de jogo: ganhando, só defende
+    if (ganhando && resta < 50 && L.elixir < 10) return;
 
-    // 4) Ataque: só quando vale a pena (elixir quase cheio ou o jogador gastou tudo)
-    const limite = dobro ? 7.5 : 9.2;
-    const oportunidade = s.azul.elixir < 3 && L.elixir >= 6;
+    // 5) ataque: evita desperdiçar elixir e aproveita quando o jogador gasta
+    const limite = dobro ? 6.5 : perdendo && resta < 70 ? 7 : 8.8;
+    const oportunidade = s.azul.elixir < 3 && L.elixir >= 5;
     if (L.elixir < limite && !oportunidade) return;
 
-    // ataca a torre mais fraca (ou a que já caiu, pelo bolso)
+    // escolhe a torre mais fraca (ou o lado com menos defesa)
     const vida = (id) => { const t = s.ent.find((e) => e.id === id); return t ? t.vida : -1; };
     const ve = vida('esq-azul'), vd = vida('dir-azul');
-    const lado = ve < 0 ? 0 : vd < 0 ? 1 : ve <= vd ? 0 : 1;
+    const defEsq = inimigos.filter((e) => e.x < W / 2).length, defDir = inimigos.length - defEsq;
+    let lado = ve < 0 ? 0 : vd < 0 ? 1 : (ve - defEsq * 150) <= (vd - defDir * 150) ? 0 : 1;
+    if (dobro && Math.random() < 0.35) lado = 1 - lado; // ataque dividido no elixir em dobro
     const x = PONTES[lado];
     const bolso = !torreViva(lado ? 'dir-azul' : 'esq-azul');
+    const torreAlvo = s.ent.find((e) => e.id === (lado ? 'dir-azul' : 'esq-azul')) || s.ent.find((e) => e.id === 'rei-azul');
 
-    // barril: joga direto na torre mais fraca
+    // barril quando a torre está sem defesa
     const barril = pode.find((m) => m.c.barril);
-    if (barril && Math.random() < 0.5) {
-      const alvoT = s.ent.find((e) => e.id === (lado ? 'dir-azul' : 'esq-azul')) || s.ent.find((e) => e.id === 'rei-azul');
-      if (alvoT) return iaJogar(barril, alvoT.x, alvoT.y - 30);
-    }
+    if (barril && torreAlvo && !inimigos.some((e) => dist(e, torreAlvo) < 100)) return iaJogar(barril, torreAlvo.x, torreAlvo.y - 28);
+
     const tropas = pode.filter((m) => !m.c.feitico && !m.c.barril);
     if (!tropas.length) return;
     const tanque = tropas.filter((m) => ehTanque(m.c)).sort((a, b) => b.c.vida - a.c.vida)[0];
-    if (tanque) return iaJogar(tanque, x + (Math.random() * 16 - 8), bolso ? RIO_BASE + 30 : 70); // tanque lá atrás, junta elixir
-    const rapida = tropas.sort((a, b) => b.c.velocidade - a.c.velocidade)[0];
-    return iaJogar(rapida, x + (Math.random() * 16 - 8), bolso ? RIO_BASE + 30 : RIO_TOPO - 20); // pressão na ponte
+    if (tanque && (L.elixir >= 8 || bolso)) return iaJogar(tanque, x + (Math.random() * 14 - 7), bolso ? RIO_BASE + 30 : 66); // tanque atrás para juntar elixir
+    const pressao = tropas.sort((a, b) => (b.c.velocidade || 0) - (a.c.velocidade || 0) || a.c.custo - b.c.custo)[0];
+    return iaJogar(pressao, x + (Math.random() * 14 - 7), bolso ? RIO_BASE + 30 : RIO_TOPO - 18);
   }
 
   // ---------- Loop principal ----------
