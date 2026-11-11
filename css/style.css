@@ -300,3 +300,136 @@ button { font-family: inherit; cursor: pointer; border: none; }
 .painel-deck .grade-4 { gap: 8px 5px; }
 .painel-deck.colecao .grade-4 { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px 8px; }
 .painel-deck.colecao .nome-3d { font-size: 17px; }
+
+/* ================= Etapa 2: jogo funcionando ================= */
+.perfil { background: none; color: inherit; text-align: left; padding: 0; }
+.nivel::after { content: attr(data-n); }
+.gota::after { content: attr(data-n); }
+button.item-loja, button.slot-bau { font-family: inherit; color: inherit; cursor: pointer; }
+button.item-loja:active, button.slot-bau:active, .slot-carta:active { transform: scale(0.96); }
+.item-loja.comprado { opacity: 0.55; }
+.slot-carta { cursor: pointer; transition: transform 0.1s; }
+.slot-bau.pronto { border-color: #5DCAA5; box-shadow: 0 0 0 2px #5DCAA588, 0 3px 0 #0d1130; animation: brilhoBau 1.2s ease-in-out infinite; }
+.slot-bau.pronto span { color: #9FE1CB; font-weight: 700; }
+@keyframes brilhoBau { 50% { box-shadow: 0 0 14px 2px #5DCAA5aa, 0 3px 0 #0d1130; } }
+
+/* Barra de cópias na carta */
+.copias { position: absolute; left: 4px; right: 4px; top: 26px; height: 12px; background: #0d1130cc; border-radius: 6px; overflow: hidden; z-index: 2; border: 1px solid #0d1130; }
+.copias i { display: block; height: 100%; background: #378ADD; }
+.copias.pode i { background: #5DCAA5; }
+.copias b { position: absolute; inset: 0; font-size: 9px; line-height: 11px; text-align: center; color: #fff; font-family: 'Lilita One', 'Fredoka', sans-serif; letter-spacing: 0.3px; }
+.copias.pode { animation: pulsa 1s ease-in-out infinite; }
+@keyframes pulsa { 50% { transform: scale(1.06); } }
+.painel-deck.trocando { box-shadow: 0 0 0 3px #FAC775, 0 4px 0 #0d1130; animation: pulsa 1s ease-in-out infinite; }
+
+/* Avisos rápidos */
+.toast { position: absolute; left: 50%; top: 70px; transform: translateX(-50%); background: #0d1130ee; color: #fff; padding: 8px 16px; border-radius: 12px; z-index: 100; font-weight: 600; font-size: 14px; border: 2px solid #5a65b8; white-space: nowrap; animation: toastEntra 0.25s ease-out; pointer-events: none; }
+.toast.sumir { opacity: 0; transition: opacity 0.4s; }
+@keyframes toastEntra { from { transform: translate(-50%, -12px); opacity: 0; } }
+
+/* Janelas */
+.modal-fundo { position: absolute; inset: 0; background: #0009; z-index: 50; display: flex; align-items: center; justify-content: center; padding: 16px; animation: fade 0.2s; }
+.modal-fundo.sumir { opacity: 0; transition: opacity 0.2s; }
+@keyframes fade { from { opacity: 0; } }
+.modal { width: 100%; max-width: 380px; max-height: 88%; overflow-y: auto; background: linear-gradient(#3b4596, #2a3170); border: 3px solid #141a40; border-radius: 18px; padding: 14px; box-shadow: 0 6px 0 #0d1130; animation: pop 0.25s cubic-bezier(0.3, 1.5, 0.6, 1); }
+@keyframes pop { from { transform: scale(0.8); } }
+.modal-titulo { font-family: 'Lilita One', 'Fredoka', sans-serif; font-size: 24px; text-align: center; margin-bottom: 10px; color: #FAC775; text-shadow: 0 2px 0 #633806, 2px 0 0 #633806, -2px 0 0 #633806, 0 -2px 0 #633806; }
+.modal-corpo { font-size: 15px; text-align: center; }
+.modal-corpo p { margin: 8px 0; }
+.modal-botoes { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+.btn-modal { flex: 1; min-width: 110px; padding: 11px 10px; border-radius: 12px; font-weight: 700; font-size: 15px; background: #5DCAA5; color: #04342C; border-bottom: 4px solid #0F6E56; }
+.btn-modal.principal { background: #FAC775; color: #412402; border-bottom-color: #BA7517; }
+.btn-modal.secundario { background: #5a65b8; color: #fff; border-bottom-color: #26215C; }
+.btn-modal.perigo { background: #E24B4A; color: #fff; border-bottom-color: #791F1F; }
+.btn-modal.pequeno { flex: 0 1 auto; font-size: 13px; }
+.btn-modal.desativado { filter: grayscale(0.8) brightness(0.8); }
+.btn-modal:active { transform: translateY(2px); border-bottom-width: 2px; }
+.bau-aberto { width: 110px; height: 96px; object-fit: contain; animation: pulo 1.4s ease-in-out infinite; }
+.ganhos { display: flex; justify-content: center; gap: 14px; font-size: 20px; font-weight: 700; margin: 8px 0; }
+.ganhos span { display: flex; align-items: center; gap: 5px; }
+.ganhos .ic-img, .ganhos [class^='ic-'] { width: 24px; height: 24px; }
+.ganhos-cartas { display: grid; grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)); gap: 8px; margin-top: 8px; }
+.ganho-carta { display: flex; flex-direction: column; align-items: center; gap: 2px; animation: pop 0.4s backwards; }
+.ganho-carta .carta { width: 100%; }
+.ganho-carta b { font-family: 'Lilita One', 'Fredoka', sans-serif; font-size: 15px; }
+.campo { display: flex; flex-direction: column; gap: 4px; text-align: left; font-size: 13px; color: #B5D4F4; }
+.campo input { padding: 10px 12px; border-radius: 10px; border: 2px solid #141a40; background: #1d2350; color: #fff; font-family: inherit; font-size: 16px; }
+.estatisticas { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+.estatisticas div { background: #1d2350; border-radius: 10px; padding: 8px; display: flex; flex-direction: column; }
+.estatisticas b { font-family: 'Lilita One', 'Fredoka', sans-serif; font-size: 22px; color: #FAC775; }
+.estatisticas span { font-size: 12px; color: #B5D4F4; }
+.compra { display: flex; align-items: center; gap: 12px; text-align: left; }
+.compra .carta { width: 70px; flex-shrink: 0; }
+.detalhe-carta { display: flex; gap: 12px; text-align: left; align-items: flex-start; }
+.detalhe-carta .carta { width: 96px; flex-shrink: 0; }
+.detalhe-carta p { margin: 4px 0; font-size: 14px; }
+.detalhe-carta .tipo { color: #B5D4F4; font-size: 13px; }
+.raridade-tag { display: inline-block; font-size: 12px; font-weight: 700; padding: 1px 8px; border-radius: 6px; background: #B4B2A9; color: #2C2C2A; }
+.raridade-tag.rara { background: #EF9F27; color: #412402; } .raridade-tag.epica { background: #AFA9EC; color: #26215C; } .raridade-tag.lendaria { background: #5DCAA5; color: #04342C; }
+.tabela-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 10px; }
+.tabela-stats div { background: #1d2350; border-radius: 8px; padding: 6px 8px; display: flex; justify-content: space-between; font-size: 13px; }
+.tabela-stats span { color: #B5D4F4; }
+.placar-final { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 6px 0 10px; }
+.placar-final .coroa { width: 50px; height: 50px; font-size: 26px; border-radius: 12px; font-family: 'Lilita One', 'Fredoka', sans-serif; }
+.modal-resultado.derrota .modal-titulo { color: #F09595; text-shadow: 0 2px 0 #501313, 2px 0 0 #501313, -2px 0 0 #501313, 0 -2px 0 #501313; }
+.ganhou-bau { display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 600; }
+.ganhou-bau img { width: 48px; height: 42px; object-fit: contain; }
+.subiu { color: #9FE1CB; font-weight: 700; }
+
+/* Clã */
+.cla-topo { display: flex; align-items: center; gap: 10px; background: linear-gradient(#4552a8, #3b4596); border-radius: 14px; padding: 12px; box-shadow: 0 4px 0 #262e68; }
+.cla-topo > div:nth-child(2) { flex: 1; display: flex; flex-direction: column; }
+.cla-topo b { font-size: 18px; } .cla-topo span { font-size: 12px; color: #B5D4F4; }
+.btn-peq.perigo { background: #E24B4A; color: #fff; border-bottom-color: #791F1F; }
+.lista-membros { display: flex; flex-direction: column; gap: 6px; }
+.membro { display: flex; align-items: center; gap: 10px; background: #1d2350; border-radius: 10px; padding: 8px 12px; }
+.membro b { flex: 1; } .membro.voce { background: #534AB7; }
+.membro .pos { width: 22px; font-family: 'Lilita One', 'Fredoka', sans-serif; color: #FAC775; }
+
+/* Eventos */
+.evento > div:first-child { flex: 1; min-width: 0; }
+.ev-barra { position: relative; height: 14px; background: #0004; border-radius: 7px; overflow: hidden; margin-top: 6px; max-width: 200px; }
+.ev-barra i { display: block; height: 100%; background: #fff9; }
+.ev-barra small { position: absolute; inset: 0; text-align: center; font-size: 10px; line-height: 14px; font-weight: 700; }
+.selo.botao { background: #FAC775; color: #412402; font-weight: 700; font-size: 13px; padding: 8px 12px; border-radius: 10px; border-bottom: 3px solid #BA7517; font-family: inherit; }
+
+/* ---------- Batalha ---------- */
+.slot-mao { position: relative; transition: transform 0.15s, filter 0.15s; cursor: pointer; }
+.slot-mao.selecionada { transform: translateY(-10px) scale(1.06); }
+.slot-mao.selecionada .carta { box-shadow: 0 0 0 3px #fff, 0 6px 10px #0008; }
+.slot-mao.caro { filter: grayscale(0.85) brightness(0.65); }
+.mini-prox .carta { width: 34px; }
+.tempo.dobro { color: #ED93B1; animation: pulsa 1s infinite; }
+.barra span.enchendo { background: linear-gradient(90deg, #D4537E99 var(--p, 0%), #26215C var(--p, 0%)); }
+.gota { transition: transform 0.2s; }
+.zona-proibida { position: absolute; left: 0; right: 0; top: 0; height: 56.5%; background: repeating-linear-gradient(45deg, #E24B4A33 0 12px, #E24B4A18 12px 24px); opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 2000; }
+.zona-proibida.ativa { opacity: 1; }
+.vida-torre { position: absolute; transform: translate(-50%, 0); width: 15%; height: 9px; background: #0d1130; border-radius: 4px; border: 1.5px solid #0d1130; z-index: 1500; }
+.vida-torre.rei { width: 19%; }
+.vida-torre span { display: block; height: 100%; border-radius: 3px; width: 100%; transition: width 0.15s; }
+.vida-torre.azul span { background: #378ADD; } .vida-torre.vermelho span { background: #E24B4A; }
+.vida-torre b { position: absolute; top: -13px; left: 0; right: 0; text-align: center; font-size: 10px; font-family: 'Lilita One', 'Fredoka', sans-serif; text-shadow: 0 1px 0 #000, 1px 0 0 #000, -1px 0 0 #000; }
+.vida-torre.levou { transform: translate(-50%, 0) scale(1.1); }
+.arena-peca.destruida { filter: grayscale(1) brightness(0.55); transform: scale(0.85); transition: all 0.4s; }
+.tropa { animation: none; transition: none; }
+.tropa .tropa-medalhao { animation: andar 0.8s ease-in-out infinite; }
+.tropa.surgindo { opacity: 0.6; }
+.tropa.surgindo .tropa-medalhao { animation: surgir 1s ease-out; }
+@keyframes surgir { from { transform: scale(0.2) translateY(-30px); } }
+@keyframes andar { 50% { transform: translateY(-3px); } }
+.tropa.levou .tropa-medalhao { filter: brightness(2); }
+.tropa.morrendo { opacity: 0; transform: translate(-50%, -60%) scale(0.4); transition: all 0.35s; }
+.projetil { position: absolute; width: 8px; height: 8px; border-radius: 50%; transform: translate(-50%, -50%); z-index: 1800; box-shadow: 0 0 6px #fff; }
+.projetil.azul { background: #85B7EB; } .projetil.vermelho { background: #F09595; }
+.projetil.de-torre { width: 6px; height: 12px; border-radius: 3px; background: #FAC775; }
+.golpe { position: absolute; width: 22px; height: 22px; transform: translate(-50%, -50%); border-radius: 50%; border: 3px solid #fff; z-index: 1800; animation: golpe 0.25s ease-out forwards; }
+@keyframes golpe { to { transform: translate(-50%, -50%) scale(1.8); opacity: 0; } }
+.explosao, .feitico { position: absolute; aspect-ratio: 1; transform: translate(-50%, -50%); border-radius: 50%; z-index: 1700; pointer-events: none; }
+.explosao { background: radial-gradient(#fff, #85B7EB88 50%, transparent 70%); animation: explodir 0.4s ease-out forwards; }
+@keyframes explodir { from { transform: translate(-50%, -50%) scale(0.3); } to { transform: translate(-50%, -50%) scale(1.1); opacity: 0; } }
+.feitico.chuva { background: radial-gradient(#F4C0D1cc, #ED93B166 60%, transparent 72%); border: 2px dashed #FBEAF0; animation: feitico 0.9s ease-out forwards; }
+.feitico.lanterna { background: radial-gradient(#FAC775, #D85A30cc 45%, #E24B4A55 65%, transparent 72%); animation: feitico 0.9s ease-out forwards; }
+@keyframes feitico { 0% { transform: translate(-50%, -50%) scale(0.2); opacity: 0.4; } 50% { transform: translate(-50%, -50%) scale(1); opacity: 1; } 100% { transform: translate(-50%, -50%) scale(1.15); opacity: 0; } }
+.dano-num { position: absolute; transform: translate(-50%, -50%); font-family: 'Lilita One', 'Fredoka', sans-serif; font-size: 13px; color: #fff; text-shadow: 0 1px 0 #000, 1px 0 0 #000, -1px 0 0 #000, 0 -1px 0 #000; z-index: 1900; animation: subir 0.65s ease-out forwards; pointer-events: none; }
+@keyframes subir { to { transform: translate(-50%, -180%); opacity: 0; } }
+.arena-grande { touch-action: none; }

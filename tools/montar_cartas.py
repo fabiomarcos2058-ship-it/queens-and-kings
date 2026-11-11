@@ -20,6 +20,8 @@ def original(id_):
 
 
 for c in json.loads((PASTA / 'cartas.json').read_text(encoding='utf-8'))['cartas']:
+    if c.get('feitico'):
+        continue  # feitiços usam a própria imagem
     img = original(c['id'])
     x, y, w = c['arte']
     h = round(w * 4 / 3)

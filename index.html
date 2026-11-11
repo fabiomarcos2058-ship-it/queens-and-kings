@@ -8,22 +8,22 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Lilita+One&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/style.css?v=1794403011" />
+  <link rel="stylesheet" href="css/style.css?v=1794403551" />
 </head>
 <body>
   <div id="app">
     <!-- Barra de cima -->
     <header class="topbar">
-      <div class="perfil">
-        <div class="nivel">1</div>
+      <button class="perfil" id="perfil">
+        <div class="nivel" id="nivel" data-n="1"></div>
         <div>
-          <div class="nome">Jogador</div>
-          <div class="xp"><span style="width: 35%"></span></div>
+          <div class="nome" id="nome">Jogador</div>
+          <div class="xp"><span id="xp" style="width: 0%"></span></div>
         </div>
-      </div>
+      </button>
       <div class="moedas">
-        <div class="moeda"><img class="ic-img" data-asset="ui/moeda" alt="" /><span>1.250</span></div>
-        <div class="moeda"><i class="ic-gema"></i><span>80</span></div>
+        <div class="moeda"><img class="ic-img" data-asset="ui/moeda" alt="" /><span id="ouro">0</span></div>
+        <div class="moeda"><i class="ic-gema"></i><span id="gemas">0</span></div>
       </div>
     </header>
 
@@ -35,45 +35,22 @@
         <section class="tela" data-tela="loja">
           <h2 class="titulo-secao"><span>Ofertas do dia</span></h2>
           <div class="grade-3" id="ofertas"></div>
-
           <h2 class="titulo-secao"><span>Baús</span></h2>
-          <div class="grade-3">
-            <div class="item-loja">
-              <img data-asset="ui/bau_madeira" alt="" />
-              <div class="item-nome">Baú de madeira</div>
-              <div class="preco"><i class="ic-gema"></i>10</div>
-            </div>
-            <div class="item-loja">
-              <img data-asset="ui/bau_prata" alt="" />
-              <div class="item-nome">Baú de prata</div>
-              <div class="preco"><i class="ic-gema"></i>40</div>
-            </div>
-            <div class="item-loja destaque"><div class="faixa">Melhor oferta</div>
-              <img data-asset="ui/bau_ouro" alt="" />
-              <div class="item-nome">Baú de ouro</div>
-              <div class="preco"><i class="ic-gema"></i>120</div>
-            </div>
-          </div>
-
+          <div class="grade-3" id="loja-baus"></div>
           <h2 class="titulo-secao"><span>Ouro</span></h2>
-          <div class="grade-3">
-            <div class="item-loja"><img data-asset="ui/ouro_1" alt="" /><div class="item-nome">500 de ouro</div><div class="preco"><i class="ic-gema"></i>20</div></div>
-            <div class="item-loja"><img data-asset="ui/ouro_2" alt="" /><div class="item-nome">2.000 de ouro</div><div class="preco"><i class="ic-gema"></i>70</div></div>
-            <div class="item-loja"><img data-asset="ui/ouro_3" alt="" /><div class="item-nome">6.000 de ouro</div><div class="preco"><i class="ic-gema"></i>180</div></div>
-          </div>
-          <p class="aviso">Tudo aqui é de mentirinha: o jogo não tem compras com dinheiro real.</p>
+          <div class="grade-3" id="loja-ouro"></div>
+          <p class="aviso">Tudo aqui é de mentirinha: o jogo não tem compras com dinheiro real. Ganhe gemas subindo de nível e abrindo baús.</p>
         </section>
 
         <!-- CARTAS -->
         <section class="tela" data-tela="cartas">
           <div class="cab-deck">
             <h2 class="titulo-secao"><span>Deck de batalha</span></h2>
-            <div class="elixir-medio">Elixir médio <b>–</b></div>
+            <div class="elixir-medio">Elixir médio <b id="elixir-medio">–</b></div>
           </div>
           <div class="painel-deck"><div class="grade-4" id="deck"></div></div>
-
           <h2 class="titulo-secao"><span>Coleção</span></h2>
-          <p class="aviso">Suas personagens vão aparecer aqui quando você mandar as imagens.</p>
+          <p class="aviso" id="aviso-colecao">Toque numa carta para ver detalhes, colocar no deck ou evoluir.</p>
           <div class="painel-deck colecao"><div class="grade-4" id="colecao"></div></div>
         </section>
 
@@ -84,40 +61,24 @@
             <div class="logo-texto"><span>Queens</span><small>and</small><span>Kings</span></div>
             <img class="logo-torre espelho" data-asset="ui/torre_logo" alt="" />
           </div>
-          <div class="trofeus"><i class="ic-trofeu"></i><span>0</span><div class="trofeus-barra"><span style="width: 0%"></span></div><small>Próxima arena: 300</small></div>
+          <div class="trofeus"><i class="ic-trofeu"></i><span id="trofeus">0</span><div class="trofeus-barra"><span id="trofeus-barra" style="width: 0%"></span></div><small id="trofeus-prox">Próxima arena: 300</small></div>
           <div class="arena-card">
             <div class="arena-nome"><span>Arena 1</span>Festival da Escola</div>
             <div class="arena-mini" id="arena-mini"></div>
           </div>
           <button class="btn-jogar" id="btn-jogar">Jogar</button>
-          <div class="baus">
-            <div class="slot-bau abrindo"><img data-asset="ui/bau_madeira" alt="" /><span>2h 41min</span><div class="tempo-bau"><i style="width: 45%"></i></div></div>
-            <div class="slot-bau"><img data-asset="ui/bau_prata" alt="" /><span>8h</span></div>
-            <div class="slot-bau vazio"><span>Espaço livre</span></div>
-            <div class="slot-bau vazio"><span>Espaço livre</span></div>
-          </div>
+          <div class="baus" id="baus"></div>
         </section>
 
         <!-- CLÃ -->
         <section class="tela" data-tela="cla">
-          <h2 class="titulo-secao"><span>Clãs</span></h2>
-          <input class="busca" type="text" placeholder="Buscar clã" />
-          <div class="lista-clas">
-            <div class="cla"><div class="escudo e1">S</div><div class="cla-info"><b>Coroas de Sakura</b><span>32/50 membros · 1.200 troféus</span></div><button class="btn-peq">Entrar</button></div>
-            <div class="cla"><div class="escudo e2">T</div><div class="cla-info"><b>Torre do Sino</b><span>18/50 membros · 800 troféus</span></div><button class="btn-peq">Entrar</button></div>
-            <div class="cla"><div class="escudo e3">L</div><div class="cla-info"><b>Lanternas Vermelhas</b><span>45/50 membros · 2.100 troféus</span></div><button class="btn-peq">Entrar</button></div>
-            <div class="cla"><div class="escudo e4">R</div><div class="cla-info"><b>Rio das Pétalas</b><span>9/50 membros · 300 troféus</span></div><button class="btn-peq">Entrar</button></div>
-          </div>
-          <p class="aviso">Os clãs chegam junto com o modo online.</p>
+          <div id="cla-conteudo"></div>
         </section>
 
         <!-- EVENTOS -->
         <section class="tela" data-tela="eventos">
           <h2 class="titulo-secao"><span>Eventos</span></h2>
-          <div class="evento ev1"><div><b>Desafio do Festival</b><span>Vença 3 batalhas seguidas</span></div><div class="selo">Em breve</div></div>
-          <div class="evento ev2"><div><b>Torneio das Coroas</b><span>Quem juntar mais coroas ganha</span></div><div class="selo">Em breve</div></div>
-          <div class="evento ev3"><div><b>Batalha em dupla</b><span>Jogue 2 contra 2 com um amigo</span></div><div class="selo">Em breve</div></div>
-          <div class="evento ev4"><div><b>Elixir em dobro</b><span>A batalha inteira com elixir rápido</span></div><div class="selo">Em breve</div></div>
+          <div id="eventos-lista"></div>
         </section>
       </div>
     </main>
@@ -137,7 +98,7 @@
         <button class="btn-sair" id="btn-sair">Sair</button>
         <div class="placar"><span class="coroa vermelha">0</span><span class="tempo">3:00</span><span class="coroa azul">0</span></div>
       </div>
-      <div class="selo-previa">Prévia da arena · batalha em breve</div>
+      <div class="selo-previa">Batalha</div>
       <div class="arena-grande-janela"><div class="arena-grande" id="arena-grande"></div></div>
       <div class="hud-baixo">
         <div class="mao">
@@ -145,16 +106,19 @@
           <div class="cartas-mao" id="mao"></div>
         </div>
         <div class="elixir">
-          <div class="gota">5</div>
+          <div class="gota" data-n="5"></div>
           <div class="barra" id="barra-elixir"></div>
         </div>
       </div>
     </div>
   </div>
 
-  <script src="js/assets.js?v=1794403011"></script>
-  <script src="js/arena.js?v=1794403011"></script>
-  <script src="js/menu.js?v=1794403011"></script>
-  <script src="js/cartas.js?v=1794403011"></script>
+  <script src="js/assets.js?v=1794403551"></script>
+  <script src="js/estado.js?v=1794403551"></script>
+  <script src="js/ui.js?v=1794403551"></script>
+  <script src="js/arena.js?v=1794403551"></script>
+  <script src="js/cartas.js?v=1794403551"></script>
+  <script src="js/batalha.js?v=1794403551"></script>
+  <script src="js/menu.js?v=1794403551"></script>
 </body>
 </html>

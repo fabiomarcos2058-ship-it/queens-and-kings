@@ -2,11 +2,19 @@
 
 Fangame de cartas e torres, sem fins lucrativos. Este jogo é inspirado no gênero de Clash Royale, mas não tem ligação com a Supercell e não usa nenhuma imagem, nome ou arquivo do jogo original.
 
-## Etapa atual: 1 (só visual)
+## O que já funciona
 
-- Menu com abas embaixo: Loja, Cartas, Batalha, Clã e Eventos. Toque nas abas ou arraste para o lado.
-- Botão **Jogar**: abre a prévia da primeira arena, o Festival da Escola.
-- Nada é interativo ainda: não tem batalha, compras nem online.
+- **Batalha** contra o computador: elixir, mão com 4 cartas e próxima, tropas que andam, atravessam as pontes e lutam, torres que atiram, feitiços, tempo de 3 minutos (elixir em dobro no último minuto), prorrogação, coroas, vitória e derrota.
+- **Recompensas:** troféus, ouro, XP, nível do jogador (+10 gemas por nível) e baús.
+- **Baús:** destrancar com tempo (um por vez) ou abrir na hora com gemas.
+- **Cartas:** detalhes e estatísticas, montar o deck (até 8), evoluir com cópias + ouro.
+- **Loja:** ofertas do dia (ouro), baús e pacotes de ouro (gemas). Tudo de mentirinha.
+- **Clã:** buscar, entrar e sair (lista de membros simulada).
+- **Eventos:** Desafio do Festival (3 vitórias seguidas), Torneio das Coroas (30 coroas) e batalha com elixir em dobro.
+- **Perfil:** toque no nome para trocar, ver estatísticas ou apagar o progresso.
+- O progresso fica salvo no navegador do celular.
+
+Dica para testes: colocar `?vel=5` no final do link deixa a batalha 5x mais rápida.
 
 ## Como abrir
 

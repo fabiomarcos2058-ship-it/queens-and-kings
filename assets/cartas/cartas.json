@@ -1,8 +1,102 @@
 {
-  "_leia": "rosto = [x, y, raio] do rosto na imagem original (vira o medalhão). arte = [x, y, largura] do recorte da carta (altura = largura x 4/3).",
+  "_leia": "rosto = [x, y, raio] do rosto na imagem original (vira o medalhão). arte = [x, y, largura] do recorte da carta (altura = largura x 4/3). Estatísticas: vida, dano, velocidade (pixels/s), alcance (pixels), cadencia (segundos entre ataques), alvo ('tudo' ou 'construcoes'), area (raio de dano em área). Feitiços usam 'feitico': true e 'imagem' própria.",
   "cartas": [
-    { "id": "itsuki", "nome": "Itsuki", "raridade": "rara", "custo": 4, "tipo": "Tanque", "descricao": "Aguenta muito dano e vai direto nas torres.", "rosto": [368, 440, 215], "arte": [58, 20, 620] },
-    { "id": "rukia", "nome": "Rukia", "raridade": "epica", "custo": 5, "tipo": "Dano em área", "descricao": "Ataca de longe e acerta vários inimigos de uma vez.", "rosto": [400, 230, 145], "arte": [98, 20, 600] },
-    { "id": "akame", "nome": "Akame", "raridade": "lendaria", "custo": 4, "tipo": "Assassina", "descricao": "Muito rápida, causa dano alto em um alvo só.", "rosto": [292, 395, 170], "arte": [40, 20, 600] }
+    {
+      "id": "itsuki",
+      "nome": "Itsuki",
+      "raridade": "rara",
+      "custo": 4,
+      "tipo": "Tanque",
+      "descricao": "Aguenta muito dano e vai direto nas torres.",
+      "rosto": [
+        368,
+        440,
+        215
+      ],
+      "arte": [
+        58,
+        20,
+        620
+      ],
+      "vida": 1700,
+      "dano": 95,
+      "velocidade": 34,
+      "alcance": 16,
+      "cadencia": 1.4,
+      "alvo": "construcoes"
+    },
+    {
+      "id": "rukia",
+      "nome": "Rukia",
+      "raridade": "epica",
+      "custo": 5,
+      "tipo": "Dano em área",
+      "descricao": "Ataca de longe e acerta vários inimigos de uma vez.",
+      "rosto": [
+        400,
+        230,
+        145
+      ],
+      "arte": [
+        98,
+        20,
+        600
+      ],
+      "vida": 620,
+      "dano": 115,
+      "velocidade": 44,
+      "alcance": 105,
+      "cadencia": 1.6,
+      "alvo": "tudo",
+      "area": 38
+    },
+    {
+      "id": "akame",
+      "nome": "Akame",
+      "raridade": "lendaria",
+      "custo": 4,
+      "tipo": "Assassina",
+      "descricao": "Muito rápida, causa dano alto em um alvo só.",
+      "rosto": [
+        292,
+        395,
+        170
+      ],
+      "arte": [
+        40,
+        20,
+        600
+      ],
+      "vida": 860,
+      "dano": 200,
+      "velocidade": 62,
+      "alcance": 18,
+      "cadencia": 1.1,
+      "alvo": "tudo"
+    },
+    {
+      "id": "chuva",
+      "nome": "Chuva de Pétalas",
+      "raridade": "comum",
+      "custo": 3,
+      "tipo": "Feitiço",
+      "descricao": "Pétalas cortantes que acertam todos numa área grande.",
+      "feitico": true,
+      "imagem": "chuva.svg",
+      "dano": 150,
+      "area": 60
+    },
+    {
+      "id": "lanterna",
+      "nome": "Lanterna Explosiva",
+      "raridade": "rara",
+      "custo": 4,
+      "tipo": "Feitiço",
+      "descricao": "Uma lanterna em chamas que explode com muito dano.",
+      "feitico": true,
+      "imagem": "lanterna.svg",
+      "dano": 360,
+      "area": 42
+    }
   ]
 }

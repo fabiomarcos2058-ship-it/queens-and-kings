@@ -1,49 +1,359 @@
-// Menu principal: troca de abas e prévia da arena. Tudo só visual por enquanto.
-(() => {
-  const ordem = ['loja', 'cartas', 'batalha', 'cla', 'eventos'];
-  const telas = document.getElementById('telas');
-  const abas = document.querySelectorAll('#abas button');
+// Menu principal: abas, loja, cartas, baús, clã, eventos e perfil.
+(async () => {
+  const $ = (id) => document.getElementById(id);
+  const d = () => Estado.d;
+  const fmt = UI.fmt;
 
+  // ---------- Abas ----------
+  const ordem = ['loja', 'cartas', 'batalha', 'cla', 'eventos'];
+  const telas = $('telas');
+  const abas = document.querySelectorAll('#abas button');
+  let abaAtual = 'batalha';
   function irPara(aba) {
-    const i = ordem.indexOf(aba);
-    telas.style.transform = `translateX(-${i * 20}%)`;
+    abaAtual = aba;
+    telas.style.transform = `translateX(-${ordem.indexOf(aba) * 20}%)`;
     abas.forEach((b) => b.classList.toggle('ativa', b.dataset.aba === aba));
   }
   abas.forEach((b) => b.addEventListener('click', () => irPara(b.dataset.aba)));
-
-  // Arrastar para o lado também troca de aba
-  let inicioX = null;
-  telas.addEventListener('touchstart', (e) => (inicioX = e.touches[0].clientX), { passive: true });
+  let inicioX = null, inicioY = null;
+  telas.addEventListener('touchstart', (e) => { inicioX = e.touches[0].clientX; inicioY = e.touches[0].clientY; }, { passive: true });
   telas.addEventListener('touchend', (e) => {
     if (inicioX === null) return;
-    const dx = e.changedTouches[0].clientX - inicioX;
-    const atual = ordem.indexOf(document.querySelector('#abas .ativa').dataset.aba);
-    if (Math.abs(dx) > 60) irPara(ordem[Math.max(0, Math.min(4, atual + (dx < 0 ? 1 : -1)))]);
+    const dx = e.changedTouches[0].clientX - inicioX, dy = e.changedTouches[0].clientY - inicioY;
+    const i = ordem.indexOf(abaAtual);
+    if (Math.abs(dx) > 70 && Math.abs(dx) > Math.abs(dy) * 1.5) irPara(ordem[Math.max(0, Math.min(4, i + (dx < 0 ? 1 : -1)))]);
     inicioX = null;
   });
 
-  // Cartas de exemplo (vazias até chegarem as personagens)
-  const raridades = ['comum', 'comum', 'rara', 'rara', 'epica', 'epica', 'lendaria', 'comum'];
-  const custos = [3, 2, 4, 5, 3, 6, 5, 1];
-  const carta = (r, c, txt = '?') =>
-    `<div class="carta-vazia ${r}"><span class="custo">${c}</span>${txt}</div>`;
+  // ---------- Recompensas ----------
+  function listaCartasGanhas(cartas) {
+    return `<div class="ganhos-cartas">${Object.entries(cartas).map(([id, q]) =>
+      `<div class="ganho-carta">${Cartas.html(Estado.carta(id), { mini: true })}<b>x${q}</b></div>`).join('')}</div>`;
+  }
 
-  document.getElementById('deck').innerHTML = Array(8).fill('<div class="slot-deck">+</div>').join('');
-  document.getElementById('colecao').innerHTML = raridades.map((r, i) => carta(r, custos[i])).join('');
-  document.getElementById('ofertas').innerHTML = ['comum', 'rara', 'epica']
-    .map((r, i) => `<div class="item-loja">${carta(r, custos[i])}<div class="item-nome">Carta ${['comum', 'rara', 'épica'][i]}</div><div class="preco"><i class="ic-ouro"></i>${[100, 500, 2000][i]}</div></div>`)
-    .join('');
-  document.getElementById('mao').innerHTML = raridades.slice(0, 4).map((r, i) => carta(r, custos[i])).join('');
-  document.getElementById('barra-elixir').innerHTML = Array.from({ length: 10 }, (_, i) => `<span class="${i < 5 ? 'cheio' : ''}"></span>`).join('');
+  function mostrarBau(tipo, r) {
+    UI.modal({
+      titulo: Estado.BAUS[tipo].nome,
+      classe: 'modal-bau',
+      html: `<img class="bau-aberto" data-asset="ui/bau_${tipo}" alt="" />
+        <div class="ganhos"><span><img class="ic-img" data-asset="ui/moeda" alt="" /> +${fmt(r.ouro)}</span>${r.gemas ? `<span><i class="ic-gema"></i> +${r.gemas}</span>` : ''}</div>
+        ${listaCartasGanhas(r.cartas)}`,
+      botoes: [{ texto: 'Pegar tudo!', classe: 'principal' }],
+    });
+    Assets.fill();
+    tudo();
+  }
 
-  // Arenas
-  Arena.render(document.getElementById('arena-mini'), { petalas: false });
-  Arena.render(document.getElementById('arena-grande'));
+  // ---------- Topo ----------
+  function topo() {
+    $('nivel').dataset.n = d().nivel;
+    $('nome').textContent = d().nome;
+    $('xp').style.width = `${(d().xp / Estado.XP_NIVEL(d().nivel)) * 100}%`;
+    $('ouro').textContent = fmt(d().ouro);
+    $('gemas').textContent = fmt(d().gemas);
+  }
 
-  const batalha = document.getElementById('batalha');
-  document.getElementById('btn-jogar').addEventListener('click', () => batalha.classList.remove('oculto'));
-  document.getElementById('btn-sair').addEventListener('click', () => batalha.classList.add('oculto'));
+  $('perfil').onclick = () => {
+    const total = d().vitorias + d().derrotas;
+    UI.modal({
+      titulo: 'Perfil',
+      html: `<label class="campo">Nome<input id="campo-nome" maxlength="16" value="${d().nome.replace(/"/g, '&quot;')}" /></label>
+        <div class="estatisticas">
+          <div><b>${d().nivel}</b><span>Nível</span></div>
+          <div><b>${d().recorde}</b><span>Recorde de troféus</span></div>
+          <div><b>${d().vitorias}</b><span>Vitórias</span></div>
+          <div><b>${total ? Math.round((d().vitorias / total) * 100) : 0}%</b><span>Aproveitamento</span></div>
+        </div>
+        <p class="aviso">XP: ${d().xp}/${Estado.XP_NIVEL(d().nivel)} · cada nível novo dá 10 gemas.</p>`,
+      botoes: [
+        { texto: 'Apagar progresso', classe: 'perigo pequeno', acao: () => {
+          UI.modal({ titulo: 'Tem certeza?', html: '<p>Isso apaga tudo: cartas, ouro, troféus e baús.</p>', botoes: [
+            { texto: 'Cancelar', classe: 'secundario' },
+            { texto: 'Apagar', classe: 'perigo', acao: () => { Estado.apagar(); tudo(); UI.toast('Progresso apagado'); } },
+          ] });
+        } },
+        { texto: 'Salvar', classe: 'principal', acao: (el) => {
+          const v = el.querySelector('#campo-nome').value.trim();
+          if (v) { d().nome = v; Estado.salvar(); topo(); }
+        } },
+      ],
+    });
+  };
 
+  // ---------- Batalha (tela inicial) ----------
+  function telaBatalha() {
+    $('trofeus').textContent = fmt(d().trofeus);
+    $('trofeus-barra').style.width = `${Math.min(100, (d().trofeus / 300) * 100)}%`;
+    $('trofeus-prox').textContent = d().trofeus >= 300 ? 'Arena 2 chega em breve!' : `Próxima arena: 300 (faltam ${300 - d().trofeus})`;
+    baus();
+  }
+
+  function baus() {
+    const algumAbrindo = d().baus.some((b) => b && b.inicio && Estado.tempoRestante(b) > 0);
+    $('baus').innerHTML = d().baus.map((b, i) => {
+      if (!b) return '<div class="slot-bau vazio"><span>Espaço livre</span></div>';
+      const resta = Estado.tempoRestante(b);
+      if (b.inicio && resta === 0) return `<button class="slot-bau pronto" data-i="${i}"><img data-asset="ui/bau_${b.tipo}" alt="" /><span>Abrir!</span></button>`;
+      if (b.inicio) {
+        const p = 1 - resta / (Estado.BAUS[b.tipo].segundos * 1000);
+        return `<button class="slot-bau abrindo" data-i="${i}"><img data-asset="ui/bau_${b.tipo}" alt="" /><span>${UI.tempo(resta)}</span><div class="tempo-bau"><i style="width:${p * 100}%"></i></div></button>`;
+      }
+      return `<button class="slot-bau" data-i="${i}"><img data-asset="ui/bau_${b.tipo}" alt="" /><span>${algumAbrindo ? 'Na fila' : 'Tocar p/ abrir'}</span></button>`;
+    }).join('');
+    $('baus').querySelectorAll('button').forEach((el) => (el.onclick = () => tocarBau(+el.dataset.i)));
+    Assets.fill($('baus'));
+  }
+
+  function tocarBau(i) {
+    const b = d().baus[i];
+    const resta = Estado.tempoRestante(b);
+    const abrir = () => { d().baus[i] = null; mostrarBau(b.tipo, Estado.abrirBau(b.tipo)); };
+    if (b.inicio && resta === 0) return abrir();
+    const custo = Math.max(1, Math.ceil((b.inicio ? resta : Estado.BAUS[b.tipo].segundos * 1000) / 60000));
+    const algumAbrindo = d().baus.some((x) => x && x.inicio && Estado.tempoRestante(x) > 0);
+    const botoes = [{ texto: `Abrir agora · ${custo} 💎`, classe: 'principal', desativado: d().gemas < custo, motivo: 'Gemas insuficientes',
+      acao: () => { d().gemas -= custo; abrir(); } }];
+    if (!b.inicio) botoes.unshift({ texto: algumAbrindo ? 'Outro baú já está abrindo' : `Destrancar (${UI.tempo(Estado.BAUS[b.tipo].segundos * 1000)})`,
+      classe: 'secundario', desativado: algumAbrindo, motivo: 'Espere o outro baú terminar',
+      acao: () => { b.inicio = Date.now(); Estado.salvar(); baus(); } });
+    UI.modal({
+      titulo: Estado.BAUS[b.tipo].nome,
+      html: `<img class="bau-aberto" data-asset="ui/bau_${b.tipo}" alt="" /><p>${b.inicio ? `Faltam ${UI.tempo(resta)}` : 'Destranque para abrir de graça, ou abra agora com gemas.'}</p>`,
+      botoes,
+    });
+    Assets.fill();
+  }
+
+  $('btn-jogar').onclick = () => jogar('normal');
+
+  function jogar(modo) {
+    if (!d().deck.length) { UI.toast('Coloque cartas no deck primeiro!'); irPara('cartas'); return; }
+    Batalha.iniciar({ modo, fim: fimDeBatalha });
+  }
+
+  function fimDeBatalha(r) {
+    const vitoria = r.resultado === 'vitoria';
+    let trofeus = 0, ouro = 0, bau = null;
+    if (vitoria) {
+      trofeus = 30; ouro = 15 + r.coroas * 5; d().vitorias++;
+      const livre = d().baus.findIndex((b) => !b);
+      if (livre >= 0) {
+        const x = Math.random();
+        bau = x < 0.06 ? 'ouro' : x < 0.3 ? 'prata' : 'madeira';
+        d().baus[livre] = { tipo: bau, inicio: null };
+      }
+    } else if (r.resultado === 'derrota') {
+      trofeus = -Math.min(15, d().trofeus); d().derrotas++;
+    }
+    d().trofeus += trofeus;
+    d().recorde = Math.max(d().recorde, d().trofeus);
+    d().ouro += ouro;
+    const niveis = Estado.ganharXp(vitoria ? 12 : 4);
+    // eventos
+    const ev = d().eventos;
+    ev.coroas += r.coroas;
+    if (vitoria) ev.sequencia = Math.min(3, ev.sequencia + 1); else if (!ev.desafioPremio) ev.sequencia = 0;
+    Estado.salvar();
+
+    const titulo = { vitoria: 'Vitória! 👑', derrota: 'Derrota', empate: 'Empate' }[r.resultado];
+    UI.modal({
+      titulo,
+      classe: `modal-resultado ${r.resultado}`,
+      html: `<div class="placar-final"><span class="coroa azul">${r.coroas}</span><small>x</small><span class="coroa vermelha">${r.coroasInimigo}</span></div>
+        <div class="ganhos">
+          <span><i class="ic-trofeu"></i> ${trofeus >= 0 ? '+' : ''}${trofeus}</span>
+          ${ouro ? `<span><img class="ic-img" data-asset="ui/moeda" alt="" /> +${ouro}</span>` : ''}
+        </div>
+        ${bau ? `<p class="ganhou-bau"><img data-asset="ui/bau_${bau}" alt="" /> Você ganhou um ${Estado.BAUS[bau].nome.toLowerCase()}!</p>` : vitoria ? '<p class="aviso">Seus espaços de baú estão cheios.</p>' : ''}
+        ${niveis.length ? `<p class="subiu">Subiu para o nível ${niveis.at(-1)}! +${niveis.length * 10} 💎</p>` : ''}`,
+      botoes: [{ texto: 'OK', classe: 'principal', acao: () => { Batalha.fechar(); tudo(); irPara('batalha'); } }],
+    });
+    Assets.fill();
+  }
+
+  // ---------- Loja ----------
+  function loja() {
+    const ofertas = Estado.ofertasDoDia();
+    $('ofertas').innerHTML = ofertas.map((o) => {
+      const c = Estado.carta(o.id);
+      const comprada = d().ofertas.compradas.includes(o.i);
+      return `<button class="item-loja${comprada ? ' comprado' : ''}" data-i="${o.i}">${Cartas.html(c, { mini: true })}
+        <div class="item-nome">${c.nome} x${o.copias}</div>
+        <div class="preco">${comprada ? 'Comprado' : `<img class="ic-img" data-asset="ui/moeda" alt="" />${fmt(o.preco)}`}</div></button>`;
+    }).join('');
+    $('ofertas').querySelectorAll('button').forEach((el) => (el.onclick = () => {
+      const o = ofertas[+el.dataset.i];
+      if (d().ofertas.compradas.includes(o.i)) return UI.toast('Você já comprou essa oferta hoje');
+      const c = Estado.carta(o.id);
+      UI.modal({
+        titulo: 'Comprar oferta?',
+        html: `<div class="compra">${Cartas.html(c, { mini: true })}<p><b>${o.copias} cópias</b> de ${c.nome} por ${fmt(o.preco)} de ouro.</p></div>`,
+        botoes: [{ texto: 'Cancelar', classe: 'secundario' }, { texto: 'Comprar', classe: 'principal', desativado: d().ouro < o.preco, motivo: 'Ouro insuficiente',
+          acao: () => { d().ouro -= o.preco; d().colecao[o.id].copias += o.copias; d().ofertas.compradas.push(o.i); Estado.salvar(); UI.toast(`+${o.copias} ${c.nome}!`); tudo(); } }],
+      });
+    }));
+
+    const precosBau = { madeira: 10, prata: 40, ouro: 120 };
+    $('loja-baus').innerHTML = Object.keys(precosBau).map((t) => `<button class="item-loja${t === 'ouro' ? ' destaque' : ''}" data-t="${t}">
+      ${t === 'ouro' ? '<div class="faixa">Melhor oferta</div>' : ''}<img data-asset="ui/bau_${t}" alt="" />
+      <div class="item-nome">${Estado.BAUS[t].nome}</div><div class="preco"><i class="ic-gema"></i>${precosBau[t]}</div></button>`).join('');
+    $('loja-baus').querySelectorAll('button').forEach((el) => (el.onclick = () => {
+      const t = el.dataset.t, p = precosBau[t];
+      UI.modal({ titulo: `Comprar ${Estado.BAUS[t].nome.toLowerCase()}?`, html: `<img class="bau-aberto" data-asset="ui/bau_${t}" alt="" /><p>Abre na hora. Até ${Estado.BAUS[t].copias} cartas e ${Estado.BAUS[t].ouro[1]} de ouro.</p>`,
+        botoes: [{ texto: 'Cancelar', classe: 'secundario' }, { texto: `Comprar · ${p} 💎`, classe: 'principal', desativado: d().gemas < p, motivo: 'Gemas insuficientes',
+          acao: () => { d().gemas -= p; mostrarBau(t, Estado.abrirBau(t)); } }] });
+      Assets.fill();
+    }));
+
+    const pacotes = [[500, 20, 1], [2000, 70, 2], [6000, 180, 3]];
+    $('loja-ouro').innerHTML = pacotes.map(([o, g, n], i) => `<button class="item-loja" data-i="${i}"><img data-asset="ui/ouro_${n}" alt="" />
+      <div class="item-nome">${fmt(o)} de ouro</div><div class="preco"><i class="ic-gema"></i>${g}</div></button>`).join('');
+    $('loja-ouro').querySelectorAll('button').forEach((el) => (el.onclick = () => {
+      const [o, g] = pacotes[+el.dataset.i];
+      UI.modal({ titulo: 'Comprar ouro?', html: `<p>${fmt(o)} de ouro por ${g} gemas.</p>`,
+        botoes: [{ texto: 'Cancelar', classe: 'secundario' }, { texto: 'Comprar', classe: 'principal', desativado: d().gemas < g, motivo: 'Gemas insuficientes',
+          acao: () => { d().gemas -= g; d().ouro += o; Estado.salvar(); UI.toast(`+${fmt(o)} de ouro!`); tudo(); } }] });
+    }));
+    Assets.fill($('loja-baus').parentElement);
+  }
+
+  // ---------- Cartas ----------
+  let trocando = null;
+  function cartas() {
+    const deck = d().deck;
+    const etiqueta = (id) => {
+      const col = d().colecao[id];
+      const prec = Estado.COPIAS[col.nivel];
+      return col.nivel >= Estado.NIVEL_MAX ? `Nível ${col.nivel} · máx` : `Nível ${col.nivel}`;
+    };
+    const barraCopias = (id) => {
+      const col = d().colecao[id];
+      if (col.nivel >= Estado.NIVEL_MAX) return '';
+      const prec = Estado.COPIAS[col.nivel];
+      const pode = Estado.podeEvoluir(id).ok;
+      return `<div class="copias${pode ? ' pode' : ''}"><i style="width:${Math.min(100, (col.copias / prec) * 100)}%"></i><b>${pode ? 'Evoluir!' : `${col.copias}/${prec}`}</b></div>`;
+    };
+    $('deck').innerHTML = Array.from({ length: 8 }, (_, i) => {
+      const id = deck[i];
+      if (!id) return `<div class="slot-carta vazio-deck" data-slot="${i}"><div class="slot-deck">+</div><div class="carta-nivel">&nbsp;</div></div>`;
+      return Cartas.html(Estado.carta(id), { nivel: etiqueta(id), extra: barraCopias(id) });
+    }).join('');
+    const media = deck.length ? deck.reduce((s, id) => s + Estado.carta(id).custo, 0) / deck.length : 0;
+    $('elixir-medio').textContent = deck.length ? media.toFixed(1).replace('.', ',') : '–';
+
+    const fora = Estado.catalogo().filter((c) => !deck.includes(c.id));
+    $('colecao').innerHTML = fora.length
+      ? fora.map((c) => Cartas.html(c, { nivel: etiqueta(c.id), extra: barraCopias(c.id) })).join('')
+      : '<p class="aviso" style="grid-column:1/-1">Todas as suas cartas estão no deck. Mande mais personagens para aumentar a coleção!</p>';
+    $('aviso-colecao').textContent = trocando
+      ? `Toque numa carta do deck para trocar por ${Estado.carta(trocando).nome}.`
+      : 'Toque numa carta para ver detalhes, colocar no deck ou evoluir.';
+    document.querySelector('.painel-deck').classList.toggle('trocando', !!trocando);
+
+    $('deck').querySelectorAll('.slot-carta').forEach((el) => (el.onclick = () => {
+      if (trocando) {
+        const i = el.dataset.slot !== undefined ? +el.dataset.slot : deck.indexOf(el.dataset.id);
+        if (i >= deck.length) deck.push(trocando); else deck[i] = trocando;
+        trocando = null; Estado.salvar(); cartas(); UI.toast('Deck atualizado!');
+        return;
+      }
+      if (el.dataset.id) detalhes(el.dataset.id);
+    }));
+    $('colecao').querySelectorAll('.slot-carta').forEach((el) => (el.onclick = () => { trocando = null; detalhes(el.dataset.id); }));
+  }
+
+  function detalhes(id) {
+    const c = Estado.stats(id);
+    const col = d().colecao[id];
+    const noDeck = d().deck.includes(id);
+    const ev = Estado.podeEvoluir(id);
+    const linhas = c.feitico
+      ? [['Dano', c.dano], ['Dano em torres', Math.round(c.dano * 0.35)], ['Raio', c.area]]
+      : [['Vida', c.vida], ['Dano', c.dano], ['Velocidade', c.velocidade >= 55 ? 'Rápida' : c.velocidade >= 40 ? 'Média' : 'Lenta'],
+         ['Alcance', c.alcance > 40 ? 'Longo' : 'Corpo a corpo'], ['Ataque a cada', `${c.cadencia}s`], ['Alvo', c.alvo === 'construcoes' ? 'Torres' : 'Tudo'],
+         ...(c.area ? [['Dano em área', 'Sim']] : [])];
+    const botoes = [];
+    if (noDeck) botoes.push({ texto: 'Tirar do deck', classe: 'secundario', desativado: d().deck.length <= 1, motivo: 'O deck precisa de pelo menos 1 carta',
+      acao: () => { d().deck = d().deck.filter((x) => x !== id); Estado.salvar(); cartas(); } });
+    else botoes.push({ texto: 'Usar no deck', classe: 'secundario', acao: () => {
+      if (d().deck.length < 8) { d().deck.push(id); Estado.salvar(); cartas(); UI.toast('Carta adicionada ao deck!'); }
+      else { trocando = id; cartas(); irPara('cartas'); }
+    } });
+    if (col.nivel < Estado.NIVEL_MAX) botoes.push({ texto: `Evoluir · ${fmt(Estado.OURO[col.nivel])} ouro`, classe: 'principal', desativado: !ev.ok, motivo: ev.motivo,
+      acao: () => { Estado.evoluir(id); UI.toast(`${c.nome} subiu para o nível ${col.nivel}!`); tudo(); } });
+    UI.modal({
+      titulo: c.nome,
+      classe: 'modal-carta',
+      html: `<div class="detalhe-carta">${Cartas.html(c, { mini: true })}
+        <div><span class="raridade-tag ${c.raridade}">${Cartas.NOMES_RARIDADE[c.raridade]}</span>
+        <p class="tipo">${c.tipo} · ${c.custo} de elixir</p><p>${c.descricao}</p>
+        <p class="aviso">Nível ${col.nivel} · cópias ${col.copias}${col.nivel < Estado.NIVEL_MAX ? `/${Estado.COPIAS[col.nivel]}` : ''}</p></div></div>
+        <div class="tabela-stats">${linhas.map(([k, v]) => `<div><span>${k}</span><b>${typeof v === 'number' ? fmt(v) : v}</b></div>`).join('')}</div>`,
+      botoes,
+    });
+  }
+
+  // ---------- Clã ----------
+  const CLAS = [
+    { nome: 'Coroas de Sakura', letra: 'S', cor: 'e1', membros: 32, trofeus: 1200 },
+    { nome: 'Torre do Sino', letra: 'T', cor: 'e2', membros: 18, trofeus: 800 },
+    { nome: 'Lanternas Vermelhas', letra: 'L', cor: 'e3', membros: 45, trofeus: 2100 },
+    { nome: 'Rio das Pétalas', letra: 'R', cor: 'e4', membros: 9, trofeus: 300 },
+  ];
+  const NOMES = ['Hana', 'Kaito', 'Yumi', 'Ren', 'Sora', 'Mika', 'Daichi', 'Aoi', 'Haru', 'Nori', 'Yuki', 'Kenji'];
+  let busca = '';
+  function cla() {
+    const c = CLAS.find((x) => x.nome === d().cla);
+    if (c) {
+      const membros = [{ n: d().nome, t: d().trofeus, voce: true }, ...NOMES.slice(0, 8).map((n, i) => ({ n, t: Math.max(0, c.trofeus / 20 + 300 - i * 40) }))]
+        .sort((a, b) => b.t - a.t);
+      $('cla-conteudo').innerHTML = `<div class="cla-topo"><div class="escudo ${c.cor}">${c.letra}</div><div><b>${c.nome}</b><span>${c.membros + 1}/50 membros</span></div>
+        <button class="btn-peq perigo" id="sair-cla">Sair</button></div>
+        <h2 class="titulo-secao"><span>Membros</span></h2>
+        <div class="lista-membros">${membros.map((m, i) => `<div class="membro${m.voce ? ' voce' : ''}"><span class="pos">${i + 1}</span><b>${m.n}${m.voce ? ' (você)' : ''}</b><span><i class="ic-trofeu"></i> ${fmt(Math.round(m.t))}</span></div>`).join('')}</div>
+        <p class="aviso">Chat e doação de cartas chegam com o modo online.</p>`;
+      $('sair-cla').onclick = () => UI.modal({ titulo: 'Sair do clã?', html: `<p>Você vai sair de ${c.nome}.</p>`,
+        botoes: [{ texto: 'Ficar', classe: 'secundario' }, { texto: 'Sair', classe: 'perigo', acao: () => { d().cla = null; Estado.salvar(); cla(); } }] });
+      return;
+    }
+    const lista = CLAS.filter((x) => x.nome.toLowerCase().includes(busca.toLowerCase()));
+    $('cla-conteudo').innerHTML = `<h2 class="titulo-secao"><span>Clãs</span></h2>
+      <input class="busca" id="busca-cla" type="text" placeholder="Buscar clã" value="${busca}" />
+      <div class="lista-clas">${lista.map((x) => `<div class="cla"><div class="escudo ${x.cor}">${x.letra}</div><div class="cla-info"><b>${x.nome}</b><span>${x.membros}/50 membros · ${fmt(x.trofeus)} troféus</span></div><button class="btn-peq" data-n="${x.nome}">Entrar</button></div>`).join('') || '<p class="aviso">Nenhum clã com esse nome.</p>'}</div>`;
+    const campo = $('busca-cla');
+    campo.oninput = () => { busca = campo.value; const pos = campo.selectionStart; cla(); const n = $('busca-cla'); n.focus(); n.setSelectionRange(pos, pos); };
+    $('cla-conteudo').querySelectorAll('[data-n]').forEach((b) => (b.onclick = () => { d().cla = b.dataset.n; Estado.salvar(); UI.toast(`Você entrou em ${b.dataset.n}!`); cla(); }));
+  }
+
+  // ---------- Eventos ----------
+  function eventos() {
+    const ev = d().eventos;
+    const item = (classe, titulo, desc, extra, botao) => `<div class="evento ${classe}"><div><b>${titulo}</b><span>${desc}</span>${extra}</div>${botao}</div>`;
+    const barra = (v, max) => `<div class="ev-barra"><i style="width:${Math.min(100, (v / max) * 100)}%"></i><small>${Math.min(v, max)}/${max}</small></div>`;
+    const btnPremio = (pronto, pego, id) => pego ? '<div class="selo">Concluído ✓</div>' : pronto ? `<button class="selo botao" data-premio="${id}">Pegar prêmio</button>` : '<button class="selo botao" data-jogar="normal">Jogar</button>';
+    $('eventos-lista').innerHTML =
+      item('ev1', 'Desafio do Festival', 'Vença 3 batalhas seguidas · prêmio: baú de ouro', barra(ev.sequencia, 3), btnPremio(ev.sequencia >= 3, ev.desafioPremio, 'desafio')) +
+      item('ev2', 'Torneio das Coroas', 'Junte 30 coroas · prêmio: 100 gemas', barra(ev.coroas, 30), btnPremio(ev.coroas >= 30, ev.torneioPremio, 'torneio')) +
+      item('ev4', 'Elixir em dobro', 'A batalha inteira com elixir rápido', '', '<button class="selo botao" data-jogar="elixir2x">Jogar</button>') +
+      item('ev3', 'Batalha em dupla', 'Jogue 2 contra 2 com um amigo', '', '<div class="selo">Em breve</div>');
+    $('eventos-lista').querySelectorAll('[data-jogar]').forEach((b) => (b.onclick = () => jogar(b.dataset.jogar)));
+    $('eventos-lista').querySelectorAll('[data-premio]').forEach((b) => (b.onclick = () => {
+      if (b.dataset.premio === 'desafio') { ev.desafioPremio = true; mostrarBau('ouro', Estado.abrirBau('ouro')); }
+      else { ev.torneioPremio = true; d().gemas += 100; Estado.salvar(); UI.toast('+100 gemas! 💎'); tudo(); }
+    }));
+  }
+
+  function tudo() {
+    topo(); telaBatalha(); loja(); cartas(); cla(); eventos();
+  }
+
+  // ---------- Início ----------
+  const lista = await Cartas.carregar();
+  Estado.carregar(lista);
+  Arena.render($('arena-mini'), { petalas: false });
+  document.getElementById('barra-elixir').innerHTML = Array.from({ length: 10 }, () => '<span></span>').join('');
   Assets.fill();
+  tudo();
   irPara('batalha');
+  setInterval(() => { if (d().baus.some((b) => b && b.inicio)) baus(); }, 1000);
 })();

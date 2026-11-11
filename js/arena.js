@@ -22,9 +22,9 @@ const Arena = (() => {
   const objetos = [
     ['arena/barraca', 46, 56, 56, 40],
     ['arena/barraca', 314, 56, 56, 40],
-    ['arena/torre_rei_vermelha', 180, 64, 88, 119],
-    ['arena/torre_vermelha', 90, 112, 62, 102],
-    ['arena/torre_vermelha', 270, 112, 62, 102],
+    ['arena/torre_rei_vermelha', 180, 64, 88, 119, 'rei-vermelho'],
+    ['arena/torre_vermelha', 90, 112, 62, 102, 'esq-vermelho'],
+    ['arena/torre_vermelha', 270, 112, 62, 102, 'dir-vermelho'],
     ['arena/arvore', 38, 182, 56, 60],
     ['arena/arvore', 322, 182, 56, 60],
     ['arena/arvore', 180, 205, 56, 60],
@@ -33,15 +33,16 @@ const Arena = (() => {
     ['arena/arvore', 180, 412, 56, 60],
     ['arena/arvore', 38, 436, 56, 60],
     ['arena/arvore', 322, 436, 56, 60],
-    ['arena/torre_azul', 90, 468, 62, 102],
-    ['arena/torre_azul', 270, 468, 62, 102],
-    ['arena/torre_rei_azul', 180, 540, 88, 119],
+    ['arena/torre_azul', 90, 468, 62, 102, 'esq-azul'],
+    ['arena/torre_azul', 270, 468, 62, 102, 'dir-azul'],
+    ['arena/torre_rei_azul', 180, 540, 88, 119, 'rei-azul'],
     ['arena/barraca', 46, 574, 56, 40],
     ['arena/barraca', 314, 574, 56, 40],
   ];
 
-  function peca([nome, x, y, w, h]) {
+  function peca([nome, x, y, w, h, id]) {
     const img = document.createElement('img');
+    if (id) img.dataset.torre = id;
     img.className = 'arena-peca';
     img.alt = '';
     img.draggable = false;
