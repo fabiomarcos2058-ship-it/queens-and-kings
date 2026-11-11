@@ -100,7 +100,7 @@ const Mod = (() => {
   function deckApelao() {
     if (!Conta.uid() || !BOT_APELAO.includes(Conta.uid())) return null;
     const peso = { lendaria: 4, epica: 3, rara: 2, comum: 1 };
-    return [...Estado.catalogo()]
+    return Estado.catalogo().filter((c) => !c.exclusivo)
       .sort((a, b) => peso[b.raridade] - peso[a.raridade] || (b.dano || 0) - (a.dano || 0))
       .slice(0, 8).map((c) => c.id);
   }

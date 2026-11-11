@@ -96,7 +96,7 @@ const Conta = (() => {
     Estado.d.conta = { tipo: 'conta', email: email() };
     if (!nuvem && u.displayName && Estado.d.nome === 'Jogador') Estado.d.nome = u.displayName.slice(0, 16);
     Estado.aoSalvar(agendarEnvio);
-    Estado.salvar();
+    Estado.recarregarCatalogo(); // libera cartas exclusivas desta conta
     await enviarParaNuvem();
   }
 

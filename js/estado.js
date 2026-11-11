@@ -14,7 +14,10 @@ const Estado = (() => {
     ouro: { nome: 'Baú de ouro', segundos: 15 * 60, ouro: [250, 400], copias: 40, gemas: 5 },
   };
 
-  let catalogo = []; // cartas.json
+  let todas = []; // cartas.json inteiro
+  let catalogo = []; // só as cartas que este jogador pode ver (as exclusivas aparecem só para os IDs da carta)
+  const meuUid = () => (typeof Conta !== 'undefined' && Conta.uid ? Conta.uid() : null);
+  const visivel = (c) => !c.exclusivo || c.exclusivo.includes(meuUid());
   let d = null;
 
   function novo() {
@@ -32,7 +35,7 @@ const Estado = (() => {
   }
 
   function carregar(lista) {
-    catalogo = lista;
+    todas = lista;
     let salvo = null;
     try { salvo = JSON.parse(localStorage.getItem(CHAVE)); } catch (e) { salvo = null; }
     return normalizar(salvo);
@@ -46,7 +49,17 @@ const Estado = (() => {
     for (const k in base.conquistas) if (d.conquistas[k] === undefined) d.conquistas[k] = 0;
     if (typeof d.cla === 'string') d.cla = null; // clãs antigos (simulados) não existem mais
     // toda carta do catálogo entra na coleção
+    catalogo = todas.filter(visivel);
     for (const c of catalogo) if (!d.colecao[c.id]) d.colecao[c.id] = { nivel: 1, copias: 0, tem: false };
+    // cartas exclusivas são presenteadas para as contas escolhidas
+    if (!d.presentes) d.presentes = [];
+    for (const c of catalogo.filter((x) => x.exclusivo)) {
+      if (d.presentes.includes(c.id)) continue;
+      d.colecao[c.id].tem = true;
+      d.presentes.push(c.id);
+      d.presenteNovo = c.id;
+      if (d.deck.length < 8 && !d.deck.includes(c.id)) d.deck.push(c.id);
+    }
     if (!d.id) d.id = Math.random().toString(36).slice(2) + Date.now().toString(36);
     if (!d.baus) {
       // cada jogador ganha 8 cartas básicas sorteadas (sempre com pelo menos 1 feitiço)
@@ -69,13 +82,15 @@ const Estado = (() => {
 
   // troca o progresso atual por outro (ex.: o que veio da nuvem)
   function importar(obj) { normalizar(obj); }
+  // refaz a lista de cartas visíveis (depois de entrar ou sair de uma conta)
+  function recarregarCatalogo() { normalizar(d); salvar(); }
 
   function apagar() {
     try { localStorage.removeItem(CHAVE); } catch (e) { /* nada */ }
     normalizar(null);
   }
 
-  const carta = (id) => catalogo.find((c) => c.id === id);
+  const carta = (id) => todas.find((c) => c.id === id);
   function embaralhar(lista) {
     const a = [...lista];
     for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
@@ -83,7 +98,7 @@ const Estado = (() => {
   }
   const tem = (id) => !!(d.colecao[id] && d.colecao[id].tem);
   const liberada = (id) => (carta(id).trofeus || 0) <= d.recorde; // já aparece em baús e na loja
-  const disponiveis = () => catalogo.filter((c) => liberada(c.id));
+  const disponiveis = () => catalogo.filter((c) => liberada(c.id) && !c.exclusivo); // exclusivas não saem em baú/loja
   const proximaLiberacao = () => catalogo.filter((c) => !liberada(c.id)).sort((a, b) => a.trofeus - b.trofeus)[0] || null;
   const sorteio = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
 
@@ -200,7 +215,7 @@ const Estado = (() => {
   }
 
   return {
-    get d() { return d; }, carregar, salvar, apagar, importar, aoSalvar, carta, stats, catalogo: () => catalogo, tem, liberada, disponiveis, proximaLiberacao,
+    get d() { return d; }, carregar, salvar, apagar, importar, recarregarCatalogo, aoSalvar, carta, stats, catalogo: () => catalogo, tem, liberada, disponiveis, proximaLiberacao,
     COPIAS, OURO, NIVEL_MAX, BAUS, XP_NIVEL,
     ganharXp, podeEvoluir, evoluir, abrirBau, tempoRestante, sortearCopias, ofertasDoDia, sorteio,
   };

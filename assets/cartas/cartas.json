@@ -1,5 +1,5 @@
 {
-  "_leia": "rosto = [x, y, raio] do rosto na imagem original (vira o medalhão). arte = [x, y, largura] do recorte da carta (altura = largura x 4/3). Estatísticas: vida, dano, velocidade (pixels/s), alcance (pixels), cadencia (segundos entre ataques), alvo ('tudo' ou 'construcoes'), area (raio de dano em área). Feitiços usam 'feitico': true e 'imagem' própria. 'trofeus' = troféus necessários para a carta começar a aparecer nos baús e na loja . 'inicial': true = uma das 8 cartas básicas dos baús iniciais.",
+  "_leia": "rosto = [x, y, raio] do rosto na imagem original (vira o medalhão). arte = [x, y, largura] do recorte da carta (altura = largura x 4/3). Estatísticas: vida, dano, velocidade (pixels/s), alcance (pixels), cadencia (segundos entre ataques), alvo ('tudo' ou 'construcoes'), area (raio de dano em área). Feitiços usam 'feitico': true e 'imagem' própria. 'trofeus' = troféus necessários para a carta começar a aparecer nos baús e na loja . 'inicial': true = uma das 8 cartas básicas dos baús iniciais. 'exclusivo': lista de IDs de jogador — a carta só existe para essas contas.",
   "cartas": [
     {
       "id": "chichi",
@@ -543,6 +543,36 @@
       "cadencia": 1.3,
       "alvo": "tudo",
       "area": 30
+    },
+    {
+      "id": "gogeta",
+      "nome": "Gogeta",
+      "raridade": "lendaria",
+      "custo": 3,
+      "tipo": "Lendário exclusivo",
+      "descricao": "Exclusivo e absurdamente forte: aguenta tudo e destrói tudo ao redor.",
+      "trofeus": 0,
+      "exclusivo": [
+        "ZwrffaFMcidTzZAGCMJNXOtuuOh2",
+        "EwnFPrCPFUMawnc6dttsQQ98yII2"
+      ],
+      "rosto": [
+        395,
+        470,
+        165
+      ],
+      "arte": [
+        58,
+        130,
+        620
+      ],
+      "vida": 4200,
+      "dano": 650,
+      "velocidade": 58,
+      "alcance": 20,
+      "cadencia": 0.8,
+      "alvo": "tudo",
+      "area": 45
     }
   ]
 }

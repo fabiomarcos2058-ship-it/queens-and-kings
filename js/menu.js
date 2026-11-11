@@ -737,6 +737,17 @@
   if (await sessao) UI.toast(`Bem-vindo(a) de volta, ${d().nome}! ☁️`);
   await Conta.tela();
   tudo();
+  if (d().presenteNovo) {
+    const c = Estado.carta(d().presenteNovo);
+    d().presenteNovo = null; Estado.salvar();
+    UI.modal({
+      titulo: '🎁 Presente exclusivo!',
+      classe: 'modal-liberadas',
+      html: `<div class="evo-raios"></div><div class="liberadas"><div class="liberada">${Cartas.html(c, { mini: true })}<b>${c.nome}</b></div></div>
+        <p>Você ganhou uma carta <b>exclusiva</b> que só existe na sua conta!</p>`,
+      botoes: [{ texto: 'Que demais!', classe: 'principal' }],
+    });
+  }
   if (!d().boasVindas) {
     d().boasVindas = true; Estado.salvar();
     UI.modal({
