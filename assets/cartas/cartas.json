@@ -265,44 +265,6 @@
       "alvo": "tudo"
     },
     {
-      "id": "gogeta",
-      "nome": "Gogeta",
-      "raridade": "lendaria",
-      "custo": 3,
-      "tipo": "Lendário exclusivo",
-      "descricao": "Exclusivo e absurdamente forte: aguenta tudo e destrói tudo ao redor.",
-      "trofeus": 0,
-      "exclusivo": [
-        "ZwrffaFMcidTzZAGCMJNXOtuuOh2",
-        "EwnFPrCPFUMawnc6dttsQQ98yII2"
-      ],
-      "rosto": [
-        395,
-        470,
-        165
-      ],
-      "arte": [
-        58,
-        130,
-        620
-      ],
-      "vida": 4200,
-      "dano": 650,
-      "velocidade": 58,
-      "alcance": 20,
-      "cadencia": 0.8,
-      "alvo": "tudo",
-      "area": 45,
-      "habilidade": {
-        "nome": "Kamehameha",
-        "custo": 2,
-        "tipo": "kamehameha",
-        "dano": 1800,
-        "recarga": 8,
-        "descricao": "Um raio gigante que destrói tudo em linha reta."
-      }
-    },
-    {
       "id": "mini",
       "nome": "Mini",
       "raridade": "comum",

@@ -69,6 +69,7 @@ const Estado = (() => {
       d.baus = [0, 1, 2, 3].map((i) => ({ tipo: 'inicial', inicio: 1, cartas: escolhidas.slice(i * 2, i * 2 + 2) }));
     }
     d.deck = d.deck.filter((id) => catalogo.some((c) => c.id === id) && d.colecao[id].tem);
+    for (const id of Object.keys(d.colecao)) if (!todas.some((c) => c.id === id)) delete d.colecao[id]; // cartas removidas do jogo
     salvar();
     return d;
   }
