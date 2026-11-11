@@ -38,9 +38,11 @@ def pasta_do_pacote(nome):
     if destino.exists():
         return destino
     html = abrir(info['pagina']).read().decode('utf-8', 'ignore')
-    zips = [urljoin(info['pagina'], h) for h in re.findall(r'href="([^"]+\.zip)"', html)]
-    zips = [z for z in zips if permitido(z)]
+    achados = re.findall(r'''["'(=]([^"'()\s<>]+?\.zip)''', html)
+    zips = [z for z in dict.fromkeys(urljoin(info['pagina'], h.replace('\\/', '/')) for h in achados) if permitido(z)]
     if not zips:
+        pistas = [l.strip()[:200] for l in html.splitlines() if 'download' in l.lower()][:15]
+        print('  pistas na página:', *pistas, sep='\n    ')
         raise RuntimeError(f'{nome}: não achei o link de download na página')
     print(f'  baixando {zips[0]}')
     destino.mkdir(parents=True)
@@ -95,7 +97,11 @@ def montar(foto, destino, tamanho, time=None):
 def listar():
     linhas = []
     for nome in CFG['pacotes']:
-        nomes = sorted(modelos(pasta_do_pacote(nome)))
+        try:
+            nomes = sorted(modelos(pasta_do_pacote(nome)))
+        except Exception as e:
+            linhas += [f'## {nome}: erro ({e})', '']
+            continue
         linhas += [f'## {nome} ({len(nomes)} modelos)', *nomes, '']
     (RAIZ / 'bot' / 'catalogo.txt').write_text('\n'.join(linhas), encoding='utf-8')
     print('Catálogo salvo em bot/catalogo.txt')
