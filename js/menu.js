@@ -286,12 +286,18 @@
     });
   }
 
-  function jogar(modo) {
+  let iniciando = false;
+  async function jogar(modo) {
+    if (iniciando) return;
     if (!d().deck.length) {
       if (d().baus.some((b) => b && b.tipo === 'inicial')) { UI.toast('Abra seus baús iniciais para ganhar cartas! 🎁'); irPara('batalha'); document.getElementById('baus').classList.add('chamando'); setTimeout(() => document.getElementById('baus').classList.remove('chamando'), 1600); }
       else { UI.toast('Coloque cartas no deck primeiro!'); irPara('cartas'); }
       return;
     }
+    iniciando = true;
+    const ok = await Atualizacao.podeJogar(); // versão nova? atualiza antes de jogar
+    iniciando = false;
+    if (!ok) return;
     Batalha.iniciar({ modo, fim: fimDeBatalha });
   }
 
@@ -517,12 +523,19 @@
 
   async function x1Criar(amigo = null) {
     let espera = null, cancelado = false;
+    if (!(await Atualizacao.podeJogar())) return;
     try {
       espera = UI.modal({ titulo: 'Criando sala...', classe: 'modal-x1', html: '<div class="x1-carregando"></div>', botoes: [{ texto: 'Cancelar', classe: 'secundario', acao: () => { cancelado = true; X1.cancelar(); } }] });
       travarFundo(espera);
       const cod = await X1.criarSala({
         aoEntrarAmigo: (amigo) => {
           if (cancelado) return;
+          const vs = Atualizacao.versaoDoAmigo(amigo.versao);
+          if (vs !== 'igual') {
+            cancelado = true; espera.fechar(); X1.cancelar();
+            if (vs === 'amigo-velho') UI.modal({ titulo: 'Versões diferentes', html: `<p><b>${esc(amigo.nome)}</b> está com o jogo desatualizado. Peça pra ele fechar e abrir o jogo de novo (ou tocar em "Atualizar agora"), depois criem outra sala!</p>` });
+            return;
+          }
           espera.fechar();
           UI.toast(`${amigo.nome} entrou! Bora! ⚔️`);
           X1.comecar(amigo, fimDeBatalha);
@@ -552,12 +565,19 @@
 
   async function x1Entrar(codigo) {
     let espera = null;
+    if (!(await Atualizacao.podeJogar())) return;
     try {
       espera = UI.modal({ titulo: 'Entrando...', classe: 'modal-x1', html: '<div class="x1-carregando"></div>', botoes: [{ texto: 'Cancelar', classe: 'secundario', acao: () => { X1.cancelar(); } }] });
       travarFundo(espera);
       const host = await X1.entrarSala(codigo, {
         aoComecar: (h) => { espera.fechar(); X1.assistir(h, fimDeBatalha); },
       });
+      const vs = Atualizacao.versaoDoAmigo(host.versao);
+      if (vs !== 'igual') {
+        espera.fechar(); X1.cancelar();
+        if (vs === 'amigo-velho') UI.modal({ titulo: 'Versões diferentes', html: `<p><b>${esc(host.nome)}</b> está com o jogo desatualizado. Peça pra ele fechar e abrir o jogo de novo (ou tocar em "Atualizar agora"), depois criem outra sala!</p>` });
+        return;
+      }
       espera.el.querySelector('.modal-titulo').textContent = `Sala de ${host.nome}`;
       espera.el.querySelector('.modal-corpo').innerHTML = `<p class="x1-esperando">Esperando ${host.nome} começar<span>...</span></p>`;
     } catch (e) {

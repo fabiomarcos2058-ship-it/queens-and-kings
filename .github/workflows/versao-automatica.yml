@@ -1,0 +1,43 @@
+name: Versão automática
+
+# Quando alguém muda o jogo (pelo site do GitHub, por exemplo) e esquece de mudar a versão,
+# este robô muda sozinho. Assim todo mundo recebe o aviso de "Nova versão do jogo!".
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - 'js/**'
+      - 'css/**'
+      - 'assets/**'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: versao-automatica
+  cancel-in-progress: false
+
+jobs:
+  versao:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Mudar a versão se ninguém mudou
+        run: |
+          ANTES="${{ github.event.before }}"
+          if [ -n "$ANTES" ] && [ "$ANTES" != "0000000000000000000000000000000000000000" ] \
+             && git diff --name-only "$ANTES" "${{ github.sha }}" | grep -qx 'versao.txt'; then
+            echo "A versão já foi mudada neste envio. Nada a fazer."
+            exit 0
+          fi
+          git pull --rebase origin main
+          sh tools/atualizar_versao.sh
+          git config user.name "versao-automatica"
+          git config user.email "versao@users.noreply.github.com"
+          git add versao.txt index.html
+          git diff --cached --quiet && exit 0
+          git commit -m "Versão automática $(cat versao.txt)"
+          git push origin HEAD:main

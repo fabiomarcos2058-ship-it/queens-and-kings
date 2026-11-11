@@ -3,4 +3,5 @@
 V=$(date +%s)
 echo "$V" > versao.txt
 sed -i -E "s#(href=\"css/style\.css)(\?v=[0-9]+)?\"#\1?v=$V\"#" index.html
+sed -i -E "s#(<meta name=\"versao-pagina\" content=\")[0-9]*(\")#\1$V\2#" index.html
 echo "versão $V"

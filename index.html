@@ -4,11 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
   <meta name="theme-color" content="#1d2350" />
+  <meta name="versao-pagina" content="1794425693" />
+  <meta http-equiv="Cache-Control" content="no-cache" />
   <title>Queens and Kings</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Lilita+One&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/style.css?v=1794425537" />
+  <link rel="stylesheet" href="css/style.css?v=1794425693" />
 </head>
 <body>
   <div id="app">
@@ -121,8 +123,18 @@
   <!-- Carrega sempre a versão mais nova (evita o celular misturar arquivos antigos e novos) -->
   <script>
     (async () => {
-      let v = Date.now();
-      try { v = (await (await fetch('versao.txt', { cache: 'no-store' })).text()).trim() || v; } catch (e) {}
+      // versão desta página (index.html) e versão mais nova no servidor (o ?t= fura o cache do GitHub)
+      const daPagina = (document.querySelector('meta[name="versao-pagina"]') || {}).content || '';
+      let v = '';
+      try { v = (await (await fetch('versao.txt?t=' + Date.now(), { cache: 'no-store' })).text()).trim(); } catch (e) {}
+      // página velha guardada no celular: recarrega pelo endereço novo (no máximo 2 vezes, para nunca ficar em loop)
+      if (v && daPagina && /^\d+$/.test(v) && /^\d+$/.test(daPagina) && +v > +daPagina) {
+        const chave = 'qk-recarga-' + v;
+        let tent = 0;
+        try { tent = +(sessionStorage.getItem(chave) || 0); sessionStorage.setItem(chave, tent + 1); } catch (e) { tent = 9; }
+        if (tent < 2) { location.replace(location.pathname + '?v=' + v + '&r=' + Date.now()); return; }
+      }
+      v = v || daPagina || String(Date.now());
       window.VERSAO_JOGO = v;
       const css = document.createElement('link');
       css.rel = 'stylesheet';
