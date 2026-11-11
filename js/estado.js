@@ -5,7 +5,7 @@ const Estado = (() => {
   // Para evoluir do nível N para N+1: cópias e ouro (índice = nível atual)
   const COPIAS = [0, 2, 4, 10, 20, 50, 100, 200, 400];
   const OURO = [0, 5, 20, 50, 150, 400, 1000, 2000, 4000];
-  const XP_NIVEL = (n) => 20 + n * 30;
+  const XP_NIVEL = (n) => 30 + n * 20; // nível 2 com ~2 vitórias; nível 9 com ~40 batalhas
 
   // ---------- Torres (igual Clash Royale) ----------
   // Torre do Rei: o nível acompanha o seu nível de rei (até o máximo).
@@ -17,7 +17,8 @@ const Estado = (() => {
     canhoneiro: { nome: 'Canhoneira', emoji: '💣', rei: 4, desc: 'Tiros lentos e muito fortes. Ótima contra tanques.', vida: 1.05, dano: 165, cadencia: 1.8, alcance: 108 },
     duquesa: { nome: 'Duquesa das Adagas', emoji: '🗡️', rei: 7, desc: 'Joga adagas sem parar. Destrói tropas pequenas, mas tem menos vida.', vida: 0.88, dano: 30, cadencia: 0.28, alcance: 100 },
   };
-  const BASE_TORRE = { princesa: { vida: 1500 }, rei: { vida: 2600, dano: 85, cadencia: 1, alcance: 125 } };
+  // vida parecida com a do Clash: tropa barata leva ~20s para derrubar uma torre, tropa pesada ~8s
+  const BASE_TORRE = { princesa: { vida: 3000 }, rei: { vida: 5000, dano: 90, cadencia: 1, alcance: 125 } };
   const nivelRei = (nv) => Math.max(1, Math.min(NIVEL_MAX, nv || (d ? d.nivel : 1)));
   // configuração das torres de um jogador: { rei, princesa, tropa }
   function minhasTorres() {
@@ -219,7 +220,7 @@ const Estado = (() => {
     d.ouro -= OURO[n];
     d.colecao[id].nivel++;
     d.conquistas.evolucoes++;
-    const niveis = ganharXp(4 + n * 3);
+    const niveis = ganharXp(10 + n * 5); // evoluir carta dá bastante XP, igual ao Clash
     salvar();
     return { niveis };
   }

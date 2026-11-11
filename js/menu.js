@@ -658,7 +658,7 @@
     d().recorde = Math.max(d().recorde, d().trofeus);
     const liberadas = Estado.catalogo().filter((c) => c.trofeus > recordeAntes && c.trofeus <= d().recorde);
     d().ouro += ouro;
-    const xpGanho = vitoria ? 12 : 4;
+    const xpGanho = vitoria ? 30 + r.coroas * 5 : r.resultado === 'empate' ? 15 : 10;
     const xpAntes = d().xp, nivelAntes = d().nivel;
     const niveis = Estado.ganharXp(xpGanho);
     if (vitoria && r.coroas === 3) d().conquistas.tresCoroas++;
