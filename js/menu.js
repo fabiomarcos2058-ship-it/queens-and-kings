@@ -39,7 +39,7 @@
     UI.modal({
       titulo: Estado.BAUS[tipo].nome,
       classe: 'modal-bau',
-      html: `<img class="bau-aberto" data-asset="ui/bau_${tipo}" alt="" />
+      html: `<img class="bau-aberto" data-asset="ui/bau_${Estado.BAUS[tipo].imagem || tipo}" alt="" />
         <div class="ganhos"><span><img class="ic-img" data-asset="ui/moeda" alt="" /> +${fmt(r.ouro)}</span>${r.gemas ? `<span><i class="ic-gema"></i> +${r.gemas}</span>` : ''}</div>
         ${r.novas && r.novas.length ? `<p class="aviso-nova">✨ Você desbloqueou ${r.novas.map((id) => Estado.carta(id).nome).join(' e ')}!</p>` : ''}
         ${listaCartasGanhas(r.cartas, r.novas)}`,
@@ -173,6 +173,10 @@
   // ---------- Batalha (tela inicial) ----------
   function telaBatalha() {
     $('trofeus').textContent = fmt(d().trofeus);
+    const iniciais = d().baus.filter((b) => b && b.tipo === 'inicial').length;
+    $('btn-jogar').classList.toggle('bloqueado', !d().deck.length);
+    $('btn-jogar').textContent = d().deck.length ? 'Jogar' : 'Abra os baús!';
+    $('dica-inicio').textContent = iniciais ? `🎁 Você tem ${iniciais} baú${iniciais > 1 ? 's' : ''} inicia${iniciais > 1 ? 'is' : 'l'} para abrir!` : '';
     $('trofeus-barra').style.width = `${Math.min(100, (d().trofeus / 300) * 100)}%`;
     const prox = Estado.proximaLiberacao();
     $('trofeus-prox').textContent = prox ? `Próxima carta com ${prox.trofeus} troféus · toque para ver` : 'Todas as cartas liberadas! · toque para ver';
@@ -184,7 +188,7 @@
     $('baus').innerHTML = d().baus.map((b, i) => {
       if (!b) return '<div class="slot-bau vazio"><span>Espaço livre</span></div>';
       const resta = Estado.tempoRestante(b);
-      if (b.inicio && resta === 0) return `<button class="slot-bau pronto" data-i="${i}"><img data-asset="ui/bau_${b.tipo}" alt="" /><span>Abrir!</span></button>`;
+      if (b.inicio && resta === 0) return `<button class="slot-bau pronto${b.tipo === 'inicial' ? ' inicial' : ''}" data-i="${i}"><img data-asset="ui/bau_${Estado.BAUS[b.tipo].imagem || b.tipo}" alt="" /><span>Abrir!</span></button>`;
       if (b.inicio) {
         const p = 1 - resta / (Estado.BAUS[b.tipo].segundos * 1000);
         return `<button class="slot-bau abrindo" data-i="${i}"><img data-asset="ui/bau_${b.tipo}" alt="" /><span>${UI.tempo(resta)}</span><div class="tempo-bau"><i style="width:${p * 100}%"></i></div></button>`;
@@ -198,7 +202,7 @@
   function tocarBau(i) {
     const b = d().baus[i];
     const resta = Estado.tempoRestante(b);
-    const abrir = () => { d().baus[i] = null; mostrarBau(b.tipo, Estado.abrirBau(b.tipo)); };
+    const abrir = () => { d().baus[i] = null; mostrarBau(b.tipo, Estado.abrirBau(b.tipo, b)); };
     if (b.inicio && resta === 0) return abrir();
     const custo = Math.max(1, Math.ceil((b.inicio ? resta : Estado.BAUS[b.tipo].segundos * 1000) / 60000));
     const algumAbrindo = d().baus.some((x) => x && x.inicio && Estado.tempoRestante(x) > 0);
@@ -234,7 +238,11 @@
   }
 
   function jogar(modo) {
-    if (!d().deck.length) { UI.toast('Coloque cartas no deck primeiro!'); irPara('cartas'); return; }
+    if (!d().deck.length) {
+      if (d().baus.some((b) => b && b.tipo === 'inicial')) { UI.toast('Abra seus baús iniciais para ganhar cartas! 🎁'); irPara('batalha'); document.getElementById('baus').classList.add('chamando'); setTimeout(() => document.getElementById('baus').classList.remove('chamando'), 1600); }
+      else { UI.toast('Coloque cartas no deck primeiro!'); irPara('cartas'); }
+      return;
+    }
     Batalha.iniciar({ modo, fim: fimDeBatalha });
   }
 
@@ -301,7 +309,8 @@
   // ---------- Loja ----------
   function loja() {
     const ofertas = Estado.ofertasDoDia();
-    $('ofertas').innerHTML = ofertas.map((o) => {
+    $('ofertas').innerHTML = ofertas.length ? '' : '<p class="aviso" style="grid-column:1/-1">Abra seus baús iniciais para liberar as ofertas!</p>';
+    $('ofertas').innerHTML += ofertas.map((o) => {
       const c = Estado.carta(o.id);
       const comprada = d().ofertas.compradas.includes(o.i);
       return `<button class="item-loja${comprada ? ' comprado' : ''}" data-i="${o.i}">${Cartas.html(c, { mini: true })}
@@ -525,4 +534,13 @@
   tudo();
   irPara('batalha');
   setInterval(() => { if (d().baus.some((b) => b && b.inicio)) baus(); }, 1000);
+  if (!d().boasVindas) {
+    d().boasVindas = true; Estado.salvar();
+    UI.modal({
+      titulo: 'Bem-vinda ao Queens and Kings!',
+      html: `<div class="boas-vindas">👑</div><p>Você ainda não tem nenhuma carta. Abra seus <b>4 baús iniciais</b> para ganhar as <b>8 cartas básicas</b> e montar seu primeiro deck!</p>
+        <p class="aviso">Depois, vença batalhas para ganhar troféus e liberar cartas novas.</p>`,
+      botoes: [{ texto: 'Vamos lá!', classe: 'principal' }],
+    });
+  }
 })();

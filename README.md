@@ -7,7 +7,8 @@ Fangame de cartas e torres, sem fins lucrativos. Este jogo é inspirado no gêne
 - **Batalha** contra o computador: elixir, mão com 4 cartas e próxima, tropas que andam, atravessam as pontes e lutam, torres que atiram, feitiços, tempo de 3 minutos (elixir em dobro no último minuto), prorrogação, coroas, vitória e derrota.
 - **Recompensas:** troféus, ouro, XP, nível do jogador (+10 gemas por nível) e baús.
 - **Baús:** destrancar com tempo (um por vez) ou abrir na hora com gemas.
-- **Cartas:** começa com 4 cartas. As outras são liberadas por troféus (veja o caminho tocando nos troféus) e desbloqueadas ao ganhar a primeira cópia em baús ou na loja. Dá pra montar o deck (até 8) e evoluir com cópias + ouro.
+- **Começo:** o jogador começa sem cartas e abre 4 baús iniciais, que dão as 8 cartas básicas.
+- **Cartas:** As outras são liberadas por troféus (veja o caminho tocando nos troféus) e desbloqueadas ao ganhar a primeira cópia em baús ou na loja. Dá pra montar o deck (até 8) e evoluir com cópias + ouro.
 - **Loja:** ofertas do dia (ouro), baús e pacotes de ouro (gemas). Tudo de mentirinha.
 - **Clã:** buscar, entrar e sair (lista de membros simulada).
 - **Eventos:** Desafio do Festival (3 vitórias seguidas), Torneio das Coroas (30 coroas) e batalha com elixir em dobro.

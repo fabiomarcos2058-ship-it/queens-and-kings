@@ -1,31 +1,6 @@
 {
-  "_leia": "rosto = [x, y, raio] do rosto na imagem original (vira o medalhão). arte = [x, y, largura] do recorte da carta (altura = largura x 4/3). Estatísticas: vida, dano, velocidade (pixels/s), alcance (pixels), cadencia (segundos entre ataques), alvo ('tudo' ou 'construcoes'), area (raio de dano em área). Feitiços usam 'feitico': true e 'imagem' própria. 'trofeus' = troféus necessários para a carta começar a aparecer nos baús e na loja (0 = carta inicial).",
+  "_leia": "rosto = [x, y, raio] do rosto na imagem original (vira o medalhão). arte = [x, y, largura] do recorte da carta (altura = largura x 4/3). Estatísticas: vida, dano, velocidade (pixels/s), alcance (pixels), cadencia (segundos entre ataques), alvo ('tudo' ou 'construcoes'), area (raio de dano em área). Feitiços usam 'feitico': true e 'imagem' própria. 'trofeus' = troféus necessários para a carta começar a aparecer nos baús e na loja . 'inicial': true = uma das 8 cartas básicas dos baús iniciais.",
   "cartas": [
-    {
-      "id": "bra",
-      "nome": "Bra",
-      "raridade": "comum",
-      "custo": 2,
-      "tipo": "Rápida",
-      "descricao": "Barata e veloz, perfeita para distrair o inimigo.",
-      "rosto": [
-        360,
-        400,
-        190
-      ],
-      "arte": [
-        40,
-        0,
-        640
-      ],
-      "vida": 320,
-      "dano": 70,
-      "velocidade": 64,
-      "alcance": 16,
-      "cadencia": 0.8,
-      "alvo": "tudo",
-      "trofeus": 0
-    },
     {
       "id": "chichi",
       "nome": "Chichi",
@@ -49,20 +24,34 @@
       "alcance": 16,
       "cadencia": 1.1,
       "alvo": "tudo",
-      "trofeus": 0
+      "trofeus": 0,
+      "inicial": true
     },
     {
-      "id": "chuva",
-      "nome": "Chuva de Pétalas",
+      "id": "bra",
+      "nome": "Bra",
       "raridade": "comum",
-      "custo": 3,
-      "tipo": "Feitiço",
-      "descricao": "Pétalas cortantes que acertam todos numa área grande.",
-      "feitico": true,
-      "imagem": "chuva.svg",
-      "dano": 150,
-      "area": 60,
-      "trofeus": 0
+      "custo": 2,
+      "tipo": "Rápida",
+      "descricao": "Barata e veloz, perfeita para distrair o inimigo.",
+      "rosto": [
+        360,
+        400,
+        190
+      ],
+      "arte": [
+        40,
+        0,
+        640
+      ],
+      "vida": 320,
+      "dano": 70,
+      "velocidade": 64,
+      "alcance": 16,
+      "cadencia": 0.8,
+      "alvo": "tudo",
+      "trofeus": 0,
+      "inicial": true
     },
     {
       "id": "mai",
@@ -87,32 +76,22 @@
       "alcance": 115,
       "cadencia": 0.9,
       "alvo": "tudo",
-      "trofeus": 0
+      "trofeus": 0,
+      "inicial": true
     },
     {
-      "id": "itsuki",
-      "nome": "Itsuki",
-      "raridade": "rara",
-      "custo": 4,
-      "tipo": "Tanque",
-      "descricao": "Aguenta muito dano e vai direto nas torres.",
-      "rosto": [
-        368,
-        440,
-        215
-      ],
-      "arte": [
-        58,
-        20,
-        620
-      ],
-      "vida": 1700,
-      "dano": 95,
-      "velocidade": 34,
-      "alcance": 16,
-      "cadencia": 1.4,
-      "alvo": "construcoes",
-      "trofeus": 30
+      "id": "chuva",
+      "nome": "Chuva de Pétalas",
+      "raridade": "comum",
+      "custo": 3,
+      "tipo": "Feitiço",
+      "descricao": "Pétalas cortantes que acertam todos numa área grande.",
+      "feitico": true,
+      "imagem": "chuva.svg",
+      "dano": 150,
+      "area": 60,
+      "trofeus": 0,
+      "inicial": true
     },
     {
       "id": "shizuku",
@@ -137,20 +116,34 @@
       "alcance": 16,
       "cadencia": 1.2,
       "alvo": "tudo",
-      "trofeus": 30
+      "trofeus": 0,
+      "inicial": true
     },
     {
-      "id": "lanterna",
-      "nome": "Lanterna Explosiva",
+      "id": "itsuki",
+      "nome": "Itsuki",
       "raridade": "rara",
       "custo": 4,
-      "tipo": "Feitiço",
-      "descricao": "Uma lanterna em chamas que explode com muito dano.",
-      "feitico": true,
-      "imagem": "lanterna.svg",
-      "dano": 360,
-      "area": 42,
-      "trofeus": 80
+      "tipo": "Tanque",
+      "descricao": "Aguenta muito dano e vai direto nas torres.",
+      "rosto": [
+        368,
+        440,
+        215
+      ],
+      "arte": [
+        58,
+        20,
+        620
+      ],
+      "vida": 1700,
+      "dano": 95,
+      "velocidade": 34,
+      "alcance": 16,
+      "cadencia": 1.4,
+      "alvo": "construcoes",
+      "trofeus": 0,
+      "inicial": true
     },
     {
       "id": "rukia",
@@ -176,7 +169,22 @@
       "cadencia": 1.6,
       "alvo": "tudo",
       "area": 38,
-      "trofeus": 80
+      "trofeus": 0,
+      "inicial": true
+    },
+    {
+      "id": "lanterna",
+      "nome": "Lanterna Explosiva",
+      "raridade": "rara",
+      "custo": 4,
+      "tipo": "Feitiço",
+      "descricao": "Uma lanterna em chamas que explode com muito dano.",
+      "feitico": true,
+      "imagem": "lanterna.svg",
+      "dano": 360,
+      "area": 42,
+      "trofeus": 0,
+      "inicial": true
     },
     {
       "id": "hinata",
@@ -201,7 +209,7 @@
       "alcance": 16,
       "cadencia": 0.9,
       "alvo": "tudo",
-      "trofeus": 140
+      "trofeus": 60
     },
     {
       "id": "akame",
@@ -226,7 +234,7 @@
       "alcance": 18,
       "cadencia": 1.1,
       "alvo": "tudo",
-      "trofeus": 210
+      "trofeus": 140
     },
     {
       "id": "bulma",
@@ -252,7 +260,7 @@
       "cadencia": 1.8,
       "alvo": "tudo",
       "area": 40,
-      "trofeus": 300
+      "trofeus": 250
     }
   ]
 }

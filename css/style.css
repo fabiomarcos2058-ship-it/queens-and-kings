@@ -558,3 +558,13 @@ button.item-loja:active, button.slot-bau:active, .slot-carta:active { transform:
 .fantasma img { width: 100%; height: 100%; border-radius: 50%; display: block; }
 .fantasma.feitico-alvo { aspect-ratio: 1; height: auto; transform: translate(-50%, -50%); background: #ED93B155; border: 2px dashed #fff; box-shadow: none; }
 .fantasma.fora { opacity: 0.5; filter: grayscale(1); }
+
+/* Começo sem cartas */
+.btn-jogar.bloqueado { filter: grayscale(0.6); font-size: 22px; }
+.dica-inicio { text-align: center; font-weight: 600; color: #FAC775; min-height: 1em; margin: -6px 0 8px; font-size: 14px; }
+.dica-inicio:empty { display: none; }
+.slot-bau.inicial { border-color: #FAC775; }
+.slot-bau.inicial img { animation: pulo 0.9s ease-in-out infinite; }
+.baus.chamando { animation: chamando 0.4s ease-in-out 3; }
+@keyframes chamando { 50% { transform: scale(1.06); } }
+.boas-vindas { font-size: 56px; animation: pulo 1.4s ease-in-out infinite; }
