@@ -1,5 +1,8 @@
 # Créditos
 
-Todos os desenhos atuais (`assets/**/*.svg`) foram criados do zero para este jogo.
+Os desenhos em `assets/**/*.svg` foram criados do zero para este jogo.
 
-Quando o bot adicionar imagens de outras fontes, cada uma deve ser listada aqui com a origem e a licença.
+Imagens geradas pelo bot a partir de modelos 3D com licença CC0:
+
+| Imagem | Modelo | Pacote | Autor | Licença |
+| --- | --- | --- | --- | --- |
