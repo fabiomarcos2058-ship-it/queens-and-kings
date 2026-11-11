@@ -102,10 +102,22 @@ def renderizar(modelo, saida, girar=0):
         check=True, stdout=subprocess.DEVNULL)
 
 
+def pintar_de_vermelho(img):
+    # Troca os tons azuis do modelo (telhados) por vermelho
+    alfa = img.getchannel('A')
+    h, sat, v = img.convert('RGB').convert('HSV').split()
+    h = h.point(lambda x: 250 if 120 <= x <= 190 else x)  # faixa do azul -> vermelho
+    nova = Image.merge('HSV', (h, sat, v)).convert('RGB')
+    nova.putalpha(alfa)
+    return nova
+
+
 def montar(foto, destino, tamanho, time=None):
     w, h = tamanho[0] * ESCALA, tamanho[1] * ESCALA
     img = Image.open(foto).convert('RGBA')
     img = img.crop(img.getchannel('A').getbbox())
+    if time == 'vermelho':
+        img = pintar_de_vermelho(img)
     img.thumbnail((w, int(h * (0.86 if time else 1))), Image.LANCZOS)
     tela = Image.new('RGBA', (w, h), (0, 0, 0, 0))
     if time:  # base colorida do time embaixo da torre

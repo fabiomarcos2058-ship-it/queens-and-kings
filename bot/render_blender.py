@@ -77,13 +77,13 @@ cena.camera = cam
 
 # Luz do sol vindo de cima à esquerda + céu claro
 sol = bpy.data.objects.new('sol', bpy.data.lights.new('sol', 'SUN'))
-sol.data.energy = 3.0
+sol.data.energy = 2.5
 sol.rotation_euler = (math.radians(45), 0, math.radians(-35))
 cena.collection.objects.link(sol)
 mundo = bpy.data.worlds.new('mundo')
 mundo.use_nodes = True
 mundo.node_tree.nodes['Background'].inputs[0].default_value = (1, 1, 1, 1)
-mundo.node_tree.nodes['Background'].inputs[1].default_value = 0.9
+mundo.node_tree.nodes['Background'].inputs[1].default_value = 0.55
 cena.world = mundo
 
 r = cena.render
@@ -91,6 +91,8 @@ r.engine = 'CYCLES'
 cena.cycles.device = 'CPU'
 cena.cycles.samples = 48
 r.film_transparent = True
+cena.view_settings.view_transform = 'Standard'  # cores mais vivas
+cena.view_settings.look = 'None'
 r.resolution_x = r.resolution_y = res
 r.image_settings.file_format = 'PNG'
 r.image_settings.color_mode = 'RGBA'
