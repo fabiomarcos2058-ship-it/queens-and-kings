@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Lilita+One&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/style.css?v=1794404172" />
+  <link rel="stylesheet" href="css/style.css?v=1794404595" />
 </head>
 <body>
   <div id="app">
@@ -113,12 +113,24 @@
     </div>
   </div>
 
-  <script src="js/assets.js?v=1794404172"></script>
-  <script src="js/estado.js?v=1794404172"></script>
-  <script src="js/ui.js?v=1794404172"></script>
-  <script src="js/arena.js?v=1794404172"></script>
-  <script src="js/cartas.js?v=1794404172"></script>
-  <script src="js/batalha.js?v=1794404172"></script>
-  <script src="js/menu.js?v=1794404172"></script>
+  <!-- Carrega sempre a versão mais nova (evita o celular misturar arquivos antigos e novos) -->
+  <script>
+    (async () => {
+      let v = Date.now();
+      try { v = (await (await fetch('versao.txt', { cache: 'no-store' })).text()).trim() || v; } catch (e) {}
+      const css = document.createElement('link');
+      css.rel = 'stylesheet';
+      css.href = 'css/style.css?v=' + v;
+      document.head.appendChild(css);
+      for (const f of ['assets', 'estado', 'ui', 'arena', 'cartas', 'batalha', 'menu']) {
+        await new Promise((ok) => {
+          const el = document.createElement('script');
+          el.src = 'js/' + f + '.js?v=' + v;
+          el.onload = el.onerror = ok;
+          document.body.appendChild(el);
+        });
+      }
+    })();
+  </script>
 </body>
 </html>

@@ -116,18 +116,6 @@
         16
       ]
     },
-    "arena/ponte": {
-      "pacote": "nature-kit",
-      "procurar": [
-        "bridge_wood",
-        "bridge"
-      ],
-      "tamanho": [
-        60,
-        92
-      ],
-      "girar": 90
-    },
     "ui/bau_madeira": {
       "pacote": "pirate-kit",
       "procurar": [

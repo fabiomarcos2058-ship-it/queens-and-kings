@@ -28,8 +28,6 @@ const Arena = (() => {
     ['arena/arvore', 38, 182, 56, 60],
     ['arena/arvore', 322, 182, 56, 60],
     ['arena/arvore', 180, 205, 56, 60],
-    ['arena/varal_lanternas', 180, 252, 130, 46],
-    ['arena/varal_lanternas', 180, 372, 130, 46],
     ['arena/arvore', 180, 412, 56, 60],
     ['arena/arvore', 38, 436, 56, 60],
     ['arena/arvore', 322, 436, 56, 60],

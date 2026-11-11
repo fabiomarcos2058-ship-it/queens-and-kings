@@ -88,12 +88,7 @@ const Batalha = (() => {
     const prox = a.fila[4] ? Estado.carta(a.fila[4]) : null;
     document.querySelector('.proxima').innerHTML = `<small>Próxima</small>${prox ? `<div class="mini-prox">${Cartas.html(prox, { mini: true })}</div>` : '<div class="carta-vazia mini">?</div>'}`;
     $('mao').querySelectorAll('.slot-mao').forEach((el) => {
-      el.onclick = () => {
-        const i = +el.dataset.i;
-        s.selecionada = s.selecionada === i ? null : i;
-        s.zona.classList.toggle('ativa', s.selecionada !== null && !Estado.carta(s.azul.fila[i]).feitico);
-        desenharMao();
-      };
+      el.onpointerdown = (ev) => comecarArrastar(ev, +el.dataset.i, el);
     });
   }
 
@@ -108,6 +103,55 @@ const Batalha = (() => {
       const c = Estado.carta(s.azul.fila[+el.dataset.i]);
       el.classList.toggle('caro', c.custo > e);
     });
+  }
+
+  // Arrastar a carta até a arena (ou tocar na carta e depois na arena)
+  function comecarArrastar(ev, i, el) {
+    if (s.acabou) return;
+    ev.preventDefault();
+    const c = Estado.carta(s.azul.fila[i]);
+    const x0 = ev.clientX, y0 = ev.clientY;
+    let fantasma = null;
+    const mover = (e) => {
+      if (!fantasma && Math.hypot(e.clientX - x0, e.clientY - y0) > 12) {
+        fantasma = document.createElement('div');
+        fantasma.className = `fantasma ${c.feitico ? 'feitico-alvo' : ''}`;
+        fantasma.innerHTML = c.feitico ? '' : `<img src="assets/cartas/${c.id}_medalhao.png" alt="" />`;
+        if (c.feitico) fantasma.style.width = `${(c.area * 2 / W) * s.arena.getBoundingClientRect().width}px`;
+        document.getElementById('app').appendChild(fantasma);
+        s.selecionada = i;
+        s.zona.classList.toggle('ativa', !c.feitico);
+        el.classList.add('arrastando');
+      }
+      if (fantasma) {
+        const app = document.getElementById('app').getBoundingClientRect();
+        fantasma.style.left = `${e.clientX - app.left}px`;
+        fantasma.style.top = `${e.clientY - app.top}px`;
+        const r = s.arena.getBoundingClientRect();
+        const dentro = e.clientX > r.left && e.clientX < r.right && e.clientY > r.top && e.clientY < r.bottom;
+        fantasma.classList.toggle('fora', !dentro);
+      }
+    };
+    const soltar = (e) => {
+      document.removeEventListener('pointermove', mover);
+      document.removeEventListener('pointerup', soltar);
+      document.removeEventListener('pointercancel', soltar);
+      el.classList.remove('arrastando');
+      if (fantasma) {
+        fantasma.remove();
+        const r = s.arena.getBoundingClientRect();
+        if (e.clientX > r.left && e.clientX < r.right && e.clientY > r.top && e.clientY < r.bottom) tocarArena(e);
+        else { s.selecionada = null; s.zona.classList.remove('ativa'); desenharMao(); }
+      } else {
+        // foi só um toque: seleciona/desseleciona
+        s.selecionada = s.selecionada === i ? null : i;
+        s.zona.classList.toggle('ativa', s.selecionada !== null && !c.feitico);
+        desenharMao();
+      }
+    };
+    document.addEventListener('pointermove', mover);
+    document.addEventListener('pointerup', soltar);
+    document.addEventListener('pointercancel', soltar);
   }
 
   function tocarArena(ev) {
@@ -456,5 +500,5 @@ const Batalha = (() => {
     s = null;
   }
 
-  return { iniciar, fechar };
+  return { iniciar, fechar, _estado: () => s };
 })();
