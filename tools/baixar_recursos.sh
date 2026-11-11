@@ -21,16 +21,7 @@ if [ -f tools/recursos/texturas.txt ]; then
   done < tools/recursos/texturas.txt
 fi
 
-# 3) pacotes do Kenney
-for pacote in particle-pack smoke-particles; do
-  [ -d "assets/efeitos/$pacote" ] && continue
-  zip=$(curl -fsSL "https://kenney.nl/assets/$pacote" | grep -oE 'https://kenney.nl/media/pages/assets/[^"]+\.zip' | head -1)
-  if [ -n "$zip" ]; then
-    curl -fsSL "$zip" -o /tmp/k.zip && mkdir -p "/tmp/k/$pacote" && unzip -qo /tmp/k.zip -d "/tmp/k/$pacote" && \
-      mkdir -p "assets/efeitos/$pacote" && find "/tmp/k/$pacote" -iname '*.png' -path '*PNG*' -exec cp {} "assets/efeitos/$pacote/" \; && echo "ok kenney $pacote"
-    [ -n "$(ls -A assets/efeitos/$pacote 2>/dev/null)" ] || find "/tmp/k/$pacote" -iname '*.png' -exec cp {} "assets/efeitos/$pacote/" \;
-  else echo "sem zip $pacote"; fi
-done
+# 3) efeitos: desenhados no próprio jogo (o site do Kenney não aceita downloads automáticos)
 
 # 4) ícones do game-icons.net (só os que têm a ver com ataques)
 if [ ! -f assets/icones/LISTA.txt ]; then
