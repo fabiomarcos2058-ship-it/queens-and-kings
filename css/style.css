@@ -255,3 +255,13 @@ button { font-family: inherit; cursor: pointer; border: none; }
 /* Mão da batalha */
 .cartas-mao .carta, .cartas-mao .carta-vazia { width: 100%; aspect-ratio: 3 / 4; }
 .cabecalho-colecao { margin-top: 14px; }
+
+/* Trava o tamanho das cartas em qualquer navegador:
+   a imagem fica "solta" dentro da carta e não consegue mais esticar ela */
+.carta { overflow: hidden; min-height: 0; height: auto; }
+.carta img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.carta::after { content: ''; display: block; padding-top: 133.33%; }
+.slot-carta .carta, .cartas-mao .carta, .item-loja .carta { aspect-ratio: auto; }
+.tropa-medalhao { overflow: visible; }
+.tropa-medalhao img { position: absolute; inset: 0; }
+.tropa-medalhao b { z-index: 1; }
