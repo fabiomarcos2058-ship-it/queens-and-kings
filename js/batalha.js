@@ -341,7 +341,7 @@ const Batalha = (() => {
     particulas(t.x, t.y, '#B4B2A9', 16, 50);
     particulas(t.x, t.y, '#FAC775', 10, 36);
     tremer(true);
-    coroaVoando(t);
+    try { coroaVoando(t); } catch (e) { console.warn('efeito da coroa:', e); }
     s.ent = s.ent.filter((x) => x !== t);
     const vencedor = t.time === 'azul' ? 'vermelho' : 'azul';
     atualizarZona();
@@ -360,9 +360,13 @@ const Batalha = (() => {
     if (s.prorrogacao) terminar();
   }
 
+  const placar = (time) => document.querySelector(time === 'azul' ? '.placar .coroa.azul' : '.placar .coroa.vermelha');
+
   function coroaVoando(t) {
     const vencedor = t.time === 'azul' ? 'vermelho' : 'azul';
-    const alvo = document.querySelector(`.coroa.${vencedor}`).getBoundingClientRect();
+    const elPlacar = placar(vencedor);
+    if (!elPlacar) return;
+    const alvo = elPlacar.getBoundingClientRect();
     const r = s.arena.getBoundingClientRect();
     const app = document.getElementById('app').getBoundingClientRect();
     const el = document.createElement('div');
@@ -376,7 +380,7 @@ const Batalha = (() => {
       el.style.top = `${alvo.top - app.top + alvo.height / 2}px`;
       el.classList.add('indo');
     }));
-    setTimeout(() => { el.remove(); const c = document.querySelector(`.coroa.${vencedor}`); c.classList.remove('pulou'); void c.offsetWidth; c.classList.add('pulou'); }, 950);
+    setTimeout(() => { el.remove(); const c = placar(vencedor); if (c) { c.classList.remove('pulou'); void c.offsetWidth; c.classList.add('pulou'); } }, 950);
   }
 
   function atualizarPlacar() {
@@ -515,7 +519,10 @@ const Batalha = (() => {
     if (!s || s.acabou) return;
     const dt = Math.min(0.05, (agora - s.ultimo) / 1000);
     s.ultimo = agora;
-    if (!s.pausa) for (let i = 0; i < VEL; i++) { if (s.acabou) break; passo(dt); }
+    if (!s.pausa) for (let i = 0; i < VEL; i++) {
+      if (s.acabou) break;
+      try { passo(dt); } catch (e) { console.error('Erro na batalha (o jogo continua):', e); }
+    }
     requestAnimationFrame(loop);
   }
 
