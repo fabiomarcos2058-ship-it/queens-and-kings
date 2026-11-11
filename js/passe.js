@@ -45,7 +45,8 @@ const Passe = (() => {
 
   // Passes de presente da criadora: { uid: ['AAAA-MM', ...] } (temporadas em que a conta ganha o Ultra)
   const PRESENTES_ULTRA = {
-    ZwrffaFMcidTzZAGCMJNXOtuuOh2: ['2026-11'],
+    ZwrffaFMcidTzZAGCMJNXOtuuOh2: ['2026-11'], // Artx
+    EwnFPrCPFUMawnc6dttsQQ98yII2: ['2026-11'], // Enzo
   };
 
   function dados() {
