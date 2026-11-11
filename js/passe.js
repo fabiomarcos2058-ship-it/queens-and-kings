@@ -1,31 +1,38 @@
-// Passe da temporada: 30 níveis por mês, três trilhas (Free, Plus, Ultra).
+// Passe da temporada: 60 níveis por mês, três trilhas (Free, Plus, Ultra).
 // Plus e Ultra são comprados com gemas (caros de propósito).
 const Passe = (() => {
-  const NIVEIS = 30;
-  const PONTOS_NIVEL = 60;
+  const NIVEIS = 60;
+  const PONTOS_NIVEL = 55;
   const PRECO = { plus: 600, ultra: 1500 }; // Ultra já inclui o Plus
   const temporadaAtual = () => new Date().toISOString().slice(0, 7); // AAAA-MM
 
-  // recompensa de cada nível em cada trilha
+  // recompensa de cada nível em cada trilha (melhorada)
   function recompensa(trilha, n) {
     if (trilha === 'free') {
-      if (n % 10 === 0) return { tipo: 'gemas', qtd: 15 };
-      if (n % 5 === 0) return { tipo: 'bau', bau: n >= 20 ? 'prata' : 'madeira' };
-      return { tipo: 'ouro', qtd: 40 + n * 5 };
+      if (n === NIVEIS) return { tipo: 'carta', raridade: 'epica', qtd: 2 };
+      if (n % 15 === 0) return { tipo: 'gemas', qtd: 40 };
+      if (n % 10 === 0) return { tipo: 'bau', bau: n >= 40 ? 'ouro' : 'prata' };
+      if (n % 5 === 0) return { tipo: 'bau', bau: 'madeira' };
+      if (n % 3 === 0) return { tipo: 'ouro', qtd: 80 + n * 6 };
+      return { tipo: 'ouro', qtd: 50 + n * 4 };
     }
     if (trilha === 'plus') {
+      if (n === NIVEIS) return { tipo: 'carta', raridade: 'lendaria', qtd: 1 };
+      if (n % 12 === 0) return { tipo: 'carta', raridade: 'epica', qtd: 3 };
       if (n % 10 === 0) return { tipo: 'bau', bau: 'ouro' };
-      if (n % 3 === 0) return { tipo: 'bau', bau: 'prata' };
-      if (n % 5 === 0) return { tipo: 'gemas', qtd: 30 };
-      return { tipo: 'ouro', qtd: 120 + n * 10 };
+      if (n % 6 === 0) return { tipo: 'gemas', qtd: 50 };
+      if (n % 4 === 0) return { tipo: 'bau', bau: 'prata' };
+      if (n % 3 === 0) return { tipo: 'ouro', qtd: 220 + n * 12 };
+      return { tipo: 'ouro', qtd: 150 + n * 8 };
     }
     // ultra
-    if (n === NIVEIS) return { tipo: 'carta', raridade: 'lendaria', qtd: 2 };
-    if (n % 10 === 0) return { tipo: 'carta', raridade: 'lendaria', qtd: 1 };
-    if (n % 5 === 0) return { tipo: 'carta', raridade: 'epica', qtd: 4 };
-    if (n % 4 === 0) return { tipo: 'bau', bau: 'ouro' };
-    if (n % 2 === 0) return { tipo: 'ouro', qtd: 400 + n * 20 };
-    return { tipo: 'gemas', qtd: 20 };
+    if (n === NIVEIS) return { tipo: 'carta', raridade: 'lendaria', qtd: 3 };
+    if (n % 15 === 0) return { tipo: 'carta', raridade: 'lendaria', qtd: 1 };
+    if (n % 10 === 0) return { tipo: 'carta', raridade: 'epica', qtd: 5 };
+    if (n % 7 === 0) return { tipo: 'bau', bau: 'ouro' };
+    if (n % 5 === 0) return { tipo: 'gemas', qtd: 60 };
+    if (n % 3 === 0) return { tipo: 'ouro', qtd: 500 + n * 25 };
+    return { tipo: 'gemas', qtd: 25 + Math.floor(n / 4) };
   }
 
   const icone = (r) => ({ ouro: '🪙', gemas: '💎', bau: '🎁', carta: '🃏' }[r.tipo]);
