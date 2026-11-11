@@ -1,6 +1,8 @@
 // Mod menu do criador. Só aparece para os IDs de jogador listados em CRIADORES.
 // (O ID aparece no perfil de quem está logado numa conta.)
 const CRIADORES = ['TxtfHnU2BXbcWpHkOSlDZQRpYNw1'];
+// Contas que enfrentam o bot "apelão" (só as cartas mais fortes do jogo)
+const BOT_APELAO = ['ZwrffaFMcidTzZAGCMJNXOtuuOh2', 'EwnFPrCPFUMawnc6dttsQQ98yII2'];
 
 const Mod = (() => {
   const flags = { elixirInfinito: false, torresInvenciveis: false, danoX5: false, iaParada: false, vel: 1 };
@@ -94,5 +96,14 @@ const Mod = (() => {
     }
   }
 
-  return { flag, vel, abrir, mostrarBotao, ehCriador };
+  // deck do bot apelão: as 8 cartas mais fortes (lendárias e épicas primeiro, depois as que causam mais dano)
+  function deckApelao() {
+    if (!Conta.uid() || !BOT_APELAO.includes(Conta.uid())) return null;
+    const peso = { lendaria: 4, epica: 3, rara: 2, comum: 1 };
+    return [...Estado.catalogo()]
+      .sort((a, b) => peso[b.raridade] - peso[a.raridade] || (b.dano || 0) - (a.dano || 0))
+      .slice(0, 8).map((c) => c.id);
+  }
+
+  return { flag, vel, abrir, mostrarBotao, ehCriador, deckApelao };
 })();
