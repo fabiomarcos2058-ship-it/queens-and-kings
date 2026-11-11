@@ -717,3 +717,22 @@ button.item-loja:active, button.slot-bau:active, .slot-carta:active { transform:
 .escolha-progresso div { background: #1d2350; border-radius: 10px; padding: 8px; font-size: 13px; text-align: left; line-height: 1.5; }
 .escolha-progresso small { display: block; color: #FAC775; font-weight: 700; }
 .perfil-conta .btn-google b { color: #378ADD; }
+
+/* ================= Clãs de verdade ================= */
+.cla-vazio { display: flex; flex-direction: column; gap: 10px; text-align: center; background: #1d2350; border-radius: 16px; padding: 18px 14px; }
+.cla-icone { font-size: 48px; }
+.cla-vazio p { margin: 0; }
+#criar-cla { width: 100%; margin-bottom: 10px; }
+.cla-info small, .cla-topo small { font-size: 11px; color: #CECBF6; }
+.cla .btn-peq:disabled { filter: grayscale(1); }
+.escudo { color: #2C2C2A; text-shadow: 0 1px 0 #fff8; }
+.cla-abas { margin: 12px 0 8px; }
+.tag-lider { background: #FAC775; color: #412402; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 6px; }
+.btn-expulsar { background: #E24B4A; color: #fff; width: 24px; height: 24px; border-radius: 6px; font-size: 12px; }
+.chat { height: 46vh; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; background: #1d2350; border-radius: 12px; padding: 10px; }
+.msg { align-self: flex-start; max-width: 80%; background: #3b4596; border-radius: 12px 12px 12px 4px; padding: 6px 10px; display: flex; flex-direction: column; animation: pop 0.2s; }
+.msg.minha { align-self: flex-end; background: #534AB7; border-radius: 12px 12px 4px 12px; }
+.msg small { font-size: 11px; color: #FAC775; font-weight: 700; }
+.msg span { font-size: 14px; overflow-wrap: anywhere; }
+.chat-enviar { display: flex; gap: 6px; margin-top: 8px; }
+.chat-enviar input { flex: 1; min-width: 0; padding: 10px 12px; border-radius: 10px; border: 2px solid #141a40; background: #1d2350; color: #fff; font-family: inherit; font-size: 15px; }

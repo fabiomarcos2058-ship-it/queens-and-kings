@@ -5,5 +5,33 @@ service cloud.firestore {
     match /jogadores/{uid} {
       allow read, write: if request.auth != null && request.auth.uid == uid;
     }
+
+    // Clãs: qualquer pessoa logada vê; cada um só mexe na própria entrada; o líder pode remover membros
+    match /clas/{claId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null
+        && request.resource.data.lider == request.auth.uid
+        && request.resource.data.membros.keys().hasOnly([request.auth.uid])
+        && request.resource.data.nome is string
+        && request.resource.data.nome.size() >= 3 && request.resource.data.nome.size() <= 20;
+      allow update: if request.auth != null && (
+        resource.data.lider == request.auth.uid
+        || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['membros'])
+            && request.resource.data.membros.diff(resource.data.membros).affectedKeys().hasOnly([request.auth.uid])
+            && request.resource.data.membros.size() <= 50)
+      );
+      allow delete: if request.auth != null && resource.data.membros.keys().hasOnly([request.auth.uid]);
+
+      // Chat: só membros leem e escrevem; mensagens de até 200 letras
+      match /mensagens/{msg} {
+        allow read: if request.auth != null
+          && request.auth.uid in get(/databases/$(database)/documents/clas/$(claId)).data.membros;
+        allow create: if request.auth != null
+          && request.resource.data.uid == request.auth.uid
+          && request.auth.uid in get(/databases/$(database)/documents/clas/$(claId)).data.membros
+          && request.resource.data.texto is string
+          && request.resource.data.texto.size() > 0 && request.resource.data.texto.size() <= 200;
+      }
+    }
   }
 }

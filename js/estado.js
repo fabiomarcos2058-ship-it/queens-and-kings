@@ -44,6 +44,7 @@ const Estado = (() => {
     const base = novo();
     for (const k in base) if (d[k] === undefined) d[k] = base[k];
     for (const k in base.conquistas) if (d.conquistas[k] === undefined) d.conquistas[k] = 0;
+    if (typeof d.cla === 'string') d.cla = null; // clãs antigos (simulados) não existem mais
     // toda carta do catálogo entra na coleção
     for (const c of catalogo) if (!d.colecao[c.id]) d.colecao[c.id] = { nivel: 1, copias: 0, tem: false };
     if (!d.id) d.id = Math.random().toString(36).slice(2) + Date.now().toString(36);

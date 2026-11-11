@@ -77,7 +77,7 @@
       ['⬆️', 'Treinadora', 'Evolua cartas 5 vezes', c.evolucoes, 5],
       ['📚', 'Colecionadora', 'Tenha cópias de todas as cartas', temCartas, total],
       ['🌸', 'Rumo à arena 2', 'Chegue a 300 troféus', d().recorde, 300],
-      ['🛡️', 'Em equipe', 'Entre num clã', d().cla ? 1 : 0, 1],
+      ['🛡️', 'Em equipe', 'Entre num clã', d().cla && d().cla.id ? 1 : 0, 1],
     ];
   }
 
@@ -95,7 +95,7 @@
             <div class="perfil-nome-linha"><input id="campo-nome" maxlength="16" value="${d().nome.replace(/"/g, '&quot;')}" aria-label="Nome" /><span>✏️</span></div>
             <div class="perfil-nivel"><div class="nivel" data-n="${d().nivel}"></div>
               <div class="perfil-xp"><i style="width:${(d().xp / xpMax) * 100}%"></i><small>${d().xp}/${xpMax} XP</small></div></div>
-            ${d().cla ? `<div class="perfil-cla">🛡️ ${d().cla}</div>` : ''}
+            ${d().cla && d().cla.id ? `<div class="perfil-cla">🛡️ ${esc(d().cla.nome)}</div>` : ''}
           </div>
         </div>
         <div class="seletor oculto" id="seletor-avatar">
@@ -487,35 +487,121 @@
   }
 
   // ---------- Clã ----------
-  const CLAS = [
-    { nome: 'Coroas de Sakura', letra: 'S', cor: 'e1', membros: 32, trofeus: 1200 },
-    { nome: 'Torre do Sino', letra: 'T', cor: 'e2', membros: 18, trofeus: 800 },
-    { nome: 'Lanternas Vermelhas', letra: 'L', cor: 'e3', membros: 45, trofeus: 2100 },
-    { nome: 'Rio das Pétalas', letra: 'R', cor: 'e4', membros: 9, trofeus: 300 },
-  ];
-  const NOMES = ['Hana', 'Kaito', 'Yumi', 'Ren', 'Sora', 'Mika', 'Daichi', 'Aoi', 'Haru', 'Nori', 'Yuki', 'Kenji'];
   let busca = '';
-  function cla() {
-    const c = CLAS.find((x) => x.nome === d().cla);
-    if (c) {
-      const membros = [{ n: d().nome, t: d().trofeus, voce: true }, ...NOMES.slice(0, 8).map((n, i) => ({ n, t: Math.max(0, c.trofeus / 20 + 300 - i * 40) }))]
-        .sort((a, b) => b.t - a.t);
-      $('cla-conteudo').innerHTML = `<div class="cla-topo"><div class="escudo ${c.cor}">${c.letra}</div><div><b>${c.nome}</b><span>${c.membros + 1}/50 membros</span></div>
-        <button class="btn-peq perigo" id="sair-cla">Sair</button></div>
-        <h2 class="titulo-secao"><span>Membros</span></h2>
-        <div class="lista-membros">${membros.map((m, i) => `<div class="membro${m.voce ? ' voce' : ''}"><span class="pos">${i + 1}</span><b>${m.n}${m.voce ? ' (você)' : ''}</b><span><i class="ic-trofeu"></i> ${fmt(Math.round(m.t))}</span></div>`).join('')}</div>
-        <p class="aviso">Chat e doação de cartas chegam com o modo online.</p>`;
-      $('sair-cla').onclick = () => UI.modal({ titulo: 'Sair do clã?', html: `<p>Você vai sair de ${c.nome}.</p>`,
-        botoes: [{ texto: 'Ficar', classe: 'secundario' }, { texto: 'Sair', classe: 'perigo', acao: () => { d().cla = null; Estado.salvar(); cla(); } }] });
+  let abaCla = 'chat';
+  const esc = (t) => String(t).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const escudo = (c) => `<div class="escudo" style="background:${c.cor}">${esc(c.letra || '?')}</div>`;
+  const erroNuvem = (e) => (String(e && (e.code || e.message)).includes('permission')
+    ? 'O Firebase recusou o acesso. Confira se as regras novas foram publicadas.'
+    : `Não foi possível carregar (${esc((e && (e.code || e.message)) || 'erro')}).`);
+
+  async function cla() {
+    const caixa = $('cla-conteudo');
+    Cla.pararOuvir();
+    if (!Conta.logado()) {
+      caixa.innerHTML = `<h2 class="titulo-secao"><span>Clãs</span></h2>
+        <div class="cla-vazio"><div class="cla-icone">🛡️</div><p>Clãs são de <b>jogadores de verdade</b>: dá pra conversar e ver os troféus de todo mundo.</p>
+        <p class="aviso">Para criar ou entrar num clã, você precisa de uma conta.</p>
+        <button class="btn-modal btn-google" id="cla-google"><b>G</b> Entrar com Google</button>
+        <button class="btn-modal secundario" id="cla-conta">Criar conta ou entrar com e-mail</button></div>`;
+      $('cla-google').onclick = async () => { if (await Conta.salvarComGoogle()) tudo(); };
+      $('cla-conta').onclick = async () => { await Conta.tela({ podeFechar: true }); tudo(); };
       return;
     }
-    const lista = CLAS.filter((x) => x.nome.toLowerCase().includes(busca.toLowerCase()));
-    $('cla-conteudo').innerHTML = `<h2 class="titulo-secao"><span>Clãs</span></h2>
-      <input class="busca" id="busca-cla" type="text" placeholder="Buscar clã" value="${busca}" />
-      <div class="lista-clas">${lista.map((x) => `<div class="cla"><div class="escudo ${x.cor}">${x.letra}</div><div class="cla-info"><b>${x.nome}</b><span>${x.membros}/50 membros · ${fmt(x.trofeus)} troféus</span></div><button class="btn-peq" data-n="${x.nome}">Entrar</button></div>`).join('') || '<p class="aviso">Nenhum clã com esse nome.</p>'}</div>`;
+    if (d().cla && d().cla.id) return meuCla(caixa);
+
+    caixa.innerHTML = `<h2 class="titulo-secao"><span>Clãs</span></h2>
+      <button class="btn-modal principal" id="criar-cla">＋ Criar meu clã</button>
+      <input class="busca" id="busca-cla" type="text" placeholder="Buscar clã" value="${esc(busca)}" />
+      <div class="lista-clas" id="lista-clas"><p class="aviso">Carregando clãs…</p></div>`;
+    $('criar-cla').onclick = criarCla;
+    let todos = [];
+    const desenhar = () => {
+      const lista = todos.filter((x) => x.nome.toLowerCase().includes(busca.toLowerCase()));
+      $('lista-clas').innerHTML = lista.map((x) => {
+        const n = Object.keys(x.membros || {}).length;
+        const tr = Object.values(x.membros || {}).reduce((a, m) => a + (m.trofeus || 0), 0);
+        return `<div class="cla">${escudo(x)}<div class="cla-info"><b>${esc(x.nome)}</b><span>${n}/${Cla.MAX} membros · ${fmt(tr)} troféus</span>${x.descricao ? `<small>${esc(x.descricao)}</small>` : ''}</div>
+          <button class="btn-peq" data-id="${x.id}" ${n >= Cla.MAX ? 'disabled' : ''}>${n >= Cla.MAX ? 'Cheio' : 'Entrar'}</button></div>`;
+      }).join('') || `<p class="aviso">${todos.length ? 'Nenhum clã com esse nome.' : 'Ainda não existe nenhum clã. Crie o primeiro!'}</p>`;
+      $('lista-clas').querySelectorAll('[data-id]').forEach((b) => (b.onclick = async () => {
+        b.disabled = true;
+        try { await Cla.entrar(b.dataset.id); UI.toast(`Você entrou em ${d().cla.nome}! 🛡️`); cla(); }
+        catch (e) { UI.toast(e.message && !e.code ? e.message : erroNuvem(e)); b.disabled = false; }
+      }));
+    };
     const campo = $('busca-cla');
-    campo.oninput = () => { busca = campo.value; const pos = campo.selectionStart; cla(); const n = $('busca-cla'); n.focus(); n.setSelectionRange(pos, pos); };
-    $('cla-conteudo').querySelectorAll('[data-n]').forEach((b) => (b.onclick = () => { d().cla = b.dataset.n; Estado.salvar(); UI.toast(`Você entrou em ${b.dataset.n}!`); cla(); }));
+    campo.oninput = () => { busca = campo.value; desenhar(); };
+    try { todos = await Cla.listar(); desenhar(); }
+    catch (e) { $('lista-clas').innerHTML = `<p class="aviso">${erroNuvem(e)}</p>`; }
+  }
+
+  function criarCla() {
+    let cor = Cla.CORES[0];
+    const m = UI.modal({
+      titulo: 'Criar clã',
+      html: `<label class="campo">Nome do clã<input id="cla-nome" maxlength="20" placeholder="Ex.: Coroas Brilhantes" /></label>
+        <label class="campo">Descrição<input id="cla-desc" maxlength="60" placeholder="Opcional" /></label>
+        <div class="seletor-titulo">Cor do escudo</div>
+        <div class="grade-cores">${Cla.CORES.map((c, i) => `<button data-cor="${c}" class="${i ? '' : 'escolhido'}" style="background:${c}"></button>`).join('')}</div>`,
+      botoes: [{ texto: 'Cancelar', classe: 'secundario' }, { texto: 'Criar', classe: 'principal', acao: (el) => {
+        const nome = el.querySelector('#cla-nome').value.trim();
+        if (nome.length < 3) { UI.toast('O nome precisa ter pelo menos 3 letras'); return false; }
+        const descricao = el.querySelector('#cla-desc').value.trim();
+        Cla.criar({ nome, descricao, cor }).then(() => { UI.toast(`Clã ${nome} criado! 👑`); cla(); }).catch((e) => UI.toast(erroNuvem(e)));
+      } }],
+    });
+    m.el.querySelectorAll('[data-cor]').forEach((b) => (b.onclick = () => {
+      cor = b.dataset.cor;
+      m.el.querySelectorAll('[data-cor]').forEach((x) => x.classList.toggle('escolhido', x === b));
+    }));
+  }
+
+  async function meuCla(caixa) {
+    caixa.innerHTML = '<p class="aviso">Carregando seu clã…</p>';
+    let c;
+    try { c = await Cla.buscar(d().cla.id); } catch (e) { caixa.innerHTML = `<p class="aviso">${erroNuvem(e)}</p>`; return; }
+    if (!c || !(c.membros || {})[Conta.uid()]) { // clã acabou ou fui removido
+      d().cla = null; Estado.salvar(); UI.toast('Você não está mais nesse clã'); return cla();
+    }
+    const souLider = c.lider === Conta.uid();
+    const membros = Object.entries(c.membros).map(([u, m]) => ({ u, ...m })).sort((a, b) => (b.trofeus || 0) - (a.trofeus || 0));
+    const total = membros.reduce((a, m) => a + (m.trofeus || 0), 0);
+    caixa.innerHTML = `<div class="cla-topo">${escudo(c)}<div><b>${esc(c.nome)}</b><span>${membros.length}/${Cla.MAX} membros · 🏆 ${fmt(total)}</span>${c.descricao ? `<small>${esc(c.descricao)}</small>` : ''}</div>
+        <button class="btn-peq perigo" id="sair-cla">Sair</button></div>
+      <div class="conta-abas cla-abas"><button data-aba="chat" class="${abaCla === 'chat' ? 'ativa' : ''}">💬 Chat</button><button data-aba="membros" class="${abaCla === 'membros' ? 'ativa' : ''}">👥 Membros</button></div>
+      <div id="cla-aba"></div>`;
+    caixa.querySelectorAll('.cla-abas button').forEach((b) => (b.onclick = () => { abaCla = b.dataset.aba; meuCla(caixa); }));
+    $('sair-cla').onclick = () => UI.modal({ titulo: 'Sair do clã?', html: `<p>Você vai sair de ${esc(c.nome)}.${souLider && membros.length > 1 ? ' Outro membro vira líder.' : ''}${membros.length === 1 ? ' Você é o último membro, então o clã será apagado.' : ''}</p>`,
+      botoes: [{ texto: 'Ficar', classe: 'secundario' }, { texto: 'Sair', classe: 'perigo', acao: () => { Cla.sair().then(() => { UI.toast('Você saiu do clã'); cla(); }).catch((e) => UI.toast(erroNuvem(e))); } }] });
+
+    const aba = $('cla-aba');
+    if (abaCla === 'membros') {
+      aba.innerHTML = `<div class="lista-membros">${membros.map((m, i) => `<div class="membro${m.u === Conta.uid() ? ' voce' : ''}"><span class="pos">${i + 1}</span>
+        <b>${esc(m.nome || 'Jogador')}${m.u === Conta.uid() ? ' (você)' : ''}</b>${m.u === c.lider ? '<span class="tag-lider">Líder</span>' : ''}
+        <span><i class="ic-trofeu"></i> ${fmt(m.trofeus || 0)}</span>${souLider && m.u !== Conta.uid() ? `<button class="btn-expulsar" data-u="${m.u}" title="Remover">✕</button>` : ''}</div>`).join('')}</div>`;
+      aba.querySelectorAll('[data-u]').forEach((b) => (b.onclick = () => UI.modal({ titulo: 'Remover do clã?', html: `<p>${esc(c.membros[b.dataset.u].nome)} vai sair do clã.</p>`,
+        botoes: [{ texto: 'Cancelar', classe: 'secundario' }, { texto: 'Remover', classe: 'perigo', acao: () => { Cla.expulsar(c.id, b.dataset.u).then(() => meuCla(caixa)).catch((e) => UI.toast(erroNuvem(e))); } }] })));
+      return;
+    }
+    aba.innerHTML = `<div class="chat" id="chat"><p class="aviso">Carregando mensagens…</p></div>
+      <form class="chat-enviar" id="chat-form"><input id="chat-texto" maxlength="200" placeholder="Escreva uma mensagem" autocomplete="off" /><button class="btn-peq">Enviar</button></form>
+      <p class="aviso">Seja gentil 💕 Todos do clã veem as mensagens.</p>`;
+    Cla.ouvirChat(c.id, (msgs) => {
+      const chat = $('chat');
+      if (!chat) return;
+      if (msgs === null) { chat.innerHTML = `<p class="aviso">${erroNuvem({ code: 'permission' })}</p>`; return; }
+      chat.innerHTML = msgs.length ? msgs.map((x) => `<div class="msg${x.uid === Conta.uid() ? ' minha' : ''}"><small>${esc(x.nome)}</small><span>${esc(x.texto)}</span></div>`).join('')
+        : '<p class="aviso">Nenhuma mensagem ainda. Diga oi! 👋</p>';
+      chat.scrollTop = chat.scrollHeight;
+    });
+    $('chat-form').onsubmit = (e) => {
+      e.preventDefault();
+      const t = $('chat-texto').value.trim();
+      if (!t) return;
+      $('chat-texto').value = '';
+      Cla.enviar(c.id, t).catch((x) => UI.toast(erroNuvem(x)));
+    };
   }
 
   // ---------- Eventos ----------

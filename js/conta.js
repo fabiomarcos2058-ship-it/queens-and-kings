@@ -41,6 +41,13 @@ const Conta = (() => {
     if (!usuario) return;
     try {
       await fb.setDoc(docJogador(), { dados: JSON.stringify(Estado.d), atualizado: fb.serverTimestamp(), nome: Estado.d.nome });
+      // mantém nome e troféus atualizados no clã
+      if (Estado.d.cla && Estado.d.cla.id) {
+        await fb.updateDoc(fb.doc(fb.db, 'clas', Estado.d.cla.id), {
+          [`membros.${usuario.uid}.nome`]: Estado.d.nome,
+          [`membros.${usuario.uid}.trofeus`]: Estado.d.trofeus,
+        }).catch(() => {});
+      }
     } catch (e) {
       console.warn('Não salvou na nuvem:', e.code || e);
     }
@@ -245,5 +252,5 @@ const Conta = (() => {
     location.reload();
   }
 
-  return { tela, ativo, logado, email, verificarSessao, sair, salvarComGoogle };
+  return { tela, ativo, logado, email, verificarSessao, sair, salvarComGoogle, fb: () => fb, uid: () => (usuario ? usuario.uid : null), salvarAgora: enviarParaNuvem };
 })();
