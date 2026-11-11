@@ -40,9 +40,13 @@ const Estado = (() => {
     for (const k in base.conquistas) if (d.conquistas[k] === undefined) d.conquistas[k] = 0;
     // toda carta do catálogo entra na coleção
     for (const c of catalogo) if (!d.colecao[c.id]) d.colecao[c.id] = { nivel: 1, copias: 0, tem: false };
+    if (!d.id) d.id = Math.random().toString(36).slice(2) + Date.now().toString(36);
     if (!d.baus) {
-      const basicas = catalogo.filter((c) => c.inicial).map((c) => c.id);
-      d.baus = [0, 1, 2, 3].map((i) => ({ tipo: 'inicial', inicio: 1, cartas: basicas.slice(i * 2, i * 2 + 2) }));
+      // cada jogador ganha 8 cartas básicas sorteadas (sempre com pelo menos 1 feitiço)
+      const basicas = embaralhar(catalogo.filter((c) => c.inicial));
+      const feitico = basicas.find((c) => c.feitico);
+      const escolhidas = embaralhar([feitico, ...basicas.filter((c) => c !== feitico).slice(0, 7)].filter(Boolean)).map((c) => c.id);
+      d.baus = [0, 1, 2, 3].map((i) => ({ tipo: 'inicial', inicio: 1, cartas: escolhidas.slice(i * 2, i * 2 + 2) }));
     }
     d.deck = d.deck.filter((id) => catalogo.some((c) => c.id === id) && d.colecao[id].tem);
     salvar();
@@ -59,6 +63,11 @@ const Estado = (() => {
   }
 
   const carta = (id) => catalogo.find((c) => c.id === id);
+  function embaralhar(lista) {
+    const a = [...lista];
+    for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+    return a;
+  }
   const tem = (id) => !!(d.colecao[id] && d.colecao[id].tem);
   const liberada = (id) => (carta(id).trofeus || 0) <= d.recorde; // já aparece em baús e na loja
   const disponiveis = () => catalogo.filter((c) => liberada(c.id));
@@ -164,12 +173,12 @@ const Estado = (() => {
     const hoje = new Date().toISOString().slice(0, 10);
     if (d.ofertas.dia !== hoje) d.ofertas = { dia: hoje, compradas: [] };
     // sorteio fixo por dia
-    let semente = [...hoje].reduce((s, ch) => s * 31 + ch.charCodeAt(0), 7) >>> 0;
+    let semente = [...(hoje + d.id)].reduce((s, ch) => (s * 31 + ch.charCodeAt(0)) >>> 0, 7);
     const rnd = () => ((semente = (semente * 1103515245 + 12345) >>> 0) % 1000) / 1000;
     const preco = { comum: [10, 100], rara: [4, 300], epica: [1, 800], lendaria: [1, 3000] };
     const lista = [];
-    const pool = disponiveis().filter((c) => tem(c.id) || !c.inicial);
-    if (!pool.length) return [];
+    const pool = disponiveis();
+    if (!catalogo.some((c) => tem(c.id))) return []; // ainda não abriu os baús iniciais
     for (let i = 0; i < 3; i++) {
       const c = pool[Math.floor(rnd() * pool.length)];
       lista.push({ i, id: c.id, copias: preco[c.raridade][0], preco: preco[c.raridade][1] });

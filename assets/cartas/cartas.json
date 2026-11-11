@@ -187,6 +187,84 @@
       "inicial": true
     },
     {
+      "id": "miku_nakano",
+      "nome": "Miku Nakano",
+      "raridade": "rara",
+      "custo": 3,
+      "tipo": "Atiradora",
+      "descricao": "Quieta, mas certeira: acerta de longe.",
+      "trofeus": 0,
+      "inicial": true,
+      "rosto": [
+        395,
+        320,
+        165
+      ],
+      "arte": [
+        60,
+        60,
+        620
+      ],
+      "vida": 420,
+      "dano": 80,
+      "velocidade": 46,
+      "alcance": 112,
+      "cadencia": 1.0,
+      "alvo": "tudo"
+    },
+    {
+      "id": "teto",
+      "nome": "Teto",
+      "raridade": "comum",
+      "custo": 2,
+      "tipo": "Rápida",
+      "descricao": "Animada e veloz, chega antes de todo mundo.",
+      "trofeus": 0,
+      "inicial": true,
+      "rosto": [
+        290,
+        370,
+        150
+      ],
+      "arte": [
+        40,
+        120,
+        620
+      ],
+      "vida": 340,
+      "dano": 72,
+      "velocidade": 64,
+      "alcance": 16,
+      "cadencia": 0.8,
+      "alvo": "tudo"
+    },
+    {
+      "id": "nami_old",
+      "nome": "Nami (Old)",
+      "raridade": "comum",
+      "custo": 3,
+      "tipo": "Lutadora",
+      "descricao": "Esperta e ágil, sempre dá um jeito de ganhar.",
+      "trofeus": 0,
+      "inicial": true,
+      "rosto": [
+        430,
+        330,
+        160
+      ],
+      "arte": [
+        180,
+        40,
+        500
+      ],
+      "vida": 650,
+      "dano": 100,
+      "velocidade": 52,
+      "alcance": 16,
+      "cadencia": 1.0,
+      "alvo": "tudo"
+    },
+    {
       "id": "pan_dbh",
       "nome": "Pan (DBH)",
       "raridade": "comum",
@@ -237,6 +315,32 @@
       "trofeus": 60
     },
     {
+      "id": "nami_last",
+      "nome": "Nami (Last)",
+      "raridade": "rara",
+      "custo": 4,
+      "tipo": "Dano em área",
+      "descricao": "Controla o clima e acerta raios em vários inimigos.",
+      "trofeus": 60,
+      "rosto": [
+        470,
+        380,
+        140
+      ],
+      "arte": [
+        220,
+        160,
+        500
+      ],
+      "vida": 600,
+      "dano": 110,
+      "velocidade": 44,
+      "alcance": 100,
+      "cadencia": 1.6,
+      "alvo": "tudo",
+      "area": 36
+    },
+    {
       "id": "pan_gt",
       "nome": "Pan (GT)",
       "raridade": "rara",
@@ -260,6 +364,32 @@
       "alcance": 110,
       "cadencia": 1.0,
       "alvo": "tudo"
+    },
+    {
+      "id": "hatsune_miku",
+      "nome": "Hatsune Miku",
+      "raridade": "epica",
+      "custo": 4,
+      "tipo": "Dano em área",
+      "descricao": "Ondas de som que atingem todos por perto.",
+      "trofeus": 120,
+      "rosto": [
+        300,
+        250,
+        130
+      ],
+      "arte": [
+        20,
+        0,
+        620
+      ],
+      "vida": 650,
+      "dano": 120,
+      "velocidade": 46,
+      "alcance": 90,
+      "cadencia": 1.5,
+      "alvo": "tudo",
+      "area": 40
     },
     {
       "id": "akame",
@@ -287,6 +417,31 @@
       "trofeus": 140
     },
     {
+      "id": "riruka",
+      "nome": "Riruka",
+      "raridade": "epica",
+      "custo": 3,
+      "tipo": "Atiradora",
+      "descricao": "Atrevida e rápida no gatilho.",
+      "trofeus": 160,
+      "rosto": [
+        400,
+        300,
+        125
+      ],
+      "arte": [
+        160,
+        20,
+        480
+      ],
+      "vida": 480,
+      "dano": 95,
+      "velocidade": 50,
+      "alcance": 115,
+      "cadencia": 0.9,
+      "alvo": "tudo"
+    },
+    {
       "id": "caulifla",
       "nome": "Caulifla",
       "raridade": "epica",
@@ -310,6 +465,32 @@
       "alcance": 16,
       "cadencia": 1.0,
       "alvo": "tudo"
+    },
+    {
+      "id": "bambietta",
+      "nome": "Bambietta",
+      "raridade": "lendaria",
+      "custo": 5,
+      "tipo": "Explosiva",
+      "descricao": "Tudo o que ela acerta explode em área.",
+      "trofeus": 220,
+      "rosto": [
+        420,
+        230,
+        115
+      ],
+      "arte": [
+        60,
+        0,
+        620
+      ],
+      "vida": 750,
+      "dano": 170,
+      "velocidade": 44,
+      "alcance": 105,
+      "cadencia": 1.7,
+      "alvo": "tudo",
+      "area": 42
     },
     {
       "id": "bulma",
