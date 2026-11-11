@@ -855,3 +855,11 @@ button.item-loja:active, button.slot-bau:active, .slot-carta:active { transform:
 .selo-hab { position: absolute; right: 3px; top: 3px; z-index: 3; width: 20px; height: 20px; border-radius: 50%; background: #FAC775; display: grid; place-items: center; font-size: 12px; box-shadow: 0 1px 0 #633806; }
 .hab-detalhe { margin-top: 10px; background: linear-gradient(90deg, #534AB7, #1d2350); border-radius: 10px; padding: 8px 10px; text-align: left; font-size: 14px; }
 .hab-detalhe small { color: #CECBF6; font-size: 12px; }
+
+/* Tela de atualização obrigatória */
+.tela-atualizar { position: absolute; inset: 0; z-index: 500; background: #10142ef2; display: flex; align-items: center; justify-content: center; padding: 20px; animation: fade 0.3s; }
+.atualizar-caixa { width: 100%; max-width: 340px; background: linear-gradient(#3b4596, #2a3170); border: 3px solid #FAC775; border-radius: 20px; padding: 20px 16px; text-align: center; box-shadow: 0 6px 0 #0d1130, 0 0 30px #FAC77555; display: flex; flex-direction: column; gap: 6px; animation: pop 0.35s cubic-bezier(0.3, 1.5, 0.6, 1); }
+.atualizar-icone { font-size: 48px; animation: pulo 1.4s ease-in-out infinite; }
+.atualizar-caixa b { font-family: 'Lilita One', 'Fredoka', sans-serif; font-size: 24px; color: #FAC775; }
+.atualizar-caixa p { margin: 0; }
+.atualizar-caixa .btn-modal { margin-top: 8px; }

@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Lilita+One&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/style.css?v=1794411382" />
+  <link rel="stylesheet" href="css/style.css?v=1794411477" />
 </head>
 <body>
   <div id="app">
@@ -120,11 +120,12 @@
     (async () => {
       let v = Date.now();
       try { v = (await (await fetch('versao.txt', { cache: 'no-store' })).text()).trim() || v; } catch (e) {}
+      window.VERSAO_JOGO = v;
       const css = document.createElement('link');
       css.rel = 'stylesheet';
       css.href = 'css/style.css?v=' + v;
       document.head.appendChild(css);
-      for (const f of ['assets', 'estado', 'ui', 'arena', 'cartas', 'batalha', 'titulo', 'conta', 'cla', 'passe', 'mod', 'menu']) {
+      for (const f of ['assets', 'estado', 'ui', 'arena', 'cartas', 'batalha', 'titulo', 'conta', 'cla', 'passe', 'mod', 'atualizacao', 'menu']) {
         await new Promise((ok) => {
           const el = document.createElement('script');
           el.src = 'js/' + f + '.js?v=' + v;
