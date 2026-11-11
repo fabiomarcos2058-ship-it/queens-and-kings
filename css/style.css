@@ -1036,3 +1036,10 @@ button.item-loja:active, button.slot-bau:active, .slot-carta:active { transform:
 
 #aviso-atualizacao { position: absolute; top: 46px; left: 50%; transform: translateX(-50%); z-index: 400; background: #FAC775; color: #412402; font-weight: 700; font-size: 12px; padding: 5px 12px; border-radius: 12px; box-shadow: 0 3px 0 #BA7517; white-space: nowrap; pointer-events: none; animation: fade 0.3s; }
 .tela-atualizar { position: fixed; z-index: 99999; }
+
+/* ---------- Instinto Superior (esquiva) ---------- */
+.dano-num.esquiva { color: #DDF3FF; font-size: 11px; text-shadow: 0 0 6px #7FD0FF, 0 1px 0 #000; }
+.tropa.desviando .tropa-corpo { animation: desvio 0.25s ease-out; }
+@keyframes desvio { 30% { transform: translateX(-7px); } 60% { transform: translateX(5px); } }
+.tropa.aura-instinto .tropa-medalhao { box-shadow: 0 0 0 3px #E8F4FF, 0 0 18px 6px #9FC8FF; }
+.tropa.aura-instinto::before { content: ''; position: absolute; left: 50%; top: 60%; width: 170%; aspect-ratio: 1; transform: translate(-50%, -50%); border-radius: 50%; background: radial-gradient(#C8E4FF66, transparent 65%); animation: pulsa 0.6s infinite; pointer-events: none; }

@@ -291,7 +291,7 @@ const Batalha = (() => {
     t.el = document.createElement('div');
     t.el.className = `tropa ${time} surgindo${c.token ? ' mini' : ''}${c.habilidade ? ' campea' : ''}`;
     t.el.innerHTML = `${barraHp()}
-      <div class="tropa-corpo"><div class="tropa-medalhao"><img src="assets/cartas/${c.id}_medalhao.png" alt="" /><b>${nivel}</b>${c.passiva ? '<i class="selo-adapt"></i>' : ''}</div></div><div class="tropa-sombra"></div>`;
+      <div class="tropa-corpo"><div class="tropa-medalhao"><img src="assets/cartas/${c.id}_medalhao.png" alt="" /><b>${nivel}</b>${c.passiva && c.passiva.tipo === 'adaptar' ? '<i class="selo-adapt"></i>' : ''}</div></div><div class="tropa-sombra"></div>`;
     s.arena.appendChild(t.el);
     s.ent.push(t);
     posicionar(t);
@@ -354,6 +354,12 @@ const Batalha = (() => {
   function ferir(e, dano, deTime) {
     if (e.vida <= 0) return;
     if (e.torre && e.time === 'azul' && Mod.flag('torresInvenciveis')) return;
+    // esquiva (Instinto Superior): o golpe erra
+    if (!e.torre && e.carta) {
+      const pv = e.carta.passiva;
+      const chance = e.esquiva > 0 ? e.esquivaChance : pv && pv.tipo === 'esquiva' ? pv.chance : 0;
+      if (chance && Math.random() < chance) { esquivou(e); return; }
+    }
     if (e.adaptacao && e.carta && e.carta.passiva) dano = Math.round(dano * (1 - e.carta.passiva.defesa * e.adaptacao));
     e.vida -= dano;
     numero(e, dano);
@@ -489,8 +495,23 @@ const Batalha = (() => {
     }
     if (h.tipo === 'kamehameha') kamehameha(t, Math.round((h.dano || 1500) * (t.f || 1)));
     if (h.tipo === 'congelar') congelar(t, h);
+    if (h.tipo === 'esquiva') {
+      t.esquiva = h.duracao || 5; t.esquivaChance = h.chance || 0.8;
+      if (h.furia) { t.furia = t.esquiva; t.el.classList.add('aura-furia'); }
+      t.el.classList.add('aura-instinto');
+    }
     if (t.time === 'azul') UI.toast(`⚡ ${h.nome}!`);
     return true;
+  }
+
+  function esquivou(e) {
+    const n = document.createElement('div');
+    n.className = 'dano-num esquiva';
+    n.textContent = 'esquivou!';
+    Object.assign(n.style, pct(e.x + (Math.random() * 16 - 8), e.y - 18));
+    s.arena.appendChild(n);
+    setTimeout(() => n.remove(), 650);
+    e.el.classList.remove('desviando'); void e.el.offsetWidth; e.el.classList.add('desviando');
   }
 
   // congela as tropas inimigas em volta (não andam nem atacam)
@@ -794,6 +815,7 @@ const Batalha = (() => {
         || (h.tipo === 'fenix' && t.vida < t.max * 0.4)
         || ((h.tipo === 'golpes' || h.tipo === 'furia') && perto && (t.alvo.torre || t.alvo.vida > t.dano))
         || (h.tipo === 'kamehameha' && t.alvo && dist(t, t.alvo) < 240)
+        || (h.tipo === 'esquiva' && perto && t.vida < t.max * 0.8)
         || (h.tipo === 'congelar' && s.ent.filter((e) => !e.torre && e.time === 'azul' && e.vida > 0 && dist(e, t) < (h.raio || 95) + 40).length >= 2);
       if (usar && ativarHabilidade(t)) return;
     }
@@ -915,7 +937,7 @@ const Batalha = (() => {
       fila: s.vermelho.fila.slice(0, 5),
       tw: Object.fromEntries(s.ent.filter((e) => e.torre).map((e) => [e.id, Math.round(e.vida)])),
       tr: s.ent.filter((e) => !e.torre).map((e) => [e.id, e.carta.id, e.time === 'azul' ? 0 : 1, Math.round(e.x * 10) / 10, Math.round(e.y * 10) / 10,
-        Math.round(e.vida), e.max, e.nivel, (e.surgir > 0 ? 1 : 0) | (e.furia > 0 ? 2 : 0) | (e.golpesFortes > 0 ? 4 : 0) | (e.fenix > 0 ? 8 : 0) | (e.congelado > 0 ? 16 : 0) | ((e.adaptacao || 0) << 6), e.recarga > 0 ? +e.recarga.toFixed(1) : 0]),
+        Math.round(e.vida), e.max, e.nivel, (e.surgir > 0 ? 1 : 0) | (e.furia > 0 ? 2 : 0) | (e.golpesFortes > 0 ? 4 : 0) | (e.fenix > 0 ? 8 : 0) | (e.congelado > 0 ? 16 : 0) | (e.esquiva > 0 ? 32 : 0) | ((e.adaptacao || 0) << 6), e.recarga > 0 ? +e.recarga.toFixed(1) : 0]),
       pj: s.proj.map((p) => [Math.round(p.x), Math.round(p.y), p.time === 'azul' ? 0 : 1, p.el.classList.contains('de-torre') ? 1 : 0]),
       ev: s.eventos,
     };
@@ -975,6 +997,7 @@ const Batalha = (() => {
       t.el.classList.toggle('aura-golpes', !!(flags & 4));
       t.el.classList.toggle('aura-fenix', !!(flags & 8));
       t.el.classList.toggle('congelada', !!(flags & 16));
+      t.el.classList.toggle('aura-instinto', !!(flags & 32));
       const ad = flags >> 6, selo = t.el.querySelector('.selo-adapt');
       if (selo && String(ad || '') !== selo.textContent) { selo.textContent = ad || ''; t.el.classList.toggle('adaptado', !!(t.carta.passiva && ad >= t.carta.passiva.max)); }
       t.recarga = recarga;
@@ -1119,6 +1142,7 @@ const Batalha = (() => {
       if (t.recarga > 0) t.recarga -= dt;
       if (t.furia > 0 && (t.furia -= dt) <= 0) t.el.classList.remove('aura-furia');
       if (t.fenix > 0 && (t.fenix -= dt) <= 0) t.el.classList.remove('aura-fenix');
+      if (t.esquiva > 0 && (t.esquiva -= dt) <= 0) t.el.classList.remove('aura-instinto');
     }
     s.habTimer -= dt;
     if (s.habTimer <= 0) { s.habTimer = 0.2; desenharHabilidades(); }
@@ -1127,7 +1151,7 @@ const Batalha = (() => {
     for (const t of s.ent) {
       if (t.torre || t.vida <= 0) continue;
       if (t.surgir > 0) { t.surgir -= dt; if (t.surgir <= 0) t.el.classList.remove('surgindo'); continue; }
-      if (t.carta.passiva) adaptar(t, dt);
+      if (t.carta.passiva && t.carta.passiva.tipo === 'adaptar') adaptar(t, dt);
       if (t.congelado > 0) { if ((t.congelado -= dt) <= 0) t.el.classList.remove('congelada'); continue; }
       if (!t.alvo || t.alvo.vida <= 0 || !s.ent.includes(t.alvo) || Math.random() < 0.02) t.alvo = escolherAlvo(t);
       t.cd -= dt;

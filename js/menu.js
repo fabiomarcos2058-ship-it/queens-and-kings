@@ -936,7 +936,7 @@
         <p class="aviso">Nível ${col.nivel} · cópias ${col.copias}${col.nivel < Estado.NIVEL_MAX ? `/${Estado.COPIAS[col.nivel]}` : ''}</p></div></div>
         <div class="tabela-stats">${linhas.map(([k, v]) => `<div><span>${k}</span><b>${typeof v === 'number' ? fmt(v) : v}</b></div>`).join('')}</div>
         ${c.habilidade ? `<div class="hab-detalhe"><b>⚡ ${c.habilidade.nome}</b> · ${c.habilidade.custo} de elixir<br><small>${c.habilidade.descricao} Durante a batalha, toque no botão da habilidade que aparece na arena.</small></div>` : ''}
-        ${c.passiva ? `<div class="hab-detalhe passiva"><b>🧩 ${c.passiva.nome}</b> · passiva (automática)<br><small>${c.passiva.descricao}</small></div>` : ''}`,
+        ${c.passiva ? `<div class="hab-detalhe passiva"><b>${c.passiva.tipo === 'esquiva' ? '✨' : '🧩'} ${c.passiva.nome}</b> · passiva (automática)<br><small>${c.passiva.descricao}</small></div>` : ''}`,
       botoes,
     });
   }

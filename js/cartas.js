@@ -18,7 +18,7 @@ const Cartas = (() => {
       <span class="custo">${c.custo}</span>
       ${mini ? '' : `<span class="nome-3d">${c.nome}</span>`}
       ${c.habilidade ? '<span class="selo-hab" title="Tem habilidade especial">⚡</span>' : ''}
-      ${c.passiva ? '<span class="selo-hab passiva" title="Tem habilidade passiva">🧩</span>' : ''}
+      ${c.passiva ? `<span class="selo-hab passiva" title="Tem habilidade passiva">${c.passiva.tipo === 'esquiva' ? '✨' : '🧩'}</span>` : ''}
       ${extra}
     </div>`;
     return mini ? carta : `<div class="slot-carta" data-id="${c.id}">${carta}<div class="carta-nivel">${nivel ?? '&nbsp;'}</div></div>`;

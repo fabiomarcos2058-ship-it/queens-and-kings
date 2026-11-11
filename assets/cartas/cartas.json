@@ -270,8 +270,8 @@
         20,
         600
       ],
-      "vida": 1000,
-      "dano": 328,
+      "vida": 1010,
+      "dano": 332,
       "velocidade": 44,
       "alcance": 75,
       "cadencia": 1.6,
@@ -445,8 +445,8 @@
         0,
         620
       ],
-      "vida": 730,
-      "dano": 244,
+      "vida": 740,
+      "dano": 247,
       "velocidade": 46,
       "alcance": 70,
       "cadencia": 1.5,
@@ -678,8 +678,8 @@
         0,
         600
       ],
-      "vida": 990,
-      "dano": 413,
+      "vida": 1000,
+      "dano": 418,
       "velocidade": 40,
       "alcance": 72,
       "cadencia": 1.8,
@@ -738,8 +738,8 @@
         10,
         620
       ],
-      "vida": 1570,
-      "dano": 373,
+      "vida": 1550,
+      "dano": 369,
       "velocidade": 48,
       "alcance": 20,
       "cadencia": 1.2,
@@ -1017,6 +1017,363 @@
         "recarga": 15,
         "duracao": 7,
         "descricao": "Por 7s ataca mais rápido, anda mais rápido e causa +30% de dano."
+      }
+    },
+    {
+      "id": "goku_base",
+      "nome": "Goku",
+      "raridade": "rara",
+      "custo": 3,
+      "tipo": "Lutador Saiyajin",
+      "descricao": "O Goku de sempre: equilibrado e confiável.",
+      "trofeus": 40,
+      "rosto": [
+        380,
+        320,
+        92
+      ],
+      "arte": [
+        58,
+        100,
+        620
+      ],
+      "vida": 690,
+      "dano": 178,
+      "velocidade": 52,
+      "alcance": 18,
+      "cadencia": 1.0,
+      "alvo": "tudo"
+    },
+    {
+      "id": "goku_ssj",
+      "nome": "Goku (SSJ)",
+      "raridade": "rara",
+      "custo": 4,
+      "tipo": "Super Saiyajin",
+      "descricao": "A transformação lendária de Namek. Fica furioso quando precisa.",
+      "trofeus": 110,
+      "rosto": [
+        400,
+        540,
+        120
+      ],
+      "arte": [
+        60,
+        150,
+        600
+      ],
+      "vida": 900,
+      "dano": 210,
+      "velocidade": 52,
+      "alcance": 18,
+      "cadencia": 1.0,
+      "alvo": "tudo",
+      "habilidade": {
+        "nome": "Fúria Lendária",
+        "tipo": "furia",
+        "custo": 2,
+        "recarga": 12,
+        "duracao": 5,
+        "descricao": "Por 5s ataca mais rápido, anda mais rápido e causa +30% de dano."
+      }
+    },
+    {
+      "id": "goku_ssj2",
+      "nome": "Goku (SSJ2)",
+      "raridade": "epica",
+      "custo": 4,
+      "tipo": "Super Saiyajin 2",
+      "descricao": "Rápido e cheio de raios. Golpes fortes em sequência.",
+      "trofeus": 190,
+      "rosto": [
+        440,
+        640,
+        130
+      ],
+      "arte": [
+        50,
+        120,
+        620
+      ],
+      "vida": 820,
+      "dano": 221,
+      "velocidade": 56,
+      "alcance": 18,
+      "cadencia": 0.9,
+      "alvo": "tudo",
+      "habilidade": {
+        "nome": "Golpe Relâmpago",
+        "tipo": "golpes",
+        "custo": 2,
+        "recarga": 10,
+        "descricao": "Os próximos 3 golpes causam 2,5x de dano.",
+        "mult": 2.5
+      }
+    },
+    {
+      "id": "goku_ssj3",
+      "nome": "Goku (SSJ3)",
+      "raridade": "epica",
+      "custo": 5,
+      "tipo": "Super Saiyajin 3",
+      "descricao": "Muito forte e resistente, mas lento: gasta muita energia.",
+      "trofeus": 230,
+      "rosto": [
+        380,
+        470,
+        110
+      ],
+      "arte": [
+        58,
+        150,
+        620
+      ],
+      "vida": 1400,
+      "dano": 261,
+      "velocidade": 40,
+      "alcance": 18,
+      "cadencia": 1.2,
+      "alvo": "tudo",
+      "area": 25,
+      "habilidade": {
+        "nome": "Kamehameha SSJ3",
+        "tipo": "kamehameha",
+        "custo": 3,
+        "recarga": 14,
+        "dano": 950,
+        "descricao": "Dispara um Kamehameha que atravessa tudo em linha reta (metade do dano nas torres)."
+      }
+    },
+    {
+      "id": "goku_deus",
+      "nome": "Goku (SSJ Deus)",
+      "raridade": "lendaria",
+      "custo": 5,
+      "tipo": "Deus Super Saiyajin",
+      "descricao": "O poder divino: se recupera no meio da luta.",
+      "trofeus": 270,
+      "rosto": [
+        285,
+        250,
+        85
+      ],
+      "arte": [
+        15,
+        40,
+        460
+      ],
+      "vida": 1280,
+      "dano": 290,
+      "velocidade": 52,
+      "alcance": 18,
+      "cadencia": 1.0,
+      "alvo": "tudo",
+      "habilidade": {
+        "nome": "Ki Divino",
+        "tipo": "cura",
+        "custo": 2,
+        "recarga": 12,
+        "descricao": "Recupera metade da vida."
+      }
+    },
+    {
+      "id": "goku_ssj4",
+      "nome": "Goku (SSJ4)",
+      "raridade": "lendaria",
+      "custo": 6,
+      "tipo": "Super Saiyajin 4",
+      "descricao": "A forma primitiva de GT. Muita vida e golpes em área.",
+      "trofeus": 300,
+      "rosto": [
+        350,
+        455,
+        72
+      ],
+      "arte": [
+        60,
+        200,
+        560
+      ],
+      "vida": 1670,
+      "dano": 316,
+      "velocidade": 46,
+      "alcance": 18,
+      "cadencia": 1.15,
+      "alvo": "tudo",
+      "area": 28,
+      "habilidade": {
+        "nome": "Kamehameha 10x",
+        "tipo": "kamehameha",
+        "custo": 3,
+        "recarga": 14,
+        "dano": 950,
+        "descricao": "Dispara um Kamehameha que atravessa tudo em linha reta (metade do dano nas torres)."
+      }
+    },
+    {
+      "id": "goku_blue",
+      "nome": "Goku (SSJ Blue)",
+      "raridade": "lendaria",
+      "custo": 6,
+      "tipo": "Super Saiyajin Blue",
+      "descricao": "Controle perfeito do ki divino: golpes certeiros.",
+      "trofeus": 310,
+      "rosto": [
+        370,
+        320,
+        90
+      ],
+      "arte": [
+        58,
+        80,
+        620
+      ],
+      "vida": 1600,
+      "dano": 360,
+      "velocidade": 52,
+      "alcance": 18,
+      "cadencia": 1.0,
+      "alvo": "tudo",
+      "habilidade": {
+        "nome": "Golpe Divino",
+        "tipo": "golpes",
+        "custo": 3,
+        "recarga": 11,
+        "descricao": "Os próximos 3 golpes causam 2,2x de dano.",
+        "mult": 2.2
+      }
+    },
+    {
+      "id": "goku_blue_kaioken",
+      "nome": "Goku (Blue Kaioken)",
+      "raridade": "lendaria",
+      "custo": 6,
+      "tipo": "Blue + Kaioken",
+      "descricao": "Arrisca tudo: o Kaioken x10 multiplica a velocidade e o dano.",
+      "trofeus": 330,
+      "rosto": [
+        380,
+        760,
+        140
+      ],
+      "arte": [
+        58,
+        250,
+        620
+      ],
+      "vida": 1450,
+      "dano": 370,
+      "velocidade": 54,
+      "alcance": 18,
+      "cadencia": 1.0,
+      "alvo": "tudo",
+      "habilidade": {
+        "nome": "Kaioken x10",
+        "tipo": "furia",
+        "custo": 3,
+        "recarga": 14,
+        "duracao": 7,
+        "descricao": "Por 7s ataca mais rápido, anda mais rápido e causa +30% de dano."
+      }
+    },
+    {
+      "id": "goku_blue_lb",
+      "nome": "Goku (Blue Limit Breaker)",
+      "raridade": "lendaria",
+      "custo": 7,
+      "tipo": "Blue sem limites",
+      "descricao": "Passou do próprio limite: o Goku Blue mais forte, em área.",
+      "trofeus": 360,
+      "rosto": [
+        395,
+        700,
+        160
+      ],
+      "arte": [
+        48,
+        200,
+        640
+      ],
+      "vida": 1900,
+      "dano": 399,
+      "velocidade": 50,
+      "alcance": 18,
+      "cadencia": 1.1,
+      "alvo": "tudo",
+      "area": 25,
+      "habilidade": {
+        "nome": "Além do Limite",
+        "tipo": "furia",
+        "custo": 3,
+        "recarga": 15,
+        "duracao": 7,
+        "descricao": "Por 7s ataca mais rápido, anda mais rápido e causa +30% de dano."
+      }
+    },
+    {
+      "id": "goku_pressagio",
+      "nome": "Goku (Presságio do Instinto)",
+      "raridade": "lendaria",
+      "custo": 6,
+      "tipo": "Instinto Superior",
+      "descricao": "O corpo desvia sozinho: às vezes os ataques simplesmente erram.",
+      "trofeus": 380,
+      "rosto": [
+        370,
+        200,
+        150
+      ],
+      "arte": [
+        58,
+        30,
+        620
+      ],
+      "vida": 1320,
+      "dano": 336,
+      "velocidade": 58,
+      "alcance": 18,
+      "cadencia": 0.95,
+      "alvo": "tudo",
+      "passiva": {
+        "nome": "Instinto",
+        "tipo": "esquiva",
+        "chance": 0.25,
+        "descricao": "Desvia sozinho de 25% dos ataques (inclusive das torres)."
+      }
+    },
+    {
+      "id": "goku_isc",
+      "nome": "Goku (Instinto Superior Completo)",
+      "raridade": "lendaria",
+      "custo": 7,
+      "tipo": "Instinto Superior Completo",
+      "descricao": "O ápice: quando ativa o Instinto, quase nada consegue acertar.",
+      "trofeus": 400,
+      "rosto": [
+        230,
+        330,
+        100
+      ],
+      "arte": [
+        60,
+        60,
+        600
+      ],
+      "vida": 1630,
+      "dano": 402,
+      "velocidade": 60,
+      "alcance": 18,
+      "cadencia": 0.9,
+      "alvo": "tudo",
+      "habilidade": {
+        "nome": "Instinto Superior",
+        "tipo": "esquiva",
+        "custo": 3,
+        "recarga": 15,
+        "duracao": 5,
+        "chance": 0.8,
+        "furia": true,
+        "descricao": "Por 5s desvia de 80% dos ataques e fica em fúria (+30% de dano e mais rápido)."
       }
     },
     {
