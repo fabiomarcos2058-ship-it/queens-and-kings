@@ -371,14 +371,14 @@
       "tipo": "Lutador",
       "descricao": "Jovem e determinado, luta com a espada em combate corpo a corpo.",
       "rosto": [
-        320,
-        280,
-        140
+        470,
+        560,
+        105
       ],
       "arte": [
-        40,
-        20,
-        600
+        200,
+        380,
+        480
       ],
       "vida": 680,
       "dano": 165,
@@ -543,14 +543,14 @@
       "tipo": "Lutador",
       "descricao": "Filho do Goku em Super Saiyajin, combina força e técnica.",
       "rosto": [
-        350,
-        270,
-        140
+        395,
+        650,
+        160
       ],
       "arte": [
-        50,
-        30,
-        600
+        58,
+        200,
+        620
       ],
       "vida": 920,
       "dano": 200,
@@ -751,6 +751,268 @@
         "duracao": 6,
         "recarga": 14,
         "descricao": "Por 6s causa +70% de dano e seus ataques atingem em área."
+      }
+    },
+    {
+      "id": "isagi",
+      "nome": "Isagi (Bastard)",
+      "raridade": "epica",
+      "custo": 3,
+      "tipo": "Atacante",
+      "descricao": "Começa fraco, mas se adapta rápido: a cada segundo em campo fica mais forte, mais rápido e mais resistente.",
+      "trofeus": 120,
+      "rosto": [
+        395,
+        720,
+        170
+      ],
+      "arte": [
+        88,
+        330,
+        560
+      ],
+      "vida": 520,
+      "dano": 115,
+      "velocidade": 52,
+      "alcance": 18,
+      "cadencia": 0.9,
+      "alvo": "tudo",
+      "passiva": {
+        "nome": "Metavisão",
+        "tipo": "adaptar",
+        "intervalo": 1,
+        "max": 15,
+        "dano": 0.07,
+        "vel": 0.03,
+        "defesa": 0.025,
+        "descricao": "A cada 1 segundo em campo ganha +7% de dano, +3% de velocidade e 2,5% de resistência (até 15 vezes: mais que o dobro do dano no fim!)."
+      }
+    },
+    {
+      "id": "mbappe",
+      "nome": "Mbappé (Copa)",
+      "raridade": "rara",
+      "custo": 3,
+      "tipo": "Velocista",
+      "descricao": "Não é muito forte, mas é de longe o mais rápido do jogo. Chega na torre antes de todo mundo perceber.",
+      "trofeus": 200,
+      "rosto": [
+        330,
+        220,
+        110
+      ],
+      "arte": [
+        40,
+        60,
+        600
+      ],
+      "vida": 540,
+      "dano": 115,
+      "velocidade": 125,
+      "alcance": 18,
+      "cadencia": 0.8,
+      "alvo": "tudo"
+    },
+    {
+      "id": "kashimo",
+      "nome": "Kashimo",
+      "raridade": "lendaria",
+      "custo": 5,
+      "tipo": "Lutador elétrico",
+      "descricao": "Golpes elétricos que acertam em área. Perigoso em qualquer briga.",
+      "trofeus": 260,
+      "rosto": [
+        330,
+        690,
+        170
+      ],
+      "arte": [
+        40,
+        300,
+        640
+      ],
+      "vida": 1050,
+      "dano": 275,
+      "velocidade": 54,
+      "alcance": 22,
+      "cadencia": 1.0,
+      "alvo": "tudo",
+      "area": 35,
+      "habilidade": {
+        "nome": "Fera Mítica Âmbar",
+        "tipo": "furia",
+        "custo": 3,
+        "recarga": 14,
+        "duracao": 6,
+        "descricao": "Por 6s fica muito mais rápido e causa +60% de dano."
+      }
+    },
+    {
+      "id": "rukia_remake",
+      "nome": "Rukia (Remake)",
+      "raridade": "lendaria",
+      "custo": 5,
+      "tipo": "Atiradora de gelo",
+      "descricao": "Ataca de longe com gelo e pode congelar as tropas inimigas em volta.",
+      "trofeus": 280,
+      "rosto": [
+        400,
+        740,
+        95
+      ],
+      "arte": [
+        60,
+        480,
+        600
+      ],
+      "vida": 880,
+      "dano": 250,
+      "velocidade": 46,
+      "alcance": 100,
+      "cadencia": 1.4,
+      "alvo": "tudo",
+      "area": 25,
+      "habilidade": {
+        "nome": "Hakka no Togame",
+        "tipo": "congelar",
+        "custo": 2,
+        "recarga": 13,
+        "duracao": 2.5,
+        "raio": 95,
+        "dano": 120,
+        "descricao": "Congela as tropas inimigas perto do alvo por 2,5s (elas não andam nem atacam)."
+      }
+    },
+    {
+      "id": "gogeta_ssjz",
+      "nome": "Gogeta (SSJ-Z)",
+      "raridade": "lendaria",
+      "custo": 6,
+      "tipo": "Fusão lendária",
+      "descricao": "A fusão de Goku e Vegeta em Super Saiyajin. Golpes rápidos e devastadores.",
+      "trofeus": 330,
+      "rosto": [
+        375,
+        520,
+        150
+      ],
+      "arte": [
+        58,
+        130,
+        620
+      ],
+      "vida": 1700,
+      "dano": 390,
+      "velocidade": 50,
+      "alcance": 20,
+      "cadencia": 1.1,
+      "alvo": "tudo",
+      "habilidade": {
+        "nome": "Punho Meteoro",
+        "tipo": "golpes",
+        "custo": 2,
+        "recarga": 11,
+        "descricao": "Os próximos 3 golpes causam o triplo de dano."
+      }
+    },
+    {
+      "id": "gogeta_ssj4",
+      "nome": "Gogeta (SSJ4)",
+      "raridade": "lendaria",
+      "custo": 7,
+      "tipo": "Fusão lendária",
+      "descricao": "Muita vida e golpes em área. Lento, mas quase impossível de parar.",
+      "trofeus": 340,
+      "rosto": [
+        365,
+        500,
+        95
+      ],
+      "arte": [
+        90,
+        250,
+        560
+      ],
+      "vida": 2200,
+      "dano": 420,
+      "velocidade": 44,
+      "alcance": 20,
+      "cadencia": 1.25,
+      "alvo": "tudo",
+      "area": 30,
+      "habilidade": {
+        "nome": "Big Bang Kamehameha",
+        "tipo": "kamehameha",
+        "custo": 3,
+        "recarga": 14,
+        "dano": 1300,
+        "descricao": "Dispara um Kamehameha gigante que atravessa tudo em linha reta."
+      }
+    },
+    {
+      "id": "vegito_ex",
+      "nome": "Vegito (SSJ EX)",
+      "raridade": "lendaria",
+      "custo": 6,
+      "tipo": "Fusão lendária",
+      "descricao": "Rápido para o tamanho e com a Espada Espiritual sempre pronta.",
+      "trofeus": 350,
+      "rosto": [
+        320,
+        190,
+        75
+      ],
+      "arte": [
+        20,
+        60,
+        600
+      ],
+      "vida": 1600,
+      "dano": 380,
+      "velocidade": 54,
+      "alcance": 22,
+      "cadencia": 1.0,
+      "alvo": "tudo",
+      "habilidade": {
+        "nome": "Espada Espiritual",
+        "tipo": "golpes",
+        "custo": 2,
+        "recarga": 10,
+        "descricao": "Os próximos 3 golpes causam o triplo de dano."
+      }
+    },
+    {
+      "id": "gogeta_ultra",
+      "nome": "Gogeta (SSJ Ultra)",
+      "raridade": "lendaria",
+      "custo": 7,
+      "tipo": "Fusão lendária",
+      "descricao": "O Gogeta mais forte: muito dano em área e uma fúria que destrói torres.",
+      "trofeus": 370,
+      "rosto": [
+        405,
+        420,
+        120
+      ],
+      "arte": [
+        58,
+        100,
+        620
+      ],
+      "vida": 2000,
+      "dano": 450,
+      "velocidade": 48,
+      "alcance": 20,
+      "cadencia": 1.15,
+      "alvo": "tudo",
+      "area": 25,
+      "habilidade": {
+        "nome": "Instinto Ultra",
+        "tipo": "furia",
+        "custo": 3,
+        "recarga": 15,
+        "duracao": 7,
+        "descricao": "Por 7s fica muito mais rápido e causa +60% de dano."
       }
     },
     {

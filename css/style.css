@@ -994,3 +994,16 @@ button.item-loja:active, button.slot-bau:active, .slot-carta:active { transform:
 .estilo-op i { position: absolute; top: 2px; right: 4px; font-style: normal; font-size: 11px; }
 .vantagem-passe { font-size: 13px; background: #0004; border-radius: 10px; padding: 6px 10px; margin: 0 0 8px; }
 .selo-pedidos.oculto { display: none; }
+
+/* ---------- Congelar (Rukia) e Adaptação (Isagi) ---------- */
+.gelo { position: absolute; transform: translate(-50%, -50%); border-radius: 50%; pointer-events: none; z-index: 1650; aspect-ratio: 1; width: 55%; background: radial-gradient(#ffffffdd, #BFE8FFaa 40%, #7FD0FF55 60%, transparent 72%); animation: ondaAbre 1s ease-out forwards; }
+.tropa.congelada { animation: none !important; }
+.tropa.congelada .tropa-medalhao { filter: saturate(0.2) brightness(1.25) hue-rotate(170deg); box-shadow: 0 0 0 3px #DDF3FF, 0 0 14px 4px #7FD0FF; }
+.tropa.congelada::after { content: '❄️'; position: absolute; top: -6px; right: -4px; font-size: 14px; }
+.selo-adapt { position: absolute; left: -6px; bottom: -4px; min-width: 16px; height: 16px; padding: 0 3px; border-radius: 8px; background: #0B6E8F; color: #fff; font-style: normal; font-size: 10px; line-height: 16px; text-align: center; font-family: 'Lilita One', 'Fredoka', sans-serif; box-shadow: 0 0 0 1.5px #7FE8FF; }
+.selo-adapt:empty { display: none; }
+.selo-adapt.pulo { animation: seloPulo 0.35s ease-out; }
+@keyframes seloPulo { 50% { transform: scale(1.5); } }
+.tropa.adaptado .tropa-medalhao { box-shadow: 0 0 0 3px #7FE8FF, 0 0 16px 5px #39C6FF; }
+.selo-hab.passiva { background: #7FE8FF; }
+.hab-detalhe.passiva { border-color: #7FE8FF; }

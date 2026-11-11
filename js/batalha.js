@@ -285,12 +285,13 @@ const Batalha = (() => {
       alcance: c.alcance, vel: c.velocidade, cadencia: c.cadencia, cd: 0.6, area: c.area || 0,
       alvoTipo: c.alvo || 'tudo', surgir: 1, alvo: null,
       habilidade: c.habilidade || null, recarga: 0, golpesFortes: 0, furia: 0, fenix: 0, nivel, f,
+      congelado: 0, adaptacao: 0, adaptTimer: 0, danoBase: Math.round(c.dano * f), velBase: c.velocidade,
     };
     if (c.token) t.raio = 8;
     t.el = document.createElement('div');
     t.el.className = `tropa ${time} surgindo${c.token ? ' mini' : ''}${c.habilidade ? ' campea' : ''}`;
     t.el.innerHTML = `${barraHp()}
-      <div class="tropa-corpo"><div class="tropa-medalhao"><img src="assets/cartas/${c.id}_medalhao.png" alt="" /><b>${nivel}</b></div></div><div class="tropa-sombra"></div>`;
+      <div class="tropa-corpo"><div class="tropa-medalhao"><img src="assets/cartas/${c.id}_medalhao.png" alt="" /><b>${nivel}</b>${c.passiva ? '<i class="selo-adapt"></i>' : ''}</div></div><div class="tropa-sombra"></div>`;
     s.arena.appendChild(t.el);
     s.ent.push(t);
     posicionar(t);
@@ -353,6 +354,7 @@ const Batalha = (() => {
   function ferir(e, dano, deTime) {
     if (e.vida <= 0) return;
     if (e.torre && e.time === 'azul' && Mod.flag('torresInvenciveis')) return;
+    if (e.adaptacao && e.carta && e.carta.passiva) dano = Math.round(dano * (1 - e.carta.passiva.defesa * e.adaptacao));
     e.vida -= dano;
     numero(e, dano);
     atualizarHp(e);
@@ -486,8 +488,40 @@ const Batalha = (() => {
       efeito('cura', t.x, t.y, 800);
     }
     if (h.tipo === 'kamehameha') kamehameha(t, Math.round((h.dano || 1500) * (t.f || 1)));
+    if (h.tipo === 'congelar') congelar(t, h);
     if (t.time === 'azul') UI.toast(`⚡ ${h.nome}!`);
     return true;
+  }
+
+  // congela as tropas inimigas em volta (não andam nem atacam)
+  function congelar(t, h) {
+    const raio = h.raio || 95;
+    const centro = (t.alvo && t.alvo.vida > 0 && !t.alvo.torre && dist(t, t.alvo) < 160) ? t.alvo : t;
+    efeito('gelo', centro.x, centro.y, 1000);
+    particulas(centro.x, centro.y, '#DDF3FF', 16, raio * 0.6);
+    if (s.rede) s.eventos.push(['g', Math.round(centro.x), Math.round(centro.y), 0]);
+    for (const e of s.ent) {
+      if (e.torre || e.time === t.time || e.vida <= 0 || dist(e, centro) > raio + e.raio) continue;
+      e.congelado = h.duracao || 2.5;
+      e.el.classList.add('congelada');
+      if (h.dano) ferir(e, Math.round(h.dano * (t.f || 1)), t.time);
+    }
+  }
+
+  // passiva do Isagi: a cada segundo vivo ele se adapta (mais dano, mais rápido e aguenta mais)
+  function adaptar(t, dt) {
+    const p = t.carta.passiva;
+    if (t.adaptacao >= p.max) return;
+    t.adaptTimer += dt;
+    if (t.adaptTimer < p.intervalo) return;
+    t.adaptTimer = 0;
+    t.adaptacao++;
+    t.dano = Math.round(t.danoBase * (1 + p.dano * t.adaptacao));
+    t.vel = t.velBase * (1 + p.vel * t.adaptacao);
+    const selo = t.el.querySelector('.selo-adapt');
+    if (selo) { selo.textContent = t.adaptacao; selo.classList.remove('pulo'); void selo.offsetWidth; selo.classList.add('pulo'); }
+    if (t.adaptacao % 5 === 0) { particulas(t.x, t.y, '#7FE8FF', 8, 20); if (t.time === 'azul' && t.adaptacao === p.max) UI.toast('🧩 Isagi se adaptou totalmente!'); }
+    t.el.classList.toggle('adaptado', t.adaptacao >= p.max);
   }
 
   function kamehameha(t, dano) {
@@ -759,7 +793,8 @@ const Batalha = (() => {
       const usar = (h.tipo === 'cura' && t.vida < t.max * 0.45)
         || (h.tipo === 'fenix' && t.vida < t.max * 0.4)
         || ((h.tipo === 'golpes' || h.tipo === 'furia') && perto && (t.alvo.torre || t.alvo.vida > t.dano))
-        || (h.tipo === 'kamehameha' && t.alvo && dist(t, t.alvo) < 240);
+        || (h.tipo === 'kamehameha' && t.alvo && dist(t, t.alvo) < 240)
+        || (h.tipo === 'congelar' && s.ent.filter((e) => !e.torre && e.time === 'azul' && e.vida > 0 && dist(e, t) < (h.raio || 95) + 40).length >= 2);
       if (usar && ativarHabilidade(t)) return;
     }
 
@@ -880,7 +915,7 @@ const Batalha = (() => {
       fila: s.vermelho.fila.slice(0, 5),
       tw: Object.fromEntries(s.ent.filter((e) => e.torre).map((e) => [e.id, Math.round(e.vida)])),
       tr: s.ent.filter((e) => !e.torre).map((e) => [e.id, e.carta.id, e.time === 'azul' ? 0 : 1, Math.round(e.x * 10) / 10, Math.round(e.y * 10) / 10,
-        Math.round(e.vida), e.max, e.nivel, (e.surgir > 0 ? 1 : 0) | (e.furia > 0 ? 2 : 0) | (e.golpesFortes > 0 ? 4 : 0) | (e.fenix > 0 ? 8 : 0), e.recarga > 0 ? +e.recarga.toFixed(1) : 0]),
+        Math.round(e.vida), e.max, e.nivel, (e.surgir > 0 ? 1 : 0) | (e.furia > 0 ? 2 : 0) | (e.golpesFortes > 0 ? 4 : 0) | (e.fenix > 0 ? 8 : 0) | (e.congelado > 0 ? 16 : 0) | ((e.adaptacao || 0) << 6), e.recarga > 0 ? +e.recarga.toFixed(1) : 0]),
       pj: s.proj.map((p) => [Math.round(p.x), Math.round(p.y), p.time === 'azul' ? 0 : 1, p.el.classList.contains('de-torre') ? 1 : 0]),
       ev: s.eventos,
     };
@@ -939,6 +974,9 @@ const Batalha = (() => {
       t.el.classList.toggle('aura-furia', !!(flags & 2));
       t.el.classList.toggle('aura-golpes', !!(flags & 4));
       t.el.classList.toggle('aura-fenix', !!(flags & 8));
+      t.el.classList.toggle('congelada', !!(flags & 16));
+      const ad = flags >> 6, selo = t.el.querySelector('.selo-adapt');
+      if (selo && String(ad || '') !== selo.textContent) { selo.textContent = ad || ''; t.el.classList.toggle('adaptado', !!(t.carta.passiva && ad >= t.carta.passiva.max)); }
       t.recarga = recarga;
     }
     for (const [hid, t] of s.mapa) {
@@ -980,7 +1018,9 @@ const Batalha = (() => {
         setTimeout(() => raio.remove(), 900);
         setTimeout(() => tremer(true), 300);
       } else if (ev[0] === 'a') {
-        efeito(`ativou ${espelhoTime(ev[3])}`, W - ev[1], H - ev[2], 700);
+        efeito(`ativou ${espelhoTime(ev[3])}`, W - ev[1], H - ev[2], 700);      } else if (ev[0] === 'g') {
+        efeito('gelo', W - ev[1], H - ev[2], 1000);
+        particulas(W - ev[1], H - ev[2], '#DDF3FF', 16, 55);
       }
     }
 
@@ -1087,6 +1127,8 @@ const Batalha = (() => {
     for (const t of s.ent) {
       if (t.torre || t.vida <= 0) continue;
       if (t.surgir > 0) { t.surgir -= dt; if (t.surgir <= 0) t.el.classList.remove('surgindo'); continue; }
+      if (t.carta.passiva) adaptar(t, dt);
+      if (t.congelado > 0) { if ((t.congelado -= dt) <= 0) t.el.classList.remove('congelada'); continue; }
       if (!t.alvo || t.alvo.vida <= 0 || !s.ent.includes(t.alvo) || Math.random() < 0.02) t.alvo = escolherAlvo(t);
       t.cd -= dt;
       if (!t.alvo) continue;
