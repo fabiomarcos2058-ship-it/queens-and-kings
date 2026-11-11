@@ -207,7 +207,7 @@ const Batalha = (() => {
     L.fila.splice(indice, 1);
     L.fila.push(id);
     const nivel = time === 'azul' ? Estado.d.colecao[id].nivel : s.nivelIA;
-    const f = Math.pow(1.1, nivel - 1);
+    const f = Math.pow(1.1, nivel - 1) * (time === 'azul' && Mod.flag('danoX5') ? 5 : 1);
     if (c.feitico) {
       lancarFeitico(time, c, x, y, Math.round(c.dano * f));
     } else {
@@ -301,6 +301,7 @@ const Batalha = (() => {
 
   function ferir(e, dano, deTime) {
     if (e.vida <= 0) return;
+    if (e.torre && e.time === 'azul' && Mod.flag('torresInvenciveis')) return;
     e.vida -= dano;
     numero(e, dano);
     atualizarHp(e);
@@ -479,6 +480,7 @@ const Batalha = (() => {
 
   // ---------- Oponente (computador) ----------
   function ia(dt) {
+    if (Mod.flag('iaParada')) return;
     const L = s.vermelho;
     s.iaTimer -= dt;
     if (s.iaTimer > 0) return;
@@ -519,7 +521,7 @@ const Batalha = (() => {
     if (!s || s.acabou) return;
     const dt = Math.min(0.05, (agora - s.ultimo) / 1000);
     s.ultimo = agora;
-    if (!s.pausa) for (let i = 0; i < VEL; i++) {
+    if (!s.pausa) for (let i = 0; i < VEL * Mod.vel(); i++) {
       if (s.acabou) break;
       try { passo(dt); } catch (e) { console.error('Erro na batalha (o jogo continua):', e); }
     }
@@ -533,6 +535,7 @@ const Batalha = (() => {
     const dobro = s.modo === 'elixir2x' || s.prorrogacao || resta <= 60;
     const ganho = (dt / ELIXIR_SEG) * (dobro ? 2 : 1);
     for (const time of ['azul', 'vermelho']) s[time].elixir = Math.min(10, s[time].elixir + ganho);
+    if (Mod.flag('elixirInfinito')) s.azul.elixir = 10;
     const tempoEl = document.querySelector('.tempo');
     tempoEl.textContent = `${Math.floor(resta / 60)}:${String(Math.floor(resta % 60)).padStart(2, '0')}`;
     tempoEl.classList.toggle('dobro', dobro);
@@ -657,5 +660,13 @@ const Batalha = (() => {
     s = null;
   }
 
-  return { iniciar, fechar, _estado: () => s };
+  function vencerAgora() {
+    if (!s || s.acabou) return false;
+    s.azul.coroas = 3;
+    atualizarPlacar();
+    terminar();
+    return true;
+  }
+
+  return { iniciar, fechar, vencerAgora, _estado: () => s };
 })();

@@ -41,6 +41,15 @@ const Conta = (() => {
     if (!usuario) return;
     try {
       await fb.setDoc(docJogador(), { dados: JSON.stringify(Estado.d), atualizado: fb.serverTimestamp(), nome: Estado.d.nome });
+      // top global (contas que usaram o mod menu ficam de fora, pra ser justo)
+      if (!Estado.d.modUsado) {
+        await fb.setDoc(fb.doc(fb.db, 'ranking', usuario.uid), {
+          nome: Estado.d.nome.slice(0, 16), trofeus: Math.max(0, Math.min(99999, Math.round(Estado.d.trofeus))),
+          avatar: Estado.d.avatar, cla: Estado.d.cla ? Estado.d.cla.nome.slice(0, 20) : '', atualizado: fb.serverTimestamp(),
+        }).catch(() => {});
+      } else {
+        await fb.deleteDoc(fb.doc(fb.db, 'ranking', usuario.uid)).catch(() => {});
+      }
       // mantém nome e troféus atualizados no clã
       if (Estado.d.cla && Estado.d.cla.id) {
         await fb.updateDoc(fb.doc(fb.db, 'clas', Estado.d.cla.id), {
@@ -244,6 +253,13 @@ const Conta = (() => {
     }
   }
 
+  async function topGlobal() {
+    await iniciarFirebase();
+    const q = fb.query(fb.collection(fb.db, 'ranking'), fb.orderBy('trofeus', 'desc'), fb.limit(50));
+    const snap = await fb.getDocs(q);
+    return snap.docs.map((x) => ({ uid: x.id, ...x.data() }));
+  }
+
   async function sair() {
     try { await enviarParaNuvem(); await fb.signOut(fb.auth); } catch (e) { /* nada */ }
     usuario = null;
@@ -252,5 +268,5 @@ const Conta = (() => {
     location.reload();
   }
 
-  return { tela, ativo, logado, email, verificarSessao, sair, salvarComGoogle, fb: () => fb, uid: () => (usuario ? usuario.uid : null), salvarAgora: enviarParaNuvem };
+  return { tela, ativo, logado, email, verificarSessao, sair, salvarComGoogle, fb: () => fb, uid: () => (usuario ? usuario.uid : null), salvarAgora: enviarParaNuvem, topGlobal };
 })();

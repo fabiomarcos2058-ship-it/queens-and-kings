@@ -6,6 +6,16 @@ service cloud.firestore {
       allow read, write: if request.auth != null && request.auth.uid == uid;
     }
 
+    // Top global: todo mundo vê; cada um só escreve a própria linha
+    match /ranking/{uid} {
+      allow read: if true;
+      allow write: if request.auth != null && request.auth.uid == uid
+        && (request.method == 'delete' || (
+          request.resource.data.trofeus is int
+          && request.resource.data.trofeus >= 0 && request.resource.data.trofeus < 100000
+          && request.resource.data.nome is string && request.resource.data.nome.size() <= 16));
+    }
+
     // Clãs: qualquer pessoa logada vê; cada um só mexe na própria entrada; o líder pode remover membros
     match /clas/{claId} {
       allow read: if request.auth != null;

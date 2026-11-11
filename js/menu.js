@@ -105,7 +105,7 @@
           <div class="grade-cores">${Object.entries(CORES).map(([k, v]) => `<button data-cor="${k}" class="${k === d().cor ? 'escolhido' : ''}" style="background:${v}"></button>`).join('')}</div>
         </div>
         <div class="perfil-conta">${Conta.logado()
-          ? `<span>☁️ Salvo na conta<br><b>${Conta.email()}</b></span><button class="btn-peq perigo" id="btn-sair-conta">Sair</button>`
+          ? `<span>☁️ Salvo na conta<br><b>${Conta.email()}</b><br><small class="meu-id">ID: <code>${Conta.uid()}</code> <button class="btn-copiar" id="copiar-id">copiar</button></small></span><button class="btn-peq perigo" id="btn-sair-conta">Sair</button>`
           : `<div class="salvar-conta"><span>📱 Seu progresso está salvo <b>só neste celular</b>. Salve numa conta pra não perder e jogar em qualquer lugar!</span>
               <button class="btn-modal btn-google" id="btn-salvar-google"><b>G</b> Salvar na conta Google</button>
               <button class="btn-modal secundario" id="btn-entrar-conta">Criar conta ou entrar com e-mail</button></div>`}</div>
@@ -140,6 +140,8 @@
     if (btnEntrar) btnEntrar.onclick = async () => { m.fechar(); await Conta.tela({ podeFechar: true }); tudo(); };
     const btnGoogle = el.querySelector('#btn-salvar-google');
     if (btnGoogle) btnGoogle.onclick = async () => { btnGoogle.disabled = true; if (await Conta.salvarComGoogle()) { m.fechar(); tudo(); } btnGoogle.disabled = false; };
+    const btnCopiar = el.querySelector('#copiar-id');
+    if (btnCopiar) btnCopiar.onclick = async () => { try { await navigator.clipboard.writeText(Conta.uid()); UI.toast('ID copiado!'); } catch (e) { UI.toast('Segure o ID para copiar'); } };
     const btnSair = el.querySelector('#btn-sair-conta');
     if (btnSair) btnSair.onclick = () => UI.modal({
       titulo: 'Sair da conta?',
@@ -235,6 +237,26 @@
   }
 
   $('btn-jogar').onclick = () => jogar('normal');
+  $('btn-top').onclick = topGlobal;
+
+  async function topGlobal() {
+    const m = UI.modal({ titulo: '🏆 Top global', classe: 'modal-top', html: '<p class="aviso">Carregando…</p>' });
+    const corpo = m.el.querySelector('.modal-corpo');
+    try {
+      const lista = await Conta.topGlobal();
+      const eu = Conta.uid();
+      const avatar = (a) => (ICONES.includes(a) ? `assets/avatares/${a}.svg` : a ? `assets/cartas/${a}_medalhao.png` : 'assets/avatares/coroa.svg');
+      corpo.innerHTML = (lista.length ? `<div class="top-lista">${lista.map((j, i) => `<div class="top-linha${j.uid === eu ? ' voce' : ''} pos${i + 1}">
+          <span class="top-pos">${i < 3 ? ['🥇', '🥈', '🥉'][i] : i + 1}</span><img src="${avatar(j.avatar)}" alt="" />
+          <div class="top-nome"><b>${esc(j.nome || 'Jogador')}${j.uid === eu ? ' (você)' : ''}</b>${j.cla ? `<small>🛡️ ${esc(j.cla)}</small>` : ''}</div>
+          <span class="top-trofeus"><i class="ic-trofeu"></i>${fmt(j.trofeus || 0)}</span></div>`).join('')}</div>`
+        : '<p class="aviso">Ainda ninguém no top. Seja o primeiro!</p>')
+        + (eu ? '' : '<p class="aviso">Entre numa conta para aparecer no top global.</p>')
+        + (d().modUsado ? '<p class="aviso">Sua conta usou o mod menu, então não aparece no top.</p>' : '');
+    } catch (e) {
+      corpo.innerHTML = `<p class="aviso">${erroNuvem(e)}</p>`;
+    }
+  }
   document.querySelector('.trofeus').onclick = caminho;
 
   function caminho() {
@@ -288,6 +310,7 @@
     const ev = d().eventos;
     ev.coroas += r.coroas;
     if (vitoria) ev.sequencia = Math.min(3, ev.sequencia + 1); else if (!ev.desafioPremio) ev.sequencia = 0;
+    const passe = Passe.ganharPontos(r.resultado, r.coroas);
     Estado.salvar();
 
     const titulo = { vitoria: 'Vitória! 👑', derrota: 'Derrota', empate: 'Empate' }[r.resultado];
@@ -300,6 +323,7 @@
           ${ouro ? `<span><img class="ic-img" data-asset="ui/moeda" alt="" /> +${ouro}</span>` : ''}
         </div>
         ${bau ? `<p class="ganhou-bau"><img data-asset="ui/bau_${bau}" alt="" /> Você ganhou um ${Estado.BAUS[bau].nome.toLowerCase()}!</p>` : vitoria ? '<p class="aviso">Seus espaços de baú estão cheios.</p>' : ''}
+        <p class="passe-ganho">🎟️ +${passe.ganho} pontos do passe${passe.subiu ? ` · <b>nível ${Passe.nivel()} do passe!</b>` : ''}</p>
         <div class="xp-resultado"><div class="nivel" data-n="${nivelAntes}"></div><div class="perfil-xp"><i id="xp-anim" style="width:${(xpAntes / Estado.XP_NIVEL(nivelAntes)) * 100}%"></i><small>+${xpGanho} XP</small></div></div>`,
       botoes: [{ texto: 'OK', classe: 'principal', acao: () => { Batalha.fechar(); tudo(); irPara('batalha'); subiuNivel(niveis, () => cartasLiberadas(liberadas)); } }],
     });
@@ -610,11 +634,20 @@
     const item = (classe, titulo, desc, extra, botao) => `<div class="evento ${classe}"><div><b>${titulo}</b><span>${desc}</span>${extra}</div>${botao}</div>`;
     const barra = (v, max) => `<div class="ev-barra"><i style="width:${Math.min(100, (v / max) * 100)}%"></i><small>${Math.min(v, max)}/${max}</small></div>`;
     const btnPremio = (pronto, pego, id) => pego ? '<div class="selo">Concluído ✓</div>' : pronto ? `<button class="selo botao" data-premio="${id}">Pegar prêmio</button>` : '<button class="selo botao" data-jogar="normal">Jogar</button>';
+    const p = Passe.dados();
+    const nv = Passe.nivel();
+    const pend = Passe.pendentes();
     $('eventos-lista').innerHTML =
+      `<button class="cartao-passe${p.ultra ? ' ultra' : p.plus ? ' plus' : ''}" id="abrir-passe">
+        <div class="passe-topo"><b>🎟️ Passe da Temporada</b><small>${Passe.diasRestantes()} dias restantes</small></div>
+        <div class="passe-linha"><span class="passe-nivel">${nv}</span><div class="ev-barra passe-barra"><i style="width:${nv >= Passe.NIVEIS ? 100 : ((p.pontos % Passe.PONTOS_NIVEL) / Passe.PONTOS_NIVEL) * 100}%"></i><small>${nv >= Passe.NIVEIS ? 'Completo!' : `${p.pontos % Passe.PONTOS_NIVEL}/${Passe.PONTOS_NIVEL}`}</small></div><span class="passe-tipo">${p.ultra ? 'ULTRA' : p.plus ? 'PLUS' : 'FREE'}</span></div>
+        ${pend ? `<span class="passe-pendente">${pend} prêmio${pend > 1 ? 's' : ''} para pegar!</span>` : ''}
+      </button>` +
       item('ev1', 'Desafio do Festival', 'Vença 3 batalhas seguidas · prêmio: baú de ouro', barra(ev.sequencia, 3), btnPremio(ev.sequencia >= 3, ev.desafioPremio, 'desafio')) +
       item('ev2', 'Torneio das Coroas', 'Junte 30 coroas · prêmio: 100 gemas', barra(ev.coroas, 30), btnPremio(ev.coroas >= 30, ev.torneioPremio, 'torneio')) +
       item('ev4', 'Elixir em dobro', 'A batalha inteira com elixir rápido', '', '<button class="selo botao" data-jogar="elixir2x">Jogar</button>') +
       item('ev3', 'Batalha em dupla', 'Jogue 2 contra 2 com um amigo', '', '<div class="selo">Em breve</div>');
+    $('abrir-passe').onclick = telaPasse;
     $('eventos-lista').querySelectorAll('[data-jogar]').forEach((b) => (b.onclick = () => jogar(b.dataset.jogar)));
     $('eventos-lista').querySelectorAll('[data-premio]').forEach((b) => (b.onclick = () => {
       if (b.dataset.premio === 'desafio') { ev.desafioPremio = true; mostrarBau('ouro', Estado.abrirBau('ouro')); }
@@ -622,7 +655,62 @@
     }));
   }
 
+  function telaPasse() {
+    const p = Passe.dados();
+    const nv = Passe.nivel();
+    const trilhas = [['free', 'Free'], ['plus', 'Plus'], ['ultra', 'Ultra']];
+    const linha = (n) => `<div class="passe-nv${n <= nv ? ' alcancado' : ''}"><span class="passe-num">${n}</span>${trilhas.map(([t]) => {
+      const r = Passe.recompensa(t, n);
+      const pego = p.pegos[t].includes(n);
+      const pode = Passe.podePegar(t, n);
+      const tranc = !Passe.temTrilha(t);
+      return `<button class="premio ${t}${pego ? ' pego' : ''}${pode ? ' pode' : ''}${tranc ? ' trancado' : ''}" data-t="${t}" data-n="${n}">
+        <span class="premio-ic">${pego ? '✔' : Passe.icone(r)}</span><small>${Passe.texto(r)}</small>${tranc ? '<i>🔒</i>' : ''}</button>`;
+    }).join('')}</div>`;
+    const m = UI.modal({
+      titulo: '🎟️ Passe da Temporada',
+      classe: 'modal-passe',
+      html: `<p class="aviso">Ganhe pontos jogando batalhas (vitória 40, derrota 15, +8 por coroa). Temporada termina em ${Passe.diasRestantes()} dias.</p>
+        <div class="passe-compras">
+          <button class="comprar-passe plus${p.plus || p.ultra ? ' tem' : ''}" data-c="plus"><b>PLUS</b><small>${p.plus || p.ultra ? 'Ativo ✔' : `💎 ${Passe.precoAtual('plus')}`}</small></button>
+          <button class="comprar-passe ultra${p.ultra ? ' tem' : ''}" data-c="ultra"><b>ULTRA</b><small>${p.ultra ? 'Ativo ✔' : `💎 ${Passe.precoAtual('ultra')}`}</small></button>
+        </div>
+        <div class="passe-cab"><span>Nv</span><span>Free</span><span>Plus</span><span>Ultra</span></div>
+        <div class="passe-trilhas">${Array.from({ length: Passe.NIVEIS }, (_, i) => linha(i + 1)).join('')}</div>`,
+      botoes: [{ texto: 'Fechar', classe: 'principal', acao: () => eventos() }],
+    });
+    const el = m.el;
+    const alvo = el.querySelectorAll('.passe-nv')[Math.max(0, nv - 2)];
+    if (alvo) setTimeout(() => alvo.scrollIntoView({ block: 'center' }), 50);
+    el.querySelectorAll('.premio').forEach((b) => (b.onclick = () => {
+      const t = b.dataset.t, n = +b.dataset.n;
+      if (!Passe.temTrilha(t)) return UI.toast(`Compre o passe ${t === 'plus' ? 'Plus' : 'Ultra'} para pegar`);
+      if (n > Passe.nivel()) return UI.toast(`Chegue ao nível ${n} do passe`);
+      const res = Passe.pegar(t, n);
+      if (!res) return;
+      b.classList.add('pego'); b.classList.remove('pode'); b.querySelector('.premio-ic').textContent = '✔';
+      topo();
+      if (res.extra && res.extra.bau) mostrarBau(res.extra.bau, res.extra.abertura);
+      else if (res.extra && res.extra.carta) UI.toast(`🃏 +${res.extra.qtd} ${res.extra.carta.nome}!`);
+      else UI.toast(`+ ${Passe.texto(res.r)}!`);
+    }));
+    el.querySelectorAll('[data-c]').forEach((b) => (b.onclick = () => {
+      const t = b.dataset.c;
+      if (Passe.dados()[t] || (t === 'plus' && Passe.dados().ultra)) return UI.toast('Você já tem esse passe');
+      const preco = Passe.precoAtual(t);
+      UI.modal({
+        titulo: `Comprar passe ${t === 'plus' ? 'Plus' : 'Ultra'}?`,
+        html: t === 'plus'
+          ? `<p>Libera a trilha <b>Plus</b> desta temporada: muito ouro, baús de prata e de ouro e gemas.</p><p><b>💎 ${preco} gemas</b></p>`
+          : `<p>Libera as trilhas <b>Plus e Ultra</b>: baús de ouro, cartas épicas e <b>cartas lendárias</b>.</p><p><b>💎 ${preco} gemas</b>${Passe.dados().plus ? ' (desconto de quem já tem o Plus)' : ''}</p>`,
+        botoes: [{ texto: 'Agora não', classe: 'secundario' }, { texto: 'Comprar', classe: 'principal', desativado: d().gemas < preco, motivo: `Faltam ${preco - d().gemas} gemas`,
+          acao: () => { const r = Passe.comprar(t); if (r.ok) { UI.toast(`Passe ${t === 'plus' ? 'Plus' : 'Ultra'} ativado! ✨`); m.fechar(); topo(); setTimeout(telaPasse, 250); } } }],
+      });
+    }));
+  }
+
   function tudo() {
+    Mod.mostrarBotao(tudo);
     topo(); telaBatalha(); loja(); cartas(); cla(); eventos();
   }
 

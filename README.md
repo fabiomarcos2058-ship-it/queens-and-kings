@@ -64,3 +64,9 @@ O bot fica em `bot/`. Ele baixa pacotes 3D com licença CC0 da Kenney, tira "fot
 - Login com e-mail/senha ou Google, ou jogar sem conta.
 - Quem tem conta tem o progresso salvo no Firestore em `jogadores/{uid}` e pode jogar em qualquer celular.
 - As regras de segurança estão em `firestore.rules`. Cole esse texto em **Firestore → Regras → Publicar**.
+
+## Top global, passe e mod menu
+
+- **Top global:** os 50 jogadores com mais troféus (coleção `ranking`). Contas que usaram o mod menu ficam de fora.
+- **Passe da temporada:** 30 níveis por mês; trilhas Free, Plus (600 gemas) e Ultra (1.500 gemas). Pontos por batalha.
+- **Mod menu:** só aparece para os IDs listados em `CRIADORES`, no arquivo `js/mod.js`. O ID aparece no perfil de quem está logado.

@@ -742,3 +742,73 @@ button.item-loja:active, button.slot-bau:active, .slot-carta:active { transform:
 .zona-lado { position: absolute; top: 0; width: 50%; background: repeating-linear-gradient(45deg, #E24B4A40 0 12px, #E24B4A1c 12px 24px); border-bottom: 2px dashed #F09595; transition: height 0.5s ease-out; }
 .zona-lado.esq { left: 0; }
 .zona-lado.dir { right: 0; }
+
+/* ================= Top global ================= */
+.btn-top { display: block; margin: 0 auto 8px; background: linear-gradient(#FFD98A, #F2B23E); color: #412402; font-weight: 700; font-size: 14px; padding: 6px 16px; border-radius: 12px; border-bottom: 3px solid #BA7517; }
+.top-lista { display: flex; flex-direction: column; gap: 6px; text-align: left; }
+.top-linha { display: flex; align-items: center; gap: 8px; background: #1d2350; border-radius: 12px; padding: 6px 10px; }
+.top-linha.voce { background: #534AB7; box-shadow: inset 0 0 0 2px #FAC775; }
+.top-linha.pos1 { background: linear-gradient(90deg, #BA7517, #1d2350); }
+.top-linha.pos2 { background: linear-gradient(90deg, #888780, #1d2350); }
+.top-linha.pos3 { background: linear-gradient(90deg, #993C1D, #1d2350); }
+.top-pos { width: 26px; text-align: center; font-family: 'Lilita One', 'Fredoka', sans-serif; font-size: 16px; color: #FAC775; }
+.top-linha img { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; border: 2px solid #fff; background: #1d2350; }
+.top-nome { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.top-nome b { font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.top-nome small { font-size: 11px; color: #CECBF6; }
+.top-trofeus { display: flex; align-items: center; gap: 3px; font-family: 'Lilita One', 'Fredoka', sans-serif; }
+.meu-id { display: block; margin-top: 4px; font-size: 11px; color: #B5D4F4; }
+.meu-id code { font-size: 10px; word-break: break-all; color: #FAC775; }
+.btn-copiar { background: #534AB7; color: #fff; font-size: 10px; padding: 1px 6px; border-radius: 6px; }
+
+/* ================= Passe ================= */
+.cartao-passe { display: block; width: 100%; text-align: left; color: #fff; font-family: inherit; border-radius: 16px; padding: 12px 14px; margin-bottom: 12px; background: linear-gradient(135deg, #3b4596, #26215C); border: 2px solid #5a65b8; box-shadow: 0 4px 0 #0d1130; position: relative; overflow: hidden; }
+.cartao-passe.plus { background: linear-gradient(135deg, #1D9E75, #26215C); border-color: #5DCAA5; }
+.cartao-passe.ultra { background: linear-gradient(135deg, #BA7517, #72243E 60%, #26215C); border-color: #FAC775; }
+.cartao-passe::after { content: ''; position: absolute; inset: 0; background: linear-gradient(115deg, transparent 35%, #ffffff22 50%, transparent 65%); background-size: 250% 100%; animation: reflexo 4s linear infinite; pointer-events: none; }
+.passe-topo { display: flex; justify-content: space-between; align-items: baseline; }
+.passe-topo b { font-family: 'Lilita One', 'Fredoka', sans-serif; font-size: 18px; }
+.passe-topo small { font-size: 11px; color: #E6F1FB; }
+.passe-linha { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+.passe-nivel { width: 32px; height: 32px; border-radius: 50%; background: #FAC775; color: #412402; display: grid; place-items: center; font-family: 'Lilita One', 'Fredoka', sans-serif; font-size: 16px; flex-shrink: 0; }
+.passe-barra { flex: 1; max-width: none; margin: 0; height: 16px; }
+.passe-barra i { background: linear-gradient(#FFE9A0, #F5C23A); }
+.passe-barra small { line-height: 16px; color: #2C2C2A; }
+.passe-tipo { font-family: 'Lilita One', 'Fredoka', sans-serif; font-size: 13px; padding: 2px 8px; border-radius: 8px; background: #0005; }
+.passe-pendente { display: inline-block; margin-top: 8px; background: #E24B4A; padding: 2px 10px; border-radius: 8px; font-size: 12px; font-weight: 700; animation: pulsa 1s infinite; }
+.passe-ganho { color: #FAC775; font-size: 14px; }
+.modal-passe { max-height: 92%; }
+.passe-compras { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 8px 0; }
+.comprar-passe { border-radius: 12px; padding: 10px 6px; color: #fff; display: flex; flex-direction: column; align-items: center; border-bottom: 4px solid #0006; }
+.comprar-passe b { font-family: 'Lilita One', 'Fredoka', sans-serif; font-size: 20px; }
+.comprar-passe.plus { background: linear-gradient(#5DCAA5, #0F6E56); }
+.comprar-passe.ultra { background: linear-gradient(#FAC775, #D4537E); text-shadow: 0 1px 0 #0006; }
+.comprar-passe.tem { filter: saturate(0.6); }
+.passe-cab, .passe-nv { display: grid; grid-template-columns: 30px 1fr 1fr 1fr; gap: 5px; align-items: stretch; }
+.passe-cab { font-size: 11px; color: #B5D4F4; text-align: center; margin-bottom: 4px; }
+.passe-trilhas { display: flex; flex-direction: column; gap: 5px; max-height: 46vh; overflow-y: auto; padding-right: 2px; }
+.passe-num { display: grid; place-items: center; font-family: 'Lilita One', 'Fredoka', sans-serif; background: #1d2350; border-radius: 8px; color: #85B7EB; }
+.passe-nv.alcancado .passe-num { background: #FAC775; color: #412402; }
+.premio { position: relative; border-radius: 10px; padding: 5px 3px; display: flex; flex-direction: column; align-items: center; gap: 1px; color: #fff; font-family: inherit; min-height: 52px; background: #1d2350; border: 2px solid transparent; }
+.premio.free { background: #2d3577; } .premio.plus { background: #0F4F3E; } .premio.ultra { background: #5A2A3E; }
+.premio-ic { font-size: 18px; }
+.premio small { font-size: 9.5px; line-height: 1.1; text-align: center; }
+.premio.trancado { filter: grayscale(0.7) brightness(0.7); }
+.premio.trancado i { position: absolute; right: 2px; top: 1px; font-size: 10px; font-style: normal; }
+.premio.pode { border-color: #FAC775; box-shadow: 0 0 10px #FAC77588; animation: pulsa 1s ease-in-out infinite; }
+.premio.pego { opacity: 0.45; }
+
+/* ================= Mod menu ================= */
+#btn-mod { position: absolute; right: 10px; bottom: 86px; z-index: 60; width: 48px; height: 48px; border-radius: 50%; font-size: 24px; background: linear-gradient(#AFA9EC, #534AB7); border: 3px solid #fff; box-shadow: 0 4px 10px #0008; }
+.modal-mod .modal-corpo { text-align: left; }
+.mod-grupo { background: #1d2350; border-radius: 12px; padding: 10px; margin-bottom: 8px; display: flex; flex-direction: column; gap: 8px; }
+.mod-botoes { display: flex; flex-wrap: wrap; gap: 6px; }
+.mod-botoes .btn-peq, .mod-grupo > .btn-peq { font-size: 13px; }
+.mod-toggle { display: flex; align-items: center; gap: 10px; font-size: 14px; cursor: pointer; }
+.mod-toggle input { display: none; }
+.mod-toggle span { width: 40px; height: 22px; border-radius: 11px; background: #3b4596; position: relative; transition: background 0.2s; flex-shrink: 0; }
+.mod-toggle span::after { content: ''; position: absolute; left: 3px; top: 3px; width: 16px; height: 16px; border-radius: 50%; background: #fff; transition: transform 0.2s; }
+.mod-toggle input:checked + span { background: #5DCAA5; }
+.mod-toggle input:checked + span::after { transform: translateX(18px); }
+.mod-vel { display: flex; align-items: center; gap: 6px; font-size: 14px; }
+.mod-vel .ativo { background: #FAC775; color: #412402; border-bottom-color: #BA7517; }
