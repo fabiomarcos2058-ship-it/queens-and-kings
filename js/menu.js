@@ -104,6 +104,9 @@
           <div class="seletor-titulo">Cor do perfil</div>
           <div class="grade-cores">${Object.entries(CORES).map(([k, v]) => `<button data-cor="${k}" class="${k === d().cor ? 'escolhido' : ''}" style="background:${v}"></button>`).join('')}</div>
         </div>
+        <div class="perfil-conta">${Conta.logado()
+          ? `<span>☁️ Salvo na conta<br><b>${Conta.email()}</b></span><button class="btn-peq perigo" id="btn-sair-conta">Sair</button>`
+          : `<span>📱 Progresso salvo só neste celular</span><button class="btn-peq" id="btn-entrar-conta">Entrar / criar conta</button>`}</div>
         <div class="estatisticas">
           <div><b>${UI.fmt(d().trofeus)}</b><span>Troféus</span></div>
           <div><b>${UI.fmt(d().recorde)}</b><span>Recorde</span></div>
@@ -118,7 +121,7 @@
           <span class="estado">${v >= max ? '✓' : `${Math.min(v, max)}/${max}`}</span></div>`).join('')}</div>`,
       botoes: [
         { texto: 'Apagar progresso', classe: 'perigo pequeno', acao: () => {
-          UI.modal({ titulo: 'Tem certeza?', html: '<p>Isso apaga tudo: cartas, ouro, troféus e baús.</p>', botoes: [
+          UI.modal({ titulo: 'Tem certeza?', html: `<p>Isso apaga tudo: cartas, ouro, troféus e baús${Conta.logado() ? ', inclusive da sua conta' : ''}.</p>`, botoes: [
             { texto: 'Cancelar', classe: 'secundario' },
             { texto: 'Apagar', classe: 'perigo', acao: () => { Estado.apagar(); tudo(); UI.toast('Progresso apagado'); } },
           ] });
@@ -131,6 +134,14 @@
       ],
     });
     const el = m.el;
+    const btnEntrar = el.querySelector('#btn-entrar-conta');
+    if (btnEntrar) btnEntrar.onclick = async () => { m.fechar(); await Conta.tela({ podeFechar: true }); tudo(); };
+    const btnSair = el.querySelector('#btn-sair-conta');
+    if (btnSair) btnSair.onclick = () => UI.modal({
+      titulo: 'Sair da conta?',
+      html: '<p>Seu progresso continua salvo na conta. Neste celular, o jogo volta para o começo até você entrar de novo.</p>',
+      botoes: [{ texto: 'Ficar', classe: 'secundario' }, { texto: 'Sair', classe: 'perigo', acao: () => { Conta.sair(); } }],
+    });
     el.querySelector('#trocar-avatar').onclick = () => el.querySelector('#seletor-avatar').classList.toggle('oculto');
     el.querySelectorAll('[data-av]').forEach((b) => (b.onclick = () => {
       d().avatar = b.dataset.av;
@@ -534,8 +545,11 @@
   tudo();
   irPara('batalha');
   setInterval(() => { if (d().baus.some((b) => b && b.inicio)) baus(); }, 1000);
+  const sessao = Conta.verificarSessao(); // confere o login enquanto a tela de título aparece
   await Titulo.mostrar();
+  if (await sessao) UI.toast(`Bem-vindo(a) de volta, ${d().nome}! ☁️`);
   await Conta.tela();
+  tudo();
   if (!d().boasVindas) {
     d().boasVindas = true; Estado.salvar();
     UI.modal({

@@ -58,3 +58,9 @@ O bot fica em `bot/`. Ele baixa pacotes 3D com licença CC0 da Kenney, tira "fot
 1. Coloque a imagem em `assets/cartas/originais/<id>.jpg` (ou `.png`).
 2. Adicione a carta em `assets/cartas/cartas.json`, com nome, raridade, custo, tipo, posição do rosto (medalhão) e recorte da arte.
 3. Rode `python tools/montar_cartas.py`. Ele gera `<id>.jpg`, que é a arte da carta, e `<id>_medalhao.png`, que é a tropa na arena.
+
+## Contas (Firebase)
+
+- Login com e-mail/senha ou Google, ou jogar sem conta.
+- Quem tem conta tem o progresso salvo no Firestore em `jogadores/{uid}` e pode jogar em qualquer celular.
+- As regras de segurança estão em `firestore.rules`. Cole esse texto em **Firestore → Regras → Publicar**.

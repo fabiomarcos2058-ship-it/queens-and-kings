@@ -703,3 +703,11 @@ button.item-loja:active, button.slot-bau:active, .slot-carta:active { transform:
 .coroa-voando.indo { transform: translate(-50%, -50%) scale(0.6) rotate(360deg); }
 .coroa.pulou { animation: pop 0.4s cubic-bezier(0.3, 1.8, 0.6, 1); }
 .vida-torre .hp-icone { display: inline-block; width: auto; height: auto; background: none !important; border-radius: 0; }
+
+/* Conta */
+.perfil-conta { display: flex; align-items: center; gap: 10px; margin: 12px 14px 0; background: #1d2350; border-radius: 12px; padding: 10px 12px; font-size: 13px; color: #B5D4F4; }
+.perfil-conta span { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.perfil-conta b { color: #fff; }
+.link-senha { background: none; color: #85B7EB; font-size: 13px; text-decoration: underline; padding: 2px; align-self: center; }
+.tela-conta.carregando .conta-caixa { opacity: 0.7; pointer-events: none; }
+.tela-conta.carregando #conta-enviar::after { content: ' …'; }

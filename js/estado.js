@@ -33,8 +33,14 @@ const Estado = (() => {
 
   function carregar(lista) {
     catalogo = lista;
-    try { d = JSON.parse(localStorage.getItem(CHAVE)); } catch (e) { d = null; }
-    if (!d) d = novo();
+    let salvo = null;
+    try { salvo = JSON.parse(localStorage.getItem(CHAVE)); } catch (e) { salvo = null; }
+    return normalizar(salvo);
+  }
+
+  // Coloca um progresso (do navegador ou da nuvem) no formato atual do jogo
+  function normalizar(obj) {
+    d = obj || novo();
     const base = novo();
     for (const k in base) if (d[k] === undefined) d[k] = base[k];
     for (const k in base.conquistas) if (d.conquistas[k] === undefined) d.conquistas[k] = 0;
@@ -53,13 +59,19 @@ const Estado = (() => {
     return d;
   }
 
+  let ouvinte = null; // chamado a cada salvamento (sincroniza com a nuvem)
   function salvar() {
     try { localStorage.setItem(CHAVE, JSON.stringify(d)); } catch (e) { /* modo anônimo etc. */ }
+    if (ouvinte) ouvinte(d);
   }
+  const aoSalvar = (fn) => { ouvinte = fn; };
+
+  // troca o progresso atual por outro (ex.: o que veio da nuvem)
+  function importar(obj) { normalizar(obj); }
 
   function apagar() {
-    d = novo();
-    carregar(catalogo);
+    try { localStorage.removeItem(CHAVE); } catch (e) { /* nada */ }
+    normalizar(null);
   }
 
   const carta = (id) => catalogo.find((c) => c.id === id);
@@ -187,7 +199,7 @@ const Estado = (() => {
   }
 
   return {
-    get d() { return d; }, carregar, salvar, apagar, carta, stats, catalogo: () => catalogo, tem, liberada, disponiveis, proximaLiberacao,
+    get d() { return d; }, carregar, salvar, apagar, importar, aoSalvar, carta, stats, catalogo: () => catalogo, tem, liberada, disponiveis, proximaLiberacao,
     COPIAS, OURO, NIVEL_MAX, BAUS, XP_NIVEL,
     ganharXp, podeEvoluir, evoluir, abrirBau, tempoRestante, sortearCopias, ofertasDoDia, sorteio,
   };
