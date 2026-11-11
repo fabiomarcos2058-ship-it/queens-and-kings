@@ -1,0 +1,33 @@
+name: Baixar recursos
+
+# Robô que baixa texturas e ícones gratuitos (o GitHub tem internet).
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'tools/baixar_recursos.sh'
+      - 'tools/recursos/texturas.txt'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: baixar-recursos
+  cancel-in-progress: false
+
+jobs:
+  baixar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Baixar
+        run: bash tools/baixar_recursos.sh 2>&1 | tee tools/recursos/ultimo_log.txt
+      - name: Salvar no repositório
+        run: |
+          git config user.name "baixar-recursos"
+          git config user.email "recursos@users.noreply.github.com"
+          git add -A assets/texturas assets/efeitos assets/icones tools/recursos
+          git diff --cached --quiet && exit 0
+          git commit -m "Recursos baixados pelo robô"
+          for i in 1 2 3; do git pull --rebase origin main && git push origin HEAD:main && break; sleep 5; done
