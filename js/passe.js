@@ -47,6 +47,7 @@ const Passe = (() => {
   const PRESENTES_ULTRA = {
     ZwrffaFMcidTzZAGCMJNXOtuuOh2: ['2026-11'], // Artx
     EwnFPrCPFUMawnc6dttsQQ98yII2: ['2026-11'], // Enzo
+    twJXL5kpGtUVwrx7Br3xCq26ZDG3: ['2026-11'], // Samuel
   };
 
   function dados() {
