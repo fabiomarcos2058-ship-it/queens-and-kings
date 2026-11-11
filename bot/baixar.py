@@ -113,12 +113,30 @@ def pintar_de_vermelho(img):
     return nova
 
 
-def montar(foto, destino, tamanho, time=None):
+def tingir(img, tom):
+    # 'prata': tira a cor e clareia | 'ouro': puxa para o amarelo dourado
+    alfa = img.getchannel('A')
+    h, sat, v = img.convert('RGB').convert('HSV').split()
+    if tom == 'prata':
+        sat = sat.point(lambda x: x // 6)
+        v = v.point(lambda x: min(255, int(x * 1.15) + 20))
+    elif tom == 'ouro':
+        h = h.point(lambda x: 32)
+        sat = sat.point(lambda x: min(255, int(x * 1.3) + 60))
+        v = v.point(lambda x: min(255, int(x * 1.1) + 15))
+    nova = Image.merge('HSV', (h, sat, v)).convert('RGB')
+    nova.putalpha(alfa)
+    return nova
+
+
+def montar(foto, destino, tamanho, time=None, tom=None):
     w, h = tamanho[0] * ESCALA, tamanho[1] * ESCALA
     img = Image.open(foto).convert('RGBA')
     img = img.crop(img.getchannel('A').getbbox())
     if time == 'vermelho':
         img = pintar_de_vermelho(img)
+    if tom:
+        img = tingir(img, tom)
     img.thumbnail((w, int(h * (0.86 if time else 1))), Image.LANCZOS)
     tela = Image.new('RGBA', (w, h), (0, 0, 0, 0))
     if time:  # base colorida do time embaixo da torre
@@ -170,7 +188,7 @@ def gerar():
                 shutil.copy(modelo, foto)  # imagem 2D pronta, só ajusta o tamanho
             else:
                 renderizar(modelo, foto, cfg.get('girar', 0))
-            montar(foto, RAIZ / 'assets' / f'{alvo}.png', cfg['tamanho'], cfg.get('time'))
+            montar(foto, RAIZ / 'assets' / f'{alvo}.png', cfg['tamanho'], cfg.get('time'), cfg.get('tom'))
             info = CFG['pacotes'][pacote]
             creditos.append(f'| `assets/{alvo}.png` | {nome_modelo} | {pacote} | {info["autor"]} | {info["licenca"]} |')
             print(f'  ok: {nome_modelo}')
