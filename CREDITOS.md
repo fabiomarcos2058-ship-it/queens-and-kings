@@ -13,3 +13,15 @@ Imagens geradas pelo bot a partir de modelos 3D com licença CC0:
 | `assets/arena/arvore.png` | tree_default.glb | nature-kit | Kenney (kenney.nl) | CC0 |
 | `assets/arena/pedra.png` | stone_smallFlatA.glb | nature-kit | Kenney (kenney.nl) | CC0 |
 | `assets/arena/ponte.png` | bridge_wood.glb | nature-kit | Kenney (kenney.nl) | CC0 |
+| `assets/ui/bau_madeira.png` | chest.glb | pirate-kit | Kenney (kenney.nl) | CC0 |
+| `assets/ui/bau_prata.png` | chest.glb | pirate-kit | Kenney (kenney.nl) | CC0 |
+| `assets/ui/bau_ouro.png` | chest.glb | pirate-kit | Kenney (kenney.nl) | CC0 |
+| `assets/ui/moeda.png` | coin.glb | mini-dungeon | Kenney (kenney.nl) | CC0 |
+| `assets/ui/ouro_1.png` | coin.glb + coin.glb | mini-dungeon | Kenney (kenney.nl) | CC0 |
+| `assets/ui/ouro_2.png` | coin.glb + coin.glb + coin.glb + coin.glb | mini-dungeon | Kenney (kenney.nl) | CC0 |
+| `assets/ui/ouro_3.png` | coin.glb + coin.glb + coin.glb + coin.glb + coin.glb + coin.glb + coin.glb | mini-dungeon | Kenney (kenney.nl) | CC0 |
+| `assets/ui/aba_loja.png` | chest.glb | pirate-kit | Kenney (kenney.nl) | CC0 |
+| `assets/ui/aba_batalha.png` | weapon-sword.glb | mini-dungeon | Kenney (kenney.nl) | CC0 |
+| `assets/ui/aba_cla.png` | shield-round.glb | mini-dungeon | Kenney (kenney.nl) | CC0 |
+| `assets/ui/aba_eventos.png` | banner.glb | mini-dungeon | Kenney (kenney.nl) | CC0 |
+| `assets/ui/torre_logo.png` | tower-square-base.glb + tower-square-mid-windows.glb + tower-square-top-roof-high.glb | castle-kit | Kenney (kenney.nl) | CC0 |
