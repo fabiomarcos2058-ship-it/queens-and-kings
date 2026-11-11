@@ -877,3 +877,43 @@ button.item-loja:active, button.slot-bau:active, .slot-carta:active { transform:
 @keyframes x1pisca { 50% { opacity: 0.2; } }
 .x1-carregando { width: 40px; height: 40px; margin: 14px auto; border: 4px solid #5B45D633; border-top-color: #5B45D6; border-radius: 50%; animation: x1gira 0.8s linear infinite; }
 @keyframes x1gira { to { transform: rotate(360deg); } }
+
+/* ---------- Amigos e perfis ---------- */
+.linha-social { display: flex; justify-content: center; gap: 8px; margin-bottom: 8px; }
+.linha-social .btn-top { margin: 0; }
+.btn-amigos { position: relative; background: linear-gradient(#B4A9FF, #7B68EE); color: #fff; border-bottom-color: #3A2A9A; text-shadow: 0 1px 0 #0004; }
+.selo-pedidos { position: absolute; top: -7px; right: -7px; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 10px; background: #E24B4A; color: #fff; font-style: normal; font-size: 12px; line-height: 20px; box-shadow: 0 0 0 2px #1d2350; animation: x1pisca 1.6s infinite; }
+.amigos-abas { margin-bottom: 10px; }
+.amigos-abas button { font-size: 14px; padding: 7px 4px; }
+#amigos-aba { min-height: 120px; max-height: 52vh; overflow-y: auto; }
+.lista-jogadores { display: flex; flex-direction: column; gap: 6px; }
+.linha-jogador { display: flex; align-items: center; gap: 10px; background: #1d2350; border-radius: 12px; padding: 7px 10px; text-align: left; }
+.lj-avatar { position: relative; flex: 0 0 auto; }
+.lj-avatar img { width: 42px; height: 42px; border-radius: 50%; background: #2b3270; object-fit: cover; }
+.lj-nome { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.lj-nome b { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lj-nome small { font-size: 12px; opacity: 0.8; }
+.txt-on { color: #5DCAA5; font-weight: 700; }
+.lj-seta { font-size: 24px; opacity: 0.6; }
+.lj-botoes { display: flex; gap: 6px; }
+.btn-peq.ok { background: #1D9E75; color: #fff; }
+.btn-x1-amigo { background: #5B45D6; color: #fff; font-size: 16px; }
+.ponto-online { position: absolute; right: 0; bottom: 0; width: 12px; height: 12px; border-radius: 50%; background: #777; box-shadow: 0 0 0 2px #1d2350; }
+.ponto-online.on { background: #3BD48A; }
+.contagem-amigos { font-size: 13px; opacity: 0.8; margin: 0 0 6px; }
+.busca-amigo { display: flex; gap: 8px; margin: 8px 0; }
+.busca-amigo input { flex: 1; min-width: 0; font-size: 16px; padding: 9px 10px; border-radius: 10px; border: 2px solid #5B45D6; background: #fff; color: #222; font-family: inherit; }
+.busca-amigo .btn-modal { margin: 0; flex: 0 0 auto; }
+.meu-id-amigos { font-size: 11px; opacity: 0.75; margin-top: 10px; word-break: break-all; }
+.clicavel { cursor: pointer; transition: transform 0.1s, filter 0.1s; }
+.clicavel:active { transform: scale(0.97); filter: brightness(1.15); }
+.perfil-avatar.outro { position: relative; }
+.perfil-avatar.outro .ponto-online { width: 16px; height: 16px; right: 2px; bottom: 2px; box-shadow: 0 0 0 3px #fff; }
+.perfil-nome-outro { font-size: 22px; font-weight: 800; text-shadow: 0 2px 0 #0005; }
+.status-online { font-size: 12px; opacity: 0.9; }
+.modal-perfil-outro .estatisticas { grid-template-columns: repeat(3, 1fr); }
+.deck-outro { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin: 6px 0 4px; }
+.deck-outro .carta-nivel { font-size: 11px; }
+.modal-perfil-outro .modal-botoes { flex-wrap: wrap; }
+.convite { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.convite img { width: 72px; height: 72px; border-radius: 50%; background: #2b3270; object-fit: cover; box-shadow: 0 0 0 3px #FAC775; }

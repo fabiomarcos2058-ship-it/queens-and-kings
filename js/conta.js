@@ -52,6 +52,7 @@ const Conta = (() => {
       } else {
         await fb.deleteDoc(fb.doc(fb.db, 'ranking', usuario.uid)).catch(() => {});
       }
+      if (typeof Amigos !== 'undefined') await Amigos.publicar();
       // mantém nome e troféus atualizados no clã
       if (Estado.d.cla && Estado.d.cla.id) {
         await fb.updateDoc(fb.doc(fb.db, 'clas', Estado.d.cla.id), {
@@ -263,7 +264,7 @@ const Conta = (() => {
   }
 
   async function sair() {
-    try { await enviarParaNuvem(); await fb.signOut(fb.auth); } catch (e) { /* nada */ }
+    try { if (typeof Amigos !== 'undefined') Amigos.parar(); await enviarParaNuvem(); await fb.signOut(fb.auth); } catch (e) { /* nada */ }
     usuario = null;
     Estado.aoSalvar(null);
     Estado.apagar(); // o progresso continua salvo na conta

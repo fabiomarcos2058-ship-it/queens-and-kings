@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Lilita+One&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/style.css?v=1794422334" />
+  <link rel="stylesheet" href="css/style.css?v=1794423102" />
 </head>
 <body>
   <div id="app">
@@ -61,7 +61,7 @@
             <div class="logo-texto"><span>Queens</span><small>and</small><span>Kings</span></div>
             <img class="logo-torre espelho" data-asset="ui/torre_logo" alt="" />
           </div>
-          <button class="btn-top" id="btn-top">🏆 Top global</button>
+          <div class="linha-social"><button class="btn-top" id="btn-top">🏆 Top global</button><button class="btn-top btn-amigos" id="btn-amigos">👥 Amigos<i class="selo-pedidos oculto" id="selo-pedidos"></i></button></div>
           <div class="trofeus"><i class="ic-trofeu"></i><span id="trofeus">0</span><div class="trofeus-barra"><span id="trofeus-barra" style="width: 0%"></span></div><small id="trofeus-prox">Próxima arena: 300</small></div>
           <div class="arena-card">
             <div class="arena-nome"><span>Arena 1</span>Festival da Escola</div>
@@ -126,7 +126,7 @@
       css.rel = 'stylesheet';
       css.href = 'css/style.css?v=' + v;
       document.head.appendChild(css);
-      for (const f of ['assets', 'estado', 'ui', 'arena', 'cartas', 'batalha', 'titulo', 'conta', 'cla', 'passe', 'mod', 'atualizacao', 'x1', 'menu']) {
+      for (const f of ['assets', 'estado', 'ui', 'arena', 'cartas', 'batalha', 'titulo', 'conta', 'cla', 'passe', 'mod', 'atualizacao', 'x1', 'amigos', 'menu']) {
         await new Promise((ok) => {
           const el = document.createElement('script');
           el.src = 'js/' + f + '.js?v=' + v;

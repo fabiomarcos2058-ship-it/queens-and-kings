@@ -116,6 +116,9 @@
           <div><b>${d().derrotas}</b><span>Derrotas</span></div>
           <div><b>${total ? Math.round((d().vitorias / total) * 100) : 0}%</b><span>Aproveitamento</span></div>
           <div><b>${d().conquistas.tresCoroas}</b><span>Vitórias 3 coroas</span></div>
+          <div><b>${Object.values(d().colecao).filter((c) => c.tem).length}/${Estado.catalogo().length}</b><span>Cartas</span></div>
+          <div><b>${d().conquistas.baus}</b><span>Baús abertos</span></div>
+          <div><b>${(d().x1 || {}).v || 0} x ${(d().x1 || {}).d || 0}</b><span>X1 com amigos</span></div>
         </div>
         <div class="titulo-conquistas">Conquistas <small>${feitas}/${lista.length}</small></div>
         <div class="lista-conquistas">${lista.map(([ic, t, desc, v, max]) => `<div class="conquista${v >= max ? ' feita' : ''}">
@@ -247,13 +250,14 @@
       const lista = await Conta.topGlobal();
       const eu = Conta.uid();
       const avatar = (a) => (ICONES.includes(a) ? `assets/avatares/${a}.svg` : a ? `assets/cartas/${a}_medalhao.png` : 'assets/avatares/coroa.svg');
-      corpo.innerHTML = (lista.length ? `<div class="top-lista">${lista.map((j, i) => `<div class="top-linha${j.uid === eu ? ' voce' : ''} pos${i + 1}">
+      corpo.innerHTML = (lista.length ? `<div class="top-lista">${lista.map((j, i) => `<div class="top-linha${j.uid === eu ? ' voce' : ''} pos${i + 1}" data-perfil="${j.uid}">
           <span class="top-pos">${i < 3 ? ['🥇', '🥈', '🥉'][i] : i + 1}</span><img src="${avatar(j.avatar)}" alt="" />
           <div class="top-nome"><b>${esc(j.nome || 'Jogador')}${j.uid === eu ? ' (você)' : ''}</b>${j.cla ? `<small>🛡️ ${esc(j.cla)}</small>` : ''}</div>
           <span class="top-trofeus"><i class="ic-trofeu"></i>${fmt(j.trofeus || 0)}</span></div>`).join('')}</div>`
         : '<p class="aviso">Ainda ninguém no top. Seja o primeiro!</p>')
         + (eu ? '' : '<p class="aviso">Entre numa conta para aparecer no top global.</p>')
         + (d().modUsado ? '<p class="aviso">Sua conta usou o mod menu, então não aparece no top.</p>' : '');
+      ligarPerfis(corpo);
     } catch (e) {
       corpo.innerHTML = `<p class="aviso">${erroNuvem(e)}</p>`;
     }
@@ -284,6 +288,198 @@
     Batalha.iniciar({ modo, fim: fimDeBatalha });
   }
 
+
+  // ---------- Amigos e perfis ----------
+  let pedidos = [];
+  const CORES_PERFIL = { roxo: '#534AB7', rosa: '#D4537E', azul: '#378ADD', verde: '#1D9E75', laranja: '#D85A30', dourado: '#BA7517' };
+  const avatarDe = (a) => (ICONES.includes(a) ? `assets/avatares/${a}.svg` : a ? `assets/cartas/${a}_medalhao.png` : 'assets/avatares/coroa.svg');
+  const pontoOnline = (p) => `<i class="ponto-online${Amigos.online(p) ? ' on' : ''}" title="${Amigos.online(p) ? 'Online' : 'Offline'}"></i>`;
+
+  function ligarPerfis(caixa) {
+    caixa.querySelectorAll('[data-perfil]').forEach((el) => {
+      if (!el.dataset.perfil || el.dataset.perfil === 'undefined') return;
+      el.classList.add('clicavel');
+      el.onclick = () => verPerfil(el.dataset.perfil);
+    });
+  }
+
+  function mudouPedidos(lista) {
+    const novos = lista.filter((p) => !pedidos.some((x) => x.uid === p.uid));
+    pedidos = lista;
+    const selo = $('selo-pedidos');
+    selo.textContent = lista.length;
+    selo.classList.toggle('oculto', !lista.length);
+    if (novos.length && document.readyState === 'complete') UI.toast(`👥 ${novos[0].nome || 'Alguém'} quer ser seu amigo!`);
+    const aba = document.getElementById('amigos-aba');
+    if (aba && aba.dataset.aba === 'pedidos') abaAmigos('pedidos');
+    document.querySelectorAll('[data-conta-pedidos]').forEach((e) => (e.textContent = lista.length ? ` (${lista.length})` : ''));
+  }
+
+  function conviteX1(c) {
+    if (!$('batalha').classList.contains('oculto')) { Amigos.apagarConvite(c.de); return; } // já está numa batalha
+    UI.modal({
+      titulo: '⚔️ Convite de x1!',
+      classe: 'modal-x1',
+      html: `<div class="convite"><img src="${avatarDe(c.avatar)}" alt="" /><p><b>${esc(c.nome || 'Um amigo')}</b> te chamou pra um x1!</p></div>`,
+      botoes: [
+        { texto: 'Agora não', classe: 'secundario', acao: () => { Amigos.apagarConvite(c.de); } },
+        { texto: 'Bora! ⚔️', classe: 'principal', acao: () => {
+          Amigos.apagarConvite(c.de);
+          if (d().deck.length < 8) { UI.toast('Você precisa de 8 cartas no deck para o x1.'); return; }
+          x1Entrar(c.codigo);
+        } },
+      ],
+    });
+  }
+
+  $('btn-amigos').onclick = () => {
+    if (!Conta.logado()) { UI.toast('Entre numa conta para ter amigos! 👥'); return; }
+    amigos(pedidos.length ? 'pedidos' : 'amigos');
+  };
+
+  function amigos(aba = 'amigos') {
+    UI.modal({
+      titulo: '👥 Amigos',
+      classe: 'modal-amigos',
+      html: `<div class="conta-abas amigos-abas">
+          <button data-a="amigos">Amigos</button><button data-a="pedidos">Pedidos<span data-conta-pedidos>${pedidos.length ? ` (${pedidos.length})` : ''}</span></button><button data-a="adicionar">Adicionar</button>
+        </div><div id="amigos-aba"></div>`,
+      botoes: [{ texto: 'Fechar', classe: 'secundario' }],
+    }).el.querySelectorAll('.amigos-abas button').forEach((b) => (b.onclick = () => abaAmigos(b.dataset.a)));
+    abaAmigos(aba);
+  }
+
+  const linhaJogador = (p, extra = '') => `<div class="linha-jogador" data-perfil="${p.uid}">
+      <div class="lj-avatar"><img src="${avatarDe(p.avatar)}" alt="" />${p.visto !== undefined ? pontoOnline(p) : ''}</div>
+      <div class="lj-nome"><b>${esc(p.nome || 'Jogador')}</b><small>${p.visto !== undefined ? `${Amigos.online(p) ? '<span class="txt-on">online</span> · ' : ''}🏆 ${fmt(p.trofeus || 0)}${p.cla ? ` · 🛡️ ${esc(p.cla)}` : ''}` : 'enviou um pedido'}</small></div>${extra}</div>`;
+
+  async function abaAmigos(qual) {
+    const aba = document.getElementById('amigos-aba');
+    if (!aba) return;
+    aba.dataset.aba = qual;
+    document.querySelectorAll('.amigos-abas button').forEach((b) => b.classList.toggle('ativa', b.dataset.a === qual));
+    if (qual === 'pedidos') {
+      aba.innerHTML = pedidos.length ? `<div class="lista-jogadores">${pedidos.map((p) => linhaJogador(p, `<div class="lj-botoes"><button class="btn-peq ok" data-aceitar="${p.uid}">✓</button><button class="btn-peq perigo" data-recusar="${p.uid}">✕</button></div>`)).join('')}</div>`
+        : '<p class="aviso">Nenhum pedido de amizade por enquanto.</p>';
+      aba.querySelectorAll('[data-aceitar]').forEach((b) => (b.onclick = async (e) => {
+        e.stopPropagation(); b.disabled = true;
+        try { await Amigos.aceitar(b.dataset.aceitar); UI.toast('Agora vocês são amigos! 💜'); } catch (err) { UI.toast(erroNuvem(err)); b.disabled = false; }
+      }));
+      aba.querySelectorAll('[data-recusar]').forEach((b) => (b.onclick = async (e) => {
+        e.stopPropagation(); b.disabled = true;
+        try { await Amigos.recusar(b.dataset.recusar); } catch (err) { UI.toast(erroNuvem(err)); b.disabled = false; }
+      }));
+      ligarPerfis(aba);
+      return;
+    }
+    if (qual === 'adicionar') {
+      aba.innerHTML = `<p class="aviso">Procure pelo nome do jogador ou cole o ID dele (fica no perfil).</p>
+        <div class="busca-amigo"><input id="busca-amigo" maxlength="40" placeholder="Nome ou ID" autocomplete="off" /><button class="btn-modal principal" id="btn-buscar-amigo">🔍</button></div>
+        <div id="resultado-busca"></div>
+        <p class="meu-id-amigos">Seu ID: <code>${Conta.uid()}</code> <button class="btn-copiar" id="copiar-id-amigos">copiar</button></p>`;
+      const campo = document.getElementById('busca-amigo'), res = document.getElementById('resultado-busca');
+      const buscar = async () => {
+        if (!campo.value.trim()) return;
+        res.innerHTML = '<div class="x1-carregando"></div>';
+        try {
+          const lista = (await Amigos.buscar(campo.value)).filter((p) => p.uid !== Conta.uid());
+          res.innerHTML = lista.length ? `<div class="lista-jogadores">${lista.map((p) => linhaJogador(p, '<span class="lj-seta">›</span>')).join('')}</div>` : '<p class="aviso">Ninguém encontrado com esse nome. O nome precisa começar igual (ex.: "ally").</p>';
+          ligarPerfis(res);
+        } catch (err) { res.innerHTML = `<p class="aviso">${erroNuvem(err)}</p>`; }
+      };
+      document.getElementById('btn-buscar-amigo').onclick = buscar;
+      campo.onkeydown = (e) => { if (e.key === 'Enter') buscar(); };
+      document.getElementById('copiar-id-amigos').onclick = () => navigator.clipboard?.writeText(Conta.uid()).then(() => UI.toast('ID copiado!'), () => {});
+      campo.focus();
+      return;
+    }
+    aba.innerHTML = '<div class="x1-carregando"></div>';
+    try {
+      const lista = await Amigos.listar();
+      if (aba.dataset.aba !== 'amigos') return;
+      aba.innerHTML = lista.length ? `<p class="contagem-amigos">${lista.filter(Amigos.online).length} online · ${lista.length} amigo${lista.length > 1 ? 's' : ''}</p>
+          <div class="lista-jogadores">${lista.map((p) => linhaJogador(p, `<button class="btn-peq btn-x1-amigo" data-x1="${p.uid}" title="Chamar pro x1">⚔️</button>`)).join('')}</div>`
+        : '<p class="aviso">Você ainda não tem amigos aqui. Vá em <b>Adicionar</b> e procure pelo nome deles! 💜</p>';
+      aba.querySelectorAll('[data-x1]').forEach((b) => (b.onclick = (e) => {
+        e.stopPropagation();
+        chamarX1(lista.find((p) => p.uid === b.dataset.x1));
+      }));
+      ligarPerfis(aba);
+    } catch (err) { aba.innerHTML = `<p class="aviso">${erroNuvem(err)}</p>`; }
+  }
+
+  function chamarX1(p) {
+    if (d().deck.length < 8) { UI.toast('Você precisa de 8 cartas no deck para o x1.'); return; }
+    document.querySelectorAll('.modal-amigos, .modal-perfil-outro').forEach((m) => m.closest('.modal-fundo').remove());
+    x1Criar({ uid: p.uid, nome: p.nome || 'seu amigo' });
+  }
+
+  async function verPerfil(id) {
+    if (!Conta.logado()) { UI.toast('Entre numa conta para ver perfis!'); return; }
+    if (id === Conta.uid()) { perfil(); return; }
+    const m = UI.modal({ classe: 'modal-perfil modal-perfil-outro', html: '<div class="x1-carregando"></div>', botoes: [{ texto: 'Fechar', classe: 'secundario' }] });
+    const corpo = m.el.querySelector('.modal-corpo'), botoes = m.el.querySelector('.modal-botoes');
+    try {
+      const [p, sit] = await Promise.all([Amigos.ver(id), Amigos.situacao(id)]);
+      if (!p) { corpo.innerHTML = '<p class="aviso">Esse jogador ainda não tem perfil público. Ele precisa abrir o jogo atualizado uma vez.</p>'; return; }
+      const total = (p.vitorias || 0) + (p.derrotas || 0);
+      const totalX1 = (p.x1v || 0) + (p.x1d || 0);
+      const deck = (p.deck || []).map((x) => ({ c: Estado.carta(x.id), nivel: x.nivel })).filter((x) => x.c);
+      corpo.innerHTML = `<div class="perfil-banner" style="--cor:${CORES_PERFIL[p.cor] || CORES_PERFIL.roxo}">
+          <div class="perfil-avatar outro"><img src="${avatarDe(p.avatar)}" alt="" />${pontoOnline(p)}</div>
+          <div class="perfil-info">
+            <div class="perfil-nome-outro">${esc(p.nome || 'Jogador')}</div>
+            <div class="perfil-nivel"><div class="nivel" data-n="${p.nivel || 1}"></div><small class="status-online">${Amigos.online(p) ? '🟢 Online agora' : p.visto && p.visto.toMillis ? `Visto ${quandoFoi(p.visto.toMillis())}` : ''}</small></div>
+            ${p.cla ? `<div class="perfil-cla">🛡️ ${esc(p.cla)}</div>` : ''}
+          </div>
+        </div>
+        <div class="estatisticas">
+          <div><b>${fmt(p.trofeus || 0)}</b><span>Troféus</span></div>
+          <div><b>${fmt(p.recorde || 0)}</b><span>Recorde</span></div>
+          <div><b>${p.vitorias || 0}</b><span>Vitórias</span></div>
+          <div><b>${p.derrotas || 0}</b><span>Derrotas</span></div>
+          <div><b>${total ? Math.round(((p.vitorias || 0) / total) * 100) : 0}%</b><span>Aproveitamento</span></div>
+          <div><b>${p.tresCoroas || 0}</b><span>Vitórias 3 coroas</span></div>
+          <div><b>${p.cartas || 0}/${p.totalCartas || Estado.catalogo().length}</b><span>Cartas</span></div>
+          <div><b>${p.baus || 0}</b><span>Baús abertos</span></div>
+          <div><b>${p.x1v || 0} x ${p.x1d || 0}</b><span>X1 (${totalX1 ? Math.round(((p.x1v || 0) / totalX1) * 100) : 0}%)</span></div>
+        </div>
+        ${deck.length ? `<div class="titulo-conquistas">Deck de batalha</div><div class="deck-outro">${deck.map((x) => Cartas.html(x.c, { nivel: `Nv. ${x.nivel}` })).join('')}</div>` : ''}
+        ${p.mod ? '<p class="aviso">Esta conta já usou o mod menu.</p>' : ''}
+        <p class="meu-id-amigos">ID: <code>${id}</code></p>`;
+      const acoes = {
+        nada: [{ t: '➕ Adicionar amigo', c: 'principal', f: async () => { const r = await Amigos.pedir(id); UI.toast(r === 'amigos' ? 'Agora vocês são amigos! 💜' : 'Pedido de amizade enviado!'); } }],
+        enviado: [{ t: 'Cancelar pedido', c: 'secundario', f: async () => { await Amigos.cancelarPedido(id); UI.toast('Pedido cancelado.'); } }],
+        recebido: [{ t: '✓ Aceitar amizade', c: 'principal', f: async () => { await Amigos.aceitar(id); UI.toast('Agora vocês são amigos! 💜'); } }],
+        amigos: [
+          { t: '⚔️ Chamar pro x1', c: 'principal', f: async () => { chamarX1(p); return 'fechou'; } },
+          { t: 'Desfazer amizade', c: 'perigo pequeno', f: async () => { await Amigos.remover(id); UI.toast('Amizade desfeita.'); } },
+        ],
+      }[sit] || [];
+      acoes.forEach((a) => {
+        const b = document.createElement('button');
+        b.className = `btn-modal ${a.c}`;
+        b.textContent = a.t;
+        b.onclick = async () => {
+          b.disabled = true;
+          try { const r = await a.f(); if (r !== 'fechou') { m.fechar(); verPerfil(id); } } catch (err) { UI.toast(err.message && !err.code ? err.message : erroNuvem(err)); b.disabled = false; }
+        };
+        botoes.prepend(b);
+      });
+    } catch (err) {
+      corpo.innerHTML = `<p class="aviso">${erroNuvem(err)}</p>`;
+    }
+  }
+
+  function quandoFoi(ms) {
+    const min = Math.round((Date.now() - ms) / 60000);
+    if (min < 60) return `há ${min} min`;
+    const h = Math.round(min / 60);
+    if (h < 24) return `há ${h} h`;
+    const dias = Math.round(h / 24);
+    return `há ${dias} dia${dias > 1 ? 's' : ''}`;
+  }
+
   // ---------- X1 com amigos ----------
   function x1() {
     if (!Conta.logado()) { UI.toast('Entre numa conta para jogar x1 com amigos!'); return; }
@@ -311,7 +507,7 @@
 
   function travarFundo(m) { m.el.addEventListener('click', (e) => { if (e.target === m.el) e.stopPropagation(); }, true); }
 
-  async function x1Criar() {
+  async function x1Criar(amigo = null) {
     let espera = null, cancelado = false;
     try {
       espera = UI.modal({ titulo: 'Criando sala...', classe: 'modal-x1', html: '<div class="x1-carregando"></div>', botoes: [{ texto: 'Cancelar', classe: 'secundario', acao: () => { cancelado = true; X1.cancelar(); } }] });
@@ -325,6 +521,13 @@
         },
       });
       if (cancelado) { X1.cancelar(); return; }
+      if (amigo) {
+        await Amigos.convidar(amigo.uid, cod);
+        espera.el.querySelector('.modal-titulo').textContent = 'Convite enviado!';
+        espera.el.querySelector('.modal-corpo').innerHTML = `<p>Chamamos <b>${esc(amigo.nome)}</b> pro x1. Se ele não estiver no jogo, mande o código:</p>
+          <div class="x1-codigo-grande">${cod}</div><p class="x1-esperando">Esperando ${esc(amigo.nome)} entrar<span>...</span></p>`;
+        return;
+      }
       espera.el.querySelector('.modal-titulo').textContent = 'Sala criada!';
       espera.el.querySelector('.modal-corpo').innerHTML = `<p>Mande este código para seu amigo:</p>
         <div class="x1-codigo-grande">${cod}</div>
@@ -333,7 +536,8 @@
       document.getElementById('x1-copiar').onclick = () => { navigator.clipboard?.writeText(cod).then(() => UI.toast('Código copiado!'), () => {}); };
     } catch (e) {
       if (espera) espera.fechar();
-      UI.toast(e.message || 'Não deu para criar a sala.');
+      X1.cancelar();
+      UI.toast(e.code ? erroNuvem(e) : e.message || 'Não deu para criar a sala.');
       console.error(e);
     }
   }
@@ -706,10 +910,11 @@
 
     const aba = $('cla-aba');
     if (abaCla === 'membros') {
-      aba.innerHTML = `<div class="lista-membros">${membros.map((m, i) => `<div class="membro${m.u === Conta.uid() ? ' voce' : ''}"><span class="pos">${i + 1}</span>
+      aba.innerHTML = `<div class="lista-membros">${membros.map((m, i) => `<div class="membro${m.u === Conta.uid() ? ' voce' : ''}" data-perfil="${m.u}"><span class="pos">${i + 1}</span>
         <b>${esc(m.nome || 'Jogador')}${m.u === Conta.uid() ? ' (você)' : ''}</b>${m.u === c.lider ? '<span class="tag-lider">Líder</span>' : ''}
         <span><i class="ic-trofeu"></i> ${fmt(m.trofeus || 0)}</span>${souLider && m.u !== Conta.uid() ? `<button class="btn-expulsar" data-u="${m.u}" title="Remover">✕</button>` : ''}</div>`).join('')}</div>`;
-      aba.querySelectorAll('[data-u]').forEach((b) => (b.onclick = () => UI.modal({ titulo: 'Remover do clã?', html: `<p>${esc(c.membros[b.dataset.u].nome)} vai sair do clã.</p>`,
+      ligarPerfis(aba);
+      aba.querySelectorAll('[data-u]').forEach((b) => (b.onclick = (ev) => ev.stopPropagation() || UI.modal({ titulo: 'Remover do clã?', html: `<p>${esc(c.membros[b.dataset.u].nome)} vai sair do clã.</p>`,
         botoes: [{ texto: 'Cancelar', classe: 'secundario' }, { texto: 'Remover', classe: 'perigo', acao: () => { Cla.expulsar(c.id, b.dataset.u).then(() => meuCla(caixa)).catch((e) => UI.toast(erroNuvem(e))); } }] })));
       return;
     }
@@ -816,6 +1021,7 @@
 
   function tudo() {
     Mod.mostrarBotao(tudo);
+    if (Conta.logado()) Amigos.ouvir({ aoMudarPedidos: mudouPedidos, aoConvite: conviteX1 });
     topo(); telaBatalha(); loja(); cartas(); cla(); eventos();
   }
 
