@@ -187,6 +187,31 @@
       "inicial": true
     },
     {
+      "id": "pan_dbh",
+      "nome": "Pan (DBH)",
+      "raridade": "comum",
+      "custo": 2,
+      "tipo": "Rápida",
+      "descricao": "Pequena, veloz e cheia de energia.",
+      "trofeus": 30,
+      "rosto": [
+        405,
+        330,
+        175
+      ],
+      "arte": [
+        57,
+        0,
+        620
+      ],
+      "vida": 360,
+      "dano": 75,
+      "velocidade": 62,
+      "alcance": 16,
+      "cadencia": 0.8,
+      "alvo": "tudo"
+    },
+    {
       "id": "hinata",
       "nome": "Hinata",
       "raridade": "epica",
@@ -210,6 +235,31 @@
       "cadencia": 0.9,
       "alvo": "tudo",
       "trofeus": 60
+    },
+    {
+      "id": "pan_gt",
+      "nome": "Pan (GT)",
+      "raridade": "rara",
+      "custo": 3,
+      "tipo": "Atiradora",
+      "descricao": "Dispara rajadas de energia de longe.",
+      "trofeus": 100,
+      "rosto": [
+        330,
+        235,
+        130
+      ],
+      "arte": [
+        0,
+        0,
+        611
+      ],
+      "vida": 450,
+      "dano": 85,
+      "velocidade": 48,
+      "alcance": 110,
+      "cadencia": 1.0,
+      "alvo": "tudo"
     },
     {
       "id": "akame",
@@ -237,6 +287,31 @@
       "trofeus": 140
     },
     {
+      "id": "caulifla",
+      "nome": "Caulifla",
+      "raridade": "epica",
+      "custo": 4,
+      "tipo": "Lutadora",
+      "descricao": "Confiante e forte, derruba quem estiver na frente.",
+      "trofeus": 180,
+      "rosto": [
+        205,
+        255,
+        85
+      ],
+      "arte": [
+        0,
+        0,
+        399
+      ],
+      "vida": 1000,
+      "dano": 150,
+      "velocidade": 50,
+      "alcance": 16,
+      "cadencia": 1.0,
+      "alvo": "tudo"
+    },
+    {
       "id": "bulma",
       "nome": "Bulma",
       "raridade": "lendaria",
@@ -261,6 +336,32 @@
       "alvo": "tudo",
       "area": 40,
       "trofeus": 250
+    },
+    {
+      "id": "caulifla_ssj",
+      "nome": "Caulifla SSJ",
+      "raridade": "lendaria",
+      "custo": 6,
+      "tipo": "Lutadora lendária",
+      "descricao": "Transformada, causa dano enorme em área ao redor.",
+      "trofeus": 300,
+      "rosto": [
+        255,
+        200,
+        85
+      ],
+      "arte": [
+        0,
+        0,
+        446
+      ],
+      "vida": 1800,
+      "dano": 230,
+      "velocidade": 46,
+      "alcance": 18,
+      "cadencia": 1.3,
+      "alvo": "tudo",
+      "area": 30
     }
   ]
 }
