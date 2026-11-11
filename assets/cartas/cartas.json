@@ -2,6 +2,74 @@
   "_leia": "rosto = [x, y, raio] do rosto na imagem original (vira o medalhão). arte = [x, y, largura] do recorte da carta (altura = largura x 4/3). Estatísticas: vida, dano, velocidade (pixels/s), alcance (pixels), cadencia (segundos entre ataques), alvo ('tudo' ou 'construcoes'), area (raio de dano em área). Feitiços usam 'feitico': true e 'imagem' própria. 'trofeus' = troféus necessários para a carta começar a aparecer nos baús e na loja . 'inicial': true = uma das 8 cartas básicas dos baús iniciais. 'exclusivo': lista de IDs de jogador — a carta só existe para essas contas.",
   "cartas": [
     {
+      "id": "mini",
+      "nome": "Mini",
+      "raridade": "comum",
+      "custo": 0,
+      "tipo": "Mini",
+      "descricao": "Sai do Barril de Minis.",
+      "token": true,
+      "vida": 130,
+      "dano": 70,
+      "velocidade": 70,
+      "alcance": 14,
+      "cadencia": 0.7,
+      "alvo": "tudo",
+      "trofeus": 0
+    },
+    {
+      "id": "bra",
+      "nome": "Bra",
+      "raridade": "comum",
+      "custo": 2,
+      "tipo": "Rápida",
+      "descricao": "Barata e veloz, perfeita para distrair o inimigo.",
+      "rosto": [
+        360,
+        400,
+        190
+      ],
+      "arte": [
+        40,
+        0,
+        640
+      ],
+      "vida": 320,
+      "dano": 126,
+      "velocidade": 64,
+      "alcance": 16,
+      "cadencia": 0.8,
+      "alvo": "tudo",
+      "trofeus": 0,
+      "inicial": true
+    },
+    {
+      "id": "teto",
+      "nome": "Teto",
+      "raridade": "comum",
+      "custo": 2,
+      "tipo": "Rápida",
+      "descricao": "Animada e veloz, chega antes de todo mundo.",
+      "trofeus": 0,
+      "inicial": true,
+      "rosto": [
+        290,
+        370,
+        150
+      ],
+      "arte": [
+        40,
+        120,
+        620
+      ],
+      "vida": 340,
+      "dano": 130,
+      "velocidade": 64,
+      "alcance": 16,
+      "cadencia": 0.8,
+      "alvo": "tudo"
+    },
+    {
       "id": "chichi",
       "nome": "Chichi",
       "raridade": "comum",
@@ -28,28 +96,16 @@
       "inicial": true
     },
     {
-      "id": "bra",
-      "nome": "Bra",
+      "id": "chuva",
+      "nome": "Chuva de Pétalas",
       "raridade": "comum",
-      "custo": 2,
-      "tipo": "Rápida",
-      "descricao": "Barata e veloz, perfeita para distrair o inimigo.",
-      "rosto": [
-        360,
-        400,
-        190
-      ],
-      "arte": [
-        40,
-        0,
-        640
-      ],
-      "vida": 320,
-      "dano": 126,
-      "velocidade": 64,
-      "alcance": 16,
-      "cadencia": 0.8,
-      "alvo": "tudo",
+      "custo": 3,
+      "tipo": "Feitiço",
+      "descricao": "Pétalas cortantes que acertam todos numa área grande.",
+      "feitico": true,
+      "imagem": "chuva.svg",
+      "dano": 240,
+      "area": 60,
       "trofeus": 0,
       "inicial": true
     },
@@ -80,18 +136,56 @@
       "inicial": true
     },
     {
-      "id": "chuva",
-      "nome": "Chuva de Pétalas",
+      "id": "miku_nakano",
+      "nome": "Miku Nakano",
+      "raridade": "rara",
+      "custo": 3,
+      "tipo": "Atiradora",
+      "descricao": "Quieta, mas certeira: acerta de longe.",
+      "trofeus": 0,
+      "inicial": true,
+      "rosto": [
+        395,
+        320,
+        165
+      ],
+      "arte": [
+        60,
+        60,
+        620
+      ],
+      "vida": 420,
+      "dano": 144,
+      "velocidade": 46,
+      "alcance": 112,
+      "cadencia": 1.0,
+      "alvo": "tudo"
+    },
+    {
+      "id": "nami_old",
+      "nome": "Nami (Old)",
       "raridade": "comum",
       "custo": 3,
-      "tipo": "Feitiço",
-      "descricao": "Pétalas cortantes que acertam todos numa área grande.",
-      "feitico": true,
-      "imagem": "chuva.svg",
-      "dano": 240,
-      "area": 60,
+      "tipo": "Lutadora",
+      "descricao": "Esperta e ágil, sempre dá um jeito de ganhar.",
       "trofeus": 0,
-      "inicial": true
+      "inicial": true,
+      "rosto": [
+        430,
+        330,
+        160
+      ],
+      "arte": [
+        180,
+        40,
+        500
+      ],
+      "vida": 650,
+      "dano": 180,
+      "velocidade": 52,
+      "alcance": 16,
+      "cadencia": 1.0,
+      "alvo": "tudo"
     },
     {
       "id": "shizuku",
@@ -146,6 +240,20 @@
       "inicial": true
     },
     {
+      "id": "lanterna",
+      "nome": "Lanterna Explosiva",
+      "raridade": "rara",
+      "custo": 4,
+      "tipo": "Feitiço",
+      "descricao": "Uma lanterna em chamas que explode com muito dano.",
+      "feitico": true,
+      "imagem": "lanterna.svg",
+      "dano": 576,
+      "area": 42,
+      "trofeus": 0,
+      "inicial": true
+    },
+    {
       "id": "rukia",
       "nome": "Rukia",
       "raridade": "epica",
@@ -162,8 +270,8 @@
         20,
         600
       ],
-      "vida": 620,
-      "dano": 207,
+      "vida": 700,
+      "dano": 230,
       "velocidade": 44,
       "alcance": 105,
       "cadencia": 1.6,
@@ -171,114 +279,6 @@
       "area": 38,
       "trofeus": 0,
       "inicial": true
-    },
-    {
-      "id": "lanterna",
-      "nome": "Lanterna Explosiva",
-      "raridade": "rara",
-      "custo": 4,
-      "tipo": "Feitiço",
-      "descricao": "Uma lanterna em chamas que explode com muito dano.",
-      "feitico": true,
-      "imagem": "lanterna.svg",
-      "dano": 576,
-      "area": 42,
-      "trofeus": 0,
-      "inicial": true
-    },
-    {
-      "id": "miku_nakano",
-      "nome": "Miku Nakano",
-      "raridade": "rara",
-      "custo": 3,
-      "tipo": "Atiradora",
-      "descricao": "Quieta, mas certeira: acerta de longe.",
-      "trofeus": 0,
-      "inicial": true,
-      "rosto": [
-        395,
-        320,
-        165
-      ],
-      "arte": [
-        60,
-        60,
-        620
-      ],
-      "vida": 420,
-      "dano": 144,
-      "velocidade": 46,
-      "alcance": 112,
-      "cadencia": 1.0,
-      "alvo": "tudo"
-    },
-    {
-      "id": "teto",
-      "nome": "Teto",
-      "raridade": "comum",
-      "custo": 2,
-      "tipo": "Rápida",
-      "descricao": "Animada e veloz, chega antes de todo mundo.",
-      "trofeus": 0,
-      "inicial": true,
-      "rosto": [
-        290,
-        370,
-        150
-      ],
-      "arte": [
-        40,
-        120,
-        620
-      ],
-      "vida": 340,
-      "dano": 130,
-      "velocidade": 64,
-      "alcance": 16,
-      "cadencia": 0.8,
-      "alvo": "tudo"
-    },
-    {
-      "id": "nami_old",
-      "nome": "Nami (Old)",
-      "raridade": "comum",
-      "custo": 3,
-      "tipo": "Lutadora",
-      "descricao": "Esperta e ágil, sempre dá um jeito de ganhar.",
-      "trofeus": 0,
-      "inicial": true,
-      "rosto": [
-        430,
-        330,
-        160
-      ],
-      "arte": [
-        180,
-        40,
-        500
-      ],
-      "vida": 650,
-      "dano": 180,
-      "velocidade": 52,
-      "alcance": 16,
-      "cadencia": 1.0,
-      "alvo": "tudo"
-    },
-    {
-      "id": "mini",
-      "nome": "Mini",
-      "raridade": "comum",
-      "custo": 0,
-      "tipo": "Mini",
-      "descricao": "Sai do Barril de Minis.",
-      "token": true,
-      "vida": 130,
-      "dano": 70,
-      "velocidade": 70,
-      "alcance": 14,
-      "cadencia": 0.7,
-      "alvo": "tudo",
-      "trofeus": 0
     },
     {
       "id": "pan_dbh",
@@ -298,8 +298,8 @@
         0,
         620
       ],
-      "vida": 360,
-      "dano": 135,
+      "vida": 320,
+      "dano": 115,
       "velocidade": 62,
       "alcance": 16,
       "cadencia": 0.8,
@@ -323,7 +323,7 @@
         600
       ],
       "vida": 820,
-      "dano": 243,
+      "dano": 200,
       "velocidade": 54,
       "alcance": 16,
       "cadencia": 0.9,
@@ -362,6 +362,31 @@
       "cadencia": 1.6,
       "alvo": "tudo",
       "area": 36
+    },
+    {
+      "id": "trunks_base",
+      "nome": "Trunks (Base)",
+      "raridade": "rara",
+      "custo": 3,
+      "tipo": "Lutador",
+      "descricao": "Jovem e determinado, luta com a espada em combate corpo a corpo.",
+      "rosto": [
+        320,
+        280,
+        140
+      ],
+      "arte": [
+        40,
+        20,
+        600
+      ],
+      "vida": 680,
+      "dano": 165,
+      "velocidade": 52,
+      "alcance": 18,
+      "cadencia": 1.0,
+      "alvo": "tudo",
+      "trofeus": 80
     },
     {
       "id": "barril",
@@ -445,8 +470,8 @@
         20,
         600
       ],
-      "vida": 860,
-      "dano": 360,
+      "vida": 780,
+      "dano": 270,
       "velocidade": 62,
       "alcance": 18,
       "cadencia": 1.1,
@@ -459,6 +484,31 @@
         "recarga": 10,
         "descricao": "Os próximos 3 golpes causam o triplo de dano."
       }
+    },
+    {
+      "id": "trunks_ssj",
+      "nome": "Trunks (SSJ)",
+      "raridade": "epica",
+      "custo": 4,
+      "tipo": "Lutador",
+      "descricao": "Super Saiyajin com poder elevado e ataques precisos.",
+      "rosto": [
+        340,
+        260,
+        130
+      ],
+      "arte": [
+        30,
+        10,
+        620
+      ],
+      "vida": 880,
+      "dano": 210,
+      "velocidade": 50,
+      "alcance": 18,
+      "cadencia": 1.0,
+      "alvo": "tudo",
+      "trofeus": 150
     },
     {
       "id": "riruka",
@@ -478,12 +528,45 @@
         20,
         480
       ],
-      "vida": 480,
-      "dano": 171,
+      "vida": 460,
+      "dano": 155,
       "velocidade": 50,
       "alcance": 115,
       "cadencia": 0.9,
       "alvo": "tudo"
+    },
+    {
+      "id": "gohan_ssj",
+      "nome": "Gohan (SSJ)",
+      "raridade": "epica",
+      "custo": 4,
+      "tipo": "Lutador",
+      "descricao": "Filho do Goku em Super Saiyajin, combina força e técnica.",
+      "rosto": [
+        350,
+        270,
+        140
+      ],
+      "arte": [
+        50,
+        30,
+        600
+      ],
+      "vida": 920,
+      "dano": 200,
+      "velocidade": 48,
+      "alcance": 16,
+      "cadencia": 1.05,
+      "alvo": "tudo",
+      "trofeus": 170,
+      "habilidade": {
+        "nome": "Potencial Despertado",
+        "custo": 2,
+        "tipo": "furia",
+        "duracao": 5,
+        "recarga": 12,
+        "descricao": "Por 5s causa +40% de dano e fica um pouco mais rápido."
+      }
     },
     {
       "id": "caulifla",
@@ -503,8 +586,8 @@
         0,
         399
       ],
-      "vida": 1000,
-      "dano": 270,
+      "vida": 950,
+      "dano": 225,
       "velocidade": 50,
       "alcance": 16,
       "cadencia": 1.0,
@@ -545,6 +628,38 @@
       }
     },
     {
+      "id": "trunks_full_power",
+      "nome": "Trunks (Full Power)",
+      "raridade": "lendaria",
+      "custo": 5,
+      "tipo": "Lutador",
+      "descricao": "Trunks no auge do poder, capaz de dominar o campo de batalha.",
+      "rosto": [
+        330,
+        250,
+        135
+      ],
+      "arte": [
+        20,
+        0,
+        640
+      ],
+      "vida": 1100,
+      "dano": 260,
+      "velocidade": 50,
+      "alcance": 20,
+      "cadencia": 1.1,
+      "alvo": "tudo",
+      "trofeus": 240,
+      "habilidade": {
+        "nome": "Corte Dimensional",
+        "custo": 2,
+        "tipo": "golpes",
+        "recarga": 11,
+        "descricao": "Os próximos 2 golpes causam o dobro de dano e atingem em pequena área."
+      }
+    },
+    {
       "id": "bulma",
       "nome": "Bulma",
       "raridade": "lendaria",
@@ -561,8 +676,8 @@
         0,
         600
       ],
-      "vida": 700,
-      "dano": 270,
+      "vida": 720,
+      "dano": 300,
       "velocidade": 40,
       "alcance": 100,
       "cadencia": 1.8,
@@ -603,6 +718,40 @@
         "recarga": 12,
         "descricao": "Por 6s fica mais rápida e causa +60% de dano."
       }
+    },
+    {
+      "id": "vegito_ssj",
+      "nome": "Vegito (SSJ)",
+      "raridade": "lendaria",
+      "custo": 6,
+      "tipo": "Lutador lendário",
+      "descricao": "A fusão definitiva de Goku e Vegeta em Super Saiyajin. Poder absoluto.",
+      "rosto": [
+        340,
+        240,
+        140
+      ],
+      "arte": [
+        30,
+        10,
+        620
+      ],
+      "vida": 1600,
+      "dano": 380,
+      "velocidade": 48,
+      "alcance": 20,
+      "cadencia": 1.2,
+      "alvo": "tudo",
+      "area": 25,
+      "trofeus": 320,
+      "habilidade": {
+        "nome": "Final Kamehameha",
+        "custo": 3,
+        "tipo": "furia",
+        "duracao": 6,
+        "recarga": 14,
+        "descricao": "Por 6s causa +70% de dano e seus ataques atingem em área."
+      }
     }
   ]
-}
+        }
