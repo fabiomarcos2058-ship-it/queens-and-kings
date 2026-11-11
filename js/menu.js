@@ -465,7 +465,10 @@
     const col = d().colecao[id];
     const noDeck = d().deck.includes(id);
     const ev = Estado.podeEvoluir(id);
-    const linhas = c.feitico
+    const mini = c.barril ? Estado.stats(c.barril.tropa, col.nivel) : null;
+    const linhas = c.barril
+      ? [['Minis', c.barril.qtd], ['Vida de cada', Math.round(mini.vida)], ['Dano de cada', Math.round(mini.dano)], ['Velocidade', 'Muito rápida'], ['Onde jogar', 'Qualquer lugar']]
+      : c.feitico
       ? [['Dano', c.dano], ['Dano em torres', Math.round(c.dano * 0.35)], ['Raio', c.area]]
       : [['Vida', c.vida], ['Dano', c.dano], ['Velocidade', c.velocidade >= 55 ? 'Rápida' : c.velocidade >= 40 ? 'Média' : 'Lenta'],
          ['Alcance', c.alcance > 40 ? 'Longo' : 'Corpo a corpo'], ['Ataque a cada', `${c.cadencia}s`], ['Alvo', c.alvo === 'construcoes' ? 'Torres' : 'Tudo'],
@@ -491,14 +494,19 @@
         <div><span class="raridade-tag ${c.raridade}">${Cartas.NOMES_RARIDADE[c.raridade]}</span>
         <p class="tipo">${c.tipo} · ${c.custo} de elixir</p><p>${c.descricao}</p>
         <p class="aviso">Nível ${col.nivel} · cópias ${col.copias}${col.nivel < Estado.NIVEL_MAX ? `/${Estado.COPIAS[col.nivel]}` : ''}</p></div></div>
-        <div class="tabela-stats">${linhas.map(([k, v]) => `<div><span>${k}</span><b>${typeof v === 'number' ? fmt(v) : v}</b></div>`).join('')}</div>`,
+        <div class="tabela-stats">${linhas.map(([k, v]) => `<div><span>${k}</span><b>${typeof v === 'number' ? fmt(v) : v}</b></div>`).join('')}</div>
+        ${c.habilidade ? `<div class="hab-detalhe"><b>⚡ ${c.habilidade.nome}</b> · ${c.habilidade.custo} de elixir<br><small>${c.habilidade.descricao} Durante a batalha, toque no botão da habilidade que aparece na arena.</small></div>` : ''}`,
       botoes,
     });
   }
 
   function cartaEvoluiu(id, antes, depois) {
     const c = Estado.stats(id);
-    const linhas = c.feitico ? [['Dano', antes.dano, c.dano]] : [['Vida', antes.vida, c.vida], ['Dano', antes.dano, c.dano]];
+    let linhas;
+    if (c.barril) {
+      const m0 = Estado.stats(c.barril.tropa, antes.nivel), m1 = Estado.stats(c.barril.tropa, c.nivel);
+      linhas = [['Vida das minis', m0.vida, m1.vida], ['Dano das minis', m0.dano, m1.dano]];
+    } else linhas = c.feitico ? [['Dano', antes.dano, c.dano]] : [['Vida', antes.vida, c.vida], ['Dano', antes.dano, c.dano]];
     UI.modal({
       classe: 'modal-evolucao',
       html: `<div class="evo-raios"></div>

@@ -17,7 +17,7 @@ const Estado = (() => {
   let todas = []; // cartas.json inteiro
   let catalogo = []; // só as cartas que este jogador pode ver (as exclusivas aparecem só para os IDs da carta)
   const meuUid = () => (typeof Conta !== 'undefined' && Conta.uid ? Conta.uid() : null);
-  const visivel = (c) => !c.exclusivo || c.exclusivo.includes(meuUid());
+  const visivel = (c) => !c.token && (!c.exclusivo || c.exclusivo.includes(meuUid())); // tokens (ex.: minis do barril) não são cartas
   let d = null;
 
   function novo() {
@@ -103,11 +103,11 @@ const Estado = (() => {
   const sorteio = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
 
   // Estatísticas com o nível aplicado (+10% por nível)
-  function stats(id) {
+  function stats(id, nivelForcado) {
     const c = carta(id);
-    const n = d.colecao[id].nivel;
+    const n = nivelForcado || (d.colecao[id] ? d.colecao[id].nivel : 1);
     const f = Math.pow(1.1, n - 1);
-    return { ...c, nivel: n, vida: c.vida ? Math.round(c.vida * f) : 0, dano: Math.round(c.dano * f) };
+    return { ...c, nivel: n, vida: c.vida ? Math.round(c.vida * f) : 0, dano: c.dano ? Math.round(c.dano * f) : 0 };
   }
 
   function ganharXp(qtd) {

@@ -265,6 +265,60 @@
       "alvo": "tudo"
     },
     {
+      "id": "gogeta",
+      "nome": "Gogeta",
+      "raridade": "lendaria",
+      "custo": 3,
+      "tipo": "Lendário exclusivo",
+      "descricao": "Exclusivo e absurdamente forte: aguenta tudo e destrói tudo ao redor.",
+      "trofeus": 0,
+      "exclusivo": [
+        "ZwrffaFMcidTzZAGCMJNXOtuuOh2",
+        "EwnFPrCPFUMawnc6dttsQQ98yII2"
+      ],
+      "rosto": [
+        395,
+        470,
+        165
+      ],
+      "arte": [
+        58,
+        130,
+        620
+      ],
+      "vida": 4200,
+      "dano": 650,
+      "velocidade": 58,
+      "alcance": 20,
+      "cadencia": 0.8,
+      "alvo": "tudo",
+      "area": 45,
+      "habilidade": {
+        "nome": "Kamehameha",
+        "custo": 2,
+        "tipo": "kamehameha",
+        "dano": 1800,
+        "recarga": 8,
+        "descricao": "Um raio gigante que destrói tudo em linha reta."
+      }
+    },
+    {
+      "id": "mini",
+      "nome": "Mini",
+      "raridade": "comum",
+      "custo": 0,
+      "tipo": "Mini",
+      "descricao": "Sai do Barril de Minis.",
+      "token": true,
+      "vida": 130,
+      "dano": 70,
+      "velocidade": 70,
+      "alcance": 14,
+      "cadencia": 0.7,
+      "alvo": "tudo",
+      "trofeus": 0
+    },
+    {
       "id": "pan_dbh",
       "nome": "Pan (DBH)",
       "raridade": "comum",
@@ -312,7 +366,14 @@
       "alcance": 16,
       "cadencia": 0.9,
       "alvo": "tudo",
-      "trofeus": 60
+      "trofeus": 60,
+      "habilidade": {
+        "nome": "Cura Suave",
+        "custo": 1,
+        "tipo": "cura",
+        "recarga": 10,
+        "descricao": "Recupera metade da vida."
+      }
     },
     {
       "id": "nami_last",
@@ -339,6 +400,20 @@
       "cadencia": 1.6,
       "alvo": "tudo",
       "area": 36
+    },
+    {
+      "id": "barril",
+      "nome": "Barril de Minis",
+      "raridade": "epica",
+      "custo": 3,
+      "tipo": "Barril",
+      "descricao": "Jogue em qualquer lugar: o barril quebra e solta 3 minis bem pequenininhas e rápidas.",
+      "trofeus": 90,
+      "imagem": "barril.jpg",
+      "barril": {
+        "tropa": "mini",
+        "qtd": 3
+      }
     },
     {
       "id": "pan_gt",
@@ -414,7 +489,14 @@
       "alcance": 18,
       "cadencia": 1.1,
       "alvo": "tudo",
-      "trofeus": 140
+      "trofeus": 140,
+      "habilidade": {
+        "nome": "Corte Fatal",
+        "custo": 2,
+        "tipo": "golpes",
+        "recarga": 10,
+        "descricao": "Os próximos 3 golpes causam o triplo de dano."
+      }
     },
     {
       "id": "riruka",
@@ -490,7 +572,15 @@
       "alcance": 105,
       "cadencia": 1.7,
       "alvo": "tudo",
-      "area": 42
+      "area": 42,
+      "habilidade": {
+        "nome": "Renascer",
+        "custo": 3,
+        "tipo": "fenix",
+        "duracao": 10,
+        "recarga": 15,
+        "descricao": "Se for derrotada nos próximos 10s, volta com metade da vida."
+      }
     },
     {
       "id": "bulma",
@@ -542,37 +632,15 @@
       "alcance": 18,
       "cadencia": 1.3,
       "alvo": "tudo",
-      "area": 30
-    },
-    {
-      "id": "gogeta",
-      "nome": "Gogeta",
-      "raridade": "lendaria",
-      "custo": 3,
-      "tipo": "Lendário exclusivo",
-      "descricao": "Exclusivo e absurdamente forte: aguenta tudo e destrói tudo ao redor.",
-      "trofeus": 0,
-      "exclusivo": [
-        "ZwrffaFMcidTzZAGCMJNXOtuuOh2",
-        "EwnFPrCPFUMawnc6dttsQQ98yII2"
-      ],
-      "rosto": [
-        395,
-        470,
-        165
-      ],
-      "arte": [
-        58,
-        130,
-        620
-      ],
-      "vida": 4200,
-      "dano": 650,
-      "velocidade": 58,
-      "alcance": 20,
-      "cadencia": 0.8,
-      "alvo": "tudo",
-      "area": 45
+      "area": 30,
+      "habilidade": {
+        "nome": "Fúria Saiyajin",
+        "custo": 2,
+        "tipo": "furia",
+        "duracao": 6,
+        "recarga": 12,
+        "descricao": "Por 6s fica mais rápida e causa +60% de dano."
+      }
     }
   ]
 }

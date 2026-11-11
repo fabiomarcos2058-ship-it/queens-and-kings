@@ -17,6 +17,7 @@ const Cartas = (() => {
       <img src="${arte(c)}" alt="${c.nome}" draggable="false" />
       <span class="custo">${c.custo}</span>
       ${mini ? '' : `<span class="nome-3d">${c.nome}</span>`}
+      ${c.habilidade ? '<span class="selo-hab" title="Tem habilidade especial">⚡</span>' : ''}
       ${extra}
     </div>`;
     return mini ? carta : `<div class="slot-carta" data-id="${c.id}">${carta}<div class="carta-nivel">${nivel ?? '&nbsp;'}</div></div>`;
