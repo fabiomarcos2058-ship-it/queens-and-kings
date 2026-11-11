@@ -78,11 +78,12 @@ def pasta_do_pacote(nome):
     return destino
 
 
-def modelos(pasta):
-    todos = [p for p in pasta.rglob('*') if p.suffix.lower() in FORMATOS]
+def modelos(pasta, formatos=FORMATOS):
+    todos = [p for p in pasta.rglob('*') if p.suffix.lower() in formatos]
     # um arquivo por nome, preferindo .glb
     por_nome = {}
-    for p in sorted(todos, key=lambda p: FORMATOS.index(p.suffix.lower())):
+    # prefere o primeiro formato da lista; entre PNGs, o maior arquivo (mais nítido)
+    for p in sorted(todos, key=lambda p: (formatos.index(p.suffix.lower()), -p.stat().st_size)):
         por_nome.setdefault(p.stem.lower(), p)
     return por_nome
 
@@ -133,7 +134,8 @@ def listar():
     linhas = []
     for nome in CFG['pacotes']:
         try:
-            nomes = sorted(modelos(pasta_do_pacote(nome)))
+            fmt = ('.png',) if CFG['pacotes'][nome].get('tipo') == '2d' else FORMATOS
+            nomes = sorted(modelos(pasta_do_pacote(nome), fmt))
         except Exception as e:
             linhas += [f'## {nome}: erro ({e})', '']
             continue
@@ -149,7 +151,8 @@ def gerar():
         print(f'- {alvo}')
         try:
             pacote = cfg['pacote']
-            por_nome = modelos(pasta_do_pacote(pacote))
+            eh_2d = CFG['pacotes'][pacote].get('tipo') == '2d'
+            por_nome = modelos(pasta_do_pacote(pacote), ('.png',) if eh_2d else FORMATOS)
             if 'pecas' in cfg:  # modelo montado com várias peças empilhadas
                 faltando = [n for n in cfg['pecas'] if n.lower() not in por_nome]
                 if faltando:
@@ -163,7 +166,10 @@ def gerar():
                     raise RuntimeError('nenhum modelo com esses nomes')
                 nome_modelo = modelo.name
             foto = tmp / (alvo.replace('/', '_') + '.png')
-            renderizar(modelo, foto, cfg.get('girar', 0))
+            if eh_2d:
+                shutil.copy(modelo, foto)  # imagem 2D pronta, só ajusta o tamanho
+            else:
+                renderizar(modelo, foto, cfg.get('girar', 0))
             montar(foto, RAIZ / 'assets' / f'{alvo}.png', cfg['tamanho'], cfg.get('time'))
             info = CFG['pacotes'][pacote]
             creditos.append(f'| `assets/{alvo}.png` | {nome_modelo} | {pacote} | {info["autor"]} | {info["licenca"]} |')

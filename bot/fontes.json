@@ -13,6 +13,30 @@
       "pagina": "https://kenney.nl/assets/nature-kit",
       "autor": "Kenney (kenney.nl)",
       "licenca": "CC0"
+    },
+    "pirate-kit": {
+      "pagina": "https://kenney.nl/assets/pirate-kit",
+      "autor": "Kenney (kenney.nl)",
+      "licenca": "CC0",
+      "tipo": "3d"
+    },
+    "mini-dungeon": {
+      "pagina": "https://kenney.nl/assets/mini-dungeon",
+      "autor": "Kenney (kenney.nl)",
+      "licenca": "CC0",
+      "tipo": "3d"
+    },
+    "game-icons": {
+      "pagina": "https://kenney.nl/assets/game-icons",
+      "autor": "Kenney (kenney.nl)",
+      "licenca": "CC0",
+      "tipo": "2d"
+    },
+    "ui-pack": {
+      "pagina": "https://kenney.nl/assets/ui-pack",
+      "autor": "Kenney (kenney.nl)",
+      "licenca": "CC0",
+      "tipo": "2d"
     }
   },
   "imagens": {
