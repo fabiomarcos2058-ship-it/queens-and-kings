@@ -19,7 +19,7 @@ const X1 = (() => {
 
   function perfil() {
     const d = Estado.d;
-    return { uid: Conta.uid(), nome: d.nome, avatar: d.avatar, torres: Estado.minhasTorres(), deck: d.deck.slice(0, 8), niveis: Object.fromEntries(d.deck.map((id) => [id, d.colecao[id] ? d.colecao[id].nivel : 1])) };
+    return { uid: Conta.uid(), nome: d.nome, estiloNome: Passe.estiloNome(), avatar: d.avatar, torres: Estado.minhasTorres(), deck: d.deck.slice(0, 8), niveis: Object.fromEntries(d.deck.map((id) => [id, d.colecao[id] ? d.colecao[id].nivel : 1])) };
   }
   const novoCodigo = () => Array.from({ length: 4 }, () => 'ABCDEFGHJKLMNPQRSTUVWXYZ'[Math.floor(Math.random() * 24)]).join('');
 

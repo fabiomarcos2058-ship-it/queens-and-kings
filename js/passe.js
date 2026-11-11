@@ -35,6 +35,29 @@ const Passe = (() => {
     return { tipo: 'gemas', qtd: 25 + Math.floor(n / 4) };
   }
 
+  // Estilos de nome: quem tem o Passe Plus ou Ultra escolhe; os animados são só do Ultra.
+  const ESTILOS_NOME = {
+    rosa: { nome: 'Rosa', tipo: 'Cor' }, ouro: { nome: 'Ouro', tipo: 'Cor' }, ciano: { nome: 'Ciano', tipo: 'Cor' },
+    menta: { nome: 'Menta', tipo: 'Cor' }, lilas: { nome: 'Lilás', tipo: 'Cor' }, rubi: { nome: 'Rubi', tipo: 'Cor' },
+    'por-do-sol': { nome: 'Pôr do sol', tipo: 'Gradiente' }, oceano: { nome: 'Oceano', tipo: 'Gradiente' },
+    'algodao-doce': { nome: 'Algodão-doce', tipo: 'Gradiente' }, aurora: { nome: 'Aurora', tipo: 'Gradiente' },
+    sakura: { nome: 'Sakura', tipo: 'Gradiente' }, fogo: { nome: 'Fogo', tipo: 'Gradiente' },
+    'arco-iris': { nome: 'Arco-íris', tipo: 'Animado', ultra: true }, galaxia: { nome: 'Galáxia', tipo: 'Animado', ultra: true },
+    'ouro-real': { nome: 'Ouro real', tipo: 'Animado', ultra: true }, 'coracao-neon': { nome: 'Neon', tipo: 'Animado', ultra: true },
+  };
+  const podeEstilo = (id) => !!ESTILOS_NOME[id] && temTrilha(ESTILOS_NOME[id].ultra ? 'ultra' : 'plus');
+  // estilo que vale agora (se o passe acabar, o nome volta ao normal)
+  const estiloNome = () => (podeEstilo(Estado.d.estiloNome) ? Estado.d.estiloNome : '');
+  function escolherEstilo(id) {
+    if (id && !podeEstilo(id)) return false;
+    Estado.d.estiloNome = id || '';
+    Estado.salvar();
+    return true;
+  }
+  const escNome = (t) => String(t == null ? '' : t).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  // nome com o estilo (o estilo vem de dados públicos, então só aceita os da lista)
+  const nomeHtml = (nome, estilo) => (ESTILOS_NOME[estilo] ? `<span class="nome-estilo nc-${estilo}">${escNome(nome)}</span>` : escNome(nome));
+
   const icone = (r) => ({ ouro: '🪙', gemas: '💎', bau: '🎁', carta: '🃏' }[r.tipo]);
   function texto(r) {
     if (r.tipo === 'ouro') return `${UI.fmt(r.qtd)} ouro`;
@@ -122,5 +145,5 @@ const Passe = (() => {
     return Math.ceil((fim - h) / 86400000);
   };
 
-  return { NIVEIS, PONTOS_NIVEL, PRECO, dados, nivel, recompensa, icone, texto, temTrilha, podePegar, pendentes, ganharPontos, pegar, comprar, precoAtual, diasRestantes };
+  return { ESTILOS_NOME, podeEstilo, estiloNome, escolherEstilo, nomeHtml, NIVEIS, PONTOS_NIVEL, PRECO, dados, nivel, recompensa, icone, texto, temTrilha, podePegar, pendentes, ganharPontos, pegar, comprar, precoAtual, diasRestantes };
 })();

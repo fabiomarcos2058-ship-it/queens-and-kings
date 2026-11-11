@@ -28,6 +28,7 @@ const Amigos = (() => {
       cartas: colecao.length, totalCartas: Estado.catalogo().length,
       deck: (d.deck || []).slice(0, 8).map((id) => ({ id, nivel: (d.colecao[id] && d.colecao[id].nivel) || 1 })),
       torres: Estado.minhasTorres(),
+      estiloNome: Passe.estiloNome(),
       cla: d.cla && d.cla.nome ? String(d.cla.nome).slice(0, 20) : '',
       mod: !!d.modUsado,
       visto: fb().serverTimestamp(),
@@ -75,7 +76,7 @@ const Amigos = (() => {
     const f = fb();
     // se a pessoa já tinha me mandado pedido, vira amizade direto
     if ((await f.getDoc(ref(uid(), 'pedidos', id))).exists()) { await aceitar(id); return 'amigos'; }
-    await f.setDoc(ref(id, 'pedidos', uid()), { nome: Estado.d.nome, avatar: Estado.d.avatar, quando: f.serverTimestamp() });
+    await f.setDoc(ref(id, 'pedidos', uid()), { nome: Estado.d.nome, estiloNome: Passe.estiloNome(), avatar: Estado.d.avatar, quando: f.serverTimestamp() });
     return 'enviado';
   }
 

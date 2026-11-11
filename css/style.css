@@ -963,3 +963,34 @@ button.item-loja:active, button.slot-bau:active, .slot-carta:active { transform:
 @keyframes torre-pula { 0% { transform: scale(0.3); } 60% { transform: scale(1.15); } 100% { transform: scale(1); } }
 .torres-outro { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin: 10px 0 0; font-size: 13px; }
 .torres-outro span { background: #1d2350; padding: 4px 10px; border-radius: 10px; }
+
+/* ---------- Estilos de nome (Passe) ---------- */
+.nome-estilo { font-weight: 800; }
+.nc-rosa { color: #FF8FC7; } .nc-ouro { color: #FFD45E; } .nc-ciano { color: #5EE6FF; }
+.nc-menta { color: #6CF0A8; } .nc-lilas { color: #C8A6FF; } .nc-rubi { color: #FF6B6B; }
+.nc-por-do-sol, .nc-oceano, .nc-algodao-doce, .nc-aurora, .nc-sakura, .nc-fogo, .nc-arco-iris, .nc-galaxia, .nc-ouro-real, .nc-coracao-neon {
+  background-clip: text; -webkit-background-clip: text; color: transparent; -webkit-text-fill-color: transparent; text-shadow: none; filter: drop-shadow(0 1px 0 #0009);
+}
+.nc-por-do-sol { background-image: linear-gradient(90deg, #FF9A8B, #FF6A88, #FFD45E); }
+.nc-oceano { background-image: linear-gradient(90deg, #4FACFE, #00F2FE, #8EF6FF); }
+.nc-algodao-doce { background-image: linear-gradient(90deg, #FBC2EB, #A6C1EE, #FBC2EB); }
+.nc-aurora { background-image: linear-gradient(90deg, #43E97B, #38F9D7, #A18CD1); }
+.nc-sakura { background-image: linear-gradient(90deg, #FF9A9E, #FECFEF, #FF6FB5); }
+.nc-fogo { background-image: linear-gradient(90deg, #F83600, #FF8A00, #F9D423); }
+.nc-arco-iris, .nc-galaxia, .nc-ouro-real, .nc-coracao-neon { background-size: 300% 100%; animation: nome-brilha 3s linear infinite; }
+.nc-arco-iris { background-image: linear-gradient(90deg, #FF5E5E, #FFB347, #FFF35E, #5EFF8A, #5EC8FF, #B45EFF, #FF5EC8, #FF5E5E); }
+.nc-galaxia { background-image: linear-gradient(90deg, #8E7CFF, #4FACFE, #FF7AD9, #C8A6FF, #8E7CFF); }
+.nc-ouro-real { background-image: linear-gradient(90deg, #B8860B, #FFD45E, #FFF6C8, #FFD45E, #B8860B); filter: drop-shadow(0 0 4px #FAC77588) drop-shadow(0 1px 0 #0009); }
+.nc-coracao-neon { background-image: linear-gradient(90deg, #FF2E93, #FF8FC7, #FFFFFF, #FF8FC7, #FF2E93); filter: drop-shadow(0 0 5px #FF2E93aa) drop-shadow(0 1px 0 #0009); }
+@keyframes nome-brilha { to { background-position: 300% 0; } }
+.btn-estilo-nome { display: inline-block; margin: 2px 0 4px; padding: 3px 10px; border-radius: 10px; background: #0005; color: #fff; font-size: 13px; font-weight: 600; }
+.modal-estilo-nome .modal-corpo { max-height: 64vh; overflow-y: auto; }
+.previa-nome { font-size: 30px; font-weight: 800; text-align: center; padding: 14px 8px; margin-bottom: 8px; background: #1d2350; border-radius: 14px; word-break: break-word; }
+.grade-estilos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.estilo-op { position: relative; padding: 10px 4px; border-radius: 10px; background: #1d2350; color: #fff; font-size: 14px; font-weight: 700; border: 2px solid transparent; }
+.modal-estilo-nome > .modal-corpo > .estilo-op { width: 100%; margin-bottom: 4px; }
+.estilo-op.escolhido { border-color: #FAC775; background: #2b3270; }
+.estilo-op.trancado { opacity: 0.55; }
+.estilo-op i { position: absolute; top: 2px; right: 4px; font-style: normal; font-size: 11px; }
+.vantagem-passe { font-size: 13px; background: #0004; border-radius: 10px; padding: 6px 10px; margin: 0 0 8px; }
+.selo-pedidos.oculto { display: none; }

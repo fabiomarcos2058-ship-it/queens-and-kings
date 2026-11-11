@@ -59,7 +59,7 @@
     $('avatar-topo').src = avatarUrl(d().avatar);
     $('avatar-topo').style.borderColor = CORES[d().cor];
     $('nivel').dataset.n = d().nivel;
-    $('nome').textContent = d().nome;
+    $('nome').innerHTML = Passe.nomeHtml(d().nome, Passe.estiloNome());
     $('xp').style.width = `${(d().xp / Estado.XP_NIVEL(d().nivel)) * 100}%`;
     $('ouro').textContent = fmt(d().ouro);
     $('gemas').textContent = fmt(d().gemas);
@@ -93,6 +93,7 @@
           <button class="perfil-avatar" id="trocar-avatar"><img src="${avatarUrl(d().avatar)}" alt="" /><i>✏️</i></button>
           <div class="perfil-info">
             <div class="perfil-nome-linha"><input id="campo-nome" maxlength="16" value="${d().nome.replace(/"/g, '&quot;')}" aria-label="Nome" /><span>✏️</span></div>
+            <button class="btn-estilo-nome" id="btn-estilo-nome">🎨 ${Passe.estiloNome() ? `Nome: ${Passe.nomeHtml(Passe.ESTILOS_NOME[Passe.estiloNome()].nome, Passe.estiloNome())}` : 'Cor do nome'}${Passe.temTrilha('plus') ? '' : ' 🔒'}</button>
             <div class="perfil-nivel"><div class="nivel" data-n="${d().nivel}"></div>
               <div class="perfil-xp"><i style="width:${(d().xp / xpMax) * 100}%"></i><small>${d().xp}/${xpMax} XP</small></div></div>
             ${d().cla && d().cla.id ? `<div class="perfil-cla">🛡️ ${esc(d().cla.nome)}</div>` : ''}
@@ -139,6 +140,11 @@
       ],
     });
     const el = m.el;
+    el.querySelector('#btn-estilo-nome').onclick = () => {
+      const v = el.querySelector('#campo-nome').value.trim();
+      if (v && v !== d().nome) { d().nome = v; Estado.salvar(); }
+      m.fechar(); telaEstiloNome();
+    };
     const btnEntrar = el.querySelector('#btn-entrar-conta');
     if (btnEntrar) btnEntrar.onclick = async () => { m.fechar(); await Conta.tela({ podeFechar: true }); tudo(); };
     const btnGoogle = el.querySelector('#btn-salvar-google');
@@ -253,7 +259,7 @@
       const avatar = (a) => (ICONES.includes(a) ? `assets/avatares/${a}.svg` : a ? `assets/cartas/${a}_medalhao.png` : 'assets/avatares/coroa.svg');
       corpo.innerHTML = (lista.length ? `<div class="top-lista">${lista.map((j, i) => `<div class="top-linha${j.uid === eu ? ' voce' : ''} pos${i + 1}" data-perfil="${j.uid}">
           <span class="top-pos">${i < 3 ? ['🥇', '🥈', '🥉'][i] : i + 1}</span><img src="${avatar(j.avatar)}" alt="" />
-          <div class="top-nome"><b>${esc(j.nome || 'Jogador')}${j.uid === eu ? ' (você)' : ''}</b>${j.cla ? `<small>🛡️ ${esc(j.cla)}</small>` : ''}</div>
+          <div class="top-nome"><b>${Passe.nomeHtml(j.nome || 'Jogador', j.estiloNome)}${j.uid === eu ? ' (você)' : ''}</b>${j.cla ? `<small>🛡️ ${esc(j.cla)}</small>` : ''}</div>
           <span class="top-trofeus"><i class="ic-trofeu"></i>${fmt(j.trofeus || 0)}</span></div>`).join('')}</div>`
         : '<p class="aviso">Ainda ninguém no top. Seja o primeiro!</p>')
         + (eu ? '' : '<p class="aviso">Entre numa conta para aparecer no top global.</p>')
@@ -352,7 +358,7 @@
 
   const linhaJogador = (p, extra = '') => `<div class="linha-jogador" data-perfil="${p.uid}">
       <div class="lj-avatar"><img src="${avatarDe(p.avatar)}" alt="" />${p.visto !== undefined ? pontoOnline(p) : ''}</div>
-      <div class="lj-nome"><b>${esc(p.nome || 'Jogador')}</b><small>${p.visto !== undefined ? `${Amigos.online(p) ? '<span class="txt-on">online</span> · ' : ''}🏆 ${fmt(p.trofeus || 0)}${p.cla ? ` · 🛡️ ${esc(p.cla)}` : ''}` : 'enviou um pedido'}</small></div>${extra}</div>`;
+      <div class="lj-nome"><b>${Passe.nomeHtml(p.nome || 'Jogador', p.estiloNome)}</b><small>${p.visto !== undefined ? `${Amigos.online(p) ? '<span class="txt-on">online</span> · ' : ''}🏆 ${fmt(p.trofeus || 0)}${p.cla ? ` · 🛡️ ${esc(p.cla)}` : ''}` : 'enviou um pedido'}</small></div>${extra}</div>`;
 
   async function abaAmigos(qual) {
     const aba = document.getElementById('amigos-aba');
@@ -429,7 +435,7 @@
       corpo.innerHTML = `<div class="perfil-banner" style="--cor:${CORES_PERFIL[p.cor] || CORES_PERFIL.roxo}">
           <div class="perfil-avatar outro"><img src="${avatarDe(p.avatar)}" alt="" />${pontoOnline(p)}</div>
           <div class="perfil-info">
-            <div class="perfil-nome-outro">${esc(p.nome || 'Jogador')}</div>
+            <div class="perfil-nome-outro">${Passe.nomeHtml(p.nome || 'Jogador', p.estiloNome)}</div>
             <div class="perfil-nivel"><div class="nivel" data-n="${p.nivel || 1}"></div><small class="status-online">${Amigos.online(p) ? '🟢 Online agora' : p.visto && p.visto.toMillis ? `Visto ${quandoFoi(p.visto.toMillis())}` : ''}</small></div>
             ${p.cla ? `<div class="perfil-cla">🛡️ ${esc(p.cla)}</div>` : ''}
           </div>
@@ -1016,7 +1022,7 @@
     const aba = $('cla-aba');
     if (abaCla === 'membros') {
       aba.innerHTML = `<div class="lista-membros">${membros.map((m, i) => `<div class="membro${m.u === Conta.uid() ? ' voce' : ''}" data-perfil="${m.u}"><span class="pos">${i + 1}</span>
-        <b>${esc(m.nome || 'Jogador')}${m.u === Conta.uid() ? ' (você)' : ''}</b>${m.u === c.lider ? '<span class="tag-lider">Líder</span>' : ''}
+        <b>${Passe.nomeHtml(m.nome || 'Jogador', m.estiloNome)}${m.u === Conta.uid() ? ' (você)' : ''}</b>${m.u === c.lider ? '<span class="tag-lider">Líder</span>' : ''}
         <span><i class="ic-trofeu"></i> ${fmt(m.trofeus || 0)}</span>${souLider && m.u !== Conta.uid() ? `<button class="btn-expulsar" data-u="${m.u}" title="Remover">✕</button>` : ''}</div>`).join('')}</div>`;
       ligarPerfis(aba);
       aba.querySelectorAll('[data-u]').forEach((b) => (b.onclick = (ev) => ev.stopPropagation() || UI.modal({ titulo: 'Remover do clã?', html: `<p>${esc(c.membros[b.dataset.u].nome)} vai sair do clã.</p>`,
@@ -1030,7 +1036,7 @@
       const chat = $('chat');
       if (!chat) return;
       if (msgs === null) { chat.innerHTML = `<p class="aviso">${erroNuvem({ code: 'permission' })}</p>`; return; }
-      chat.innerHTML = msgs.length ? msgs.map((x) => `<div class="msg${x.uid === Conta.uid() ? ' minha' : ''}"><small>${esc(x.nome)}</small><span>${esc(x.texto)}</span></div>`).join('')
+      chat.innerHTML = msgs.length ? msgs.map((x) => `<div class="msg${x.uid === Conta.uid() ? ' minha' : ''}"><small>${Passe.nomeHtml(x.nome, x.estiloNome)}</small><span>${esc(x.texto)}</span></div>`).join('')
         : '<p class="aviso">Nenhuma mensagem ainda. Diga oi! 👋</p>';
       chat.scrollTop = chat.scrollHeight;
     });
@@ -1070,6 +1076,34 @@
     }));
   }
 
+  function telaEstiloNome() {
+    const tem = Passe.temTrilha('plus'), ultra = Passe.temTrilha('ultra'), atual = Passe.estiloNome();
+    const grupos = ['Cor', 'Gradiente', 'Animado'];
+    const md = UI.modal({
+      titulo: '🎨 Estilo do nome',
+      classe: 'modal-estilo-nome',
+      html: `<div class="previa-nome">${Passe.nomeHtml(d().nome, atual)}</div>
+        ${tem ? '' : '<p class="aviso">✨ Cores e gradientes no nome são vantagem do <b>Passe Plus</b> e do <b>Passe Ultra</b>. Os animados são só do Ultra!</p>'}
+        ${tem && !ultra ? '<p class="aviso">Os estilos <b>animados</b> são só do Passe Ultra.</p>' : ''}
+        <button class="estilo-op${atual ? '' : ' escolhido'}" data-estilo="">Normal</button>
+        ${grupos.map((g) => `<div class="titulo-conquistas">${g === 'Cor' ? 'Cores' : g === 'Gradiente' ? 'Gradientes' : 'Animados 👑 Ultra'}</div>
+          <div class="grade-estilos">${Object.entries(Passe.ESTILOS_NOME).filter(([, e]) => e.tipo === g).map(([id, e]) => `<button class="estilo-op${id === atual ? ' escolhido' : ''}${Passe.podeEstilo(id) ? '' : ' trancado'}" data-estilo="${id}">
+            ${Passe.nomeHtml(e.nome, id)}${Passe.podeEstilo(id) ? '' : '<i>🔒</i>'}</button>`).join('')}</div>`).join('')}`,
+      botoes: tem ? [{ texto: 'Fechar', classe: 'principal', acao: () => { topo(); } }]
+        : [{ texto: 'Fechar', classe: 'secundario' }, { texto: '🎟️ Ver passe', classe: 'principal', acao: () => { telaPasse(); } }],
+    });
+    md.el.querySelectorAll('[data-estilo]').forEach((b) => (b.onclick = () => {
+      const id = b.dataset.estilo;
+      if (!Passe.escolherEstilo(id)) {
+        UI.toast(id && Passe.ESTILOS_NOME[id].ultra ? 'Esse estilo é só do Passe Ultra! 👑' : 'Compre o Passe Plus ou Ultra para mudar a cor do nome! 🎟️');
+        return;
+      }
+      md.el.querySelectorAll('[data-estilo]').forEach((x) => x.classList.toggle('escolhido', x === b));
+      md.el.querySelector('.previa-nome').innerHTML = Passe.nomeHtml(d().nome, Passe.estiloNome());
+      topo();
+    }));
+  }
+
   function telaPasse() {
     const p = Passe.dados();
     const nv = Passe.nivel();
@@ -1086,6 +1120,7 @@
       titulo: '🎟️ Passe da Temporada',
       classe: 'modal-passe',
       html: `<p class="aviso">Ganhe pontos jogando batalhas (vitória 40, derrota 15, +8 por coroa). Temporada termina em ${Passe.diasRestantes()} dias.</p>
+        <p class="vantagem-passe">✨ Plus e Ultra: <b>cor e gradiente no nome</b> (vá no seu perfil). Ultra: estilos <span class="nome-estilo nc-arco-iris">animados</span>!</p>
         <div class="passe-compras">
           <button class="comprar-passe plus${p.plus || p.ultra ? ' tem' : ''}" data-c="plus"><b>PLUS</b><small>${p.plus || p.ultra ? 'Ativo ✔' : `💎 ${Passe.precoAtual('plus')}`}</small></button>
           <button class="comprar-passe ultra${p.ultra ? ' tem' : ''}" data-c="ultra"><b>ULTRA</b><small>${p.ultra ? 'Ativo ✔' : `💎 ${Passe.precoAtual('ultra')}`}</small></button>

@@ -47,7 +47,7 @@ const Conta = (() => {
       if (!Estado.d.modUsado) {
         await fb.setDoc(fb.doc(fb.db, 'ranking', usuario.uid), {
           nome: Estado.d.nome.slice(0, 16), trofeus: Math.max(0, Math.min(99999, Math.round(Estado.d.trofeus))),
-          avatar: Estado.d.avatar, cla: Estado.d.cla ? Estado.d.cla.nome.slice(0, 20) : '', atualizado: fb.serverTimestamp(),
+          avatar: Estado.d.avatar, estiloNome: Passe.estiloNome(), cla: Estado.d.cla ? Estado.d.cla.nome.slice(0, 20) : '', atualizado: fb.serverTimestamp(),
         }).catch(() => {});
       } else {
         await fb.deleteDoc(fb.doc(fb.db, 'ranking', usuario.uid)).catch(() => {});
@@ -58,6 +58,7 @@ const Conta = (() => {
         await fb.updateDoc(fb.doc(fb.db, 'clas', Estado.d.cla.id), {
           [`membros.${usuario.uid}.nome`]: Estado.d.nome,
           [`membros.${usuario.uid}.trofeus`]: Estado.d.trofeus,
+          [`membros.${usuario.uid}.estiloNome`]: Passe.estiloNome(),
         }).catch(() => {});
       }
     } catch (e) {

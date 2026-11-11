@@ -19,7 +19,7 @@ const Cla = (() => {
     return snap.exists() ? { id: snap.id, ...snap.data() } : null;
   }
 
-  const eu = () => ({ nome: Estado.d.nome, trofeus: Estado.d.trofeus, avatar: Estado.d.avatar, entrou: Date.now() });
+  const eu = () => ({ nome: Estado.d.nome, estiloNome: Passe.estiloNome(), trofeus: Estado.d.trofeus, avatar: Estado.d.avatar, entrou: Date.now() });
 
   async function criar({ nome, descricao, cor }) {
     const f = fb();
@@ -79,7 +79,7 @@ const Cla = (() => {
   async function enviar(id, texto) {
     const f = fb();
     await f.addDoc(f.collection(f.db, 'clas', id, 'mensagens'), {
-      uid: uid(), nome: Estado.d.nome, texto: texto.slice(0, 200), criado: f.serverTimestamp(),
+      uid: uid(), nome: Estado.d.nome, estiloNome: Passe.estiloNome(), texto: texto.slice(0, 200), criado: f.serverTimestamp(),
     });
   }
 
