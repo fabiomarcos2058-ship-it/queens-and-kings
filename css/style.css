@@ -106,7 +106,7 @@ button { font-family: inherit; cursor: pointer; border: none; }
 
 /* ---------- Arena ---------- */
 .arena { position: relative; width: 100%; aspect-ratio: 360 / 620; overflow: hidden; border-radius: 12px; }
-.arena-peca { position: absolute; pointer-events: none; }
+.arena-peca { position: absolute; pointer-events: none; object-fit: contain; object-position: center bottom; }
 .arena-campo { position: absolute; left: 5.56%; top: 4.84%; width: 88.89%; height: 90.32%; background-size: 8.4% auto; border: 2px solid #3B6D11; border-radius: 6px; }
 .petala { position: absolute; top: -4%; width: 7px; height: 5px; background: #F4C0D1; border-radius: 60% 0 60% 0; animation: cair linear infinite; pointer-events: none; }
 @keyframes cair { 0% { transform: translate(0, 0) rotate(0); } 50% { transform: translate(18px, 330px) rotate(200deg); } 100% { transform: translate(-6px, 700px) rotate(420deg); } }

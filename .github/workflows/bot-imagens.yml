@@ -1,0 +1,35 @@
+name: Bot de imagens
+
+on:
+  workflow_dispatch:
+    inputs:
+      modo:
+        description: "baixar = gera as imagens | listar = só lista os modelos"
+        type: choice
+        options: [baixar, listar]
+        default: baixar
+
+permissions:
+  contents: write
+
+jobs:
+  imagens:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - name: Instalar Blender e Pillow
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q blender
+          pip install pillow
+      - name: Rodar o bot
+        run: python bot/baixar.py --${{ inputs.modo }}
+      - name: Salvar no repositório
+        run: |
+          git config user.name "bot-de-imagens"
+          git config user.email "bot@users.noreply.github.com"
+          git add assets bot/catalogo.txt CREDITOS.md
+          git diff --cached --quiet && echo "Nada novo" && exit 0
+          git commit -m "Bot: imagens CC0 atualizadas"
+          git push

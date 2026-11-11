@@ -33,3 +33,13 @@ Para trocar uma imagem, coloque um `.png` com **o mesmo nome** na mesma pasta. P
 | `ui/bau_madeira`, `ui/bau_prata`, `ui/bau_ouro` | Baús |
 
 As imagens novas devem ser de fontes com licença livre (CC0), como Kenney e Quaternius. Anote a origem de cada uma em `CREDITOS.md`.
+
+## Bot de imagens
+
+O bot fica em `bot/`. Ele baixa pacotes 3D com licença CC0 da Kenney, tira "fotos" dos modelos no Blender e salva os PNGs com os nomes certos em `assets/`. Os créditos são atualizados sozinhos em `CREDITOS.md`.
+
+**Para rodar pelo celular:** abra a aba **Actions** do repositório, toque em **Bot de imagens**, depois em **Run workflow** e confirme com **baixar**. Em uns 5 a 10 minutos, as imagens novas entram no jogo.
+
+- O modo **listar** só gera `bot/catalogo.txt` com todos os modelos disponíveis.
+- Para trocar qual modelo vira qual imagem, edite `bot/fontes.json`.
+- Só entram pacotes CC0 de sites da lista `sites_permitidos`.
