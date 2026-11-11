@@ -601,6 +601,18 @@ const Batalha = (() => {
   const dpsC = (c) => (c.dano || 0) / (c.cadencia || 1);
   const dpsE = (e) => (e.dano || 0) / (e.cadencia || 1);
 
+  // Dificuldade da IA baseada nos troféus do jogador
+  function dificuldadeIA() {
+    const t = Estado.d.trofeus || 0;
+    if (t >= 1500) return 5; // muito difícil
+    if (t >= 900)  return 4; // raciocínio
+    if (t >= 400)  return 3; // difícil
+    if (t >= 200)  return 2; // médio
+    return 1;                // fácil (ruim)
+  }
+
+
+
   // deck aleatório e equilibrado: 1 tanque, 2 feitiços/barril, 1 dano em área, 1 atiradora e o resto sorteado
   function deckAleatorioIA() {
     const pool = embaralhar(Estado.catalogo().filter((c) => !c.exclusivo && !c.token));
@@ -621,7 +633,8 @@ const Batalha = (() => {
       if (!podeColocar('vermelho', x, y)) return false;
     }
     jogar('vermelho', m.i, Math.max(28, Math.min(W - 28, x)), y);
-    s.iaTimer = 0.45 + Math.random() * 0.3;
+    const d = dificuldadeIA();
+    s.iaTimer = ({ 1: 1.2, 2: 0.8, 3: 0.5, 4: 0.35, 5: 0.22 }[d] || 0.45) + Math.random() * 0.25;
     return true;
   }
 
@@ -679,9 +692,12 @@ const Batalha = (() => {
   function ia(dt) {
     if (Mod.flag('iaParada')) return;
     const L = s.vermelho;
+    const dif = dificuldadeIA();
     s.iaTimer -= dt;
     if (s.iaTimer > 0) return;
-    s.iaTimer = 0.25 + Math.random() * 0.25; // reage muito rápido
+    // tempo de reação conforme dificuldade (fácil = lento, 1500+ = bem rápido)
+    const delay = { 1: 1.4, 2: 0.9, 3: 0.55, 4: 0.32, 5: 0.18 }[dif] || 0.4;
+    s.iaTimer = delay + Math.random() * (delay * 0.5);
 
     // 0) habilidades das campeãs
     for (const t of s.ent.filter((e) => !e.torre && e.time === 'vermelho' && e.habilidade && e.recarga <= 0 && e.surgir <= 0)) {
@@ -698,6 +714,20 @@ const Batalha = (() => {
     const mao = L.fila.slice(0, 4).map((id, i) => ({ i, c: Estado.carta(id) }));
     const pode = mao.filter((m) => m.c.custo <= L.elixir);
     const nivel = Math.pow(1.1, s.nivelIA - 1);
+
+    // Em dificuldades baixas a IA "erra" e joga de forma aleatória/burra
+    if (dif <= 2 && pode.length) {
+      const chanceBurra = dif === 1 ? 0.72 : 0.38;
+      if (Math.random() < chanceBurra) {
+        const m = pode[Math.floor(Math.random() * pode.length)];
+        const x = PONTES[Math.random() < 0.5 ? 0 : 1] + (Math.random() * 40 - 20);
+        const y = m.c.feitico || m.c.barril
+          ? (80 + Math.random() * 200)
+          : (RIO_TOPO - 10 - Math.random() * 30);
+        return iaJogar(m, x, y);
+      }
+    }
+
     const torresAzuis = s.ent.filter((e) => e.torre && e.time === 'azul');
     const inimigos = s.ent.filter((e) => !e.torre && e.time === 'azul' && e.vida > 0);
     const meus = s.ent.filter((e) => !e.torre && e.time === 'vermelho' && e.vida > 0);
@@ -709,7 +739,10 @@ const Batalha = (() => {
     // 1) feitiço que vale a pena (finaliza torre, acerta grupo, mata atiradora/campeã)
     for (const m of pode.filter((x) => x.c.feitico)) {
       const p = melhorFeitico(m, nivel, inimigos, torresAzuis);
-      const minimo = m.c.custo * (perdendo && resta < 45 ? 70 : 130);
+      const baseMin = perdendo && resta < 45 ? 70 : 130;
+      // fácil/médio exige valor bem maior → quase nunca joga feitiço no momento certo
+      const multDif = { 1: 2.4, 2: 1.7, 3: 1.2, 4: 1.0, 5: 0.75 }[dif] || 1;
+      const minimo = m.c.custo * baseMin * multDif;
       if (p && p.v >= minimo) return iaJogar(m, p.x, p.y);
     }
 
