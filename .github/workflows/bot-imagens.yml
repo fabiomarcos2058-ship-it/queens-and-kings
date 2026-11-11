@@ -21,7 +21,7 @@ jobs:
       - name: Instalar Blender e Pillow
         run: |
           sudo apt-get update -q
-          sudo apt-get install -y -q blender
+          sudo apt-get install -y -q blender python3-numpy
           pip install pillow
       - name: Rodar o bot
         run: python bot/baixar.py --${{ inputs.modo }}
