@@ -7,6 +7,8 @@ const FIREBASE_CONFIG = {
   storageBucket: 'queens-and-kings-dab10.firebasestorage.app',
   messagingSenderId: '884266795254',
   appId: '1:884266795254:web:aa60cb867487cdac316cd7',
+  // Realtime Database (usado no x1 ao vivo)
+  databaseURL: 'https://queens-and-kings-dab10-default-rtdb.firebaseio.com',
 };
 
 const Conta = (() => {
@@ -24,7 +26,7 @@ const Conta = (() => {
     if (fb || !ativo()) return fb;
     const [app, auth, fs] = await Promise.all([import(sdk('app')), import(sdk('auth')), import(sdk('firestore'))]);
     const a = app.initializeApp(FIREBASE_CONFIG);
-    fb = { ...auth, ...fs, auth: auth.getAuth(a), db: fs.getFirestore(a) };
+    fb = { ...auth, ...fs, app: a, auth: auth.getAuth(a), db: fs.getFirestore(a) };
     fb.auth.languageCode = 'pt';
     return fb;
   }

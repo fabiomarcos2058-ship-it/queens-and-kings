@@ -41,17 +41,22 @@ const Batalha = (() => {
     return { elixir: 5, fila, coroas: 0 };
   }
 
-  function iniciar({ modo = 'normal', fim } = {}) {
+  // rede (x1): no celular de quem criou a sala, rede = { tipo: 'host', convidado, enviarEstado, fim }
+  function iniciar({ modo = 'normal', fim, rede = null } = {}) {
     ao_fim = fim;
     const deck = Estado.d.deck;
-    // o computador só usa cartas já liberadas para o seu número de troféus
-    const deckIA = embaralhar(Mod.deckApelao() || deckAleatorioIA()).slice(0, 8);
+    const deckIA = rede ? embaralhar(rede.convidado.deck) : embaralhar(Mod.deckApelao() || deckAleatorioIA()).slice(0, 8);
     s = {
       modo, t: 0, prorrogacao: false, acabou: false, pausa: false,
       azul: lado(deck), vermelho: lado(deckIA),
       ent: torres(), proj: [], efeitos: [], selecionada: null, iaTimer: 2, id: 0,
       nivelIA: Math.max(1, Math.min(9, Math.round(deck.reduce((a, id) => a + Estado.d.colecao[id].nivel, 0) / deck.length))),
+      rede, niveisV: rede ? rede.convidado.niveis : null, eventos: [], snapTimer: 0,
     };
+    montar(rede ? `X1 contra ${rede.convidado.nome}` : modo === 'elixir2x' ? 'Evento: elixir em dobro' : 'Batalha');
+  }
+
+  function montar(titulo) {
     const arena = $('arena-grande');
     Arena.render(arena);
     s.arena = arena;
@@ -74,7 +79,8 @@ const Batalha = (() => {
     hab.innerHTML = '';
     s.habTimer = 0;
     $('btn-sair').onclick = desistir;
-    document.querySelector('.selo-previa').textContent = modo === 'elixir2x' ? 'Evento: elixir em dobro' : 'Batalha';
+    document.querySelector('.selo-previa').textContent = titulo;
+    atualizarPlacar();
     desenharMao();
     $('batalha').classList.remove('oculto');
     s.ultimo = performance.now();
@@ -198,6 +204,13 @@ const Batalha = (() => {
       return;
     }
     if (c.custo > s.azul.elixir) { UI.toast('Elixir insuficiente'); return; }
+    if (s.convidado) {
+      s.rede.enviarComando({ tipo: 'carta', i: s.selecionada, x: Math.round(x), y: Math.round(y) }); // o host espelha
+      efeito('onda-surgir azul', x, y, 700); // retorno imediato enquanto o host confirma
+      s.azul.elixir -= c.custo;
+      s.selecionada = null; s.zona.classList.remove('ativa'); desenharMao();
+      return;
+    }
     jogar('azul', s.selecionada, x, y);
     s.selecionada = null;
     s.zona.classList.remove('ativa');
@@ -211,7 +224,7 @@ const Batalha = (() => {
     L.elixir -= c.custo;
     L.fila.splice(indice, 1);
     L.fila.push(id);
-    const nivel = time === 'azul' ? Estado.d.colecao[id].nivel : s.nivelIA;
+    const nivel = time === 'azul' ? Estado.d.colecao[id].nivel : s.niveisV ? (s.niveisV[id] || 1) : s.nivelIA;
     const f = Math.pow(1.1, nivel - 1) * (time === 'azul' && Mod.flag('danoX5') ? 5 : 1);
     if (c.feitico) {
       lancarFeitico(time, c, x, y, Math.round(c.dano * f));
@@ -281,6 +294,7 @@ const Batalha = (() => {
 
   // barril voa da torre do rei, quebra e solta as minis
   function lancarBarril(time, c, x, y, f, nivel) {
+    if (s.rede) s.eventos.push(['b', Math.round(x), Math.round(y), time === 'azul' ? 0 : 1]);
     const rei = s.ent.find((e) => e.torre && e.tipo === 'rei' && e.time === time) || { x: W / 2, y: time === 'azul' ? H - 70 : 60 };
     const b = document.createElement('div');
     b.className = 'barril-voando';
@@ -301,6 +315,7 @@ const Batalha = (() => {
   }
 
   function lancarFeitico(time, c, x, y, dano) {
+    if (s.rede) s.eventos.push(['f', c.id, Math.round(x), Math.round(y), time === 'azul' ? 0 : 1]);
     const largura = { width: `${((c.area * 2) / W) * 100}%` };
     efeito(`mira-feitico ${time}`, x, y, 650, largura);
     if (c.id === 'lanterna') {
@@ -370,6 +385,20 @@ const Batalha = (() => {
     setTimeout(() => n.remove(), 650);
   }
 
+  function torreCaiuVisual(t) {
+    if (!s.ent.includes(t)) return;
+    t.vida = 0;
+    const img = s.arena.querySelector(`[data-torre="${t.id}"]`);
+    if (img) img.classList.add('destruida');
+    t.el.remove();
+    s.ent = s.ent.filter((x) => x !== t);
+    efeito('explosao-torre', t.x, t.y, 900);
+    particulas(t.x, t.y, '#B4B2A9', 16, 50);
+    tremer(true);
+    try { coroaVoando(t); } catch (e) { /* nada */ }
+    atualizarZona();
+  }
+
   function destruirTorre(t, deTime) {
     t.vida = 0;
     const img = s.arena.querySelector(`[data-torre="${t.id}"]`);
@@ -428,12 +457,19 @@ const Batalha = (() => {
 
   // ---------- Habilidades especiais (gastam elixir) ----------
   function ativarHabilidade(t) {
+    if (s.convidado) {
+      if (!t.habilidade || t.recarga > 0 || s.azul.elixir < t.habilidade.custo) return false;
+      s.rede.enviarComando({ tipo: 'hab', id: t.hid });
+      t.recarga = t.habilidade.recarga || 10;
+      return true;
+    }
     const h = t.habilidade;
     const L = s[t.time];
     if (!h || t.vida <= 0 || t.recarga > 0 || L.elixir < h.custo || t.surgir > 0) return false;
     L.elixir -= h.custo;
     t.recarga = h.recarga || 10;
     efeito(`ativou ${t.time}`, t.x, t.y, 700);
+    if (s.rede) s.eventos.push(['a', Math.round(t.x), Math.round(t.y), t.time === 'azul' ? 0 : 1]);
     if (h.tipo === 'golpes') { t.golpesFortes = 3; t.el.classList.add('aura-golpes'); }
     if (h.tipo === 'furia') { t.furia = h.duracao || 6; t.el.classList.add('aura-furia'); }
     if (h.tipo === 'fenix') { t.fenix = h.duracao || 10; t.el.classList.add('aura-fenix'); }
@@ -453,6 +489,7 @@ const Batalha = (() => {
     const alvo = (t.alvo && t.alvo.vida > 0 && t.alvo) || s.ent.filter((e) => e.time !== t.time && e.vida > 0).sort((a, b) => dist(a, t) - dist(b, t))[0];
     if (!alvo) return;
     const ang = Math.atan2(alvo.y - t.y, alvo.x - t.x);
+    if (s.rede) s.eventos.push(['k', Math.round(t.x), Math.round(t.y), +ang.toFixed(3)]);
     const comp = 320, larg = 34;
     const fx = Math.cos(ang), fy = Math.sin(ang);
     const raio = document.createElement('div');
@@ -690,7 +727,7 @@ const Batalha = (() => {
   }
 
   function ia(dt) {
-    if (Mod.flag('iaParada')) return;
+    if (Mod.flag('iaParada') || s.rede) return;
     const L = s.vermelho;
     const dif = dificuldadeIA();
     s.iaTimer -= dt;
@@ -820,14 +857,182 @@ const Batalha = (() => {
   }
 
   // ---------- Loop principal ----------
+  // "foto" do estado da batalha que vai para o celular do convidado
+  function foto() {
+    return {
+      t: +s.t.toFixed(2), p: s.prorrogacao ? 1 : 0,
+      cz: [s.azul.coroas, s.vermelho.coroas], el: [+s.azul.elixir.toFixed(2), +s.vermelho.elixir.toFixed(2)],
+      fila: s.vermelho.fila.slice(0, 5),
+      tw: Object.fromEntries(s.ent.filter((e) => e.torre).map((e) => [e.id, Math.round(e.vida)])),
+      tr: s.ent.filter((e) => !e.torre).map((e) => [e.id, e.carta.id, e.time === 'azul' ? 0 : 1, Math.round(e.x * 10) / 10, Math.round(e.y * 10) / 10,
+        Math.round(e.vida), e.max, e.nivel, (e.surgir > 0 ? 1 : 0) | (e.furia > 0 ? 2 : 0) | (e.golpesFortes > 0 ? 4 : 0) | (e.fenix > 0 ? 8 : 0), e.recarga > 0 ? +e.recarga.toFixed(1) : 0]),
+      pj: s.proj.map((p) => [Math.round(p.x), Math.round(p.y), p.time === 'azul' ? 0 : 1, p.el.classList.contains('de-torre') ? 1 : 0]),
+      ev: s.eventos,
+    };
+  }
+
+  // ---------- X1: celular do convidado (só mostra o que o host calcula) ----------
+  const espelhoTime = (n) => (n === 0 ? 'vermelho' : 'azul'); // azul do host = vermelho para o convidado
+  const espelhoTorre = (id) => id.replace('esq', 'X').replace('dir', 'esq').replace('X', 'dir').replace('azul', 'Y').replace('vermelho', 'azul').replace('Y', 'vermelho');
+
+  function iniciarConvidado({ fim, rede }) {
+    ao_fim = fim;
+    s = {
+      modo: 'x1c', convidado: true, rede, t: 0, prorrogacao: false, acabou: false, pausa: false,
+      azul: { elixir: 5, fila: [], coroas: 0 }, vermelho: { elixir: 5, fila: [], coroas: 0 },
+      ent: torres(), proj: [], efeitos: [], selecionada: null, id: 0, mapa: new Map(), pjEls: [],
+    };
+    montar(`X1 contra ${rede.host.nome}`);
+  }
+
+  function receberEstado(est) {
+    if (!s || !s.convidado || s.acabou || !est) return;
+    s.t = est.t; s.prorrogacao = !!est.p;
+    s.azul.coroas = est.cz[1]; s.vermelho.coroas = est.cz[0];
+    s.azul.elixir = est.el[1]; s.vermelho.elixir = est.el[0];
+    const filaMudou = (est.fila || []).join() !== s.azul.fila.join();
+    s.azul.fila = est.fila || [];
+    if (filaMudou) desenharMao();
+    atualizarPlacar();
+
+    // torres
+    for (const t of s.ent.filter((e) => e.torre)) {
+      const idHost = espelhoTorre(t.id);
+      const v = est.tw ? est.tw[idHost] : undefined;
+      if (v === undefined) { torreCaiuVisual(t); continue; }
+      if (v < t.vida) { t.vida = v; atualizarHp(t); t.el.querySelector('b').textContent = v; t.el.classList.remove('levou'); void t.el.offsetWidth; t.el.classList.add('levou'); }
+    }
+
+    // tropas
+    const vistas = new Set();
+    for (const [hid, cartaId, timeN, hx, hy, vida, max, nivel, flags, recarga] of est.tr || []) {
+      vistas.add(hid);
+      let t = s.mapa.get(hid);
+      const x = W - hx, y = H - hy;
+      if (!t) {
+        criarTropa(espelhoTime(timeN), Estado.carta(cartaId), x, y, 1, nivel);
+        t = s.ent[s.ent.length - 1];
+        t.hid = hid; t.max = max; t.vida = vida;
+        s.mapa.set(hid, t);
+      }
+      t.tx = x; t.ty = y;
+      if (vida < t.vida) { t.el.classList.remove('levou'); void t.el.offsetWidth; t.el.classList.add('levou'); numero(t, t.vida - vida); }
+      t.vida = vida; t.max = max;
+      atualizarHp(t);
+      t.surgir = flags & 1 ? 1 : 0;
+      t.el.classList.toggle('surgindo', !!(flags & 1));
+      t.el.classList.toggle('aura-furia', !!(flags & 2));
+      t.el.classList.toggle('aura-golpes', !!(flags & 4));
+      t.el.classList.toggle('aura-fenix', !!(flags & 8));
+      t.recarga = recarga;
+    }
+    for (const [hid, t] of s.mapa) {
+      if (vistas.has(hid)) continue;
+      s.mapa.delete(hid);
+      s.ent = s.ent.filter((e) => e !== t);
+      t.el.classList.add('morrendo');
+      efeito(`poof ${t.time}`, t.x, t.y, 500);
+      particulas(t.x, t.y, t.time === 'azul' ? '#85B7EB' : '#F09595', 8, 26);
+      setTimeout(() => t.el.remove(), 400);
+    }
+
+    // projéteis (redesenhados a cada foto)
+    s.pjEls.forEach((el) => el.remove());
+    s.pjEls = (est.pj || []).map(([px, py, timeN, deTorre]) => {
+      const el = document.createElement('div');
+      el.className = `projetil ${espelhoTime(timeN)}${deTorre ? ' de-torre' : ''}`;
+      Object.assign(el.style, pct(W - px, H - py));
+      s.arena.appendChild(el);
+      return el;
+    });
+
+    // efeitos
+    for (const ev of est.ev || []) {
+      if (ev[0] === 'f') {
+        const c = Estado.carta(ev[1]); const x = W - ev[2], y = H - ev[3];
+        const largura = { width: `${((c.area * 2) / W) * 100}%` };
+        efeito(`mira-feitico ${espelhoTime(ev[4])}`, x, y, 650, largura);
+        if (c.id === 'lanterna') efeito('lanterna-caindo', x, y, 460);
+        setTimeout(() => { if (!s || s.acabou) return; efeito(`feitico ${c.id}`, x, y, 700, largura); particulas(x, y, c.id === 'lanterna' ? '#FAC775' : '#F4C0D1', 12, c.area); if (c.id === 'lanterna') tremer(); }, 450);
+      } else if (ev[0] === 'b') {
+        efeito('barril-quebra', W - ev[1], H - ev[2], 500);
+      } else if (ev[0] === 'k') {
+        const x = W - ev[1], y = H - ev[2], ang = ev[3] + Math.PI;
+        const raio = document.createElement('div');
+        raio.className = 'kamehameha';
+        Object.assign(raio.style, pct(x, y), { width: `${(320 / W) * 100}%`, transform: `translate(0, -50%) rotate(${ang}rad)` });
+        s.arena.appendChild(raio);
+        setTimeout(() => raio.remove(), 900);
+        setTimeout(() => tremer(true), 300);
+      } else if (ev[0] === 'a') {
+        efeito(`ativou ${espelhoTime(ev[3])}`, W - ev[1], H - ev[2], 700);
+      }
+    }
+
+    // fim (resultado do ponto de vista do host)
+    if (est.fim) {
+      s.acabou = true;
+      const inv = { vitoria: 'derrota', derrota: 'vitoria', empate: 'empate' };
+      const dados = { resultado: inv[est.fim.resultado] || 'empate', coroas: est.cz[1], coroasInimigo: est.cz[0], modo: 'x1' };
+      setTimeout(() => ao_fim && ao_fim(dados), 900);
+    }
+  }
+
+  // anima as tropas suavemente entre uma foto e outra
+  function assistir(agora) {
+    const dt = Math.min(0.05, (agora - s.ultimo) / 1000);
+    s.ultimo = agora;
+    for (const t of s.ent) {
+      if (t.torre || t.tx === undefined) continue;
+      const k = Math.min(1, dt * 10);
+      t.x += (t.tx - t.x) * k; t.y += (t.ty - t.y) * k;
+      if (t.recarga > 0) t.recarga -= dt;
+      posicionar(t);
+    }
+    const limite = DURACAO + (s.prorrogacao ? PRORROGACAO : 0);
+    const resta = Math.max(0, limite - s.t);
+    const tempoEl = document.querySelector('.tempo');
+    tempoEl.textContent = `${Math.floor(resta / 60)}:${String(Math.floor(resta % 60)).padStart(2, '0')}`;
+    tempoEl.classList.toggle('dobro', s.prorrogacao || resta <= 60);
+    atualizarElixir();
+    s.habTimer = (s.habTimer || 0) - dt;
+    if (s.habTimer <= 0) { s.habTimer = 0.2; desenharHabilidades(); }
+  }
+
+  // jogada do convidado (vem com as coordenadas da tela dele, que é espelhada)
+  function comandoRemoto(cmd) {
+    if (!s || s.acabou || !s.rede) return;
+    const x = W - cmd.x, y = H - cmd.y;
+    if (cmd.tipo === 'carta') {
+      const id = s.vermelho.fila[cmd.i];
+      if (!id || cmd.i > 3) return;
+      const c = Estado.carta(id);
+      if (c.custo > s.vermelho.elixir) return;
+      if (!c.feitico && !c.barril && !podeColocar('vermelho', x, y)) return;
+      jogar('vermelho', cmd.i, x, y);
+    } else if (cmd.tipo === 'hab') {
+      const t = s.ent.find((e) => e.id === cmd.id && e.time === 'vermelho');
+      if (t) ativarHabilidade(t);
+    }
+  }
+
+  function adversarioSaiu() {
+    if (!s || s.acabou) return;
+    UI.toast('Seu adversário saiu da partida!');
+    s.forcar = 'vitoria';
+    terminar();
+  }
+
   function loop(agora) {
     if (!s || s.acabou) return;
+    if (s.convidado) { assistir(agora); requestAnimationFrame(loop); return; }
     const dt = Math.min(0.05, (agora - s.ultimo) / 1000);
     s.ultimo = agora;
     if (!s.pausa) for (let i = 0; i < VEL * Mod.vel(); i++) {
       if (s.acabou) break;
       try { passo(dt); } catch (e) { console.error('Erro na batalha (o jogo continua):', e); }
     }
+    if (s.rede && !s.acabou && (s.snapTimer -= dt) <= 0) { s.snapTimer = 0.1; s.rede.enviarEstado(foto()); s.eventos = []; }
     requestAnimationFrame(loop);
   }
 
@@ -944,18 +1149,27 @@ const Batalha = (() => {
     if (s.acabou) return;
     s.acabou = true;
     let resultado;
-    if (desistiu) resultado = 'derrota';
+    if (s.forcar) resultado = s.forcar;
+    else if (desistiu) resultado = 'derrota';
     else if (s.azul.coroas !== s.vermelho.coroas) resultado = s.azul.coroas > s.vermelho.coroas ? 'vitoria' : 'derrota';
     else {
       const a = vidaMinima('azul'), v = vidaMinima('vermelho');
       resultado = Math.abs(a - v) < 0.01 ? 'empate' : a > v ? 'vitoria' : 'derrota';
     }
     const dados = { resultado, coroas: s.azul.coroas, coroasInimigo: s.vermelho.coroas, modo: s.modo };
+    if (s.rede && s.rede.fim) { s.rede.enviarEstado({ ...foto(), fim: { resultado } }); s.rede.fim(dados, desistiu); }
     setTimeout(() => ao_fim && ao_fim(dados), 900);
   }
 
   function desistir() {
     if (!s || s.acabou) { fechar(); return; }
+    if (s.convidado) {
+      UI.modal({ titulo: 'Sair do x1?', html: '<p>Se sair, seu amigo vence.</p>', botoes: [
+        { texto: 'Continuar', classe: 'secundario' },
+        { texto: 'Sair', classe: 'perigo', acao: () => { s.rede.sair(); s.acabou = true; ao_fim && ao_fim({ resultado: 'derrota', coroas: s.azul.coroas, coroasInimigo: 3, modo: 'x1' }); } },
+      ] });
+      return;
+    }
     s.pausa = true;
     UI.modal({
       titulo: 'Sair da batalha?',
@@ -981,5 +1195,5 @@ const Batalha = (() => {
     return true;
   }
 
-  return { iniciar, fechar, vencerAgora, _estado: () => s };
+  return { iniciar, iniciarConvidado, receberEstado, comandoRemoto, adversarioSaiu, fechar, vencerAgora, _estado: () => s };
 })();

@@ -863,3 +863,17 @@ button.item-loja:active, button.slot-bau:active, .slot-carta:active { transform:
 .atualizar-caixa b { font-family: 'Lilita One', 'Fredoka', sans-serif; font-size: 24px; color: #FAC775; }
 .atualizar-caixa p { margin: 0; }
 .atualizar-caixa .btn-modal { margin-top: 8px; }
+
+/* ---------- X1 com amigos ---------- */
+.btn-x1 { display: block; width: 62%; margin: -4px auto 10px; padding: 9px; font-size: 17px; font-weight: 700; color: #fff; background: linear-gradient(#8E7CFF, #5B45D6); border-radius: 13px; border-bottom: 4px solid #3A2A9A; text-shadow: 0 1px 0 #0005; box-shadow: 0 4px 10px #0005; }
+.btn-x1:active { transform: translateY(2px); border-bottom-width: 2px; }
+.modal-x1 .x1-placar { font-size: 14px; opacity: 0.85; }
+.x1-entrar { display: flex; gap: 8px; margin-top: 12px; align-items: stretch; }
+.x1-entrar input { flex: 1; min-width: 0; font-size: 22px; letter-spacing: 6px; text-align: center; text-transform: uppercase; padding: 8px; border-radius: 10px; border: 2px solid #5B45D6; background: #fff; color: #222; font-family: inherit; font-weight: 700; }
+.x1-entrar .btn-modal { flex: 0 0 auto; margin: 0; }
+.x1-codigo-grande { font-size: 46px; font-weight: 800; letter-spacing: 10px; text-align: center; margin: 8px 0 12px; color: #5B45D6; text-shadow: 0 2px 0 #fff; }
+.x1-esperando { text-align: center; margin-top: 12px; }
+.x1-esperando span { display: inline-block; animation: x1pisca 1.2s infinite; }
+@keyframes x1pisca { 50% { opacity: 0.2; } }
+.x1-carregando { width: 40px; height: 40px; margin: 14px auto; border: 4px solid #5B45D633; border-top-color: #5B45D6; border-radius: 50%; animation: x1gira 0.8s linear infinite; }
+@keyframes x1gira { to { transform: rotate(360deg); } }

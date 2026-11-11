@@ -237,6 +237,7 @@
   }
 
   $('btn-jogar').onclick = () => jogar('normal');
+  $('btn-x1').onclick = () => x1();
   $('btn-top').onclick = topGlobal;
 
   async function topGlobal() {
@@ -283,7 +284,94 @@
     Batalha.iniciar({ modo, fim: fimDeBatalha });
   }
 
+  // ---------- X1 com amigos ----------
+  function x1() {
+    if (!Conta.logado()) { UI.toast('Entre numa conta para jogar x1 com amigos!'); return; }
+    if (d().deck.length < 8) { UI.toast('Você precisa de 8 cartas no deck para o x1.'); irPara('cartas'); return; }
+    const st = d().x1 || { v: 0, d: 0 };
+    UI.modal({
+      titulo: '⚔️ X1 com amigo',
+      classe: 'modal-x1',
+      html: `<p>Batalha ao vivo contra um amigo. É amistosa: não ganha nem perde troféus.</p>
+        <p class="x1-placar">Suas vitórias no x1: <b>${st.v}</b> · derrotas: <b>${st.d}</b></p>
+        <div class="x1-entrar"><input id="x1-codigo" maxlength="4" placeholder="CÓDIGO" autocomplete="off" /><button class="btn-modal principal" id="x1-btn-entrar">Entrar</button></div>`,
+      botoes: [
+        { texto: 'Criar sala', classe: 'principal', acao: () => { x1Criar(); } },
+        { texto: 'Fechar', classe: 'secundario' },
+      ],
+    });
+    const inp = document.getElementById('x1-codigo');
+    inp.oninput = () => { inp.value = inp.value.toUpperCase().replace(/[^A-Z]/g, ''); };
+    document.getElementById('x1-btn-entrar').onclick = () => {
+      if (inp.value.length !== 4) { UI.toast('O código tem 4 letras.'); return; }
+      inp.closest('.modal-fundo').remove();
+      x1Entrar(inp.value);
+    };
+  }
+
+  function travarFundo(m) { m.el.addEventListener('click', (e) => { if (e.target === m.el) e.stopPropagation(); }, true); }
+
+  async function x1Criar() {
+    let espera = null, cancelado = false;
+    try {
+      espera = UI.modal({ titulo: 'Criando sala...', classe: 'modal-x1', html: '<div class="x1-carregando"></div>', botoes: [{ texto: 'Cancelar', classe: 'secundario', acao: () => { cancelado = true; X1.cancelar(); } }] });
+      travarFundo(espera);
+      const cod = await X1.criarSala({
+        aoEntrarAmigo: (amigo) => {
+          if (cancelado) return;
+          espera.fechar();
+          UI.toast(`${amigo.nome} entrou! Bora! ⚔️`);
+          X1.comecar(amigo, fimDeBatalha);
+        },
+      });
+      if (cancelado) { X1.cancelar(); return; }
+      espera.el.querySelector('.modal-titulo').textContent = 'Sala criada!';
+      espera.el.querySelector('.modal-corpo').innerHTML = `<p>Mande este código para seu amigo:</p>
+        <div class="x1-codigo-grande">${cod}</div>
+        <button class="btn-modal secundario" id="x1-copiar">📋 Copiar código</button>
+        <p class="x1-esperando">Esperando seu amigo entrar<span>...</span></p>`;
+      document.getElementById('x1-copiar').onclick = () => { navigator.clipboard?.writeText(cod).then(() => UI.toast('Código copiado!'), () => {}); };
+    } catch (e) {
+      if (espera) espera.fechar();
+      UI.toast(e.message || 'Não deu para criar a sala.');
+      console.error(e);
+    }
+  }
+
+  async function x1Entrar(codigo) {
+    let espera = null;
+    try {
+      espera = UI.modal({ titulo: 'Entrando...', classe: 'modal-x1', html: '<div class="x1-carregando"></div>', botoes: [{ texto: 'Cancelar', classe: 'secundario', acao: () => { X1.cancelar(); } }] });
+      travarFundo(espera);
+      const host = await X1.entrarSala(codigo, {
+        aoComecar: (h) => { espera.fechar(); X1.assistir(h, fimDeBatalha); },
+      });
+      espera.el.querySelector('.modal-titulo').textContent = `Sala de ${host.nome}`;
+      espera.el.querySelector('.modal-corpo').innerHTML = `<p class="x1-esperando">Esperando ${host.nome} começar<span>...</span></p>`;
+    } catch (e) {
+      if (espera) espera.fechar();
+      UI.toast(e.message || 'Não deu para entrar na sala.');
+      console.error(e);
+    }
+  }
+
+  function fimX1(r) {
+    const st = d().x1 || (d().x1 = { v: 0, d: 0 });
+    if (r.resultado === 'vitoria') st.v++; else if (r.resultado === 'derrota') st.d++;
+    Estado.salvar();
+    const titulo = { vitoria: 'Você venceu o x1! 👑', derrota: 'Derrota no x1', empate: 'Empate!' }[r.resultado];
+    UI.modal({
+      titulo,
+      classe: `modal-resultado ${r.resultado}`,
+      html: `<div class="placar-final"><span class="coroa azul">${r.coroas}</span><small>x</small><span class="coroa vermelha">${r.coroasInimigo}</span></div>
+        <p>Partida amistosa: troféus não mudam.</p>
+        <p class="x1-placar">X1: <b>${st.v}</b> vitórias · <b>${st.d}</b> derrotas</p>`,
+      botoes: [{ texto: 'OK', classe: 'principal', acao: () => { Batalha.fechar(); tudo(); irPara('batalha'); } }],
+    });
+  }
+
   function fimDeBatalha(r) {
+    if (r.modo === 'x1' || r.modo === 'x1c') { fimX1(r); return; }
     const vitoria = r.resultado === 'vitoria';
     let trofeus = 0, ouro = 0, bau = null;
     if (vitoria) {
