@@ -13,6 +13,20 @@ const Batalha = (() => {
   const $ = (id) => document.getElementById(id);
   const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
   const pct = (x, y) => ({ left: `${(x / W) * 100}%`, top: `${(y / H) * 100}%` });
+  // ---------- desempenho ----------
+  // tropas e projéteis andam com transform (a placa de vídeo faz o trabalho, sem recalcular a página)
+  let escala = 1; // pixels por unidade da arena
+  let observador = null;
+  const tr = (x, y, extra = '') => `translate3d(${(x * escala).toFixed(1)}px, ${(y * escala).toFixed(1)}px, 0) ${extra}`;
+  // reinicia uma animação de CSS sem forçar o navegador a recalcular tudo (antes usava offsetWidth)
+  function piscar(el, classe) {
+    if (!el) return;
+    el.classList.remove(classe);
+    requestAnimationFrame(() => el.classList.add(classe));
+  }
+  // limite de enfeites ao mesmo tempo (partículas e números de dano)
+  const LIMITE = { particula: 45, numero: 18 };
+  const vivos = { particula: 0, numero: 0 };
 
   // ---------- Montagem ----------
   // cfgAzul / cfgVermelho = { rei, princesa, tropa } (níveis das torres de cada lado)
@@ -55,6 +69,7 @@ const Batalha = (() => {
       modo, t: 0, prorrogacao: false, acabou: false, pausa: false,
       azul: lado(deck), vermelho: lado(deckIA),
       ent: torres(minhas, delas), proj: [], efeitos: [], selecionada: null, iaTimer: 2, id: 0,
+      arenaId: Arena.daQtd(Estado.d.recorde).id,
       nivelIA: Math.max(1, Math.min(9, Math.round(deck.reduce((a, id) => a + Estado.d.colecao[id].nivel, 0) / deck.length) - (Mod.deckApelao() ? 0 : 1))),
       rede, niveisV: rede ? rede.convidado.niveis : null, eventos: [], snapTimer: 0,
     };
@@ -63,8 +78,11 @@ const Batalha = (() => {
 
   function montar(titulo) {
     const arena = $('arena-grande');
-    Arena.render(arena);
+    Arena.render(arena, { arena: s.arenaId });
     s.arena = arena;
+    escala = (arena.clientWidth || W) / W;
+    if (!observador && 'ResizeObserver' in window) observador = new ResizeObserver(() => medirArena());
+    if (observador) { observador.disconnect(); observador.observe(arena); }
     // barras de vida das torres
     for (const t of s.ent) {
       t.el = document.createElement('div');
@@ -112,14 +130,18 @@ const Batalha = (() => {
 
   function atualizarElixir() {
     const e = s.azul.elixir;
-    document.querySelectorAll('#barra-elixir span').forEach((sp, i) => {
-      sp.className = i < Math.floor(e) ? 'cheio' : i < e ? 'enchendo' : '';
-      if (i === Math.floor(e)) sp.style.setProperty('--p', `${(e % 1) * 100}%`);
+    if (!s.elxEl) s.elxEl = { spans: [...document.querySelectorAll('#barra-elixir span')], gota: document.querySelector('.gota') };
+    const cheio = Math.floor(e);
+    s.elxEl.spans.forEach((sp, i) => {
+      const cl = i < cheio ? 'cheio' : i < e ? 'enchendo' : '';
+      if (sp.className !== cl) sp.className = cl;
+      if (i === cheio) sp.style.setProperty('--p', `${Math.round((e % 1) * 100)}%`);
     });
-    document.querySelector('.gota').dataset.n = Math.floor(e);
+    if (s.elxEl.gota.dataset.n !== String(cheio)) s.elxEl.gota.dataset.n = cheio;
     $('mao').querySelectorAll('.slot-mao').forEach((el) => {
       const c = Estado.carta(s.azul.fila[+el.dataset.i]);
-      el.classList.toggle('caro', c.custo > e);
+      const caro = c.custo > e;
+      if (el.classList.contains('caro') !== caro) el.classList.toggle('caro', caro);
     });
   }
 
@@ -242,16 +264,16 @@ const Batalha = (() => {
   }
 
   // ---------- Barras de vida e efeitos ----------
-  const barraHp = () => '<div class="hp"><i class="hp-rastro" style="width:100%"></i><i class="hp-fill" style="width:100%"></i><i class="hp-brilho"></i></div>';
+  const barraHp = () => '<div class="hp"><i class="hp-rastro"></i><i class="hp-fill"></i><i class="hp-brilho"></i></div>';
 
   function atualizarHp(e) {
-    const p = Math.max(0, e.vida / e.max);
-    const hp = e.el.querySelector('.hp');
-    hp.querySelector('.hp-fill').style.width = `${p * 100}%`;
-    hp.querySelector('.hp-rastro').style.width = `${p * 100}%`;
-    hp.classList.toggle('media', p < 0.5 && p >= 0.25);
-    hp.classList.toggle('baixa', p < 0.25);
-    e.el.classList.toggle('ferido', p < 1);
+    const p = Math.max(0, Math.min(1, e.vida / e.max));
+    if (!e.hpEl) { e.hpEl = e.el.querySelector('.hp'); e.hpFill = e.hpEl.querySelector('.hp-fill'); e.hpRastro = e.hpEl.querySelector('.hp-rastro'); }
+    e.hpFill.style.transform = `scaleX(${p.toFixed(3)})`;
+    e.hpRastro.style.transform = `scaleX(${p.toFixed(3)})`;
+    const faixa = p < 0.25 ? 'baixa' : p < 0.5 ? 'media' : '';
+    if (faixa !== e.hpFaixa) { e.hpEl.classList.toggle('media', faixa === 'media'); e.hpEl.classList.toggle('baixa', faixa === 'baixa'); e.hpFaixa = faixa; }
+    if (!e.ferido && p < 1) { e.ferido = true; e.el.classList.add('ferido'); }
   }
 
   function efeito(classe, x, y, ms, estilo = {}) {
@@ -264,6 +286,10 @@ const Batalha = (() => {
   }
 
   function particulas(x, y, cor, qtd = 8, forca = 26) {
+    qtd = Math.min(qtd, LIMITE.particula - vivos.particula);
+    if (qtd <= 0) return;
+    vivos.particula += qtd;
+    setTimeout(() => (vivos.particula -= qtd), 600);
     for (let i = 0; i < qtd; i++) {
       const a = (i / qtd) * Math.PI * 2 + Math.random() * 0.5;
       const d = forca * (0.6 + Math.random() * 0.6);
@@ -273,8 +299,7 @@ const Batalha = (() => {
 
   function tremer(forte = false) {
     s.arena.classList.remove('tremendo', 'tremendo-forte');
-    void s.arena.offsetWidth;
-    s.arena.classList.add(forte ? 'tremendo-forte' : 'tremendo');
+    piscar(s.arena, forte ? 'tremendo-forte' : 'tremendo');
   }
 
   // ---------- Entidades ----------
@@ -347,8 +372,16 @@ const Batalha = (() => {
   }
 
   function posicionar(e) {
-    Object.assign(e.el.style, pct(e.x, e.y));
-    e.el.style.zIndex = 5 + Math.round(e.y);
+    e.el.style.transform = tr(e.x, e.y, 'translate(-50%, -60%)');
+    const z = 5 + Math.round(e.y / 3) * 3;
+    if (z !== e.z) { e.z = z; e.el.style.zIndex = z; }
+  }
+  function medirArena() {
+    if (!s || !s.arena) return;
+    const w = s.arena.clientWidth;
+    if (!w) return;
+    escala = w / W;
+    for (const e of s.ent) if (!e.torre && e.el) posicionar(e);
   }
 
   function ferir(e, dano, deTime) {
@@ -364,14 +397,12 @@ const Batalha = (() => {
     e.vida -= dano;
     numero(e, dano);
     atualizarHp(e);
-    e.el.classList.remove('levou');
-    void e.el.offsetWidth;
-    e.el.classList.add('levou');
+    piscar(e.el, 'levou');
     if (e.torre) {
       if (e.tipo === 'rei') e.ativa = true;
-      e.el.querySelector('b').textContent = Math.max(0, Math.round(e.vida));
-      const img = s.arena.querySelector(`[data-torre="${e.id}"]`);
-      if (img) { img.classList.remove('torre-levou'); void img.offsetWidth; img.classList.add('torre-levou'); }
+      (e.numEl || (e.numEl = e.el.querySelector('b'))).textContent = Math.max(0, Math.round(e.vida));
+      const img = e.img || (e.img = s.arena.querySelector(`[data-torre="${e.id}"]`));
+      if (img) { piscar(img, 'torre-levou'); }
       if (e.vida <= 0) destruirTorre(e, deTime);
     } else if (e.vida <= 0 && e.fenix > 0) {
       e.fenix = 0;
@@ -391,6 +422,9 @@ const Batalha = (() => {
   }
 
   function numero(e, dano) {
+    if (vivos.numero >= LIMITE.numero) return;
+    vivos.numero++;
+    setTimeout(() => vivos.numero--, 650);
     const n = document.createElement('div');
     n.className = `dano-num${dano >= 250 ? ' grande' : ''}`;
     n.textContent = dano;
@@ -461,7 +495,7 @@ const Batalha = (() => {
       el.style.top = `${alvo.top - app.top + alvo.height / 2}px`;
       el.classList.add('indo');
     }));
-    setTimeout(() => { el.remove(); const c = placar(vencedor); if (c) { c.classList.remove('pulou'); void c.offsetWidth; c.classList.add('pulou'); } }, 950);
+    setTimeout(() => { el.remove(); const c = placar(vencedor); if (c) { piscar(c, 'pulou'); } }, 950);
   }
 
   function atualizarPlacar() {
@@ -511,7 +545,7 @@ const Batalha = (() => {
     Object.assign(n.style, pct(e.x + (Math.random() * 16 - 8), e.y - 18));
     s.arena.appendChild(n);
     setTimeout(() => n.remove(), 650);
-    e.el.classList.remove('desviando'); void e.el.offsetWidth; e.el.classList.add('desviando');
+    piscar(e.el, 'desviando');
   }
 
   // congela as tropas inimigas em volta (não andam nem atacam)
@@ -540,7 +574,7 @@ const Batalha = (() => {
     t.dano = Math.round(t.danoBase * (1 + p.dano * t.adaptacao));
     t.vel = t.velBase * (1 + p.vel * t.adaptacao);
     const selo = t.el.querySelector('.selo-adapt');
-    if (selo) { selo.textContent = t.adaptacao; selo.classList.remove('pulo'); void selo.offsetWidth; selo.classList.add('pulo'); }
+    if (selo) { selo.textContent = t.adaptacao; piscar(selo, 'pulo'); }
     if (t.adaptacao % 5 === 0) { particulas(t.x, t.y, '#7FE8FF', 8, 20); if (t.time === 'azul' && t.adaptacao === p.max) UI.toast('🧩 Isagi se adaptou totalmente!'); }
     t.el.classList.toggle('adaptado', t.adaptacao >= p.max);
   }
@@ -673,18 +707,16 @@ const Batalha = (() => {
 
   function atacar(atacante, alvo) {
     if (atacante.alcance > 40 || atacante.torre) {
-      if (!atacante.torre) { atacante.el.classList.remove('atirando'); void atacante.el.offsetWidth; atacante.el.classList.add('atirando'); }
+      if (!atacante.torre) { piscar(atacante.el, 'atirando'); }
       const p = document.createElement('div');
       p.className = `projetil ${atacante.time}${atacante.torre ? ` de-torre${atacante.tropa ? ` t-${atacante.tropa}` : ''}` : ''}`;
       s.arena.appendChild(p);
-      s.proj.push({ x: atacante.x, y: atacante.y - 14, alvo, dano: danoDe(atacante), area: atacante.area || 0, time: atacante.time, el: p });
+      s.proj.push({ x: atacante.x, y: atacante.y - 14, alvo, dano: danoDe(atacante), area: atacante.area || 0, time: atacante.time, el: p, mudou: true });
     } else {
       const dx = alvo.x - atacante.x, dy = alvo.y - atacante.y, d0 = Math.hypot(dx, dy) || 1;
       atacante.el.style.setProperty('--lx', `${(dx / d0) * 9}px`);
       atacante.el.style.setProperty('--ly', `${(dy / d0) * 9}px`);
-      atacante.el.classList.remove('atacando');
-      void atacante.el.offsetWidth;
-      atacante.el.classList.add('atacando');
+      piscar(atacante.el, 'atacando');
       ferir(alvo, danoDe(atacante), atacante.time);
       const golpe = document.createElement('div');
       golpe.className = 'golpe';
@@ -960,6 +992,7 @@ const Batalha = (() => {
       modo: 'x1c', convidado: true, rede, t: 0, prorrogacao: false, acabou: false, pausa: false,
       azul: { elixir: 5, fila: [], coroas: 0 }, vermelho: { elixir: 5, fila: [], coroas: 0 },
       ent: torres(Estado.minhasTorres(), rede.host.torres || Estado.minhasTorres()), proj: [], efeitos: [], selecionada: null, id: 0, mapa: new Map(), pjEls: [],
+      arenaId: rede.host.arena || 'festival',
     };
     montar(`X1 contra ${rede.host.nome}`);
   }
@@ -979,7 +1012,7 @@ const Batalha = (() => {
       const idHost = espelhoTorre(t.id);
       const v = est.tw ? est.tw[idHost] : undefined;
       if (v === undefined) { torreCaiuVisual(t); continue; }
-      if (v < t.vida) { t.vida = v; atualizarHp(t); t.el.querySelector('b').textContent = v; t.el.classList.remove('levou'); void t.el.offsetWidth; t.el.classList.add('levou'); }
+      if (v < t.vida) { t.vida = v; atualizarHp(t); t.el.querySelector('b').textContent = v; piscar(t.el, 'levou'); }
     }
 
     // tropas
@@ -995,7 +1028,7 @@ const Batalha = (() => {
         s.mapa.set(hid, t);
       }
       t.tx = x; t.ty = y;
-      if (vida < t.vida) { t.el.classList.remove('levou'); void t.el.offsetWidth; t.el.classList.add('levou'); numero(t, t.vida - vida); }
+      if (vida < t.vida) { piscar(t.el, 'levou'); numero(t, t.vida - vida); }
       t.vida = vida; t.max = max;
       atualizarHp(t);
       t.surgir = flags & 1 ? 1 : 0;
@@ -1074,12 +1107,7 @@ const Batalha = (() => {
       if (t.recarga > 0) t.recarga -= dt;
       posicionar(t);
     }
-    const limite = DURACAO + (s.prorrogacao ? PRORROGACAO : 0);
-    const resta = Math.max(0, limite - s.t);
-    const tempoEl = document.querySelector('.tempo');
-    tempoEl.textContent = `${Math.floor(resta / 60)}:${String(Math.floor(resta % 60)).padStart(2, '0')}`;
-    tempoEl.classList.toggle('dobro', s.prorrogacao || resta <= 60);
-    atualizarElixir();
+    hud();
     s.habTimer = (s.habTimer || 0) - dt;
     if (s.habTimer <= 0) { s.habTimer = 0.2; desenharHabilidades(); }
   }
@@ -1118,7 +1146,26 @@ const Batalha = (() => {
       try { passo(dt); } catch (e) { console.error('Erro na batalha (o jogo continua):', e); }
     }
     if (s.rede && !s.acabou && (s.snapTimer -= dt) <= 0) { s.snapTimer = 0.1; s.rede.enviarEstado(foto()); s.eventos = []; }
+    if (s && !s.acabou) desenhar();
     requestAnimationFrame(loop);
+  }
+
+  // desenha tudo uma vez por quadro (a simulação pode rodar várias vezes por quadro)
+  function desenhar() {
+    for (const e of s.ent) if (!e.torre && e.el) posicionar(e);
+    for (const p of s.proj) if (p.mudou) { p.el.style.transform = tr(p.x, p.y, p.giro ? `translate(-50%, -50%) rotate(${p.giro}deg)` : 'translate(-50%, -50%)'); p.mudou = false; }
+    hud();
+  }
+
+  // relógio e elixir: só mexe na tela quando o valor muda
+  function hud() {
+    const limite = DURACAO + (s.prorrogacao ? PRORROGACAO : 0);
+    const resta = Math.max(0, limite - s.t);
+    const txt = `${Math.floor(resta / 60)}:${String(Math.floor(resta % 60)).padStart(2, '0')}`;
+    if (!s.hudEl) s.hudEl = { tempo: document.querySelector('.tempo') };
+    if (txt !== s.hudTxt) { s.hudTxt = txt; s.hudEl.tempo.textContent = txt; s.hudEl.tempo.classList.toggle('dobro', s.modo === 'elixir2x' || !!s.prorrogacao || resta <= 60); }
+    const el = Math.round(s.azul.elixir * 50) / 50;
+    if (el !== s.hudElixir) { s.hudElixir = el; atualizarElixir(); }
   }
 
   function passo(dt) {
@@ -1129,10 +1176,6 @@ const Batalha = (() => {
     const ganho = (dt / ELIXIR_SEG) * (dobro ? 2 : 1);
     for (const time of ['azul', 'vermelho']) s[time].elixir = Math.min(10, s[time].elixir + ganho);
     if (Mod.flag('elixirInfinito')) s.azul.elixir = 10;
-    const tempoEl = document.querySelector('.tempo');
-    tempoEl.textContent = `${Math.floor(resta / 60)}:${String(Math.floor(resta % 60)).padStart(2, '0')}`;
-    tempoEl.classList.toggle('dobro', dobro);
-    atualizarElixir();
 
     if (resta <= 0) {
       if (!s.prorrogacao && s.azul.coroas === s.vermelho.coroas) {
@@ -1184,7 +1227,6 @@ const Batalha = (() => {
       }
     }
     tropas.forEach(evitarTorres);
-    tropas.forEach(posicionar);
 
     // torres
     for (const t of s.ent) {
@@ -1217,7 +1259,7 @@ const Batalha = (() => {
       }
       p.x += (dx / d0) * passo;
       p.y += (dy / d0) * passo;
-      Object.assign(p.el.style, pct(p.x, p.y));
+      p.mudou = true;
     }
 
     // efeitos de feitiço

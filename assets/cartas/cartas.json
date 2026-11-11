@@ -41,7 +41,8 @@
       "cadencia": 0.8,
       "alvo": "tudo",
       "trofeus": 0,
-      "inicial": true
+      "inicial": true,
+      "arena": 1
     },
     {
       "id": "teto",
@@ -67,7 +68,8 @@
       "velocidade": 64,
       "alcance": 16,
       "cadencia": 0.8,
-      "alvo": "tudo"
+      "alvo": "tudo",
+      "arena": 1
     },
     {
       "id": "chichi",
@@ -93,7 +95,8 @@
       "cadencia": 1.1,
       "alvo": "tudo",
       "trofeus": 0,
-      "inicial": true
+      "inicial": true,
+      "arena": 1
     },
     {
       "id": "chuva",
@@ -107,7 +110,8 @@
       "dano": 420,
       "area": 60,
       "trofeus": 0,
-      "inicial": true
+      "inicial": true,
+      "arena": 1
     },
     {
       "id": "mai",
@@ -133,7 +137,8 @@
       "cadencia": 0.9,
       "alvo": "tudo",
       "trofeus": 0,
-      "inicial": true
+      "inicial": true,
+      "arena": 1
     },
     {
       "id": "miku_nakano",
@@ -159,7 +164,8 @@
       "velocidade": 46,
       "alcance": 78,
       "cadencia": 1.0,
-      "alvo": "tudo"
+      "alvo": "tudo",
+      "arena": 1
     },
     {
       "id": "nami_old",
@@ -185,7 +191,8 @@
       "velocidade": 52,
       "alcance": 16,
       "cadencia": 1.0,
-      "alvo": "tudo"
+      "alvo": "tudo",
+      "arena": 1
     },
     {
       "id": "shizuku",
@@ -211,7 +218,8 @@
       "cadencia": 1.2,
       "alvo": "tudo",
       "trofeus": 0,
-      "inicial": true
+      "inicial": true,
+      "arena": 1
     },
     {
       "id": "itsuki",
@@ -237,7 +245,8 @@
       "cadencia": 1.4,
       "alvo": "construcoes",
       "trofeus": 0,
-      "inicial": true
+      "inicial": true,
+      "arena": 1
     },
     {
       "id": "lanterna",
@@ -251,7 +260,8 @@
       "dano": 680,
       "area": 42,
       "trofeus": 0,
-      "inicial": true
+      "inicial": true,
+      "arena": 1
     },
     {
       "id": "rukia",
@@ -278,7 +288,8 @@
       "alvo": "tudo",
       "area": 38,
       "trofeus": 0,
-      "inicial": true
+      "inicial": true,
+      "arena": 1
     },
     {
       "id": "pan_dbh",
@@ -287,7 +298,7 @@
       "custo": 2,
       "tipo": "Rápida",
       "descricao": "Pequena, veloz e cheia de energia.",
-      "trofeus": 30,
+      "trofeus": 0,
       "rosto": [
         405,
         330,
@@ -303,7 +314,8 @@
       "velocidade": 62,
       "alcance": 16,
       "cadencia": 0.8,
-      "alvo": "tudo"
+      "alvo": "tudo",
+      "arena": 1
     },
     {
       "id": "hinata",
@@ -328,14 +340,15 @@
       "alcance": 16,
       "cadencia": 0.9,
       "alvo": "tudo",
-      "trofeus": 60,
+      "trofeus": 0,
       "habilidade": {
         "nome": "Cura Suave",
         "custo": 2,
         "tipo": "cura",
         "recarga": 10,
         "descricao": "Recupera metade da vida."
-      }
+      },
+      "arena": 1
     },
     {
       "id": "nami_last",
@@ -344,7 +357,7 @@
       "custo": 4,
       "tipo": "Dano em área",
       "descricao": "Controla o clima e acerta raios em vários inimigos.",
-      "trofeus": 60,
+      "trofeus": 0,
       "rosto": [
         470,
         380,
@@ -361,7 +374,8 @@
       "alcance": 72,
       "cadencia": 1.6,
       "alvo": "tudo",
-      "area": 36
+      "area": 36,
+      "arena": 1
     },
     {
       "id": "trunks_base",
@@ -386,7 +400,8 @@
       "alcance": 18,
       "cadencia": 1.0,
       "alvo": "tudo",
-      "trofeus": 80
+      "trofeus": 0,
+      "arena": 1
     },
     {
       "id": "barril",
@@ -395,12 +410,13 @@
       "custo": 3,
       "tipo": "Barril",
       "descricao": "Jogue em qualquer lugar: o barril quebra e solta 3 minis bem pequenininhas e rápidas.",
-      "trofeus": 90,
+      "trofeus": 0,
       "imagem": "barril.jpg",
       "barril": {
         "tropa": "mini",
         "qtd": 3
-      }
+      },
+      "arena": 1
     },
     {
       "id": "pan_gt",
@@ -409,7 +425,7 @@
       "custo": 3,
       "tipo": "Atiradora",
       "descricao": "Dispara rajadas de energia de longe.",
-      "trofeus": 100,
+      "trofeus": 0,
       "rosto": [
         330,
         235,
@@ -425,7 +441,8 @@
       "velocidade": 48,
       "alcance": 76,
       "cadencia": 1.0,
-      "alvo": "tudo"
+      "alvo": "tudo",
+      "arena": 1
     },
     {
       "id": "hatsune_miku",
@@ -434,7 +451,7 @@
       "custo": 4,
       "tipo": "Dano em área",
       "descricao": "Ondas de som que atingem todos por perto.",
-      "trofeus": 120,
+      "trofeus": 400,
       "rosto": [
         300,
         250,
@@ -451,7 +468,8 @@
       "alcance": 70,
       "cadencia": 1.5,
       "alvo": "tudo",
-      "area": 40
+      "area": 40,
+      "arena": 2
     },
     {
       "id": "akame",
@@ -476,7 +494,7 @@
       "alcance": 18,
       "cadencia": 1.1,
       "alvo": "tudo",
-      "trofeus": 140,
+      "trofeus": 400,
       "habilidade": {
         "nome": "Corte Fatal",
         "custo": 2,
@@ -484,7 +502,8 @@
         "recarga": 10,
         "descricao": "Os próximos 3 golpes causam 2,5x de dano.",
         "mult": 2.5
-      }
+      },
+      "arena": 2
     },
     {
       "id": "trunks_ssj",
@@ -509,7 +528,8 @@
       "alcance": 18,
       "cadencia": 1.0,
       "alvo": "tudo",
-      "trofeus": 150
+      "trofeus": 400,
+      "arena": 2
     },
     {
       "id": "riruka",
@@ -518,7 +538,7 @@
       "custo": 3,
       "tipo": "Atiradora",
       "descricao": "Atrevida e rápida no gatilho.",
-      "trofeus": 160,
+      "trofeus": 400,
       "rosto": [
         400,
         300,
@@ -534,7 +554,8 @@
       "velocidade": 50,
       "alcance": 78,
       "cadencia": 0.9,
-      "alvo": "tudo"
+      "alvo": "tudo",
+      "arena": 2
     },
     {
       "id": "gohan_ssj",
@@ -559,7 +580,7 @@
       "alcance": 16,
       "cadencia": 1.05,
       "alvo": "tudo",
-      "trofeus": 170,
+      "trofeus": 400,
       "habilidade": {
         "nome": "Potencial Despertado",
         "custo": 2,
@@ -567,7 +588,8 @@
         "duracao": 5,
         "recarga": 12,
         "descricao": "Por 5s ataca mais rápido, anda mais rápido e causa +30% de dano."
-      }
+      },
+      "arena": 2
     },
     {
       "id": "caulifla",
@@ -576,7 +598,7 @@
       "custo": 4,
       "tipo": "Lutadora",
       "descricao": "Confiante e forte, derruba quem estiver na frente.",
-      "trofeus": 180,
+      "trofeus": 400,
       "rosto": [
         205,
         255,
@@ -592,7 +614,8 @@
       "velocidade": 50,
       "alcance": 16,
       "cadencia": 1.0,
-      "alvo": "tudo"
+      "alvo": "tudo",
+      "arena": 2
     },
     {
       "id": "bambietta",
@@ -601,7 +624,7 @@
       "custo": 5,
       "tipo": "Explosiva",
       "descricao": "Tudo o que ela acerta explode em área.",
-      "trofeus": 220,
+      "trofeus": 1000,
       "rosto": [
         420,
         230,
@@ -626,7 +649,8 @@
         "duracao": 10,
         "recarga": 15,
         "descricao": "Se for derrotada nos próximos 10s, volta com metade da vida."
-      }
+      },
+      "arena": 3
     },
     {
       "id": "trunks_full_power",
@@ -651,7 +675,7 @@
       "alcance": 20,
       "cadencia": 1.1,
       "alvo": "tudo",
-      "trofeus": 240,
+      "trofeus": 1000,
       "habilidade": {
         "nome": "Corte Dimensional",
         "custo": 2,
@@ -659,7 +683,8 @@
         "recarga": 11,
         "descricao": "Os próximos 3 golpes causam 2,5x de dano.",
         "mult": 2.5
-      }
+      },
+      "arena": 3
     },
     {
       "id": "bulma",
@@ -685,7 +710,8 @@
       "cadencia": 1.8,
       "alvo": "tudo",
       "area": 40,
-      "trofeus": 250
+      "trofeus": 1000,
+      "arena": 3
     },
     {
       "id": "caulifla_ssj",
@@ -694,7 +720,7 @@
       "custo": 6,
       "tipo": "Lutadora lendária",
       "descricao": "Transformada, causa dano enorme em área ao redor.",
-      "trofeus": 300,
+      "trofeus": 1000,
       "rosto": [
         255,
         200,
@@ -719,7 +745,8 @@
         "duracao": 6,
         "recarga": 12,
         "descricao": "Por 6s ataca mais rápido, anda mais rápido e causa +30% de dano."
-      }
+      },
+      "arena": 3
     },
     {
       "id": "vegito_ssj",
@@ -745,7 +772,7 @@
       "cadencia": 1.2,
       "alvo": "tudo",
       "area": 25,
-      "trofeus": 320,
+      "trofeus": 1000,
       "habilidade": {
         "nome": "Final Kamehameha",
         "custo": 3,
@@ -753,7 +780,8 @@
         "duracao": 6,
         "recarga": 14,
         "descricao": "Por 6s ataca mais rápido, anda mais rápido e causa +30% de dano."
-      }
+      },
+      "arena": 3
     },
     {
       "id": "isagi",
@@ -762,7 +790,7 @@
       "custo": 3,
       "tipo": "Atacante",
       "descricao": "Começa fraco, mas se adapta rápido: a cada segundo em campo fica mais forte, mais rápido e mais resistente.",
-      "trofeus": 120,
+      "trofeus": 400,
       "rosto": [
         395,
         720,
@@ -788,7 +816,8 @@
         "vel": 0.02,
         "defesa": 0.02,
         "descricao": "A cada 1 segundo em campo ganha +5% de dano, +2% de velocidade e 2% de resistência (até 15 vezes: +75% de dano no fim!)."
-      }
+      },
+      "arena": 2
     },
     {
       "id": "mbappe",
@@ -797,7 +826,7 @@
       "custo": 3,
       "tipo": "Velocista",
       "descricao": "Não é muito forte, mas é de longe o mais rápido do jogo. Chega na torre antes de todo mundo perceber.",
-      "trofeus": 200,
+      "trofeus": 400,
       "rosto": [
         330,
         220,
@@ -813,7 +842,8 @@
       "velocidade": 125,
       "alcance": 18,
       "cadencia": 0.8,
-      "alvo": "tudo"
+      "alvo": "tudo",
+      "arena": 2
     },
     {
       "id": "kashimo",
@@ -822,7 +852,7 @@
       "custo": 5,
       "tipo": "Lutador elétrico",
       "descricao": "Golpes elétricos que acertam em área. Perigoso em qualquer briga.",
-      "trofeus": 260,
+      "trofeus": 1000,
       "rosto": [
         330,
         690,
@@ -847,7 +877,8 @@
         "recarga": 14,
         "duracao": 6,
         "descricao": "Por 6s ataca mais rápido, anda mais rápido e causa +30% de dano."
-      }
+      },
+      "arena": 3
     },
     {
       "id": "rukia_remake",
@@ -856,7 +887,7 @@
       "custo": 5,
       "tipo": "Atiradora de gelo",
       "descricao": "Ataca de longe com gelo e pode congelar as tropas inimigas em volta.",
-      "trofeus": 280,
+      "trofeus": 1000,
       "rosto": [
         400,
         740,
@@ -883,7 +914,8 @@
         "raio": 95,
         "dano": 120,
         "descricao": "Congela as tropas inimigas perto do alvo por 2s (elas não andam nem atacam)."
-      }
+      },
+      "arena": 3
     },
     {
       "id": "gogeta_ssjz",
@@ -892,7 +924,7 @@
       "custo": 6,
       "tipo": "Fusão lendária",
       "descricao": "A fusão de Goku e Vegeta em Super Saiyajin. Golpes rápidos e devastadores.",
-      "trofeus": 330,
+      "trofeus": 1800,
       "rosto": [
         375,
         520,
@@ -916,7 +948,8 @@
         "recarga": 11,
         "descricao": "Os próximos 3 golpes causam 2,2x de dano.",
         "mult": 2.2
-      }
+      },
+      "arena": 4
     },
     {
       "id": "gogeta_ssj4",
@@ -925,7 +958,7 @@
       "custo": 7,
       "tipo": "Fusão lendária",
       "descricao": "Muita vida e golpes em área. Lento, mas quase impossível de parar.",
-      "trofeus": 340,
+      "trofeus": 1800,
       "rosto": [
         365,
         500,
@@ -950,7 +983,8 @@
         "recarga": 14,
         "dano": 950,
         "descricao": "Dispara um Kamehameha que atravessa tudo em linha reta (metade do dano nas torres)."
-      }
+      },
+      "arena": 4
     },
     {
       "id": "vegito_ex",
@@ -959,7 +993,7 @@
       "custo": 6,
       "tipo": "Fusão lendária",
       "descricao": "Rápido para o tamanho e com a Espada Espiritual sempre pronta.",
-      "trofeus": 350,
+      "trofeus": 1800,
       "rosto": [
         320,
         190,
@@ -983,7 +1017,8 @@
         "recarga": 10,
         "descricao": "Os próximos 3 golpes causam 2,2x de dano.",
         "mult": 2.2
-      }
+      },
+      "arena": 4
     },
     {
       "id": "gogeta_ultra",
@@ -992,7 +1027,7 @@
       "custo": 7,
       "tipo": "Fusão lendária",
       "descricao": "O Gogeta mais forte: muito dano em área e uma fúria que destrói torres.",
-      "trofeus": 370,
+      "trofeus": 1800,
       "rosto": [
         405,
         420,
@@ -1017,7 +1052,8 @@
         "recarga": 15,
         "duracao": 7,
         "descricao": "Por 7s ataca mais rápido, anda mais rápido e causa +30% de dano."
-      }
+      },
+      "arena": 4
     },
     {
       "id": "goku_base",
@@ -1026,7 +1062,7 @@
       "custo": 3,
       "tipo": "Lutador Saiyajin",
       "descricao": "O Goku de sempre: equilibrado e confiável.",
-      "trofeus": 40,
+      "trofeus": 0,
       "rosto": [
         380,
         320,
@@ -1042,7 +1078,8 @@
       "velocidade": 52,
       "alcance": 18,
       "cadencia": 1.0,
-      "alvo": "tudo"
+      "alvo": "tudo",
+      "arena": 1
     },
     {
       "id": "goku_ssj",
@@ -1051,7 +1088,7 @@
       "custo": 4,
       "tipo": "Super Saiyajin",
       "descricao": "A transformação lendária de Namek. Fica furioso quando precisa.",
-      "trofeus": 110,
+      "trofeus": 400,
       "rosto": [
         400,
         540,
@@ -1075,7 +1112,8 @@
         "recarga": 12,
         "duracao": 5,
         "descricao": "Por 5s ataca mais rápido, anda mais rápido e causa +30% de dano."
-      }
+      },
+      "arena": 2
     },
     {
       "id": "goku_ssj2",
@@ -1084,7 +1122,7 @@
       "custo": 4,
       "tipo": "Super Saiyajin 2",
       "descricao": "Rápido e cheio de raios. Golpes fortes em sequência.",
-      "trofeus": 190,
+      "trofeus": 400,
       "rosto": [
         440,
         640,
@@ -1108,7 +1146,8 @@
         "recarga": 10,
         "descricao": "Os próximos 3 golpes causam 2,5x de dano.",
         "mult": 2.5
-      }
+      },
+      "arena": 2
     },
     {
       "id": "goku_ssj3",
@@ -1117,7 +1156,7 @@
       "custo": 5,
       "tipo": "Super Saiyajin 3",
       "descricao": "Muito forte e resistente, mas lento: gasta muita energia.",
-      "trofeus": 230,
+      "trofeus": 1000,
       "rosto": [
         380,
         470,
@@ -1142,7 +1181,8 @@
         "recarga": 14,
         "dano": 950,
         "descricao": "Dispara um Kamehameha que atravessa tudo em linha reta (metade do dano nas torres)."
-      }
+      },
+      "arena": 3
     },
     {
       "id": "goku_deus",
@@ -1151,7 +1191,7 @@
       "custo": 5,
       "tipo": "Deus Super Saiyajin",
       "descricao": "O poder divino: se recupera no meio da luta.",
-      "trofeus": 270,
+      "trofeus": 1000,
       "rosto": [
         285,
         250,
@@ -1174,7 +1214,8 @@
         "custo": 2,
         "recarga": 12,
         "descricao": "Recupera metade da vida."
-      }
+      },
+      "arena": 3
     },
     {
       "id": "goku_ssj4",
@@ -1183,7 +1224,7 @@
       "custo": 6,
       "tipo": "Super Saiyajin 4",
       "descricao": "A forma primitiva de GT. Muita vida e golpes em área.",
-      "trofeus": 300,
+      "trofeus": 1000,
       "rosto": [
         350,
         455,
@@ -1208,7 +1249,8 @@
         "recarga": 14,
         "dano": 950,
         "descricao": "Dispara um Kamehameha que atravessa tudo em linha reta (metade do dano nas torres)."
-      }
+      },
+      "arena": 3
     },
     {
       "id": "goku_blue",
@@ -1217,7 +1259,7 @@
       "custo": 6,
       "tipo": "Super Saiyajin Blue",
       "descricao": "Controle perfeito do ki divino: golpes certeiros.",
-      "trofeus": 310,
+      "trofeus": 1000,
       "rosto": [
         370,
         320,
@@ -1241,7 +1283,8 @@
         "recarga": 11,
         "descricao": "Os próximos 3 golpes causam 2,2x de dano.",
         "mult": 2.2
-      }
+      },
+      "arena": 3
     },
     {
       "id": "goku_blue_kaioken",
@@ -1250,7 +1293,7 @@
       "custo": 6,
       "tipo": "Blue + Kaioken",
       "descricao": "Arrisca tudo: o Kaioken x10 multiplica a velocidade e o dano.",
-      "trofeus": 330,
+      "trofeus": 1800,
       "rosto": [
         380,
         760,
@@ -1274,7 +1317,8 @@
         "recarga": 14,
         "duracao": 7,
         "descricao": "Por 7s ataca mais rápido, anda mais rápido e causa +30% de dano."
-      }
+      },
+      "arena": 4
     },
     {
       "id": "goku_blue_lb",
@@ -1283,7 +1327,7 @@
       "custo": 7,
       "tipo": "Blue sem limites",
       "descricao": "Passou do próprio limite: o Goku Blue mais forte, em área.",
-      "trofeus": 360,
+      "trofeus": 1800,
       "rosto": [
         395,
         700,
@@ -1308,7 +1352,8 @@
         "recarga": 15,
         "duracao": 7,
         "descricao": "Por 7s ataca mais rápido, anda mais rápido e causa +30% de dano."
-      }
+      },
+      "arena": 4
     },
     {
       "id": "goku_pressagio",
@@ -1317,7 +1362,7 @@
       "custo": 6,
       "tipo": "Instinto Superior",
       "descricao": "O corpo desvia sozinho: às vezes os ataques simplesmente erram.",
-      "trofeus": 380,
+      "trofeus": 1800,
       "rosto": [
         370,
         200,
@@ -1339,7 +1384,8 @@
         "tipo": "esquiva",
         "chance": 0.25,
         "descricao": "Desvia sozinho de 25% dos ataques (inclusive das torres)."
-      }
+      },
+      "arena": 4
     },
     {
       "id": "goku_isc",
@@ -1348,7 +1394,7 @@
       "custo": 7,
       "tipo": "Instinto Superior Completo",
       "descricao": "O ápice: quando ativa o Instinto, quase nada consegue acertar.",
-      "trofeus": 400,
+      "trofeus": 1800,
       "rosto": [
         230,
         330,
@@ -1374,7 +1420,8 @@
         "chance": 0.8,
         "furia": true,
         "descricao": "Por 5s desvia de 80% dos ataques e fica em fúria (+30% de dano e mais rápido)."
-      }
+      },
+      "arena": 4
     },
     {
       "id": "goku_ui",
@@ -1413,7 +1460,8 @@
         "recarga": 12,
         "dano": 1600,
         "descricao": "Dispara um Kamehameha gigante que atravessa tudo em linha reta."
-      }
+      },
+      "arena": 1
     }
   ]
 }

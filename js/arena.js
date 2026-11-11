@@ -1,41 +1,26 @@
-// Monta a arena a partir das imagens em assets/arena.
+// Arenas: cada uma é uma imagem pronta (feita com texturas reais pelo tools/gerar_arenas.py).
+// Só as torres ficam por cima, porque elas levam dano e caem.
 // Coordenadas num espaço de 360 x 620 (convertidas para %).
 const Arena = (() => {
   const W = 360, H = 620;
 
-  // [imagem, centro x, centro y, largura, altura]
-  const camadas = [
-    ['arena/rio', 180, 310, 320, 56],
-    ['arena/ponte', 90, 310, 60, 92],
-    ['arena/ponte', 270, 310, 60, 92],
+  // Troféus para chegar em cada arena. Ninguém volta para a arena anterior (os troféus não caem abaixo do portão).
+  const ARENAS = [
+    { n: 1, id: 'festival', nome: 'Festival da Escola', trofeus: 0, ambiente: 'confete', cor: '#5DCAA5', desc: 'Barracas, lanternas e o rio da escola em dia de festa.' },
+    { n: 2, id: 'sakura', nome: 'Bosque das Cerejeiras', trofeus: 400, ambiente: 'petala', cor: '#F4A6C6', desc: 'Pétalas caindo, pontes vermelhas e carpas no rio.' },
+    { n: 3, id: 'gelo', nome: 'Vila Congelada', trofeus: 1000, ambiente: 'neve', cor: '#9ED4F5', desc: 'Neve fofa, pinheiros e um rio completamente congelado.' },
+    { n: 4, id: 'vulcao', nome: 'Templo Vulcânico', trofeus: 1800, ambiente: 'brasa', cor: '#F07A2A', desc: 'Um templo antigo cortado por um rio de lava.' },
   ];
+  const daQtd = (trofeus) => [...ARENAS].reverse().find((a) => (trofeus || 0) >= a.trofeus) || ARENAS[0];
+  const porId = (id) => ARENAS.find((a) => a.id === id) || ARENAS[0];
 
-  // Trilha de pedras por onde as tropas andam
-  const trilha = [];
-  for (const x of [90, 270]) {
-    for (const y of [186, 210, 234, 258, 362, 386, 410]) {
-      trilha.push(['arena/pedra', x, y, 22, 16]);
-    }
-  }
-
-  // Objetos com profundidade (desenhados de cima para baixo)
-  const objetos = [
-    ['arena/barraca', 46, 56, 56, 40],
-    ['arena/barraca', 314, 56, 56, 40],
+  const torres = [
     ['arena/torre_rei_vermelha', 180, 64, 88, 119, 'rei-vermelho'],
     ['arena/torre_vermelha', 90, 112, 62, 102, 'esq-vermelho'],
     ['arena/torre_vermelha', 270, 112, 62, 102, 'dir-vermelho'],
-    ['arena/arvore', 38, 182, 56, 60],
-    ['arena/arvore', 322, 182, 56, 60],
-    ['arena/arvore', 180, 205, 56, 60],
-    ['arena/arvore', 180, 412, 56, 60],
-    ['arena/arvore', 38, 436, 56, 60],
-    ['arena/arvore', 322, 436, 56, 60],
     ['arena/torre_azul', 90, 468, 62, 102, 'esq-azul'],
     ['arena/torre_azul', 270, 468, 62, 102, 'dir-azul'],
     ['arena/torre_rei_azul', 180, 540, 88, 119, 'rei-azul'],
-    ['arena/barraca', 46, 574, 56, 40],
-    ['arena/barraca', 314, 574, 56, 40],
   ];
 
   function peca([nome, x, y, w, h, id]) {
@@ -52,32 +37,33 @@ const Arena = (() => {
     return img;
   }
 
-  function render(el, { petalas = true } = {}) {
+  // el: onde desenhar; arena: id ou objeto; mini: usa a imagem pequena; ambiente: partículas do tema
+  function render(el, { arena = null, mini = false, ambiente = true } = {}) {
+    const a = typeof arena === 'string' ? porId(arena) : arena || ARENAS[0];
     el.innerHTML = '';
     el.classList.add('arena');
-
-    const cerca = peca(['arena/cerca', 180, 310, 360, 620]);
-    el.appendChild(cerca);
-
-    const campo = document.createElement('div');
-    campo.className = 'arena-campo';
-    Assets.url('arena/chao').then((u) => (campo.style.backgroundImage = `url(${u})`));
-    el.appendChild(campo);
-
-    [...trilha, ...camadas, ...objetos].forEach((p) => el.appendChild(peca(p)));
-
-    if (petalas) {
-      for (let i = 0; i < 8; i++) {
-        const p = document.createElement('span');
-        p.className = 'petala';
-        p.style.left = `${5 + Math.random() * 90}%`;
-        p.style.animationDuration = `${8 + Math.random() * 6}s`;
-        p.style.animationDelay = `${-Math.random() * 12}s`;
-        el.appendChild(p);
+    el.dataset.arena = a.id;
+    const fundo = document.createElement('div');
+    fundo.className = 'arena-fundo';
+    fundo.style.backgroundImage = `url(assets/arenas/${a.id}${mini ? '_mini' : ''}.jpg?v=${window.VERSAO_JOGO || 1})`;
+    el.appendChild(fundo);
+    torres.forEach((p) => el.appendChild(peca(p)));
+    if (ambiente) {
+      const camada = document.createElement('div');
+      camada.className = `ambiente amb-${a.ambiente}`;
+      for (let i = 0; i < (mini ? 5 : 9); i++) {
+        const p = document.createElement('i');
+        p.style.left = `${4 + Math.random() * 92}%`;
+        p.style.animationDuration = `${7 + Math.random() * 7}s`;
+        p.style.animationDelay = `${-Math.random() * 14}s`;
+        p.style.setProperty('--d', `${(Math.random() * 60 - 30).toFixed(0)}px`);
+        camada.appendChild(p);
       }
+      el.appendChild(camada);
     }
     Assets.fill(el);
+    return a;
   }
 
-  return { render };
+  return { render, ARENAS, daQtd, porId };
 })();

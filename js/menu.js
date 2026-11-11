@@ -204,9 +204,14 @@
     $('btn-jogar').classList.toggle('bloqueado', !d().deck.length);
     $('btn-jogar').textContent = d().deck.length ? 'Jogar' : 'Abra os baús!';
     $('dica-inicio').textContent = iniciais ? `🎁 Você tem ${iniciais} baú${iniciais > 1 ? 's' : ''} inicia${iniciais > 1 ? 'is' : 'l'} para abrir!` : '';
-    $('trofeus-barra').style.width = `${Math.min(100, (d().trofeus / 300) * 100)}%`;
-    const prox = Estado.proximaLiberacao();
-    $('trofeus-prox').textContent = prox ? `Próxima carta com ${prox.trofeus} troféus · toque para ver` : 'Todas as cartas liberadas! · toque para ver';
+    const atual = Arena.daQtd(d().recorde), prox = Arena.ARENAS[atual.n] || null;
+    const p = prox ? (d().trofeus - atual.trofeus) / (prox.trofeus - atual.trofeus) : 1;
+    $('trofeus-barra').style.width = `${Math.max(0, Math.min(100, p * 100))}%`;
+    $('trofeus-prox').textContent = prox ? `Próxima arena: ${fmt(prox.trofeus)} · toque para ver` : 'Você chegou na última arena! · toque para ver';
+    const card = document.querySelector('.arena-card');
+    card.querySelector('.arena-nome').innerHTML = `<span>Arena ${atual.n}</span>${atual.nome}`;
+    if ($('arena-mini').dataset.arena !== atual.id) Arena.render($('arena-mini'), { arena: atual, mini: true });
+    card.onclick = caminho;
     baus();
   }
 
@@ -272,15 +277,17 @@
   document.querySelector('.trofeus').onclick = caminho;
 
   function caminho() {
-    const marcos = [...new Set(Estado.catalogo().map((c) => c.trofeus || 0))].sort((a, b) => a - b);
+    const atual = Arena.daQtd(d().recorde);
     UI.modal({
-      titulo: 'Caminho de troféus',
-      classe: 'modal-caminho',
-      html: `<p class="aviso">Cada carta passa a aparecer nos baús e na loja quando você chega aos troféus dela. A primeira cópia que você ganhar desbloqueia a carta.</p>
-        <div class="caminho">${marcos.map((t) => {
-          const ok = d().recorde >= t;
-          const cs = Estado.catalogo().filter((c) => (c.trofeus || 0) === t);
-          return `<div class="marco${ok ? ' ok' : ''}"><div class="marco-trofeus"><i class="ic-trofeu"></i>${t}</div>
+      titulo: 'Caminho das arenas',
+      classe: 'modal-caminho modal-arenas',
+      html: `<p class="aviso">Ganhe troféus para chegar nas próximas arenas. Cada arena libera novas cartas, mas elas só aparecem nos <b>baús</b>. Quando você chega numa arena, seus troféus não caem mais abaixo do portão dela.</p>
+        <div class="caminho-arenas">${[...Arena.ARENAS].reverse().map((a) => {
+          const ok = d().recorde >= a.trofeus, aqui = a.id === atual.id;
+          const cs = Estado.catalogo().filter((c) => (c.arena || 1) === a.n && !c.exclusivo);
+          return `<div class="marco-arena${ok ? ' ok' : ''}${aqui ? ' aqui' : ''}" style="--cor:${a.cor}">
+            <div class="ma-topo"><div class="ma-img${ok ? '' : ' trancada'}" style="background-image:url(assets/arenas/${a.id}_mini.jpg)">${ok ? '' : '<span>🔒</span>'}</div>
+              <div class="ma-info"><small>Arena ${a.n}${aqui ? ' · você está aqui' : ''}</small><b>${a.nome}</b><span><i class="ic-trofeu"></i>${fmt(a.trofeus)}</span><em>${a.desc}</em></div></div>
             <div class="marco-cartas">${cs.map((c) => `<div class="marco-carta${Estado.tem(c.id) ? '' : ok ? ' falta' : ' trancada'}">${ok ? Cartas.html(c, { mini: true }) : '<div class="carta-silhueta">🔒</div>'}<small>${ok ? c.nome : '???'}</small></div>`).join('')}</div></div>`;
         }).join('')}</div>`,
     });
@@ -689,12 +696,15 @@
         d().baus[livre] = { tipo: bau, inicio: null };
       }
     } else if (r.resultado === 'derrota') {
-      trofeus = -Math.min(15, d().trofeus); d().derrotas++;
+      // não cai abaixo do portão da arena em que você já chegou
+      const piso = Arena.daQtd(d().recorde).trofeus;
+      trofeus = -Math.max(0, Math.min(15, d().trofeus - piso)); d().derrotas++;
     }
     const recordeAntes = d().recorde;
     d().trofeus += trofeus;
     d().recorde = Math.max(d().recorde, d().trofeus);
-    const liberadas = Estado.catalogo().filter((c) => c.trofeus > recordeAntes && c.trofeus <= d().recorde);
+    const arenaAntes = Arena.daQtd(recordeAntes), arenaAgora = Arena.daQtd(d().recorde);
+    const liberadas = arenaAgora.n > arenaAntes.n ? arenaAgora : null;
     d().ouro += ouro;
     const xpGanho = vitoria ? 30 + r.coroas * 5 : r.resultado === 'empate' ? 15 : 10;
     const xpAntes = d().xp, nivelAntes = d().nivel;
@@ -728,15 +738,21 @@
     }, 500);
   }
 
-  function cartasLiberadas(lista) {
-    if (!lista.length) return;
-    UI.modal({
-      titulo: 'Novas cartas liberadas!',
-      classe: 'modal-liberadas',
-      html: `<div class="evo-raios"></div><div class="liberadas">${lista.map((c, i) => `<div class="liberada" style="animation-delay:${i * 0.2}s">${Cartas.html(c, { mini: true })}<b>${c.nome}</b></div>`).join('')}</div>
-        <p>Agora ${lista.length > 1 ? 'elas podem' : 'ela pode'} aparecer nos baús e na loja. Ganhe a primeira cópia para desbloquear!</p>`,
-      botoes: [{ texto: 'Oba!', classe: 'principal' }],
-    });
+  // chegou numa arena nova
+  function cartasLiberadas(a) {
+    if (!a || !a.id) return;
+    const cs = Estado.catalogo().filter((c) => (c.arena || 1) === a.n && !c.exclusivo);
+    const el = document.createElement('div');
+    el.className = 'nova-arena';
+    el.style.setProperty('--cor', a.cor);
+    el.innerHTML = `<div class="raios"></div><div class="na-conteudo">
+        <small>Nova arena!</small><b>Arena ${a.n}</b><div class="na-nome">${a.nome}</div>
+        <div class="na-img" style="background-image:url(assets/arenas/${a.id}_mini.jpg)"></div>
+        <p>${cs.length} cartas novas podem aparecer nos seus baús agora!</p>
+        <div class="liberadas">${cs.slice(0, 6).map((c, i) => `<div class="liberada" style="animation-delay:${0.6 + i * 0.12}s">${Cartas.html(c, { mini: true })}</div>`).join('')}</div>
+        <button class="btn-modal principal">Incrível!</button></div>`;
+    document.getElementById('app').appendChild(el);
+    el.querySelector('button').onclick = () => { el.classList.add('sumir'); setTimeout(() => el.remove(), 300); };
   }
 
   // ---------- Loja ----------
@@ -1446,7 +1462,6 @@
   // ---------- Início ----------
   const lista = await Cartas.carregar();
   Estado.carregar(lista);
-  Arena.render($('arena-mini'), { petalas: false });
   document.getElementById('barra-elixir').innerHTML = Array.from({ length: 10 }, () => '<span></span>').join('');
   Assets.fill();
   tudo();

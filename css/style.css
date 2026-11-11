@@ -1067,3 +1067,54 @@ button.item-loja:active, button.slot-bau:active, .slot-carta:active { transform:
 .convite-botoes .btn-modal { flex: 1; margin: 0; font-size: 17px; }
 .x1-resposta { font-size: 16px; margin: 10px 0; }
 .x1-codigo-peq { letter-spacing: 3px; color: #FAC775; }
+
+/* ---------- Desempenho: tropas e projéteis andam com transform ---------- */
+.tropa { left: 0 !important; top: 0 !important; will-change: transform; contain: layout style; }
+.tropa.morrendo { opacity: 0; transition: opacity 0.35s; }
+.tropa.morrendo > * { transform: scale(0.4); transition: transform 0.35s; }
+.projetil { left: 0; top: 0; will-change: transform; }
+.hp i.hp-fill, .hp i.hp-rastro { width: 100%; transform-origin: left center; }
+.hp-fill { transition: transform 0.12s ease-out; }
+.hp-rastro { transition: transform 0.45s ease-in 0.3s; }
+
+/* ---------- Arenas com imagem realista ---------- */
+.arena { position: relative; overflow: hidden; }
+.arena-fundo { position: absolute; inset: 0; background-size: 100% 100%; background-position: center; z-index: 0; transform: translateZ(0); }
+.arena .arena-peca { z-index: 2; filter: drop-shadow(0 6px 4px #0006); }
+.ambiente { position: absolute; inset: 0; pointer-events: none; z-index: 2400; overflow: hidden; }
+.ambiente i { position: absolute; top: -4%; display: block; will-change: transform; animation: ambCair linear infinite; }
+@keyframes ambCair { from { transform: translate3d(0, 0, 0) rotate(0deg); } to { transform: translate3d(var(--d, 20px), 112vh, 0) rotate(540deg); } }
+.amb-petala i { width: 7px; height: 5px; background: #F8C6D8; border-radius: 60% 0 60% 0; opacity: 0.9; }
+.amb-confete i { width: 5px; height: 5px; border-radius: 1px; opacity: 0.85; }
+.amb-confete i:nth-child(3n) { background: #FFD45E; } .amb-confete i:nth-child(3n+1) { background: #FF6B8A; } .amb-confete i:nth-child(3n+2) { background: #6BC7FF; }
+.amb-neve i { width: 5px; height: 5px; background: #fff; border-radius: 50%; opacity: 0.9; box-shadow: 0 0 4px #fff; }
+.amb-brasa i { width: 4px; height: 4px; background: #FFB347; border-radius: 50%; box-shadow: 0 0 6px 2px #FF6A00aa; top: auto; bottom: -4%; animation-name: ambSubir; }
+@keyframes ambSubir { from { transform: translate3d(0, 0, 0); opacity: 1; } to { transform: translate3d(var(--d, 20px), -110vh, 0); opacity: 0; } }
+.arena-mini .arena-fundo { border-radius: 12px; }
+
+/* caminho das arenas */
+.modal-arenas .modal-corpo { max-height: 68vh; overflow-y: auto; }
+.caminho-arenas { display: flex; flex-direction: column; gap: 10px; }
+.marco-arena { background: #1d2350; border-radius: 14px; padding: 10px; border: 2px solid transparent; text-align: left; }
+.marco-arena.aqui { border-color: var(--cor); box-shadow: 0 0 16px color-mix(in srgb, var(--cor) 50%, transparent); }
+.ma-topo { display: flex; gap: 10px; align-items: center; margin-bottom: 8px; }
+.ma-img { flex: 0 0 74px; height: 128px; border-radius: 10px; background-size: cover; background-position: center; position: relative; box-shadow: 0 3px 0 #0d1130; }
+.ma-img.trancada { filter: grayscale(1) brightness(0.45); }
+.ma-img span { position: absolute; inset: 0; display: grid; place-items: center; font-size: 26px; filter: none; }
+.ma-info { display: flex; flex-direction: column; gap: 2px; }
+.ma-info small { color: var(--cor); font-weight: 700; font-size: 12px; }
+.ma-info b { font-family: 'Lilita One', 'Fredoka', sans-serif; font-size: 20px; }
+.ma-info span { display: flex; align-items: center; gap: 4px; font-weight: 700; }
+.ma-info em { font-size: 12px; opacity: 0.8; font-style: normal; }
+
+/* nova arena */
+.nova-arena { position: fixed; inset: 0; z-index: 650; background: #0b0e24ee; display: flex; align-items: center; justify-content: center; overflow: hidden; animation: fade 0.3s; }
+.nova-arena.sumir { opacity: 0; transition: opacity 0.3s; }
+.nova-arena .raios { position: absolute; width: 220vmax; height: 220vmax; background: repeating-conic-gradient(from 0deg, color-mix(in srgb, var(--cor) 25%, transparent) 0deg 10deg, transparent 10deg 20deg); animation: girar 18s linear infinite; }
+.na-conteudo { position: relative; text-align: center; padding: 20px; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.na-conteudo small { font-size: 16px; color: var(--cor); font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
+.na-conteudo b { font-family: 'Lilita One', 'Fredoka', sans-serif; font-size: 34px; text-shadow: 0 3px 0 #0008; }
+.na-nome { font-family: 'Lilita One', 'Fredoka', sans-serif; font-size: 24px; color: #FAC775; text-shadow: 0 2px 0 #0008; }
+.na-img { width: 150px; height: 258px; border-radius: 16px; background-size: cover; box-shadow: 0 0 0 4px var(--cor), 0 0 40px var(--cor); animation: pop 0.6s cubic-bezier(0.3, 1.5, 0.6, 1); margin: 8px 0; }
+.na-conteudo .liberadas { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+.na-conteudo .liberada .carta { width: 52px; }
