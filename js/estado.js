@@ -19,6 +19,7 @@ const Estado = (() => {
   function novo() {
     return {
       nome: 'Jogador', nivel: 1, xp: 0, ouro: 500, gemas: 100, trofeus: 0, recorde: 0,
+      avatar: 'coroa', cor: 'roxo', conquistas: { baus: 0, evolucoes: 0, tresCoroas: 0 },
       deck: [], colecao: {},
       baus: [{ tipo: 'madeira', inicio: null }, null, null, null],
       cla: null,
@@ -34,6 +35,7 @@ const Estado = (() => {
     if (!d) d = novo();
     const base = novo();
     for (const k in base) if (d[k] === undefined) d[k] = base[k];
+    for (const k in base.conquistas) if (d.conquistas[k] === undefined) d.conquistas[k] = 0;
     // toda carta do catálogo entra na coleção
     for (const c of catalogo) if (!d.colecao[c.id]) d.colecao[c.id] = { nivel: 1, copias: 0 };
     d.deck = d.deck.filter((id) => catalogo.some((c) => c.id === id));
@@ -88,9 +90,10 @@ const Estado = (() => {
     d.colecao[id].copias -= COPIAS[n];
     d.ouro -= OURO[n];
     d.colecao[id].nivel++;
-    ganharXp(4 + n * 3);
+    d.conquistas.evolucoes++;
+    const niveis = ganharXp(4 + n * 3);
     salvar();
-    return true;
+    return { niveis };
   }
 
   // Distribui cópias entre cartas aleatórias
@@ -115,6 +118,7 @@ const Estado = (() => {
     d.ouro += ouro;
     d.gemas += b.gemas;
     const cartas = sortearCopias(b.copias);
+    d.conquistas.baus++;
     salvar();
     return { ouro, gemas: b.gemas, cartas };
   }

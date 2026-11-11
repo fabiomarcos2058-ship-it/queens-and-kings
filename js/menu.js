@@ -44,8 +44,15 @@
     tudo();
   }
 
+  // ---------- Avatar ----------
+  const ICONES = ['coroa', 'estrela', 'coracao', 'espadas', 'lanterna', 'flor'];
+  const CORES = { roxo: '#534AB7', rosa: '#D4537E', azul: '#378ADD', verde: '#1D9E75', laranja: '#D85A30', dourado: '#BA7517' };
+  const avatarUrl = (a) => (ICONES.includes(a) ? `assets/avatares/${a}.svg` : `assets/cartas/${a}_medalhao.png`);
+
   // ---------- Topo ----------
   function topo() {
+    $('avatar-topo').src = avatarUrl(d().avatar);
+    $('avatar-topo').style.borderColor = CORES[d().cor];
     $('nivel').dataset.n = d().nivel;
     $('nome').textContent = d().nome;
     $('xp').style.width = `${(d().xp / Estado.XP_NIVEL(d().nivel)) * 100}%`;
@@ -53,18 +60,57 @@
     $('gemas').textContent = fmt(d().gemas);
   }
 
-  $('perfil').onclick = () => {
+  function conquistas() {
+    const c = d().conquistas;
+    const total = Estado.catalogo().length;
+    const temCartas = Object.values(d().colecao).filter((x) => x.nivel > 1 || x.copias > 0).length;
+    return [
+      ['🏆', 'Primeira vitória', 'Vença uma batalha', Math.min(1, d().vitorias), 1],
+      ['👑', 'Três coroas', 'Derrube a torre do rei', Math.min(1, c.tresCoroas), 1],
+      ['⚔️', 'Veterana', 'Vença 10 batalhas', d().vitorias, 10],
+      ['🎁', 'Caçadora de baús', 'Abra 10 baús', c.baus, 10],
+      ['⬆️', 'Treinadora', 'Evolua cartas 5 vezes', c.evolucoes, 5],
+      ['📚', 'Colecionadora', 'Tenha cópias de todas as cartas', temCartas, total],
+      ['🌸', 'Rumo à arena 2', 'Chegue a 300 troféus', d().recorde, 300],
+      ['🛡️', 'Em equipe', 'Entre num clã', d().cla ? 1 : 0, 1],
+    ];
+  }
+
+  function perfil() {
     const total = d().vitorias + d().derrotas;
-    UI.modal({
-      titulo: 'Perfil',
-      html: `<label class="campo">Nome<input id="campo-nome" maxlength="16" value="${d().nome.replace(/"/g, '&quot;')}" /></label>
-        <div class="estatisticas">
-          <div><b>${d().nivel}</b><span>Nível</span></div>
-          <div><b>${d().recorde}</b><span>Recorde de troféus</span></div>
-          <div><b>${d().vitorias}</b><span>Vitórias</span></div>
-          <div><b>${total ? Math.round((d().vitorias / total) * 100) : 0}%</b><span>Aproveitamento</span></div>
+    const xpMax = Estado.XP_NIVEL(d().nivel);
+    const lista = conquistas();
+    const feitas = lista.filter((x) => x[3] >= x[4]).length;
+    const opcoesAvatar = [...ICONES, ...Estado.catalogo().filter((c) => !c.feitico).map((c) => c.id)];
+    const m = UI.modal({
+      classe: 'modal-perfil',
+      html: `<div class="perfil-banner" style="--cor:${CORES[d().cor]}">
+          <button class="perfil-avatar" id="trocar-avatar"><img src="${avatarUrl(d().avatar)}" alt="" /><i>✏️</i></button>
+          <div class="perfil-info">
+            <div class="perfil-nome-linha"><input id="campo-nome" maxlength="16" value="${d().nome.replace(/"/g, '&quot;')}" aria-label="Nome" /><span>✏️</span></div>
+            <div class="perfil-nivel"><div class="nivel" data-n="${d().nivel}"></div>
+              <div class="perfil-xp"><i style="width:${(d().xp / xpMax) * 100}%"></i><small>${d().xp}/${xpMax} XP</small></div></div>
+            ${d().cla ? `<div class="perfil-cla">🛡️ ${d().cla}</div>` : ''}
+          </div>
         </div>
-        <p class="aviso">XP: ${d().xp}/${Estado.XP_NIVEL(d().nivel)} · cada nível novo dá 10 gemas.</p>`,
+        <div class="seletor oculto" id="seletor-avatar">
+          <div class="seletor-titulo">Escolha seu avatar</div>
+          <div class="grade-avatares">${opcoesAvatar.map((a) => `<button data-av="${a}" class="${a === d().avatar ? 'escolhido' : ''}"><img src="${avatarUrl(a)}" alt="" /></button>`).join('')}</div>
+          <div class="seletor-titulo">Cor do perfil</div>
+          <div class="grade-cores">${Object.entries(CORES).map(([k, v]) => `<button data-cor="${k}" class="${k === d().cor ? 'escolhido' : ''}" style="background:${v}"></button>`).join('')}</div>
+        </div>
+        <div class="estatisticas">
+          <div><b>${UI.fmt(d().trofeus)}</b><span>Troféus</span></div>
+          <div><b>${UI.fmt(d().recorde)}</b><span>Recorde</span></div>
+          <div><b>${d().vitorias}</b><span>Vitórias</span></div>
+          <div><b>${d().derrotas}</b><span>Derrotas</span></div>
+          <div><b>${total ? Math.round((d().vitorias / total) * 100) : 0}%</b><span>Aproveitamento</span></div>
+          <div><b>${d().conquistas.tresCoroas}</b><span>Vitórias 3 coroas</span></div>
+        </div>
+        <div class="titulo-conquistas">Conquistas <small>${feitas}/${lista.length}</small></div>
+        <div class="lista-conquistas">${lista.map(([ic, t, desc, v, max]) => `<div class="conquista${v >= max ? ' feita' : ''}">
+          <span class="ic">${ic}</span><div><b>${t}</b><small>${desc}</small><div class="mini-barra"><i style="width:${Math.min(100, (v / max) * 100)}%"></i></div></div>
+          <span class="estado">${v >= max ? '✓' : `${Math.min(v, max)}/${max}`}</span></div>`).join('')}</div>`,
       botoes: [
         { texto: 'Apagar progresso', classe: 'perigo pequeno', acao: () => {
           UI.modal({ titulo: 'Tem certeza?', html: '<p>Isso apaga tudo: cartas, ouro, troféus e baús.</p>', botoes: [
@@ -72,13 +118,52 @@
             { texto: 'Apagar', classe: 'perigo', acao: () => { Estado.apagar(); tudo(); UI.toast('Progresso apagado'); } },
           ] });
         } },
-        { texto: 'Salvar', classe: 'principal', acao: (el) => {
+        { texto: 'Pronto', classe: 'principal', acao: (el) => {
           const v = el.querySelector('#campo-nome').value.trim();
-          if (v) { d().nome = v; Estado.salvar(); topo(); }
+          if (v && v !== d().nome) { d().nome = v; UI.toast('Nome salvo!'); }
+          Estado.salvar(); topo(); cla();
         } },
       ],
     });
-  };
+    const el = m.el;
+    el.querySelector('#trocar-avatar').onclick = () => el.querySelector('#seletor-avatar').classList.toggle('oculto');
+    el.querySelectorAll('[data-av]').forEach((b) => (b.onclick = () => {
+      d().avatar = b.dataset.av;
+      el.querySelectorAll('[data-av]').forEach((x) => x.classList.toggle('escolhido', x === b));
+      el.querySelector('.perfil-avatar img').src = avatarUrl(d().avatar);
+      Estado.salvar(); topo();
+    }));
+    el.querySelectorAll('[data-cor]').forEach((b) => (b.onclick = () => {
+      d().cor = b.dataset.cor;
+      el.querySelectorAll('[data-cor]').forEach((x) => x.classList.toggle('escolhido', x === b));
+      el.querySelector('.perfil-banner').style.setProperty('--cor', CORES[d().cor]);
+      Estado.salvar(); topo();
+    }));
+  }
+  $('perfil').onclick = perfil;
+
+  // ---------- Subir de nível ----------
+  function subiuNivel(niveis, depois) {
+    if (!niveis || !niveis.length) { if (depois) depois(); return; }
+    const novo = niveis.at(-1), anterior = novo - niveis.length;
+    const fundo = document.createElement('div');
+    fundo.className = 'level-up';
+    fundo.innerHTML = `<div class="raios"></div>
+      <div class="level-conteudo">
+        <div class="level-texto">Subiu de nível!</div>
+        <div class="level-diamante"><span id="level-num">${anterior}</span></div>
+        <div class="level-premio">+${niveis.length * 10} <i class="ic-gema"></i></div>
+        <button class="btn-modal principal">Continuar</button>
+      </div>
+      ${Array.from({ length: 28 }, (_, i) => `<i class="confete" style="--x:${Math.random() * 100}%;--d:${(Math.random() * 1.2).toFixed(2)}s;--c:${['#FAC775', '#ED93B1', '#85B7EB', '#5DCAA5', '#AFA9EC'][i % 5]};--r:${Math.round(Math.random() * 360)}deg"></i>`).join('')}`;
+    document.getElementById('app').appendChild(fundo);
+    setTimeout(() => {
+      const num = fundo.querySelector('#level-num');
+      num.textContent = novo;
+      num.parentElement.classList.add('pulou');
+    }, 700);
+    fundo.querySelector('button').onclick = () => { fundo.classList.add('sumir'); setTimeout(() => { fundo.remove(); topo(); if (depois) depois(); }, 250); };
+  }
 
   // ---------- Batalha (tela inicial) ----------
   function telaBatalha() {
@@ -148,7 +233,10 @@
     d().trofeus += trofeus;
     d().recorde = Math.max(d().recorde, d().trofeus);
     d().ouro += ouro;
-    const niveis = Estado.ganharXp(vitoria ? 12 : 4);
+    const xpGanho = vitoria ? 12 : 4;
+    const xpAntes = d().xp, nivelAntes = d().nivel;
+    const niveis = Estado.ganharXp(xpGanho);
+    if (vitoria && r.coroas === 3) d().conquistas.tresCoroas++;
     // eventos
     const ev = d().eventos;
     ev.coroas += r.coroas;
@@ -165,10 +253,14 @@
           ${ouro ? `<span><img class="ic-img" data-asset="ui/moeda" alt="" /> +${ouro}</span>` : ''}
         </div>
         ${bau ? `<p class="ganhou-bau"><img data-asset="ui/bau_${bau}" alt="" /> Você ganhou um ${Estado.BAUS[bau].nome.toLowerCase()}!</p>` : vitoria ? '<p class="aviso">Seus espaços de baú estão cheios.</p>' : ''}
-        ${niveis.length ? `<p class="subiu">Subiu para o nível ${niveis.at(-1)}! +${niveis.length * 10} 💎</p>` : ''}`,
-      botoes: [{ texto: 'OK', classe: 'principal', acao: () => { Batalha.fechar(); tudo(); irPara('batalha'); } }],
+        <div class="xp-resultado"><div class="nivel" data-n="${nivelAntes}"></div><div class="perfil-xp"><i id="xp-anim" style="width:${(xpAntes / Estado.XP_NIVEL(nivelAntes)) * 100}%"></i><small>+${xpGanho} XP</small></div></div>`,
+      botoes: [{ texto: 'OK', classe: 'principal', acao: () => { Batalha.fechar(); tudo(); irPara('batalha'); subiuNivel(niveis); } }],
     });
     Assets.fill();
+    setTimeout(() => {
+      const barra = document.getElementById('xp-anim');
+      if (barra) barra.style.width = niveis.length ? '100%' : `${(d().xp / Estado.XP_NIVEL(d().nivel)) * 100}%`;
+    }, 500);
   }
 
   // ---------- Loja ----------
@@ -280,7 +372,12 @@
       else { trocando = id; cartas(); irPara('cartas'); }
     } });
     if (col.nivel < Estado.NIVEL_MAX) botoes.push({ texto: `Evoluir · ${fmt(Estado.OURO[col.nivel])} ouro`, classe: 'principal', desativado: !ev.ok, motivo: ev.motivo,
-      acao: () => { Estado.evoluir(id); UI.toast(`${c.nome} subiu para o nível ${col.nivel}!`); tudo(); } });
+      acao: () => {
+        const antes = Estado.stats(id);
+        const r = Estado.evoluir(id);
+        tudo();
+        cartaEvoluiu(id, antes, () => subiuNivel(r.niveis));
+      } });
     UI.modal({
       titulo: c.nome,
       classe: 'modal-carta',
@@ -290,6 +387,20 @@
         <p class="aviso">Nível ${col.nivel} · cópias ${col.copias}${col.nivel < Estado.NIVEL_MAX ? `/${Estado.COPIAS[col.nivel]}` : ''}</p></div></div>
         <div class="tabela-stats">${linhas.map(([k, v]) => `<div><span>${k}</span><b>${typeof v === 'number' ? fmt(v) : v}</b></div>`).join('')}</div>`,
       botoes,
+    });
+  }
+
+  function cartaEvoluiu(id, antes, depois) {
+    const c = Estado.stats(id);
+    const linhas = c.feitico ? [['Dano', antes.dano, c.dano]] : [['Vida', antes.vida, c.vida], ['Dano', antes.dano, c.dano]];
+    UI.modal({
+      classe: 'modal-evolucao',
+      html: `<div class="evo-raios"></div>
+        <div class="evo-carta">${Cartas.html(c, { mini: true })}</div>
+        <div class="evo-nivel"><span>Nível ${antes.nivel}</span><b>→</b><span class="novo">Nível ${c.nivel}</span></div>
+        <div class="evo-stats">${linhas.map(([k, a, b]) => `<div><span>${k}</span><b>${UI.fmt(a)}</b><i>→</i><b class="novo">${UI.fmt(b)}</b><small>+${UI.fmt(b - a)}</small></div>`).join('')}</div>`,
+      titulo: `${c.nome} evoluiu!`,
+      botoes: [{ texto: 'Incrível!', classe: 'principal', acao: () => { if (depois) setTimeout(depois, 250); } }],
     });
   }
 
