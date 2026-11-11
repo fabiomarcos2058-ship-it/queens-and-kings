@@ -22,7 +22,7 @@
         </div>
       </div>
       <div class="moedas">
-        <div class="moeda"><i class="ic-ouro"></i><span>1.250</span></div>
+        <div class="moeda"><img class="ic-img" data-asset="ui/moeda" alt="" /><span>1.250</span></div>
         <div class="moeda"><i class="ic-gema"></i><span>80</span></div>
       </div>
     </header>
@@ -33,10 +33,10 @@
 
         <!-- LOJA -->
         <section class="tela" data-tela="loja">
-          <h2 class="titulo-secao">Ofertas do dia</h2>
+          <h2 class="titulo-secao"><span>Ofertas do dia</span></h2>
           <div class="grade-3" id="ofertas"></div>
 
-          <h2 class="titulo-secao">Baús</h2>
+          <h2 class="titulo-secao"><span>Baús</span></h2>
           <div class="grade-3">
             <div class="item-loja">
               <img data-asset="ui/bau_madeira" alt="" />
@@ -48,18 +48,18 @@
               <div class="item-nome">Baú de prata</div>
               <div class="preco"><i class="ic-gema"></i>40</div>
             </div>
-            <div class="item-loja destaque">
+            <div class="item-loja destaque"><div class="faixa">Melhor oferta</div>
               <img data-asset="ui/bau_ouro" alt="" />
               <div class="item-nome">Baú de ouro</div>
               <div class="preco"><i class="ic-gema"></i>120</div>
             </div>
           </div>
 
-          <h2 class="titulo-secao">Ouro</h2>
+          <h2 class="titulo-secao"><span>Ouro</span></h2>
           <div class="grade-3">
-            <div class="item-loja"><div class="pilha-ouro p1"></div><div class="item-nome">500 de ouro</div><div class="preco"><i class="ic-gema"></i>20</div></div>
-            <div class="item-loja"><div class="pilha-ouro p2"></div><div class="item-nome">2.000 de ouro</div><div class="preco"><i class="ic-gema"></i>70</div></div>
-            <div class="item-loja"><div class="pilha-ouro p3"></div><div class="item-nome">6.000 de ouro</div><div class="preco"><i class="ic-gema"></i>180</div></div>
+            <div class="item-loja"><img data-asset="ui/ouro_1" alt="" /><div class="item-nome">500 de ouro</div><div class="preco"><i class="ic-gema"></i>20</div></div>
+            <div class="item-loja"><img data-asset="ui/ouro_2" alt="" /><div class="item-nome">2.000 de ouro</div><div class="preco"><i class="ic-gema"></i>70</div></div>
+            <div class="item-loja"><img data-asset="ui/ouro_3" alt="" /><div class="item-nome">6.000 de ouro</div><div class="preco"><i class="ic-gema"></i>180</div></div>
           </div>
           <p class="aviso">Tudo aqui é de mentirinha: o jogo não tem compras com dinheiro real.</p>
         </section>
@@ -67,26 +67,31 @@
         <!-- CARTAS -->
         <section class="tela" data-tela="cartas">
           <div class="cab-deck">
-            <h2 class="titulo-secao">Deck de batalha</h2>
+            <h2 class="titulo-secao"><span>Deck de batalha</span></h2>
             <div class="elixir-medio">Elixir médio <b>–</b></div>
           </div>
           <div class="grade-4" id="deck"></div>
 
-          <h2 class="titulo-secao">Coleção</h2>
+          <h2 class="titulo-secao"><span>Coleção</span></h2>
           <p class="aviso">Suas personagens vão aparecer aqui quando você mandar as imagens.</p>
           <div class="grade-4" id="colecao"></div>
         </section>
 
         <!-- BATALHA -->
         <section class="tela" data-tela="batalha">
-          <div class="trofeus"><i class="ic-trofeu"></i><span>0</span></div>
+          <div class="logo">
+            <img class="logo-torre" data-asset="ui/torre_logo" alt="" />
+            <div class="logo-texto"><span>Queens</span><small>and</small><span>Kings</span></div>
+            <img class="logo-torre espelho" data-asset="ui/torre_logo" alt="" />
+          </div>
+          <div class="trofeus"><i class="ic-trofeu"></i><span>0</span><div class="trofeus-barra"><span style="width: 0%"></span></div><small>Próxima arena: 300</small></div>
           <div class="arena-card">
-            <div class="arena-nome">Arena 1 · Festival da Escola</div>
+            <div class="arena-nome"><span>Arena 1</span>Festival da Escola</div>
             <div class="arena-mini" id="arena-mini"></div>
           </div>
           <button class="btn-jogar" id="btn-jogar">Jogar</button>
           <div class="baus">
-            <div class="slot-bau"><img data-asset="ui/bau_madeira" alt="" /><span>3h</span></div>
+            <div class="slot-bau abrindo"><img data-asset="ui/bau_madeira" alt="" /><span>2h 41min</span><div class="tempo-bau"><i style="width: 45%"></i></div></div>
             <div class="slot-bau"><img data-asset="ui/bau_prata" alt="" /><span>8h</span></div>
             <div class="slot-bau vazio"><span>Espaço livre</span></div>
             <div class="slot-bau vazio"><span>Espaço livre</span></div>
@@ -95,7 +100,7 @@
 
         <!-- CLÃ -->
         <section class="tela" data-tela="cla">
-          <h2 class="titulo-secao">Clãs</h2>
+          <h2 class="titulo-secao"><span>Clãs</span></h2>
           <input class="busca" type="text" placeholder="Buscar clã" />
           <div class="lista-clas">
             <div class="cla"><div class="escudo e1">S</div><div class="cla-info"><b>Coroas de Sakura</b><span>32/50 membros · 1.200 troféus</span></div><button class="btn-peq">Entrar</button></div>
@@ -108,7 +113,7 @@
 
         <!-- EVENTOS -->
         <section class="tela" data-tela="eventos">
-          <h2 class="titulo-secao">Eventos</h2>
+          <h2 class="titulo-secao"><span>Eventos</span></h2>
           <div class="evento ev1"><div><b>Desafio do Festival</b><span>Vença 3 batalhas seguidas</span></div><div class="selo">Em breve</div></div>
           <div class="evento ev2"><div><b>Torneio das Coroas</b><span>Quem juntar mais coroas ganha</span></div><div class="selo">Em breve</div></div>
           <div class="evento ev3"><div><b>Batalha em dupla</b><span>Jogue 2 contra 2 com um amigo</span></div><div class="selo">Em breve</div></div>
@@ -119,11 +124,11 @@
 
     <!-- Abas de baixo -->
     <nav class="abas" id="abas">
-      <button data-aba="loja"><i class="ic-aba ic-loja"></i><span>Loja</span></button>
+      <button data-aba="loja"><img class="ic-aba" data-asset="ui/aba_loja" alt="" /><span>Loja</span></button>
       <button data-aba="cartas"><i class="ic-aba ic-cartas"></i><span>Cartas</span></button>
-      <button data-aba="batalha" class="central"><i class="ic-aba ic-batalha"></i><span>Batalha</span></button>
-      <button data-aba="cla"><i class="ic-aba ic-cla"></i><span>Clã</span></button>
-      <button data-aba="eventos"><i class="ic-aba ic-eventos"></i><span>Eventos</span></button>
+      <button data-aba="batalha" class="central"><img class="ic-aba" data-asset="ui/aba_batalha" alt="" /><span>Batalha</span></button>
+      <button data-aba="cla"><img class="ic-aba" data-asset="ui/aba_cla" alt="" /><span>Clã</span></button>
+      <button data-aba="eventos"><img class="ic-aba" data-asset="ui/aba_eventos" alt="" /><span>Eventos</span></button>
     </nav>
 
     <!-- Tela da arena (prévia) -->

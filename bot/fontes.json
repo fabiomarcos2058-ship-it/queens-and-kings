@@ -160,80 +160,10 @@
       ],
       "tom": "ouro"
     },
-    "ui/moeda": {
-      "pacote": "mini-dungeon",
-      "procurar": [
-        "coin"
-      ],
-      "tamanho": [
-        32,
-        32
-      ]
-    },
-    "ui/ouro_1": {
-      "pacote": "mini-dungeon",
-      "pecas": [
-        "coin",
-        "coin"
-      ],
-      "tamanho": [
-        64,
-        56
-      ]
-    },
-    "ui/ouro_2": {
-      "pacote": "mini-dungeon",
-      "pecas": [
-        "coin",
-        "coin",
-        "coin",
-        "coin"
-      ],
-      "tamanho": [
-        64,
-        56
-      ]
-    },
-    "ui/ouro_3": {
-      "pacote": "mini-dungeon",
-      "pecas": [
-        "coin",
-        "coin",
-        "coin",
-        "coin",
-        "coin",
-        "coin",
-        "coin"
-      ],
-      "tamanho": [
-        64,
-        56
-      ]
-    },
     "ui/aba_loja": {
       "pacote": "pirate-kit",
       "procurar": [
         "chest"
-      ],
-      "tamanho": [
-        40,
-        40
-      ]
-    },
-    "ui/aba_batalha": {
-      "pacote": "mini-dungeon",
-      "procurar": [
-        "weapon-sword"
-      ],
-      "tamanho": [
-        40,
-        40
-      ]
-    },
-    "ui/aba_cla": {
-      "pacote": "mini-dungeon",
-      "procurar": [
-        "shield-round"
       ],
       "tamanho": [
         40,

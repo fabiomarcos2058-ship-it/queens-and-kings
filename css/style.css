@@ -135,3 +135,74 @@ button { font-family: inherit; cursor: pointer; border: none; }
 .barra span { border-radius: 4px; background: #26215C; }
 .barra span.cheio { background: #D4537E; }
 .selo-previa { align-self: center; background: #000a; padding: 3px 12px; border-radius: 10px; font-size: 12px; white-space: nowrap; margin-bottom: 4px; }
+
+/* ---------- Visual caprichado (etapa 1.1) ---------- */
+#app {
+  background-color: #2a3170;
+  background-image:
+    radial-gradient(circle at 50% 0%, #4a56b0 0, transparent 55%),
+    repeating-linear-gradient(45deg, #ffffff07 0 14px, transparent 14px 28px),
+    repeating-linear-gradient(-45deg, #ffffff07 0 14px, transparent 14px 28px);
+}
+.ic-img { width: 22px; height: 22px; object-fit: contain; }
+.topbar { background: linear-gradient(#262e68, #1d2350); box-shadow: 0 3px 0 #0d1130; }
+.moeda { border: 2px solid #2d3577; box-shadow: inset 0 2px 0 #0006; }
+
+/* Títulos como faixas */
+.titulo-secao span { display: inline-block; background: #534AB7; padding: 3px 14px 4px; border-radius: 8px; box-shadow: 0 3px 0 #26215C; transform: skewX(-6deg); }
+
+/* Logo */
+.logo { display: flex; align-items: flex-end; justify-content: center; gap: 4px; margin-bottom: 6px; }
+.logo-torre { width: 34px; height: 54px; object-fit: contain; }
+.logo-torre.espelho { transform: scaleX(-1); }
+.logo-texto { display: flex; align-items: baseline; gap: 6px; font-weight: 700; line-height: 1; padding-bottom: 6px; }
+.logo-texto span { font-size: 30px; color: #FAC775; -webkit-text-stroke: 1.5px #633806; text-shadow: 0 3px 0 #633806, 0 5px 0 #0005; letter-spacing: 0.5px; }
+.logo-texto small { font-size: 16px; color: #F4C0D1; -webkit-text-stroke: 1px #72243E; }
+
+/* Troféus com barra */
+.trofeus { flex-wrap: wrap; width: 78%; padding: 6px 14px; border-radius: 14px; border: 2px solid #3b4596; }
+.trofeus-barra { flex-basis: 100%; height: 8px; background: #0d1130; border-radius: 4px; overflow: hidden; }
+.trofeus-barra span { display: block; height: 100%; background: #FAC775; }
+.trofeus small { flex-basis: 100%; text-align: center; font-size: 11px; font-weight: 400; color: #B5D4F4; }
+
+/* Cartão da arena */
+.arena-card { background: linear-gradient(#262e68, #1d2350); box-shadow: 0 5px 0 #0d1130; position: relative; }
+.arena-nome { display: flex; flex-direction: column; align-items: center; line-height: 1.1; margin-bottom: 8px; color: #fff; font-weight: 600; font-size: 17px; }
+.arena-nome span { font-size: 12px; color: #FAC775; background: #0d1130; padding: 1px 10px; border-radius: 6px; margin-bottom: 3px; }
+.arena-mini { border-radius: 12px; box-shadow: 0 4px 0 #0d1130; }
+
+/* Botão jogar */
+.btn-jogar { background: linear-gradient(#FFD98A, #F2B23E); position: relative; overflow: hidden; box-shadow: 0 6px 14px #0006; }
+.btn-jogar::after { content: ''; position: absolute; top: 0; left: -60%; width: 40%; height: 100%; background: linear-gradient(90deg, transparent, #fff8, transparent); transform: skewX(-20deg); animation: brilho 3s ease-in-out infinite; }
+@keyframes brilho { 0%, 60% { left: -60%; } 100% { left: 130%; } }
+
+/* Baús */
+.slot-bau { background: linear-gradient(#262e68, #1d2350); position: relative; gap: 1px; box-shadow: 0 3px 0 #0d1130; padding-bottom: 8px; height: 84px; }
+.slot-bau img { width: 54px; height: 46px; object-fit: contain; }
+.slot-bau.abrindo { border-color: #FAC775; }
+.slot-bau.abrindo img { animation: pulo 1.6s ease-in-out infinite; }
+.tempo-bau { position: absolute; bottom: 4px; left: 8px; right: 8px; height: 4px; background: #0d1130; border-radius: 2px; overflow: hidden; }
+.tempo-bau i { display: block; height: 100%; background: #FAC775; }
+@keyframes pulo { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+
+/* Loja */
+.item-loja { background: linear-gradient(#4552a8, #3b4596); box-shadow: 0 4px 0 #262e68; position: relative; }
+.item-loja img { object-fit: contain; }
+.item-loja.destaque { background: linear-gradient(#6a58c4, #4b3a8c); box-shadow: 0 4px 0 #26215C, 0 0 0 2px #FAC77555; }
+.faixa { position: absolute; top: -8px; background: #D4537E; color: #fff; font-size: 10px; font-weight: 600; padding: 1px 8px; border-radius: 6px; box-shadow: 0 2px 0 #72243E; white-space: nowrap; }
+
+/* Cartas */
+.carta-vazia { box-shadow: 0 4px 0 #0d1130; background-image: repeating-linear-gradient(45deg, #ffffff08 0 6px, transparent 6px 12px); }
+.slot-deck { background: #ffffff08; }
+
+/* Clã e eventos */
+.cla { background: linear-gradient(#4552a8, #3b4596); box-shadow: 0 3px 0 #262e68; }
+.evento { box-shadow: 0 4px 10px #0004; background-image: repeating-linear-gradient(-45deg, #ffffff10 0 10px, transparent 10px 20px); }
+
+/* Abas */
+.abas { background: linear-gradient(#262e68, #1a1f4a); gap: 3px; padding-top: 4px; }
+.abas button { background: #ffffff08; border-radius: 10px 10px 6px 6px; }
+.abas button.ativa { background: linear-gradient(#6a74d0, #3b4596); box-shadow: 0 -3px 0 #8f98e8 inset, 0 4px 0 #0d1130; transform: translateY(-8px); flex: 1.35; }
+.abas .ic-aba { width: 32px; height: 32px; object-fit: contain; transition: transform 0.2s; }
+.abas button.ativa .ic-aba { transform: scale(1.25); }
+.abas button.central .ic-aba { width: 32px; height: 32px; }
