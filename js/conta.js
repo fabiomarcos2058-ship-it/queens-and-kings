@@ -265,7 +265,7 @@ const Conta = (() => {
   }
 
   async function sair() {
-    try { if (typeof Amigos !== 'undefined') Amigos.parar(); await enviarParaNuvem(); await fb.signOut(fb.auth); } catch (e) { /* nada */ }
+    try { if (typeof Presentes !== 'undefined') Presentes.parar(); if (typeof Amigos !== 'undefined') Amigos.parar(); await enviarParaNuvem(); await fb.signOut(fb.auth); } catch (e) { /* nada */ }
     usuario = null;
     Estado.aoSalvar(null);
     Estado.apagar(); // o progresso continua salvo na conta

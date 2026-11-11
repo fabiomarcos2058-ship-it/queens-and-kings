@@ -45,6 +45,12 @@ service cloud.firestore {
       }
     }
 
+    // Presentes da criadora: só a criadora manda; o jogador lê e apaga os dele
+    match /presentes/{uid}/itens/{item} {
+      allow read, delete: if request.auth != null && (request.auth.uid == uid || request.auth.uid == 'TxtfHnU2BXbcWpHkOSlDZQRpYNw1');
+      allow create: if request.auth != null && request.auth.uid == 'TxtfHnU2BXbcWpHkOSlDZQRpYNw1';
+    }
+
     // Clãs: qualquer pessoa logada vê; cada um só mexe na própria entrada; o líder pode remover membros
     match /clas/{claId} {
       allow read: if request.auth != null;

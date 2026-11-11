@@ -302,6 +302,23 @@
   }
 
 
+  // ---------- Presentes da criadora ----------
+  function chegaramPresentes(lista) {
+    const ok = lista.filter((p) => p.ok), msgs = [...new Set(lista.map((p) => p.mensagem).filter(Boolean))];
+    tudo();
+    if (!ok.length) return;
+    const cartasP = ok.filter((p) => p.tipo === 'carta').map((p) => ({ c: Estado.carta(p.carta), nivel: p.nivel })).filter((x) => x.c);
+    UI.modal({
+      titulo: '🎁 Presente da criadora!',
+      classe: 'modal-liberadas modal-presente',
+      html: `<div class="evo-raios"></div>
+        ${cartasP.length ? `<div class="liberadas">${cartasP.map((x, i) => `<div class="liberada" style="animation-delay:${i * 0.2}s">${Cartas.html(x.c, { mini: true })}<b>${x.c.nome}</b><small>Nível ${x.nivel}</small></div>`).join('')}</div>` : ''}
+        <div class="lista-presentes">${ok.map((p) => `<div>${Presentes.descrever(p)}</div>`).join('')}</div>
+        ${msgs.map((m) => `<p class="msg-presente">💌 "${esc(m)}"</p>`).join('')}`,
+      botoes: [{ texto: 'Obrigado! 💜', classe: 'principal' }],
+    });
+  }
+
   // ---------- Amigos e perfis ----------
   let pedidos = [];
   const CORES_PERFIL = { roxo: '#534AB7', rosa: '#D4537E', azul: '#378ADD', verde: '#1D9E75', laranja: '#D85A30', dourado: '#BA7517' };
@@ -1097,6 +1114,118 @@
     }));
   }
 
+  // ---------- Presentear (só a criadora) ----------
+  function telaPresentear() {
+    if (!Mod.ehCriador()) return;
+    let alvo = null, tipo = 'carta';
+    const cartasTodas = Estado.todasCartas().sort((a, b) => a.nome.localeCompare(b.nome));
+    const md = UI.modal({
+      titulo: '🎁 Presentear jogador',
+      classe: 'modal-presentear',
+      html: `<div class="pres-passo"><b>1. Para quem?</b>
+          <div class="busca-amigo"><input id="pres-busca" maxlength="40" placeholder="Nome ou ID do jogador" autocomplete="off" /><button class="btn-modal principal" id="pres-buscar">🔍</button></div>
+          <div id="pres-resultados"></div>
+          <div id="pres-amigos" class="pres-chips"></div>
+          <div id="pres-alvo" class="pres-alvo oculto"></div>
+        </div>
+        <div class="pres-passo"><b>2. O que dar?</b>
+          <div class="conta-abas pres-abas">${[['carta', '🃏 Carta'], ['passe', '🎟️ Passe'], ['ouro', '🪙 Ouro'], ['gemas', '💎 Gemas']].map(([k, t]) => `<button data-tipo="${k}">${t}</button>`).join('')}</div>
+          <div id="pres-opcoes"></div>
+          <input id="pres-msg" maxlength="80" placeholder="Mensagem (opcional) 💌" autocomplete="off" />
+        </div>
+        <button class="btn-modal principal pres-enviar" id="pres-enviar">🎁 Enviar presente</button>
+        <div id="pres-pendentes"></div>`,
+      botoes: [{ texto: 'Fechar', classe: 'secundario' }],
+    });
+    const el = md.el, $q = (s) => el.querySelector(s);
+
+    const escolherAlvo = async (p) => {
+      alvo = p;
+      $q('#pres-resultados').innerHTML = '';
+      $q('#pres-alvo').classList.remove('oculto');
+      $q('#pres-alvo').innerHTML = `<img src="${avatarDe(p.avatar)}" alt="" /><div><b>${Passe.nomeHtml(p.nome || 'Jogador', p.estiloNome)}</b><small>${p.uid}</small></div><button class="btn-peq" id="pres-trocar">trocar</button>`;
+      $q('#pres-trocar').onclick = () => { alvo = null; $q('#pres-alvo').classList.add('oculto'); $q('#pres-pendentes').innerHTML = ''; };
+      mostrarPendentes();
+    };
+    const mostrarPendentes = async () => {
+      const caixa = $q('#pres-pendentes');
+      if (!alvo) { caixa.innerHTML = ''; return; }
+      try {
+        const lista = await Presentes.pendentes(alvo.uid);
+        caixa.innerHTML = lista.length ? `<div class="titulo-conquistas">Ainda não recebidos (${lista.length})</div>
+          <div class="lista-jogadores">${lista.map((p) => `<div class="linha-jogador"><div class="lj-nome"><b>${Presentes.descrever(p)}</b>${p.mensagem ? `<small>💌 ${esc(p.mensagem)}</small>` : ''}</div><button class="btn-peq perigo" data-cancelar="${p.id}">✕</button></div>`).join('')}</div>` : '';
+        caixa.querySelectorAll('[data-cancelar]').forEach((b) => (b.onclick = async () => { await Presentes.cancelar(alvo.uid, b.dataset.cancelar); UI.toast('Presente cancelado'); mostrarPendentes(); }));
+      } catch (e) { caixa.innerHTML = `<p class="aviso">${erroNuvem(e)}</p>`; }
+    };
+
+    // atalhos: seus amigos
+    Amigos.listar().then((lista) => {
+      $q('#pres-amigos').innerHTML = lista.length ? `<small>Seus amigos:</small> ${lista.map((p) => `<button class="pres-chip" data-u="${p.uid}">${Passe.nomeHtml(p.nome || 'Jogador', p.estiloNome)}</button>`).join('')}` : '';
+      $q('#pres-amigos').querySelectorAll('[data-u]').forEach((b) => (b.onclick = () => escolherAlvo(lista.find((p) => p.uid === b.dataset.u))));
+    }).catch(() => {});
+
+    const buscar = async () => {
+      const t = $q('#pres-busca').value.trim();
+      if (!t) return;
+      const res = $q('#pres-resultados');
+      res.innerHTML = '<div class="x1-carregando"></div>';
+      try {
+        let lista = await Amigos.buscar(t);
+        if (!lista.length && t.length >= 20) lista = [{ uid: t, nome: 'Jogador (sem perfil público)' }];
+        res.innerHTML = lista.length ? `<div class="lista-jogadores">${lista.map((p) => `<div class="linha-jogador clicavel" data-u="${p.uid}"><div class="lj-avatar"><img src="${avatarDe(p.avatar)}" alt="" /></div><div class="lj-nome"><b>${Passe.nomeHtml(p.nome || 'Jogador', p.estiloNome)}</b><small>${p.uid}</small></div></div>`).join('')}</div>` : '<p class="aviso">Ninguém encontrado. Tente colar o ID.</p>';
+        res.querySelectorAll('[data-u]').forEach((b) => (b.onclick = () => escolherAlvo(lista.find((p) => p.uid === b.dataset.u))));
+      } catch (e) { res.innerHTML = `<p class="aviso">${erroNuvem(e)}</p>`; }
+    };
+    $q('#pres-buscar').onclick = buscar;
+    $q('#pres-busca').onkeydown = (e) => { if (e.key === 'Enter') buscar(); };
+
+    const opcoes = () => {
+      el.querySelectorAll('.pres-abas button').forEach((b) => b.classList.toggle('ativa', b.dataset.tipo === tipo));
+      const o = $q('#pres-opcoes');
+      if (tipo === 'carta') {
+        o.innerHTML = `<select id="pres-carta">${cartasTodas.map((c) => `<option value="${c.id}">${c.nome}${c.exclusivo ? ' ⭐ exclusiva' : ''}</option>`).join('')}</select>
+          <div class="pres-linha"><label>Nível <select id="pres-nivel">${Array.from({ length: Estado.NIVEL_MAX }, (_, i) => `<option ${i + 1 === Estado.NIVEL_MAX ? 'selected' : ''}>${i + 1}</option>`).join('')}</select></label>
+          <label>Cópias extras <input id="pres-copias" type="number" min="0" max="9999" value="0" /></label></div>
+          <div id="pres-previa" class="pres-previa"></div>`;
+        const previa = () => { const c = Estado.carta($q('#pres-carta').value); $q('#pres-previa').innerHTML = Cartas.html(c, { nivel: `Nível ${$q('#pres-nivel').value}` }); };
+        $q('#pres-carta').onchange = previa; $q('#pres-nivel').onchange = previa; previa();
+      } else if (tipo === 'passe') {
+        o.innerHTML = `<div class="pres-linha"><label class="pres-radio"><input type="radio" name="pres-passe" value="plus" /> Plus</label><label class="pres-radio"><input type="radio" name="pres-passe" value="ultra" checked /> Ultra 👑</label></div>
+          <p class="aviso">Vale para a temporada atual (${Passe.dados().temporada}).</p>`;
+      } else {
+        const presets = tipo === 'ouro' ? [500, 1000, 5000, 10000] : [50, 100, 500, 1000];
+        o.innerHTML = `<input id="pres-qtd" type="number" min="1" max="1000000" value="${presets[1]}" />
+          <div class="pres-chips">${presets.map((v) => `<button class="pres-chip" data-qtd="${v}">${UI.fmt(v)}</button>`).join('')}</div>`;
+        o.querySelectorAll('[data-qtd]').forEach((b) => (b.onclick = () => { $q('#pres-qtd').value = b.dataset.qtd; }));
+      }
+    };
+    el.querySelectorAll('.pres-abas button').forEach((b) => (b.onclick = () => { tipo = b.dataset.tipo; opcoes(); }));
+    opcoes();
+
+    $q('#pres-enviar').onclick = async () => {
+      if (!alvo) { UI.toast('Escolha para quem é o presente primeiro!'); return; }
+      let item;
+      if (tipo === 'carta') item = { tipo, carta: $q('#pres-carta').value, nivel: +$q('#pres-nivel').value, copias: Math.max(0, Math.round(+$q('#pres-copias').value || 0)) };
+      else if (tipo === 'passe') item = { tipo, passe: el.querySelector('input[name="pres-passe"]:checked').value, temporada: Passe.dados().temporada };
+      else {
+        const qtd = Math.round(+$q('#pres-qtd').value || 0);
+        if (qtd <= 0) { UI.toast('Coloque uma quantidade'); return; }
+        item = { tipo, qtd };
+      }
+      const msg = $q('#pres-msg').value.trim();
+      if (msg) item.mensagem = msg;
+      const btn = $q('#pres-enviar');
+      btn.disabled = true;
+      try {
+        await Presentes.enviar(alvo.uid, item);
+        UI.toast(`🎁 Presente enviado para ${alvo.nome || 'o jogador'}!`);
+        $q('#pres-msg').value = '';
+        mostrarPendentes();
+      } catch (e) { UI.toast(e.code ? erroNuvem(e) : e.message); }
+      btn.disabled = false;
+    };
+  }
+
   function telaEstiloNome() {
     const tem = Passe.temTrilha('plus'), ultra = Passe.temTrilha('ultra'), atual = Passe.estiloNome();
     const grupos = ['Cor', 'Gradiente', 'Animado'];
@@ -1180,9 +1309,11 @@
     }));
   }
 
+  window.telaPresentear = telaPresentear; // usado pelo mod menu
   function tudo() {
     Mod.mostrarBotao(tudo);
     if (Conta.logado()) Amigos.ouvir({ aoMudarPedidos: mudouPedidos, aoConvite: conviteX1 });
+    if (Conta.logado()) Presentes.ouvir(chegaramPresentes);
     topo(); telaBatalha(); loja(); cartas(); cla(); eventos();
   }
 

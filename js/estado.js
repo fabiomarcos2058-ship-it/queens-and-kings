@@ -85,7 +85,7 @@ const Estado = (() => {
   let todas = []; // cartas.json inteiro
   let catalogo = []; // só as cartas que este jogador pode ver (as exclusivas aparecem só para os IDs da carta)
   const meuUid = () => (typeof Conta !== 'undefined' && Conta.uid ? Conta.uid() : null);
-  const visivel = (c) => !c.token && (!c.exclusivo || c.exclusivo.includes(meuUid())) && !(d && d.esgotadas && d.esgotadas.includes(c.id)); // tokens (ex.: minis do barril) não são cartas
+  const visivel = (c) => !c.token && (!c.exclusivo || c.exclusivo.includes(meuUid()) || !!(d && d.cartasExtras && d.cartasExtras.includes(c.id))) && !(d && d.esgotadas && d.esgotadas.includes(c.id)); // tokens (ex.: minis do barril) não são cartas
   let d = null;
 
   function novo() {
@@ -299,7 +299,7 @@ const Estado = (() => {
   return {
     get d() { return d; }, carregar, salvar, apagar, importar, recarregarCatalogo, aoSalvar, carta, stats, catalogo: () => catalogo, tem, liberada, disponiveis, proximaLiberacao,
     COPIAS, OURO, NIVEL_MAX, BAUS, XP_NIVEL,
-    contarUsos, usosRestantes,
+    contarUsos, usosRestantes, todasCartas: () => todas.filter((c) => !c.token),
     TORRE_OURO, TROPAS_TORRE, nivelRei, minhasTorres, statsTorre, podeEvoluirTorre, evoluirTorre, escolherTropaTorre,
     ganharXp, podeEvoluir, evoluir, abrirBau, tempoRestante, sortearCopias, ofertasDoDia, sorteio,
   };
