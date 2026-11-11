@@ -1,6 +1,6 @@
 // Mod menu do criador. Só aparece para os IDs de jogador listados em CRIADORES.
 // (O ID aparece no perfil de quem está logado numa conta.)
-const CRIADORES = [];
+const CRIADORES = ['TxtfHnU2BXbcWpHkOSlDZQRpYNw1'];
 
 const Mod = (() => {
   const flags = { elixirInfinito: false, torresInvenciveis: false, danoX5: false, iaParada: false, vel: 1 };
