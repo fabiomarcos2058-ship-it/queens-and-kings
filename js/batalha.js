@@ -1160,7 +1160,7 @@ const Batalha = (() => {
       if (!t.torre || !t.ativa) continue;
       t.cd -= dt;
       if (t.cd > 0) continue;
-      const alvo = s.ent.filter((e) => !e.torre && e.time !== t.time && e.vida > 0 && e.surgir <= 0 && dist(e, t) <= t.alcance)
+      const alvo = s.ent.filter((e) => !e.torre && e.time !== t.time && e.vida > 0 && e.surgir <= 0 && dist(e, t) <= t.alcance + e.raio) // igual ao Clash: alcance até a borda da tropa
         .sort((a, b) => dist(a, t) - dist(b, t))[0];
       if (alvo) { atacar(t, alvo); t.cd = t.cadencia; }
     }
