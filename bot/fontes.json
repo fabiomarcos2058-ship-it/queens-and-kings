@@ -1,6 +1,8 @@
 {
-  "_leia": "Só entram pacotes com licença CC0 e de sites da lista 'sites_permitidos'. Em 'procurar', o bot testa cada palavra em ordem e usa o primeiro modelo cujo nome contém aquela palavra.",
-  "sites_permitidos": ["kenney.nl"],
+  "_leia": "Só entram pacotes com licença CC0 e de sites da lista 'sites_permitidos'. Em 'procurar', o bot testa cada palavra em ordem e usa o primeiro modelo cujo nome contém aquela palavra. Em 'pecas', os modelos com esses nomes exatos são empilhados de baixo para cima. Os nomes disponíveis ficam em bot/catalogo.txt.",
+  "sites_permitidos": [
+    "kenney.nl"
+  ],
   "pacotes": {
     "castle-kit": {
       "pagina": "https://kenney.nl/assets/castle-kit",
@@ -16,42 +18,90 @@
   "imagens": {
     "arena/torre_azul": {
       "pacote": "castle-kit",
-      "procurar": ["tower-square-roof", "tower-hexagon-roof", "tower-square", "tower"],
-      "tamanho": [62, 102],
-      "time": "azul"
+      "tamanho": [
+        62,
+        102
+      ],
+      "time": "azul",
+      "pecas": [
+        "tower-square-base",
+        "tower-square-mid-windows",
+        "tower-square-top-roof-high"
+      ]
     },
     "arena/torre_vermelha": {
       "pacote": "castle-kit",
-      "procurar": ["tower-square-roof", "tower-hexagon-roof", "tower-square", "tower"],
-      "tamanho": [62, 102],
-      "time": "vermelho"
+      "tamanho": [
+        62,
+        102
+      ],
+      "time": "vermelho",
+      "pecas": [
+        "tower-square-base",
+        "tower-square-mid-windows",
+        "tower-square-top-roof-high"
+      ]
     },
     "arena/torre_rei_azul": {
       "pacote": "castle-kit",
-      "procurar": ["tower-hexagon-roof", "tower-hexagon", "gate", "tower"],
-      "tamanho": [88, 119],
-      "time": "azul"
+      "tamanho": [
+        88,
+        119
+      ],
+      "time": "azul",
+      "pecas": [
+        "tower-hexagon-base",
+        "tower-hexagon-mid",
+        "tower-hexagon-roof"
+      ]
     },
     "arena/torre_rei_vermelha": {
       "pacote": "castle-kit",
-      "procurar": ["tower-hexagon-roof", "tower-hexagon", "gate", "tower"],
-      "tamanho": [88, 119],
-      "time": "vermelho"
+      "tamanho": [
+        88,
+        119
+      ],
+      "time": "vermelho",
+      "pecas": [
+        "tower-hexagon-base",
+        "tower-hexagon-mid",
+        "tower-hexagon-roof"
+      ]
     },
     "arena/arvore": {
       "pacote": "nature-kit",
-      "procurar": ["tree_blocks", "tree_default", "tree_oak", "tree"],
-      "tamanho": [56, 60]
+      "procurar": [
+        "tree_default",
+        "tree_fat",
+        "tree"
+      ],
+      "tamanho": [
+        56,
+        60
+      ]
     },
     "arena/pedra": {
       "pacote": "nature-kit",
-      "procurar": ["path_stone", "stone_flat", "rock_flat", "rock_small", "rock"],
-      "tamanho": [22, 16]
+      "procurar": [
+        "stone_smallflata",
+        "path_stone",
+        "stone_small"
+      ],
+      "tamanho": [
+        22,
+        16
+      ]
     },
     "arena/ponte": {
       "pacote": "nature-kit",
-      "procurar": ["bridge_wood", "bridge"],
-      "tamanho": [60, 92],
+      "procurar": [
+        "bridge_wood",
+        "bridge"
+      ],
+      "tamanho": [
+        60,
+        92
+      ],
       "girar": 90
     }
   }

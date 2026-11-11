@@ -11,16 +11,38 @@ girar = float(args[3]) if len(args) > 3 else 0.0
 bpy.ops.wm.read_factory_settings(use_empty=True)
 cena = bpy.context.scene
 
-ext = modelo.lower().rsplit('.', 1)[-1]
-if ext in ('glb', 'gltf'):
-    bpy.ops.import_scene.gltf(filepath=modelo)
-elif ext == 'obj':
-    try:
-        bpy.ops.wm.obj_import(filepath=modelo)
-    except AttributeError:
-        bpy.ops.import_scene.obj(filepath=modelo)
-else:
-    raise SystemExit(f'Formato não suportado: {ext}')
+def importar(caminho):
+    ext = caminho.lower().rsplit('.', 1)[-1]
+    if ext in ('glb', 'gltf'):
+        bpy.ops.import_scene.gltf(filepath=caminho)
+    elif ext == 'obj':
+        try:
+            bpy.ops.wm.obj_import(filepath=caminho)
+        except AttributeError:
+            bpy.ops.import_scene.obj(filepath=caminho)
+    else:
+        raise SystemExit(f'Formato não suportado: {ext}')
+
+
+# Vários modelos separados por "|" são empilhados (base, meio, telhado...)
+topo = None
+for caminho in modelo.split('|'):
+    antes = set(cena.objects)
+    importar(caminho)
+    novos = [o for o in cena.objects if o not in antes]
+    bpy.context.view_layer.update()
+    pts = [o.matrix_world @ Vector(c) for o in novos if o.type == 'MESH' for c in o.bound_box]
+    if not pts:
+        continue
+    zmin = min(p.z for p in pts)
+    cx = (min(p.x for p in pts) + max(p.x for p in pts)) / 2
+    cy = (min(p.y for p in pts) + max(p.y for p in pts)) / 2
+    desloc = Vector((-cx, -cy, (topo - zmin) if topo is not None else -zmin))
+    for o in novos:
+        if o.parent is None:
+            o.location += desloc
+    bpy.context.view_layer.update()
+    topo = max((o.matrix_world @ Vector(c)).z for o in novos if o.type == 'MESH' for c in o.bound_box)
 
 malhas = [o for o in cena.objects if o.type == 'MESH']
 if not malhas:
@@ -73,13 +95,18 @@ r.resolution_x = r.resolution_y = res
 r.image_settings.file_format = 'PNG'
 r.image_settings.color_mode = 'RGBA'
 
-# Contorno escuro estilo desenho animado
-r.use_freestyle = True
-r.line_thickness = 1.6
-camada = bpy.context.view_layer
-camada.use_freestyle = True
-linha = camada.freestyle_settings.linesets[0] if camada.freestyle_settings.linesets else camada.freestyle_settings.linesets.new('linha')
-linha.linestyle.color = (0.12, 0.1, 0.1)
+# Contorno escuro estilo desenho animado (se a versão do Blender deixar)
+try:
+    r.use_freestyle = True
+    r.line_thickness = 1.6
+    fs = bpy.context.view_layer.freestyle_settings
+    linha = fs.linesets[0] if len(fs.linesets) else fs.linesets.new('linha')
+    if linha.linestyle is None:
+        linha.linestyle = bpy.data.linestyles.new('contorno')
+    linha.linestyle.color = (0.12, 0.1, 0.1)
+except Exception as e:
+    print('Sem contorno:', e)
+    r.use_freestyle = False
 
 r.filepath = saida
 bpy.ops.render.render(write_still=True)

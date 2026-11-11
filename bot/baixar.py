@@ -137,15 +137,25 @@ def gerar():
         print(f'- {alvo}')
         try:
             pacote = cfg['pacote']
-            modelo = escolher(modelos(pasta_do_pacote(pacote)), cfg['procurar'])
-            if not modelo:
-                raise RuntimeError('nenhum modelo com esses nomes')
+            por_nome = modelos(pasta_do_pacote(pacote))
+            if 'pecas' in cfg:  # modelo montado com várias peças empilhadas
+                faltando = [n for n in cfg['pecas'] if n.lower() not in por_nome]
+                if faltando:
+                    raise RuntimeError(f'peças não encontradas: {faltando}')
+                partes = [por_nome[n.lower()] for n in cfg['pecas']]
+                modelo = Path('|'.join(str(p) for p in partes))
+                nome_modelo = ' + '.join(p.name for p in partes)
+            else:
+                modelo = escolher(por_nome, cfg['procurar'])
+                if not modelo:
+                    raise RuntimeError('nenhum modelo com esses nomes')
+                nome_modelo = modelo.name
             foto = tmp / (alvo.replace('/', '_') + '.png')
             renderizar(modelo, foto, cfg.get('girar', 0))
             montar(foto, RAIZ / 'assets' / f'{alvo}.png', cfg['tamanho'], cfg.get('time'))
             info = CFG['pacotes'][pacote]
-            creditos.append(f'| `assets/{alvo}.png` | {modelo.name} | {pacote} | {info["autor"]} | {info["licenca"]} |')
-            print(f'  ok: {modelo.name}')
+            creditos.append(f'| `assets/{alvo}.png` | {nome_modelo} | {pacote} | {info["autor"]} | {info["licenca"]} |')
+            print(f'  ok: {nome_modelo}')
         except Exception as e:  # uma imagem com problema não para o resto
             falhas.append(f'{alvo}: {e}')
             print(f'  pulei: {e}')
