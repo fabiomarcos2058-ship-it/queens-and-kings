@@ -1,6 +1,7 @@
 // Obriga a atualizar quando sai uma versão nova do jogo.
 // - O carregador (index.html) guarda a versão em window.VERSAO_JOGO.
-// - A cada 30s, quando o jogo volta a aparecer na tela e antes de cada batalha, conferimos o versao.txt
+// - O "sino" do Firebase avisa na hora quando alguém abre uma versão nova (ver ligarSino).
+// - A cada 15s, quando o jogo volta a aparecer na tela e antes de cada batalha, conferimos o versao.txt
 //   (com ?t= para furar o cache do GitHub Pages, que guarda cópias por até 10 minutos).
 // - Se mudou, aparece uma tela que bloqueia o jogo até atualizar. Durante uma batalha, ela espera a batalha acabar.
 const Atualizacao = (() => {
@@ -84,9 +85,60 @@ const Atualizacao = (() => {
     return 'amigo-velho';
   }
 
+  // ---------- "Sino" no Firebase: o primeiro celular que abre a versão nova avisa todo mundo na hora ----------
+  // Realtime Database: config/versao = número da versão mais nova que alguém já abriu.
+  let rapidoAte = 0;
+  function modoRapido() {
+    // o GitHub pode demorar até ~1 min para publicar: confere a cada 5s por até 3 min
+    const jaEstava = Date.now() < rapidoAte;
+    rapidoAte = Date.now() + 3 * 60 * 1000;
+    if (jaEstava) return;
+    const tic = async () => {
+      if (mostrando || pendente || Date.now() > rapidoAte) return;
+      if (await conferir()) return;
+      setTimeout(tic, 5000);
+    };
+    tic();
+  }
+
+  async function ligarSino() {
+    // espera o Firebase iniciar (a conta liga ele no começo do jogo)
+    for (let i = 0; i < 60 && !(typeof Conta !== 'undefined' && Conta.fb && Conta.fb() && Conta.fb().app); i++) await new Promise((ok) => setTimeout(ok, 1000));
+    const f = typeof Conta !== 'undefined' && Conta.fb && Conta.fb();
+    if (!f || !f.app || typeof FIREBASE_CONFIG === 'undefined' || !FIREBASE_CONFIG.databaseURL) return;
+    try {
+      const m = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js');
+      const db = m.getDatabase(f.app, FIREBASE_CONFIG.databaseURL);
+      const ref = m.ref(db, 'config/versao');
+      m.onValue(ref, (snap) => {
+        const v = snap.val();
+        const minhaN = +minha();
+        if (typeof v === 'number' && minhaN && v > minhaN) modoRapido(); // alguém já está numa versão mais nova
+        else if (minhaN && (!v || minhaN > v) && Conta.logado()) {
+          // eu sou o primeiro com a versão nova: toco o sino
+          m.runTransaction(ref, (atual) => (!atual || minhaN > atual ? minhaN : undefined)).catch(() => {});
+        }
+      }, () => {});
+    } catch (e) { console.warn('Sino de atualização indisponível:', e); }
+  }
+  ligarSino();
+
+  // aviso pequeno durante a batalha
+  function avisoNaBatalha() {
+    let b = document.getElementById('aviso-atualizacao');
+    const mostrar = pendente && emBatalha();
+    if (!mostrar) { if (b) b.remove(); return; }
+    if (!b) {
+      b = document.createElement('div');
+      b.id = 'aviso-atualizacao';
+      b.textContent = '✨ Nova versão! O jogo atualiza quando a batalha acabar';
+      document.getElementById('app').appendChild(b);
+    }
+  }
+
   // quando a batalha fecha, mostra a tela se havia atualização esperando
-  setInterval(() => { if (pendente && !mostrando && !emBatalha()) mostrarTela(); }, 1000);
-  setInterval(() => { if (document.visibilityState === 'visible') conferir(); }, 30000);
+  setInterval(() => { avisoNaBatalha(); if (pendente && !mostrando && !emBatalha()) mostrarTela(); }, 1000);
+  setInterval(() => { if (document.visibilityState === 'visible') conferir(); }, 15000);
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') conferir(); });
   window.addEventListener('online', conferir);
   window.addEventListener('pageshow', (e) => { if (e.persisted) conferir(); }); // voltou pelo botão "voltar" do navegador
@@ -101,5 +153,5 @@ const Atualizacao = (() => {
     } catch (e) { /* nada */ }
   }, 2500);
 
-  return { conferir, podeJogar, versaoDoAmigo, versao: minha };
+  return { conferir, podeJogar, versaoDoAmigo, versao: minha, modoRapido };
 })();
