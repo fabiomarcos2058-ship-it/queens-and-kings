@@ -43,10 +43,26 @@ const Passe = (() => {
     return `${r.qtd}x ${r.raridade === 'lendaria' ? 'lendária' : 'épica'}`;
   }
 
+  // Passes de presente da criadora: { uid: ['AAAA-MM', ...] } (temporadas em que a conta ganha o Ultra)
+  const PRESENTES_ULTRA = {
+    ZwrffaFMcidTzZAGCMJNXOtuuOh2: ['2026-11'],
+  };
+
   function dados() {
     const d = Estado.d;
     if (!d.passe || d.passe.temporada !== temporadaAtual()) {
       d.passe = { temporada: temporadaAtual(), pontos: 0, plus: false, ultra: false, pegos: { free: [], plus: [], ultra: [] } };
+    }
+    const meu = typeof Conta !== 'undefined' && Conta.uid ? Conta.uid() : null;
+    if (meu && !d.passe.presenteUltra && (PRESENTES_ULTRA[meu] || []).includes(d.passe.temporada)) {
+      d.passe.ultra = true;
+      d.passe.presenteUltra = true;
+      Estado.salvar();
+      setTimeout(() => UI.modal({
+        titulo: '🎁 Presente!',
+        html: '<p style="font-size:40px;margin:4px 0">🎟️👑</p><p>A criadora do jogo te deu o <b>Passe Ultra</b> desta temporada!</p><p class="aviso">Vá em Eventos → Passe para pegar suas recompensas.</p>',
+        botoes: [{ texto: 'Obrigado! 💜', classe: 'principal' }],
+      }), 1200);
     }
     return d.passe;
   }
