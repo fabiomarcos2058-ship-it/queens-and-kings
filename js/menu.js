@@ -178,6 +178,7 @@
         <div class="level-texto">Subiu de nível!</div>
         <div class="level-diamante"><span id="level-num">${anterior}</span></div>
         <div class="level-premio">+${niveis.length * 10} <i class="ic-gema"></i></div>
+        ${novo <= Estado.NIVEL_MAX ? `<div class="level-torre">🏰 Torre do Rei agora é nível ${novo}!${Object.values(Estado.TROPAS_TORRE).filter((t) => t.rei > anterior && t.rei <= novo).map((t) => `<br>${t.emoji} Nova tropa de torre: <b>${t.nome}</b>!`).join('')}</div>` : ''}
         <button class="btn-modal principal">Continuar</button>
       </div>
       ${Array.from({ length: 28 }, (_, i) => `<i class="confete" style="--x:${Math.random() * 100}%;--d:${(Math.random() * 1.2).toFixed(2)}s;--c:${['#FAC775', '#ED93B1', '#85B7EB', '#5DCAA5', '#AFA9EC'][i % 5]};--r:${Math.round(Math.random() * 360)}deg"></i>`).join('')}`;
@@ -444,6 +445,7 @@
           <div><b>${p.baus || 0}</b><span>Baús abertos</span></div>
           <div><b>${p.x1v || 0} x ${p.x1d || 0}</b><span>X1 (${totalX1 ? Math.round(((p.x1v || 0) / totalX1) * 100) : 0}%)</span></div>
         </div>
+        ${p.torres ? `<div class="torres-outro"><span>👑 Rei <b>Nv. ${p.torres.rei}</b></span><span>🏰 Princesas <b>Nv. ${p.torres.princesa}</b></span><span>${(Estado.TROPAS_TORRE[p.torres.tropa] || Estado.TROPAS_TORRE.princesa).emoji} ${(Estado.TROPAS_TORRE[p.torres.tropa] || Estado.TROPAS_TORRE.princesa).nome}</span></div>` : ''}
         ${deck.length ? `<div class="titulo-conquistas">Deck de batalha</div><div class="deck-outro">${deck.map((x) => Cartas.html(x.c, { nivel: `Nv. ${x.nivel}` })).join('')}</div>` : ''}
         ${p.mod ? '<p class="aviso">Esta conta já usou o mod menu.</p>' : ''}
         <p class="meu-id-amigos">ID: <code>${id}</code></p>`;
@@ -693,6 +695,87 @@
 
   // ---------- Cartas ----------
   let trocando = null;
+  // ---------- Torres ----------
+  function painelTorres() {
+    const m = Estado.minhasTorres(), tropa = Estado.TROPAS_TORRE[m.tropa];
+    const pode = Estado.podeEvoluirTorre();
+    $('painel-torres').innerHTML = `<div class="torre-mini rei"><img data-asset="arena/torre_rei_azul" alt="" /><span class="nv-torre-grande">${m.rei}</span><b>Torre do Rei</b></div>
+      <div class="torre-mini"><img data-asset="arena/torre_azul" alt="" /><span class="nv-torre-grande">${m.princesa}</span><b>Princesas</b></div>
+      <div class="torre-mini mini-tropa"><span class="tropa-emoji">${tropa.emoji}</span><b>${tropa.nome}</b></div>
+      <div class="torre-acao${pode.ok ? ' pode' : ''}">${pode.ok ? `Evoluir<small><img class="ic-img" data-asset="ui/moeda" alt="" /> ${fmt(pode.preco)}</small>` : 'Ver torres'}</div>`;
+    $('painel-torres').onclick = telaTorres;
+    Assets.fill();
+  }
+
+  function linhaStats(st, prox) {
+    const dps = (x) => Math.round(x.dano / x.cadencia);
+    const item = (rot, a, b) => `<div><span>${rot}</span><b>${fmt(a)}${b !== undefined && b !== a ? ` <em>+${fmt(b - a)}</em>` : ''}</b></div>`;
+    return `<div class="stats-torre">${item('❤️ Vida', st.vida, prox && prox.vida)}${item('⚔️ Dano', st.dano, prox && prox.dano)}${item('🔥 Dano/s', dps(st), prox && dps(prox))}${item('🎯 Alcance', st.alcance)}</div>`;
+  }
+
+  function telaTorres() {
+    const m = Estado.minhasTorres(), pode = Estado.podeEvoluirTorre();
+    const rei = Estado.statsTorre('rei', m), prin = Estado.statsTorre('princesa', m);
+    const proxPrin = m.princesa < Estado.NIVEL_MAX ? Estado.statsTorre('princesa', { ...m, princesa: m.princesa + 1 }) : null;
+    const proxRei = m.rei < Estado.NIVEL_MAX ? Estado.statsTorre('rei', { ...m, rei: m.rei + 1 }) : null;
+    const precoTxt = m.princesa >= Estado.NIVEL_MAX ? 'Nível máximo! 👑' : pode.ok ? `Evoluir · ${fmt(pode.preco)} 🪙` : pode.motivo === 'Ouro insuficiente' ? `Evoluir · ${fmt(Estado.TORRE_OURO[m.princesa])} 🪙` : pode.motivo;
+    const md = UI.modal({
+      titulo: '🏰 Suas torres',
+      classe: 'modal-torres',
+      html: `<div class="bloco-torre">
+          <div class="bt-topo"><img data-asset="arena/torre_rei_azul" alt="" /><div><b>Torre do Rei</b><span class="nv-chip">Nível ${m.rei}</span>
+            <small>Sobe sozinha junto com o seu nível de rei. Ganhe XP jogando e evoluindo cartas!</small></div></div>
+          ${linhaStats(rei, proxRei)}
+          ${proxRei ? `<p class="dica-torre">No nível de rei ${m.rei + 1} ela fica com os valores em verde.</p>` : ''}
+        </div>
+        <div class="bloco-torre">
+          <div class="bt-topo"><img data-asset="arena/torre_azul" alt="" /><div><b>Torres das Princesas</b><span class="nv-chip">Nível ${m.princesa}</span>
+            <small>Evolua com ouro. O nível máximo é o nível da sua Torre do Rei.</small></div></div>
+          ${linhaStats(prin, proxPrin)}
+          <button class="btn-modal ${pode.ok ? 'principal' : 'desativado'}" id="evoluir-torre">${precoTxt}</button>
+        </div>
+        <div class="titulo-conquistas">Tropa das torres</div>
+        <div class="tropas-torre">${Object.entries(Estado.TROPAS_TORRE).map(([id, t]) => {
+          const livre = m.rei >= t.rei, st = Estado.statsTorre('princesa', { ...m, tropa: id });
+          return `<button class="tropa-torre${id === m.tropa ? ' escolhida' : ''}${livre ? '' : ' trancada'}" data-tropa="${id}">
+            <span class="tropa-emoji">${livre ? t.emoji : '🔒'}</span><b>${t.nome}</b>
+            <small>${livre ? t.desc : `Libera no nível de rei ${t.rei}`}</small>
+            ${livre ? `<span class="tropa-num">❤️ ${fmt(st.vida)} · ⚔️ ${fmt(st.dano)} · 🔥 ${Math.round(st.dano / st.cadencia)}/s</span>` : ''}
+            ${id === m.tropa ? '<i class="tag-escolhida">Em uso</i>' : ''}</button>`;
+        }).join('')}</div>`,
+      botoes: [{ texto: 'Fechar', classe: 'secundario' }],
+    });
+    Assets.fill();
+    md.el.querySelector('#evoluir-torre').onclick = () => {
+      const r = Estado.evoluirTorre();
+      if (!r.ok) { UI.toast(r.motivo === 'Nível máximo' ? 'Suas torres já estão no máximo! 👑' : r.motivo); return; }
+      md.fechar(); topo(); cartas();
+      torreEvoluiu(r.nivel);
+    };
+    md.el.querySelectorAll('[data-tropa]').forEach((b) => (b.onclick = () => {
+      const t = Estado.TROPAS_TORRE[b.dataset.tropa];
+      if (!Estado.escolherTropaTorre(b.dataset.tropa)) { UI.toast(`Libera no nível de rei ${t.rei}! 🔒`); return; }
+      UI.toast(`${t.emoji} ${t.nome} vai defender suas torres!`);
+      md.fechar(); cartas(); telaTorres();
+    }));
+  }
+
+  function torreEvoluiu(nivel) {
+    const fundo = document.createElement('div');
+    fundo.className = 'level-up torre-up';
+    fundo.innerHTML = `<div class="raios"></div>
+      <div class="level-conteudo">
+        <div class="level-texto">Torres evoluídas!</div>
+        <div class="torre-up-img"><img data-asset="arena/torre_azul" alt="" /><span class="nv-torre-grande">${nivel}</span></div>
+        <div class="level-premio">Mais vida e mais dano 💪</div>
+        <button class="btn-modal principal">Oba!</button>
+      </div>
+      ${Array.from({ length: 24 }, (_, i) => `<i class="confete" style="--x:${Math.random() * 100}%;--d:${(Math.random() * 1.2).toFixed(2)}s;--c:${['#FAC775', '#85B7EB', '#5DCAA5', '#AFA9EC'][i % 4]};--r:${Math.round(Math.random() * 360)}deg"></i>`).join('')}`;
+    document.getElementById('app').appendChild(fundo);
+    Assets.fill();
+    fundo.querySelector('button').onclick = () => { fundo.classList.add('sumir'); setTimeout(() => fundo.remove(), 250); };
+  }
+
   function cartas() {
     const deck = d().deck;
     const etiqueta = (id) => {
@@ -707,6 +790,7 @@
       const pode = Estado.podeEvoluir(id).ok;
       return `<div class="copias${pode ? ' pode' : ''}"><i style="width:${Math.min(100, (col.copias / prec) * 100)}%"></i><b>${pode ? 'Evoluir!' : `${col.copias}/${prec}`}</b></div>`;
     };
+    painelTorres();
     $('deck').innerHTML = Array.from({ length: 8 }, (_, i) => {
       const id = deck[i];
       if (!id) return `<div class="slot-carta vazio-deck" data-slot="${i}"><div class="slot-deck">+</div><div class="carta-nivel">&nbsp;</div></div>`;

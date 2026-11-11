@@ -7,6 +7,54 @@ const Estado = (() => {
   const OURO = [0, 5, 20, 50, 150, 400, 1000, 2000, 4000];
   const XP_NIVEL = (n) => 20 + n * 30;
 
+  // ---------- Torres (igual Clash Royale) ----------
+  // Torre do Rei: o nível acompanha o seu nível de rei (até o máximo).
+  // Torres de princesa: evoluem com ouro, no máximo até o nível da Torre do Rei.
+  // Cada nível deixa a torre ~10% mais forte (vida e dano), igual às cartas.
+  const TORRE_OURO = [0, 30, 100, 250, 600, 1500, 3000, 6000, 10000]; // TORRE_OURO[n] = preço para ir do nível n ao n+1
+  const TROPAS_TORRE = {
+    princesa: { nome: 'Arqueira Real', emoji: '🏹', rei: 1, desc: 'Equilibrada: bom alcance e tiros constantes.', vida: 1, dano: 65, cadencia: 0.8, alcance: 120 },
+    canhoneiro: { nome: 'Canhoneira', emoji: '💣', rei: 4, desc: 'Tiros lentos e muito fortes. Ótima contra tanques.', vida: 1.05, dano: 165, cadencia: 1.8, alcance: 108 },
+    duquesa: { nome: 'Duquesa das Adagas', emoji: '🗡️', rei: 7, desc: 'Joga adagas sem parar. Destrói tropas pequenas, mas tem menos vida.', vida: 0.88, dano: 30, cadencia: 0.28, alcance: 100 },
+  };
+  const BASE_TORRE = { princesa: { vida: 1500 }, rei: { vida: 2600, dano: 85, cadencia: 1, alcance: 125 } };
+  const nivelRei = (nv) => Math.max(1, Math.min(NIVEL_MAX, nv || (d ? d.nivel : 1)));
+  // configuração das torres de um jogador: { rei, princesa, tropa }
+  function minhasTorres() {
+    return { rei: nivelRei(), princesa: Math.min(nivelRei(), d.torres.princesa), tropa: d.torres.tropa };
+  }
+  function statsTorre(tipo, cfg) {
+    if (tipo === 'rei') {
+      const f = Math.pow(1.1, (cfg.rei || 1) - 1);
+      return { nivel: cfg.rei || 1, vida: Math.round(BASE_TORRE.rei.vida * f), dano: Math.round(BASE_TORRE.rei.dano * f), cadencia: 1, alcance: 125 };
+    }
+    const t = TROPAS_TORRE[cfg.tropa] || TROPAS_TORRE.princesa;
+    const n = cfg.princesa || 1, f = Math.pow(1.1, n - 1);
+    return { nivel: n, tropa: cfg.tropa in TROPAS_TORRE ? cfg.tropa : 'princesa', vida: Math.round(BASE_TORRE.princesa.vida * t.vida * f), dano: Math.round(t.dano * f), cadencia: t.cadencia, alcance: t.alcance };
+  }
+  function podeEvoluirTorre() {
+    const n = d.torres.princesa;
+    if (n >= NIVEL_MAX) return { ok: false, motivo: 'Nível máximo' };
+    if (n >= nivelRei()) return { ok: false, motivo: `Suba seu nível de rei para ${n + 1} primeiro` };
+    if (d.ouro < TORRE_OURO[n]) return { ok: false, motivo: 'Ouro insuficiente' };
+    return { ok: true, preco: TORRE_OURO[n] };
+  }
+  function evoluirTorre() {
+    const p = podeEvoluirTorre();
+    if (!p.ok) return p;
+    d.ouro -= p.preco;
+    d.torres.princesa++;
+    salvar();
+    return { ok: true, nivel: d.torres.princesa };
+  }
+  function escolherTropaTorre(id) {
+    const t = TROPAS_TORRE[id];
+    if (!t || nivelRei() < t.rei) return false;
+    d.torres.tropa = id;
+    salvar();
+    return true;
+  }
+
   const BAUS = {
     inicial: { nome: 'Baú inicial', segundos: 0, ouro: [20, 30], copias: 0, gemas: 0, imagem: 'madeira' },
     madeira: { nome: 'Baú de madeira', segundos: 60, ouro: [30, 60], copias: 6, gemas: 0 },
@@ -31,6 +79,7 @@ const Estado = (() => {
       eventos: { sequencia: 0, desafioPremio: false, coroas: 0, torneioPremio: false },
       ofertas: { dia: '', compradas: [] },
       vitorias: 0, derrotas: 0,
+      torres: { princesa: 1, tropa: 'princesa' },
     };
   }
 
@@ -47,6 +96,13 @@ const Estado = (() => {
     const base = novo();
     for (const k in base) if (d[k] === undefined) d[k] = base[k];
     for (const k in base.conquistas) if (d.conquistas[k] === undefined) d.conquistas[k] = 0;
+    if (!d.torres || typeof d.torres !== 'object' || d.torresNovas !== true) {
+      // quem já jogava ganha as torres de princesa no nível médio do deck (sem passar do nível de rei)
+      const dk = (d.deck || []).filter((id) => d.colecao && d.colecao[id]);
+      const media = dk.length ? Math.round(dk.reduce((a, id) => a + (d.colecao[id].nivel || 1), 0) / dk.length) : 1;
+      d.torres = { princesa: Math.max(1, Math.min(nivelRei(d.nivel), media)), tropa: (d.torres && d.torres.tropa) || 'princesa' };
+      d.torresNovas = true;
+    }
     if (typeof d.cla === 'string') d.cla = null; // clãs antigos (simulados) não existem mais
     // toda carta do catálogo entra na coleção
     catalogo = todas.filter(visivel);
@@ -218,6 +274,7 @@ const Estado = (() => {
   return {
     get d() { return d; }, carregar, salvar, apagar, importar, recarregarCatalogo, aoSalvar, carta, stats, catalogo: () => catalogo, tem, liberada, disponiveis, proximaLiberacao,
     COPIAS, OURO, NIVEL_MAX, BAUS, XP_NIVEL,
+    TORRE_OURO, TROPAS_TORRE, nivelRei, minhasTorres, statsTorre, podeEvoluirTorre, evoluirTorre, escolherTropaTorre,
     ganharXp, podeEvoluir, evoluir, abrirBau, tempoRestante, sortearCopias, ofertasDoDia, sorteio,
   };
 })();

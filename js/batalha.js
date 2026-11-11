@@ -15,13 +15,16 @@ const Batalha = (() => {
   const pct = (x, y) => ({ left: `${(x / W) * 100}%`, top: `${(y / H) * 100}%` });
 
   // ---------- Montagem ----------
-  function torres() {
-    const t = (id, time, tipo, x, y) => ({
-      id, time, tipo, x, y, torre: true, raio: tipo === 'rei' ? 26 : 20,
-      vida: tipo === 'rei' ? 2400 : 1400, max: tipo === 'rei' ? 2400 : 1400,
-      alcance: tipo === 'rei' ? 125 : 120, dano: tipo === 'rei' ? 80 : 62, cadencia: tipo === 'rei' ? 1 : 0.8,
-      cd: 0, ativa: tipo !== 'rei',
-    });
+  // cfgAzul / cfgVermelho = { rei, princesa, tropa } (níveis das torres de cada lado)
+  function torres(cfgAzul = { rei: 1, princesa: 1, tropa: 'princesa' }, cfgVermelho = cfgAzul) {
+    const t = (id, time, tipo, x, y) => {
+      const st = Estado.statsTorre(tipo, time === 'azul' ? cfgAzul : cfgVermelho);
+      return {
+        id, time, tipo, x, y, torre: true, raio: tipo === 'rei' ? 26 : 20,
+        vida: st.vida, max: st.vida, alcance: st.alcance, dano: st.dano, cadencia: st.cadencia,
+        nivel: st.nivel, tropa: st.tropa || null, cd: 0, ativa: tipo !== 'rei',
+      };
+    };
     return [
       t('esq-vermelho', 'vermelho', 'princesa', 90, 104), t('dir-vermelho', 'vermelho', 'princesa', 270, 104),
       t('rei-vermelho', 'vermelho', 'rei', 180, 58),
@@ -46,10 +49,12 @@ const Batalha = (() => {
     ao_fim = fim;
     const deck = Estado.d.deck;
     const deckIA = rede ? embaralhar(rede.convidado.deck) : embaralhar(Mod.deckApelao() || deckAleatorioIA()).slice(0, 8);
+    const minhas = Estado.minhasTorres();
+    const delas = rede ? (rede.convidado.torres || minhas) : torresIA(minhas);
     s = {
       modo, t: 0, prorrogacao: false, acabou: false, pausa: false,
       azul: lado(deck), vermelho: lado(deckIA),
-      ent: torres(), proj: [], efeitos: [], selecionada: null, iaTimer: 2, id: 0,
+      ent: torres(minhas, delas), proj: [], efeitos: [], selecionada: null, iaTimer: 2, id: 0,
       nivelIA: Math.max(1, Math.min(9, Math.round(deck.reduce((a, id) => a + Estado.d.colecao[id].nivel, 0) / deck.length))),
       rede, niveisV: rede ? rede.convidado.niveis : null, eventos: [], snapTimer: 0,
     };
@@ -65,7 +70,8 @@ const Batalha = (() => {
       t.el = document.createElement('div');
       t.el.className = `vida-torre ${t.time} ${t.tipo}`;
       Object.assign(t.el.style, pct(t.x, t.y + (t.tipo === 'rei' ? 40 : 34)));
-      t.el.innerHTML = `<span class="hp-icone">${t.tipo === 'rei' ? '👑' : '🏰'}</span>${barraHp()}<b>${t.vida}</b>`;
+      const emoji = t.tipo === 'rei' ? '👑' : (Estado.TROPAS_TORRE[t.tropa] || Estado.TROPAS_TORRE.princesa).emoji;
+      t.el.innerHTML = `<span class="nv-torre">${t.nivel}</span><span class="hp-icone">${emoji}</span>${barraHp()}<b>${t.vida}</b>`;
       arena.appendChild(t.el);
     }
     s.zona = document.createElement('div');
@@ -614,7 +620,7 @@ const Batalha = (() => {
     if (atacante.alcance > 40 || atacante.torre) {
       if (!atacante.torre) { atacante.el.classList.remove('atirando'); void atacante.el.offsetWidth; atacante.el.classList.add('atirando'); }
       const p = document.createElement('div');
-      p.className = `projetil ${atacante.time}${atacante.torre ? ' de-torre' : ''}`;
+      p.className = `projetil ${atacante.time}${atacante.torre ? ` de-torre${atacante.tropa ? ` t-${atacante.tropa}` : ''}` : ''}`;
       s.arena.appendChild(p);
       s.proj.push({ x: atacante.x, y: atacante.y - 14, alvo, dano: danoDe(atacante), area: atacante.area || 0, time: atacante.time, el: p });
     } else {
@@ -649,6 +655,15 @@ const Batalha = (() => {
   }
 
 
+
+  // torres da IA: mesmo nível de rei que você e torres de princesa parecidas com as suas
+  function torresIA(m) {
+    const apelao = !!Mod.deckApelao();
+    const rei = Math.min(Estado.NIVEL_MAX, m.rei + (apelao ? 1 : 0));
+    const princesa = Math.max(1, Math.min(rei, m.princesa + (apelao ? 1 : Math.floor(Math.random() * 3) - 1)));
+    const tropas = Object.entries(Estado.TROPAS_TORRE).filter(([, t]) => t.rei <= rei).map(([id]) => id);
+    return { rei, princesa, tropa: tropas[Math.floor(Math.random() * tropas.length)] };
+  }
 
   // deck aleatório e equilibrado: 1 tanque, 2 feitiços/barril, 1 dano em área, 1 atiradora e o resto sorteado
   function deckAleatorioIA() {
@@ -880,7 +895,7 @@ const Batalha = (() => {
     s = {
       modo: 'x1c', convidado: true, rede, t: 0, prorrogacao: false, acabou: false, pausa: false,
       azul: { elixir: 5, fila: [], coroas: 0 }, vermelho: { elixir: 5, fila: [], coroas: 0 },
-      ent: torres(), proj: [], efeitos: [], selecionada: null, id: 0, mapa: new Map(), pjEls: [],
+      ent: torres(Estado.minhasTorres(), rede.host.torres || Estado.minhasTorres()), proj: [], efeitos: [], selecionada: null, id: 0, mapa: new Map(), pjEls: [],
     };
     montar(`X1 contra ${rede.host.nome}`);
   }

@@ -27,6 +27,7 @@ const Amigos = (() => {
       x1v: (d.x1 && d.x1.v) || 0, x1d: (d.x1 && d.x1.d) || 0,
       cartas: colecao.length, totalCartas: Estado.catalogo().length,
       deck: (d.deck || []).slice(0, 8).map((id) => ({ id, nivel: (d.colecao[id] && d.colecao[id].nivel) || 1 })),
+      torres: Estado.minhasTorres(),
       cla: d.cla && d.cla.nome ? String(d.cla.nome).slice(0, 20) : '',
       mod: !!d.modUsado,
       visto: fb().serverTimestamp(),

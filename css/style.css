@@ -917,3 +917,49 @@ button.item-loja:active, button.slot-bau:active, .slot-carta:active { transform:
 .modal-perfil-outro .modal-botoes { flex-wrap: wrap; }
 .convite { display: flex; flex-direction: column; align-items: center; gap: 8px; }
 .convite img { width: 72px; height: 72px; border-radius: 50%; background: #2b3270; object-fit: cover; box-shadow: 0 0 0 3px #FAC775; }
+
+/* ---------- Torres ---------- */
+.vida-torre .nv-torre { position: absolute; left: -15px; top: -3px; width: 15px; height: 15px; line-height: 15px; text-align: center; font-size: 9px; font-family: 'Lilita One', 'Fredoka', sans-serif; color: #fff; background: #378ADD; border-radius: 5px; border: 1px solid #fff8; box-shadow: 0 1px 0 #000; }
+.vida-torre.vermelho .nv-torre { background: #E24B4A; }
+.vida-torre .nv-torre { display: flex; align-items: center; justify-content: center; }
+.projetil.de-torre.t-canhoneiro { width: 11px; height: 11px; border-radius: 50%; background: #3a3a3a; color: #000; box-shadow: 0 0 0 2px #888, 0 0 8px 2px #FAC775; }
+.projetil.de-torre.t-duquesa { width: 3px; height: 10px; background: #E8E8FF; box-shadow: 0 0 4px 1px #AFA9EC; }
+.painel-torres { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)) minmax(0, 1.1fr); gap: 6px; align-items: stretch; background: #1d2350; border-radius: 14px; padding: 8px; margin: 0 4px 6px; cursor: pointer; box-shadow: 0 3px 0 #0d1130; }
+.torre-mini { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 2px; background: #2b3270; border-radius: 10px; padding: 4px 2px 5px; }
+.torre-mini img { height: 46px; object-fit: contain; filter: drop-shadow(0 2px 0 #0007); }
+.torre-mini b { font-size: 10px; line-height: 1.1; text-align: center; }
+.torre-mini.mini-tropa .tropa-emoji { font-size: 28px; line-height: 46px; height: 46px; overflow: hidden; }
+.torre-mini { overflow: hidden; min-width: 0; }
+.nv-torre-grande { position: absolute; top: 3px; right: 4px; min-width: 20px; height: 20px; line-height: 20px; text-align: center; font-size: 12px; font-family: 'Lilita One', 'Fredoka', sans-serif; background: #534AB7; color: #fff; border-radius: 6px; box-shadow: 0 2px 0 #26215C; }
+.torre-acao { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; border-radius: 10px; background: #534AB7; color: #fff; font-weight: 700; font-size: 13px; text-align: center; }
+.torre-acao.pode { background: linear-gradient(#5DCAA5, #1D9E75); box-shadow: 0 3px 0 #0E6B4E; animation: pulsar-torre 1.6s infinite; }
+.torre-acao small { display: flex; align-items: center; gap: 3px; font-size: 12px; }
+@keyframes pulsar-torre { 50% { transform: scale(1.05); } }
+.modal-torres .modal-corpo { max-height: 66vh; overflow-y: auto; }
+.bloco-torre { background: #1d2350; border-radius: 12px; padding: 10px; margin-bottom: 10px; text-align: left; }
+.bt-topo { display: flex; gap: 10px; align-items: center; }
+.bt-topo img { height: 58px; flex: 0 0 auto; }
+.bt-topo b { font-size: 16px; margin-right: 6px; }
+.bt-topo small { display: block; font-size: 12px; opacity: 0.8; margin-top: 3px; }
+.nv-chip { display: inline-block; background: #534AB7; padding: 1px 8px; border-radius: 8px; font-size: 12px; font-weight: 700; }
+.stats-torre { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin: 8px 0 4px; }
+.stats-torre div { background: #2b3270; border-radius: 8px; padding: 4px 8px; display: flex; justify-content: space-between; align-items: center; font-size: 12px; }
+.stats-torre b { font-size: 14px; }
+.stats-torre em { color: #5DCAA5; font-style: normal; font-size: 12px; }
+.dica-torre { font-size: 11px; opacity: 0.7; margin: 2px 0 0; }
+.bloco-torre .btn-modal { width: 100%; margin: 8px 0 0; }
+.tropas-torre { display: flex; flex-direction: column; gap: 6px; }
+.tropa-torre { position: relative; display: grid; grid-template-columns: 40px 1fr; grid-template-rows: auto auto auto; column-gap: 8px; text-align: left; background: #1d2350; border-radius: 12px; padding: 8px 10px; color: #fff; border: 2px solid transparent; }
+.tropa-torre .tropa-emoji { grid-row: 1 / 4; font-size: 28px; align-self: center; text-align: center; }
+.tropa-torre small { font-size: 12px; opacity: 0.8; }
+.tropa-num { font-size: 11px; color: #FAC775; margin-top: 2px; }
+.tropa-torre.escolhida { border-color: #FAC775; background: #2b3270; }
+.tropa-torre.trancada { opacity: 0.55; }
+.tag-escolhida { position: absolute; top: 6px; right: 8px; font-style: normal; font-size: 10px; background: #FAC775; color: #412402; padding: 1px 6px; border-radius: 6px; font-weight: 700; }
+.level-torre { margin: 6px 0 4px; font-size: 14px; background: #0006; padding: 6px 10px; border-radius: 10px; }
+.torre-up-img { position: relative; display: inline-block; margin: 10px auto; animation: torre-pula 0.8s ease-out; }
+.torre-up-img img { height: 120px; filter: drop-shadow(0 0 18px #FAC775); }
+.torre-up-img .nv-torre-grande { top: -6px; right: -14px; min-width: 34px; height: 34px; line-height: 34px; font-size: 20px; }
+@keyframes torre-pula { 0% { transform: scale(0.3); } 60% { transform: scale(1.15); } 100% { transform: scale(1); } }
+.torres-outro { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin: 10px 0 0; font-size: 13px; }
+.torres-outro span { background: #1d2350; padding: 4px 10px; border-radius: 10px; }
