@@ -232,3 +232,26 @@ button { font-family: inherit; cursor: pointer; border: none; }
 .tropa-medalhao b { position: absolute; right: -6px; bottom: -4px; width: 18px; height: 18px; border-radius: 50%; background: #534AB7; color: #fff; font-size: 10px; display: grid; place-items: center; border: 1.5px solid #fff; }
 .tropa-sombra { width: 60%; height: 6px; margin-top: 2px; border-radius: 50%; background: #27500A55; }
 @keyframes andar { 0%, 100% { transform: translate(-50%, -60%); } 50% { transform: translate(-50%, -66%); } }
+
+/* ---------- Deck e coleção (ajuste para celular) ---------- */
+.painel-deck { background: #1d2350; border: 2px solid #141a40; border-radius: 14px; padding: 10px 8px 6px; box-shadow: inset 0 2px 0 #ffffff10, 0 4px 0 #0d1130; }
+.painel-deck .grade-4 { gap: 8px 6px; }
+.slot-carta { min-width: 0; display: flex; flex-direction: column; align-items: stretch; }
+.slot-carta .carta, .slot-carta .carta-vazia, .slot-carta .slot-deck { width: 100%; aspect-ratio: 3 / 4; border-radius: 9px; }
+.slot-deck { background: #ffffff0a; border: 2px dashed #5a65b8; font-size: 22px; color: #7F77DD; display: grid; place-items: center; }
+.carta-legenda { margin-top: 4px; font-size: 12px; font-weight: 600; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2; }
+.carta-legenda.bloqueada { color: #7F77DD; font-weight: 400; }
+.carta-nivel { font-size: 10px; text-align: center; color: #85B7EB; line-height: 1.2; }
+
+/* Custo de elixir dentro da carta (não sai mais pra fora) */
+.carta .custo, .carta-vazia .custo { top: 3px; left: 3px; width: 20px; height: 20px; font-size: 11px; font-weight: 700; border-width: 1.5px; box-shadow: 0 1px 0 #72243E; }
+.carta.mini .custo, .carta-vazia.mini .custo { width: 17px; height: 17px; font-size: 10px; top: 2px; left: 2px; }
+.carta { border-width: 2px; box-shadow: 0 3px 0 #0d1130; }
+.carta img { border-radius: 7px; }
+.carta-vazia { border-width: 2px; box-shadow: 0 3px 0 #0d1130; font-size: 22px; }
+.carta-vazia .q { opacity: 0.8; }
+.carta-nome { display: none; }
+
+/* Mão da batalha */
+.cartas-mao .carta, .cartas-mao .carta-vazia { width: 100%; aspect-ratio: 3 / 4; }
+.cabecalho-colecao { margin-top: 14px; }

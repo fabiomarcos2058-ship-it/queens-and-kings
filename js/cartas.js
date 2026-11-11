@@ -2,15 +2,20 @@
 const Cartas = (() => {
   const NOMES_RARIDADE = { comum: 'Comum', rara: 'Rara', epica: 'Épica', lendaria: 'Lendária' };
 
+  // Carta com legenda embaixo (deck e coleção) ou só a carta (mini: mão e loja)
   function html(c, { mini = false } = {}) {
-    return `<div class="carta ${c.raridade}${mini ? ' mini' : ''}">
+    const carta = `<div class="carta ${c.raridade}${mini ? ' mini' : ''}">
       <img src="assets/cartas/${c.id}.jpg" alt="${c.nome}" draggable="false" />
       <span class="custo">${c.custo}</span>
-      ${mini ? '' : `<div class="carta-nome">${c.nome}</div>`}
     </div>`;
+    return mini ? carta : `<div class="slot-carta">${carta}<div class="carta-legenda">${c.nome}</div><div class="carta-nivel">Nível 9</div></div>`;
   }
 
-  const vazia = (r, custo) => `<div class="carta-vazia ${r}"><span class="custo">${custo}</span>?</div>`;
+  const vazia = (r, custo, mini = false) => {
+    const carta = `<div class="carta-vazia ${r}${mini ? ' mini' : ''}"><span class="custo">${custo}</span><span class="q">?</span></div>`;
+    return mini ? carta : `<div class="slot-carta">${carta}<div class="carta-legenda bloqueada">Bloqueada</div><div class="carta-nivel">&nbsp;</div></div>`;
+  };
+  const slotVazio = '<div class="slot-carta"><div class="slot-deck">+</div><div class="carta-legenda">&nbsp;</div><div class="carta-nivel">&nbsp;</div></div>';
 
   function tropa(arena, c, { time, x, y, vida = 1, nivel = 9 }) {
     const el = document.createElement('div');
@@ -35,7 +40,7 @@ const Cartas = (() => {
 
     // Deck: personagens primeiro, o resto vazio
     document.getElementById('deck').innerHTML =
-      lista.map((c) => html(c)).join('') + '<div class="slot-deck">+</div>'.repeat(Math.max(0, 8 - lista.length));
+      lista.map((c) => html(c)).join('') + slotVazio.repeat(Math.max(0, 8 - lista.length));
     const media = lista.reduce((s, c) => s + c.custo, 0) / lista.length;
     document.querySelector('.elixir-medio b').textContent = media.toFixed(1).replace('.', ',');
 
@@ -55,7 +60,7 @@ const Cartas = (() => {
 
     // Mão na arena
     const mao = lista.slice(0, 4).map((c) => html(c, { mini: true }));
-    while (mao.length < 4) mao.push(vazia('comum', 3));
+    while (mao.length < 4) mao.push(vazia('comum', 3, true));
     document.getElementById('mao').innerHTML = mao.join('');
 
     // Prévia de tropas na arena (só visual)
