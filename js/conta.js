@@ -52,11 +52,31 @@ const Conta = (() => {
   }
 
   // Ao entrar: se a conta já tem progresso, ele é carregado; se não, o progresso deste celular vai para a conta
-  async function aoEntrar(u) {
+  const temProgresso = (x) => x && (x.trofeus > 0 || x.vitorias > 0 || Object.values(x.colecao || {}).some((c) => c.tem));
+
+  function escolherProgresso(local, nuvem) {
+    const resumo = (x) => `<b>${x.nome}</b><br>🏆 ${x.trofeus} troféus · nível ${x.nivel}<br>🃏 ${Object.values(x.colecao).filter((c) => c.tem).length} cartas`;
+    return new Promise((ok) => UI.modal({
+      titulo: 'Qual progresso manter?',
+      html: `<p>Essa conta já tem um progresso salvo, e este celular também tem um.</p>
+        <div class="escolha-progresso"><div><small>☁️ Na conta</small>${resumo(nuvem)}</div><div><small>📱 Neste celular</small>${resumo(local)}</div></div>
+        <p class="aviso">O que você não escolher será substituído.</p>`,
+      botoes: [
+        { texto: 'Usar o da conta', classe: 'secundario', acao: () => ok('nuvem') },
+        { texto: 'Usar o deste celular', classe: 'principal', acao: () => ok('local') },
+      ],
+    }));
+  }
+
+  async function aoEntrar(u, { perguntar = false } = {}) {
     usuario = u;
     let nuvem = null;
     try { nuvem = await baixarDaNuvem(); } catch (e) { console.warn('Erro ao ler a nuvem:', e.code || e); }
-    if (nuvem) Estado.importar(nuvem);
+    if (nuvem) {
+      const local = JSON.parse(JSON.stringify(Estado.d));
+      const escolha = perguntar && temProgresso(local) && temProgresso(nuvem) ? await escolherProgresso(local, nuvem) : 'nuvem';
+      if (escolha === 'nuvem') Estado.importar(nuvem);
+    }
     Estado.d.conta = { tipo: 'conta', email: email() };
     if (!nuvem && u.displayName && Estado.d.nome === 'Jogador') Estado.d.nome = u.displayName.slice(0, 16);
     Estado.aoSalvar(agendarEnvio);
@@ -142,7 +162,7 @@ const Conta = (() => {
       const carregando = (sim) => { el.querySelectorAll('button').forEach((b) => (b.disabled = sim)); el.classList.toggle('carregando', sim); };
       const entrou = async (u, nome) => {
         if (nome) { try { await fb.updateProfile(u, { displayName: nome }); } catch (e) { /* tudo bem */ } }
-        await aoEntrar(u);
+        await aoEntrar(u, { perguntar: true });
         if (nome) { Estado.d.nome = nome; Estado.salvar(); }
         UI.toast(`Conectado como ${email()} 💕`);
         fechar();
@@ -201,6 +221,22 @@ const Conta = (() => {
     });
   }
 
+  async function salvarComGoogle() {
+    try {
+      await iniciarFirebase();
+      const prov = new fb.GoogleAuthProvider();
+      const r = await fb.signInWithPopup(fb.auth, prov);
+      await aoEntrar(r.user, { perguntar: true });
+      UI.toast(`Progresso salvo na conta ${email()} ☁️`);
+      return true;
+    } catch (x) {
+      if (x.code === 'auth/popup-blocked' || x.code === 'auth/operation-not-supported-in-this-environment') {
+        await fb.signInWithRedirect(fb.auth, new fb.GoogleAuthProvider());
+      } else UI.toast(msgErro(x));
+      return false;
+    }
+  }
+
   async function sair() {
     try { await enviarParaNuvem(); await fb.signOut(fb.auth); } catch (e) { /* nada */ }
     usuario = null;
@@ -209,5 +245,5 @@ const Conta = (() => {
     location.reload();
   }
 
-  return { tela, ativo, logado, email, verificarSessao, sair };
+  return { tela, ativo, logado, email, verificarSessao, sair, salvarComGoogle };
 })();

@@ -711,3 +711,9 @@ button.item-loja:active, button.slot-bau:active, .slot-carta:active { transform:
 .link-senha { background: none; color: #85B7EB; font-size: 13px; text-decoration: underline; padding: 2px; align-self: center; }
 .tela-conta.carregando .conta-caixa { opacity: 0.7; pointer-events: none; }
 .tela-conta.carregando #conta-enviar::after { content: ' …'; }
+.salvar-conta { display: flex; flex-direction: column; gap: 8px; width: 100%; }
+.salvar-conta .btn-modal { width: 100%; font-size: 14px; padding: 9px; }
+.escolha-progresso { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 8px 0; }
+.escolha-progresso div { background: #1d2350; border-radius: 10px; padding: 8px; font-size: 13px; text-align: left; line-height: 1.5; }
+.escolha-progresso small { display: block; color: #FAC775; font-weight: 700; }
+.perfil-conta .btn-google b { color: #378ADD; }

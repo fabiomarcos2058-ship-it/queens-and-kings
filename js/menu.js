@@ -106,7 +106,9 @@
         </div>
         <div class="perfil-conta">${Conta.logado()
           ? `<span>☁️ Salvo na conta<br><b>${Conta.email()}</b></span><button class="btn-peq perigo" id="btn-sair-conta">Sair</button>`
-          : `<span>📱 Progresso salvo só neste celular</span><button class="btn-peq" id="btn-entrar-conta">Entrar / criar conta</button>`}</div>
+          : `<div class="salvar-conta"><span>📱 Seu progresso está salvo <b>só neste celular</b>. Salve numa conta pra não perder e jogar em qualquer lugar!</span>
+              <button class="btn-modal btn-google" id="btn-salvar-google"><b>G</b> Salvar na conta Google</button>
+              <button class="btn-modal secundario" id="btn-entrar-conta">Criar conta ou entrar com e-mail</button></div>`}</div>
         <div class="estatisticas">
           <div><b>${UI.fmt(d().trofeus)}</b><span>Troféus</span></div>
           <div><b>${UI.fmt(d().recorde)}</b><span>Recorde</span></div>
@@ -136,6 +138,8 @@
     const el = m.el;
     const btnEntrar = el.querySelector('#btn-entrar-conta');
     if (btnEntrar) btnEntrar.onclick = async () => { m.fechar(); await Conta.tela({ podeFechar: true }); tudo(); };
+    const btnGoogle = el.querySelector('#btn-salvar-google');
+    if (btnGoogle) btnGoogle.onclick = async () => { btnGoogle.disabled = true; if (await Conta.salvarComGoogle()) { m.fechar(); tudo(); } btnGoogle.disabled = false; };
     const btnSair = el.querySelector('#btn-sair-conta');
     if (btnSair) btnSair.onclick = () => UI.modal({
       titulo: 'Sair da conta?',
