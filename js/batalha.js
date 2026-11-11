@@ -44,7 +44,8 @@ const Batalha = (() => {
   function iniciar({ modo = 'normal', fim } = {}) {
     ao_fim = fim;
     const deck = Estado.d.deck;
-    const deckIA = embaralhar(Estado.catalogo().map((c) => c.id)).slice(0, 8);
+    // o computador só usa cartas já liberadas para o seu número de troféus
+    const deckIA = embaralhar(Estado.disponiveis().map((c) => c.id)).slice(0, 8);
     s = {
       modo, t: 0, prorrogacao: false, acabou: false, pausa: false,
       azul: lado(deck), vermelho: lado(deckIA),

@@ -1,6 +1,94 @@
 {
-  "_leia": "rosto = [x, y, raio] do rosto na imagem original (vira o medalhão). arte = [x, y, largura] do recorte da carta (altura = largura x 4/3). Estatísticas: vida, dano, velocidade (pixels/s), alcance (pixels), cadencia (segundos entre ataques), alvo ('tudo' ou 'construcoes'), area (raio de dano em área). Feitiços usam 'feitico': true e 'imagem' própria.",
+  "_leia": "rosto = [x, y, raio] do rosto na imagem original (vira o medalhão). arte = [x, y, largura] do recorte da carta (altura = largura x 4/3). Estatísticas: vida, dano, velocidade (pixels/s), alcance (pixels), cadencia (segundos entre ataques), alvo ('tudo' ou 'construcoes'), area (raio de dano em área). Feitiços usam 'feitico': true e 'imagem' própria. 'trofeus' = troféus necessários para a carta começar a aparecer nos baús e na loja (0 = carta inicial).",
   "cartas": [
+    {
+      "id": "bra",
+      "nome": "Bra",
+      "raridade": "comum",
+      "custo": 2,
+      "tipo": "Rápida",
+      "descricao": "Barata e veloz, perfeita para distrair o inimigo.",
+      "rosto": [
+        360,
+        400,
+        190
+      ],
+      "arte": [
+        40,
+        0,
+        640
+      ],
+      "vida": 320,
+      "dano": 70,
+      "velocidade": 64,
+      "alcance": 16,
+      "cadencia": 0.8,
+      "alvo": "tudo",
+      "trofeus": 0
+    },
+    {
+      "id": "chichi",
+      "nome": "Chichi",
+      "raridade": "comum",
+      "custo": 3,
+      "tipo": "Lutadora",
+      "descricao": "Brava e decidida, bate forte e não recua.",
+      "rosto": [
+        385,
+        470,
+        165
+      ],
+      "arte": [
+        60,
+        40,
+        600
+      ],
+      "vida": 700,
+      "dano": 110,
+      "velocidade": 48,
+      "alcance": 16,
+      "cadencia": 1.1,
+      "alvo": "tudo",
+      "trofeus": 0
+    },
+    {
+      "id": "chuva",
+      "nome": "Chuva de Pétalas",
+      "raridade": "comum",
+      "custo": 3,
+      "tipo": "Feitiço",
+      "descricao": "Pétalas cortantes que acertam todos numa área grande.",
+      "feitico": true,
+      "imagem": "chuva.svg",
+      "dano": 150,
+      "area": 60,
+      "trofeus": 0
+    },
+    {
+      "id": "mai",
+      "nome": "Mai",
+      "raridade": "rara",
+      "custo": 3,
+      "tipo": "Atiradora",
+      "descricao": "Atira de longe, ótima para defender.",
+      "rosto": [
+        350,
+        270,
+        150
+      ],
+      "arte": [
+        90,
+        20,
+        600
+      ],
+      "vida": 400,
+      "dano": 75,
+      "velocidade": 46,
+      "alcance": 115,
+      "cadencia": 0.9,
+      "alvo": "tudo",
+      "trofeus": 0
+    },
     {
       "id": "itsuki",
       "nome": "Itsuki",
@@ -23,7 +111,46 @@
       "velocidade": 34,
       "alcance": 16,
       "cadencia": 1.4,
-      "alvo": "construcoes"
+      "alvo": "construcoes",
+      "trofeus": 30
+    },
+    {
+      "id": "shizuku",
+      "nome": "Shizuku",
+      "raridade": "rara",
+      "custo": 3,
+      "tipo": "Defensora",
+      "descricao": "Calma e resistente, segura os inimigos na sua frente.",
+      "rosto": [
+        410,
+        270,
+        165
+      ],
+      "arte": [
+        80,
+        0,
+        600
+      ],
+      "vida": 1050,
+      "dano": 80,
+      "velocidade": 40,
+      "alcance": 16,
+      "cadencia": 1.2,
+      "alvo": "tudo",
+      "trofeus": 30
+    },
+    {
+      "id": "lanterna",
+      "nome": "Lanterna Explosiva",
+      "raridade": "rara",
+      "custo": 4,
+      "tipo": "Feitiço",
+      "descricao": "Uma lanterna em chamas que explode com muito dano.",
+      "feitico": true,
+      "imagem": "lanterna.svg",
+      "dano": 360,
+      "area": 42,
+      "trofeus": 80
     },
     {
       "id": "rukia",
@@ -48,55 +175,8 @@
       "alcance": 105,
       "cadencia": 1.6,
       "alvo": "tudo",
-      "area": 38
-    },
-    {
-      "id": "akame",
-      "nome": "Akame",
-      "raridade": "lendaria",
-      "custo": 4,
-      "tipo": "Assassina",
-      "descricao": "Muito rápida, causa dano alto em um alvo só.",
-      "rosto": [
-        292,
-        395,
-        170
-      ],
-      "arte": [
-        40,
-        20,
-        600
-      ],
-      "vida": 860,
-      "dano": 200,
-      "velocidade": 62,
-      "alcance": 18,
-      "cadencia": 1.1,
-      "alvo": "tudo"
-    },
-    {
-      "id": "shizuku",
-      "nome": "Shizuku",
-      "raridade": "rara",
-      "custo": 3,
-      "tipo": "Defensora",
-      "descricao": "Calma e resistente, segura os inimigos na sua frente.",
-      "rosto": [
-        410,
-        270,
-        165
-      ],
-      "arte": [
-        80,
-        0,
-        600
-      ],
-      "vida": 1050,
-      "dano": 80,
-      "velocidade": 40,
-      "alcance": 16,
-      "cadencia": 1.2,
-      "alvo": "tudo"
+      "area": 38,
+      "trofeus": 80
     },
     {
       "id": "hinata",
@@ -120,79 +200,33 @@
       "velocidade": 54,
       "alcance": 16,
       "cadencia": 0.9,
-      "alvo": "tudo"
+      "alvo": "tudo",
+      "trofeus": 140
     },
     {
-      "id": "chichi",
-      "nome": "Chichi",
-      "raridade": "comum",
-      "custo": 3,
-      "tipo": "Lutadora",
-      "descricao": "Brava e decidida, bate forte e não recua.",
+      "id": "akame",
+      "nome": "Akame",
+      "raridade": "lendaria",
+      "custo": 4,
+      "tipo": "Assassina",
+      "descricao": "Muito rápida, causa dano alto em um alvo só.",
       "rosto": [
-        385,
-        470,
-        165
+        292,
+        395,
+        170
       ],
       "arte": [
-        60,
         40,
-        600
-      ],
-      "vida": 700,
-      "dano": 110,
-      "velocidade": 48,
-      "alcance": 16,
-      "cadencia": 1.1,
-      "alvo": "tudo"
-    },
-    {
-      "id": "mai",
-      "nome": "Mai",
-      "raridade": "rara",
-      "custo": 3,
-      "tipo": "Atiradora",
-      "descricao": "Atira de longe, ótima para defender.",
-      "rosto": [
-        350,
-        270,
-        150
-      ],
-      "arte": [
-        90,
         20,
         600
       ],
-      "vida": 400,
-      "dano": 75,
-      "velocidade": 46,
-      "alcance": 115,
-      "cadencia": 0.9,
-      "alvo": "tudo"
-    },
-    {
-      "id": "bra",
-      "nome": "Bra",
-      "raridade": "comum",
-      "custo": 2,
-      "tipo": "Rápida",
-      "descricao": "Barata e veloz, perfeita para distrair o inimigo.",
-      "rosto": [
-        360,
-        400,
-        190
-      ],
-      "arte": [
-        40,
-        0,
-        640
-      ],
-      "vida": 320,
-      "dano": 70,
-      "velocidade": 64,
-      "alcance": 16,
-      "cadencia": 0.8,
-      "alvo": "tudo"
+      "vida": 860,
+      "dano": 200,
+      "velocidade": 62,
+      "alcance": 18,
+      "cadencia": 1.1,
+      "alvo": "tudo",
+      "trofeus": 210
     },
     {
       "id": "bulma",
@@ -217,31 +251,8 @@
       "alcance": 100,
       "cadencia": 1.8,
       "alvo": "tudo",
-      "area": 40
-    },
-    {
-      "id": "chuva",
-      "nome": "Chuva de Pétalas",
-      "raridade": "comum",
-      "custo": 3,
-      "tipo": "Feitiço",
-      "descricao": "Pétalas cortantes que acertam todos numa área grande.",
-      "feitico": true,
-      "imagem": "chuva.svg",
-      "dano": 150,
-      "area": 60
-    },
-    {
-      "id": "lanterna",
-      "nome": "Lanterna Explosiva",
-      "raridade": "rara",
-      "custo": 4,
-      "tipo": "Feitiço",
-      "descricao": "Uma lanterna em chamas que explode com muito dano.",
-      "feitico": true,
-      "imagem": "lanterna.svg",
-      "dano": 360,
-      "area": 42
+      "area": 40,
+      "trofeus": 300
     }
   ]
 }

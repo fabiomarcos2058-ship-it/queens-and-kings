@@ -26,9 +26,13 @@
   });
 
   // ---------- Recompensas ----------
-  function listaCartasGanhas(cartas) {
-    return `<div class="ganhos-cartas">${Object.entries(cartas).map(([id, q]) =>
-      `<div class="ganho-carta">${Cartas.html(Estado.carta(id), { mini: true })}<b>x${q}</b></div>`).join('')}</div>`;
+  function listaCartasGanhas(cartas, novas = []) {
+    const ordem = [...novas, ...Object.keys(cartas).filter((id) => !novas.includes(id))];
+    return `<div class="ganhos-cartas">${ordem.map((id, i) => {
+      const nova = novas.includes(id);
+      const q = cartas[id] + (nova ? 1 : 0);
+      return `<div class="ganho-carta${nova ? ' nova' : ''}" style="animation-delay:${i * 0.12}s">${nova ? '<span class="selo-nova">NOVA!</span>' : ''}${Cartas.html(Estado.carta(id), { mini: true })}<b>x${q}</b></div>`;
+    }).join('')}</div>`;
   }
 
   function mostrarBau(tipo, r) {
@@ -37,7 +41,8 @@
       classe: 'modal-bau',
       html: `<img class="bau-aberto" data-asset="ui/bau_${tipo}" alt="" />
         <div class="ganhos"><span><img class="ic-img" data-asset="ui/moeda" alt="" /> +${fmt(r.ouro)}</span>${r.gemas ? `<span><i class="ic-gema"></i> +${r.gemas}</span>` : ''}</div>
-        ${listaCartasGanhas(r.cartas)}`,
+        ${r.novas && r.novas.length ? `<p class="aviso-nova">✨ Você desbloqueou ${r.novas.map((id) => Estado.carta(id).nome).join(' e ')}!</p>` : ''}
+        ${listaCartasGanhas(r.cartas, r.novas)}`,
       botoes: [{ texto: 'Pegar tudo!', classe: 'principal' }],
     });
     Assets.fill();
@@ -169,7 +174,8 @@
   function telaBatalha() {
     $('trofeus').textContent = fmt(d().trofeus);
     $('trofeus-barra').style.width = `${Math.min(100, (d().trofeus / 300) * 100)}%`;
-    $('trofeus-prox').textContent = d().trofeus >= 300 ? 'Arena 2 chega em breve!' : `Próxima arena: 300 (faltam ${300 - d().trofeus})`;
+    const prox = Estado.proximaLiberacao();
+    $('trofeus-prox').textContent = prox ? `Próxima carta com ${prox.trofeus} troféus · toque para ver` : 'Todas as cartas liberadas! · toque para ver';
     baus();
   }
 
@@ -210,6 +216,22 @@
   }
 
   $('btn-jogar').onclick = () => jogar('normal');
+  document.querySelector('.trofeus').onclick = caminho;
+
+  function caminho() {
+    const marcos = [...new Set(Estado.catalogo().map((c) => c.trofeus || 0))].sort((a, b) => a - b);
+    UI.modal({
+      titulo: 'Caminho de troféus',
+      classe: 'modal-caminho',
+      html: `<p class="aviso">Cada carta passa a aparecer nos baús e na loja quando você chega aos troféus dela. A primeira cópia que você ganhar desbloqueia a carta.</p>
+        <div class="caminho">${marcos.map((t) => {
+          const ok = d().recorde >= t;
+          const cs = Estado.catalogo().filter((c) => (c.trofeus || 0) === t);
+          return `<div class="marco${ok ? ' ok' : ''}"><div class="marco-trofeus"><i class="ic-trofeu"></i>${t}</div>
+            <div class="marco-cartas">${cs.map((c) => `<div class="marco-carta${Estado.tem(c.id) ? '' : ok ? ' falta' : ' trancada'}">${ok ? Cartas.html(c, { mini: true }) : '<div class="carta-silhueta">🔒</div>'}<small>${ok ? c.nome : '???'}</small></div>`).join('')}</div></div>`;
+        }).join('')}</div>`,
+    });
+  }
 
   function jogar(modo) {
     if (!d().deck.length) { UI.toast('Coloque cartas no deck primeiro!'); irPara('cartas'); return; }
@@ -230,8 +252,10 @@
     } else if (r.resultado === 'derrota') {
       trofeus = -Math.min(15, d().trofeus); d().derrotas++;
     }
+    const recordeAntes = d().recorde;
     d().trofeus += trofeus;
     d().recorde = Math.max(d().recorde, d().trofeus);
+    const liberadas = Estado.catalogo().filter((c) => c.trofeus > recordeAntes && c.trofeus <= d().recorde);
     d().ouro += ouro;
     const xpGanho = vitoria ? 12 : 4;
     const xpAntes = d().xp, nivelAntes = d().nivel;
@@ -254,13 +278,24 @@
         </div>
         ${bau ? `<p class="ganhou-bau"><img data-asset="ui/bau_${bau}" alt="" /> Você ganhou um ${Estado.BAUS[bau].nome.toLowerCase()}!</p>` : vitoria ? '<p class="aviso">Seus espaços de baú estão cheios.</p>' : ''}
         <div class="xp-resultado"><div class="nivel" data-n="${nivelAntes}"></div><div class="perfil-xp"><i id="xp-anim" style="width:${(xpAntes / Estado.XP_NIVEL(nivelAntes)) * 100}%"></i><small>+${xpGanho} XP</small></div></div>`,
-      botoes: [{ texto: 'OK', classe: 'principal', acao: () => { Batalha.fechar(); tudo(); irPara('batalha'); subiuNivel(niveis); } }],
+      botoes: [{ texto: 'OK', classe: 'principal', acao: () => { Batalha.fechar(); tudo(); irPara('batalha'); subiuNivel(niveis, () => cartasLiberadas(liberadas)); } }],
     });
     Assets.fill();
     setTimeout(() => {
       const barra = document.getElementById('xp-anim');
       if (barra) barra.style.width = niveis.length ? '100%' : `${(d().xp / Estado.XP_NIVEL(d().nivel)) * 100}%`;
     }, 500);
+  }
+
+  function cartasLiberadas(lista) {
+    if (!lista.length) return;
+    UI.modal({
+      titulo: 'Novas cartas liberadas!',
+      classe: 'modal-liberadas',
+      html: `<div class="evo-raios"></div><div class="liberadas">${lista.map((c, i) => `<div class="liberada" style="animation-delay:${i * 0.2}s">${Cartas.html(c, { mini: true })}<b>${c.nome}</b></div>`).join('')}</div>
+        <p>Agora ${lista.length > 1 ? 'elas podem' : 'ela pode'} aparecer nos baús e na loja. Ganhe a primeira cópia para desbloquear!</p>`,
+      botoes: [{ texto: 'Oba!', classe: 'principal' }],
+    });
   }
 
   // ---------- Loja ----------
@@ -270,7 +305,7 @@
       const c = Estado.carta(o.id);
       const comprada = d().ofertas.compradas.includes(o.i);
       return `<button class="item-loja${comprada ? ' comprado' : ''}" data-i="${o.i}">${Cartas.html(c, { mini: true })}
-        <div class="item-nome">${c.nome} x${o.copias}</div>
+        <div class="item-nome">${Estado.tem(c.id) ? '' : '<b class="tag-nova">NOVA</b> '}${c.nome} x${o.copias}</div>
         <div class="preco">${comprada ? 'Comprado' : `<img class="ic-img" data-asset="ui/moeda" alt="" />${fmt(o.preco)}`}</div></button>`;
     }).join('');
     $('ofertas').querySelectorAll('button').forEach((el) => (el.onclick = () => {
@@ -281,7 +316,14 @@
         titulo: 'Comprar oferta?',
         html: `<div class="compra">${Cartas.html(c, { mini: true })}<p><b>${o.copias} cópias</b> de ${c.nome} por ${fmt(o.preco)} de ouro.</p></div>`,
         botoes: [{ texto: 'Cancelar', classe: 'secundario' }, { texto: 'Comprar', classe: 'principal', desativado: d().ouro < o.preco, motivo: 'Ouro insuficiente',
-          acao: () => { d().ouro -= o.preco; d().colecao[o.id].copias += o.copias; d().ofertas.compradas.push(o.i); Estado.salvar(); UI.toast(`+${o.copias} ${c.nome}!`); tudo(); } }],
+          acao: () => {
+            d().ouro -= o.preco;
+            const col = d().colecao[o.id];
+            const nova = !col.tem;
+            if (nova) { col.tem = true; col.copias += o.copias - 1; } else col.copias += o.copias;
+            d().ofertas.compradas.push(o.i); Estado.salvar();
+            UI.toast(nova ? `✨ ${c.nome} desbloqueada!` : `+${o.copias} ${c.nome}!`); tudo();
+          } }],
       });
     }));
 
@@ -333,13 +375,22 @@
     const media = deck.length ? deck.reduce((s, id) => s + Estado.carta(id).custo, 0) / deck.length : 0;
     $('elixir-medio').textContent = deck.length ? media.toFixed(1).replace('.', ',') : '–';
 
-    const fora = Estado.catalogo().filter((c) => !deck.includes(c.id));
-    $('colecao').innerHTML = fora.length
+    const fora = Estado.catalogo().filter((c) => !deck.includes(c.id) && Estado.tem(c.id));
+    const aDescobrir = Estado.catalogo().filter((c) => !Estado.tem(c.id));
+    const temTotal = Estado.catalogo().filter((c) => Estado.tem(c.id)).length;
+    $('colecao').innerHTML = (fora.length
       ? fora.map((c) => Cartas.html(c, { nivel: etiqueta(c.id), extra: barraCopias(c.id) })).join('')
-      : '<p class="aviso" style="grid-column:1/-1">Todas as suas cartas estão no deck. Mande mais personagens para aumentar a coleção!</p>';
+      : '<p class="aviso" style="grid-column:1/-1">Todas as suas cartas desbloqueadas estão no deck.</p>')
+      + (aDescobrir.length ? `<div class="divisor-colecao">A descobrir · ${temTotal}/${Estado.catalogo().length} desbloqueadas</div>` : '')
+      + aDescobrir.map((c) => {
+        const lib = Estado.liberada(c.id);
+        return lib
+          ? `<div class="slot-carta bloqueada-carta" data-id="${c.id}">${Cartas.html(c, { mini: true, extra: '<span class="cadeado">🎁</span>' })}<div class="carta-nivel">Nos baús</div></div>`
+          : `<div class="slot-carta trancada-carta" data-id="${c.id}"><div class="carta-silhueta">🔒</div><div class="carta-nivel">${c.trofeus} troféus</div></div>`;
+      }).join('');
     $('aviso-colecao').textContent = trocando
       ? `Toque numa carta do deck para trocar por ${Estado.carta(trocando).nome}.`
-      : 'Toque numa carta para ver detalhes, colocar no deck ou evoluir.';
+      : 'Toque numa carta para ver detalhes, colocar no deck ou evoluir. Desbloqueie mais cartas ganhando troféus e abrindo baús!';
     document.querySelector('.painel-deck').classList.toggle('trocando', !!trocando);
 
     $('deck').querySelectorAll('.slot-carta').forEach((el) => (el.onclick = () => {
@@ -351,7 +402,14 @@
       }
       if (el.dataset.id) detalhes(el.dataset.id);
     }));
-    $('colecao').querySelectorAll('.slot-carta').forEach((el) => (el.onclick = () => { trocando = null; detalhes(el.dataset.id); }));
+    $('colecao').querySelectorAll('.slot-carta').forEach((el) => (el.onclick = () => {
+      trocando = null;
+      const id = el.dataset.id;
+      if (Estado.tem(id)) return detalhes(id);
+      const c = Estado.carta(id);
+      if (Estado.liberada(id)) UI.modal({ titulo: c.nome, html: `<div class="compra">${Cartas.html(c, { mini: true })}<p>${Cartas.NOMES_RARIDADE[c.raridade]} · ${c.tipo}<br>Já pode aparecer nos <b>baús</b> e nas <b>ofertas da loja</b>. Ganhe a primeira cópia para desbloquear!</p></div>` });
+      else UI.modal({ titulo: 'Carta misteriosa', html: `<div class="carta-silhueta grande">🔒</div><p>Chegue a <b>${c.trofeus} troféus</b> para liberar esta carta.</p><p class="aviso">Você tem ${d().recorde} de recorde.</p>` });
+    }));
   }
 
   function detalhes(id) {

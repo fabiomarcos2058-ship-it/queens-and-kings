@@ -1,6 +1,6 @@
 // Progresso do jogador, salvo no navegador (localStorage).
 const Estado = (() => {
-  const CHAVE = 'queens-and-kings-v1';
+  const CHAVE = 'queens-and-kings-v2'; // v2: cartas desbloqueadas aos poucos
   const NIVEL_MAX = 9;
   // Para evoluir do nível N para N+1: cópias e ouro (índice = nível atual)
   const COPIAS = [0, 2, 4, 10, 20, 50, 100, 200, 400];
@@ -25,7 +25,7 @@ const Estado = (() => {
       cla: null,
       eventos: { sequencia: 0, desafioPremio: false, coroas: 0, torneioPremio: false },
       ofertas: { dia: '', compradas: [] },
-      vitorias: 0, derrotas: 0, vistas: null,
+      vitorias: 0, derrotas: 0,
     };
   }
 
@@ -37,16 +37,12 @@ const Estado = (() => {
     for (const k in base) if (d[k] === undefined) d[k] = base[k];
     for (const k in base.conquistas) if (d.conquistas[k] === undefined) d.conquistas[k] = 0;
     // toda carta do catálogo entra na coleção
-    for (const c of catalogo) if (!d.colecao[c.id]) d.colecao[c.id] = { nivel: 1, copias: 0 };
-    d.deck = d.deck.filter((id) => catalogo.some((c) => c.id === id));
-    if (!d.deck.length) d.deck = catalogo.slice(0, 8).map((c) => c.id);
-    // cartas novas entram no deck sozinhas se tiver espaço
-    if (!d.vistas) d.vistas = catalogo.map((c) => c.id);
     for (const c of catalogo) {
-      if (d.vistas.includes(c.id)) continue;
-      d.vistas.push(c.id);
-      if (d.deck.length < 8 && !d.deck.includes(c.id)) d.deck.push(c.id);
+      if (!d.colecao[c.id]) d.colecao[c.id] = { nivel: 1, copias: 0, tem: false };
+      if (!(c.trofeus > 0)) d.colecao[c.id].tem = true; // cartas iniciais
     }
+    d.deck = d.deck.filter((id) => catalogo.some((c) => c.id === id) && d.colecao[id].tem);
+    if (!d.deck.length) d.deck = catalogo.filter((c) => d.colecao[c.id].tem).slice(0, 8).map((c) => c.id);
     salvar();
     return d;
   }
@@ -61,6 +57,10 @@ const Estado = (() => {
   }
 
   const carta = (id) => catalogo.find((c) => c.id === id);
+  const tem = (id) => !!(d.colecao[id] && d.colecao[id].tem);
+  const liberada = (id) => (carta(id).trofeus || 0) <= d.recorde; // já aparece em baús e na loja
+  const disponiveis = () => catalogo.filter((c) => liberada(c.id));
+  const proximaLiberacao = () => catalogo.filter((c) => !liberada(c.id)).sort((a, b) => a.trofeus - b.trofeus)[0] || null;
   const sorteio = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
 
   // Estatísticas com o nível aplicado (+10% por nível)
@@ -106,16 +106,22 @@ const Estado = (() => {
   // Distribui cópias entre cartas aleatórias
   function sortearCopias(total) {
     const ganhos = {};
-    const pesos = { comum: 6, rara: 3, epica: 1.5, lendaria: 0.6 };
+    const pesos = { comum: 6, rara: 3, epica: 1.2, lendaria: 0.4 };
+    const lista = disponiveis();
     while (total > 0) {
-      const soma = catalogo.reduce((s, c) => s + pesos[c.raridade], 0);
+      const soma = lista.reduce((s, c) => s + pesos[c.raridade], 0);
       let r = Math.random() * soma;
-      const c = catalogo.find((x) => (r -= pesos[x.raridade]) < 0) || catalogo[0];
+      const c = lista.find((x) => (r -= pesos[x.raridade]) < 0) || lista[0];
       const q = Math.min(total, Math.max(1, Math.round(total * (c.raridade === 'comum' ? 0.4 : c.raridade === 'rara' ? 0.3 : 0.15))));
       ganhos[c.id] = (ganhos[c.id] || 0) + q;
       total -= q;
     }
-    for (const id in ganhos) d.colecao[id].copias += ganhos[id];
+    const novas = [];
+    for (const id in ganhos) {
+      if (!d.colecao[id].tem) { d.colecao[id].tem = true; novas.push(id); ganhos[id]--; } // a 1ª cópia desbloqueia
+      d.colecao[id].copias += ganhos[id];
+    }
+    ganhos._novas = novas;
     return ganhos;
   }
 
@@ -125,9 +131,10 @@ const Estado = (() => {
     d.ouro += ouro;
     d.gemas += b.gemas;
     const cartas = sortearCopias(b.copias);
+    const novas = cartas._novas; delete cartas._novas;
     d.conquistas.baus++;
     salvar();
-    return { ouro, gemas: b.gemas, cartas };
+    return { ouro, gemas: b.gemas, cartas, novas };
   }
 
   function tempoRestante(slot) {
@@ -143,15 +150,16 @@ const Estado = (() => {
     const rnd = () => ((semente = (semente * 1103515245 + 12345) >>> 0) % 1000) / 1000;
     const preco = { comum: [10, 100], rara: [4, 300], epica: [1, 800], lendaria: [1, 3000] };
     const lista = [];
+    const pool = disponiveis();
     for (let i = 0; i < 3; i++) {
-      const c = catalogo[Math.floor(rnd() * catalogo.length)];
+      const c = pool[Math.floor(rnd() * pool.length)];
       lista.push({ i, id: c.id, copias: preco[c.raridade][0], preco: preco[c.raridade][1] });
     }
     return lista;
   }
 
   return {
-    get d() { return d; }, carregar, salvar, apagar, carta, stats, catalogo: () => catalogo,
+    get d() { return d; }, carregar, salvar, apagar, carta, stats, catalogo: () => catalogo, tem, liberada, disponiveis, proximaLiberacao,
     COPIAS, OURO, NIVEL_MAX, BAUS, XP_NIVEL,
     ganharXp, podeEvoluir, evoluir, abrirBau, tempoRestante, sortearCopias, ofertasDoDia, sorteio,
   };
