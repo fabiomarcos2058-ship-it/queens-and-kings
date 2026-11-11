@@ -346,20 +346,31 @@
   }
 
   function conviteX1(c) {
-    if (!$('batalha').classList.contains('oculto')) { Amigos.apagarConvite(c.de); return; } // já está numa batalha
-    UI.modal({
-      titulo: '⚔️ Convite de x1!',
-      classe: 'modal-x1',
-      html: `<div class="convite"><img src="${avatarDe(c.avatar)}" alt="" /><p><b>${esc(c.nome || 'Um amigo')}</b> te chamou pra um x1!</p></div>`,
-      botoes: [
-        { texto: 'Agora não', classe: 'secundario', acao: () => { Amigos.apagarConvite(c.de); } },
-        { texto: 'Bora! ⚔️', classe: 'principal', acao: () => {
-          Amigos.apagarConvite(c.de);
-          if (d().deck.length < 8) { UI.toast('Você precisa de 8 cartas no deck para o x1.'); return; }
-          x1Entrar(c.codigo);
-        } },
-      ],
-    });
+    // já está numa batalha: avisa quem chamou
+    if (!$('batalha').classList.contains('oculto')) { Amigos.apagarConvite(c.de); X1.responder(c.codigo, 'ocupado'); return; }
+    document.querySelectorAll('.convite-x1').forEach((x) => x.remove());
+    const TEMPO = 30;
+    const el = document.createElement('div');
+    el.className = 'convite-x1';
+    el.innerHTML = `<div class="convite-caixa">
+        <div class="convite-titulo">⚔️ Desafio de x1!</div>
+        <img class="convite-avatar" src="${avatarDe(c.avatar)}" alt="" />
+        <p><b>${Passe.nomeHtml(c.nome || 'Um amigo', c.estiloNome)}</b> está te chamando pra um x1!</p>
+        <div class="convite-tempo"><i style="animation-duration:${TEMPO}s"></i></div>
+        <div class="convite-botoes"><button class="btn-modal secundario" data-r="nao">Recusar</button><button class="btn-modal principal" data-r="sim">Aceitar ⚔️</button></div>
+      </div>`;
+    document.getElementById('app').appendChild(el);
+    try { navigator.vibrate && navigator.vibrate([200, 100, 200]); } catch (e) { /* nada */ }
+    let fechou = false;
+    const fechar = () => { if (fechou) return; fechou = true; el.classList.add('sumir'); setTimeout(() => el.remove(), 250); Amigos.apagarConvite(c.de); };
+    const tempo = setTimeout(fechar, TEMPO * 1000);
+    el.querySelector('[data-r="nao"]').onclick = () => { clearTimeout(tempo); X1.responder(c.codigo, 'recusou'); fechar(); };
+    el.querySelector('[data-r="sim"]').onclick = () => {
+      clearTimeout(tempo); fechar();
+      if (d().deck.length < 8) { UI.toast('Você precisa de 8 cartas no deck para o x1.'); X1.responder(c.codigo, 'recusou'); return; }
+      document.querySelectorAll('.modal-fundo').forEach((m) => m.remove());
+      x1Entrar(c.codigo);
+    };
   }
 
   $('btn-amigos').onclick = () => {
@@ -440,8 +451,8 @@
 
   function chamarX1(p) {
     if (d().deck.length < 8) { UI.toast('Você precisa de 8 cartas no deck para o x1.'); return; }
-    document.querySelectorAll('.modal-amigos, .modal-perfil-outro').forEach((m) => m.closest('.modal-fundo').remove());
-    x1Criar({ uid: p.uid, nome: p.nome || 'seu amigo' });
+    document.querySelectorAll('.modal-amigos, .modal-perfil-outro, .modal-x1').forEach((m) => m.closest('.modal-fundo').remove());
+    x1Criar({ uid: p.uid, nome: p.nome || 'seu amigo', avatar: p.avatar });
   }
 
   async function verPerfil(id) {
@@ -521,12 +532,23 @@
       classe: 'modal-x1',
       html: `<p>Batalha ao vivo contra um amigo. É amistosa: não ganha nem perde troféus.</p>
         <p class="x1-placar">Suas vitórias no x1: <b>${st.v}</b> · derrotas: <b>${st.d}</b></p>
+        <div class="titulo-conquistas">Chamar um amigo</div>
+        <div id="x1-amigos" class="x1-amigos"><div class="x1-carregando"></div></div>
+        <div class="titulo-conquistas">Ou use um código</div>
         <div class="x1-entrar"><input id="x1-codigo" maxlength="4" placeholder="CÓDIGO" autocomplete="off" /><button class="btn-modal principal" id="x1-btn-entrar">Entrar</button></div>`,
       botoes: [
-        { texto: 'Criar sala', classe: 'principal', acao: () => { x1Criar(); } },
+        { texto: 'Criar sala com código', classe: 'secundario', acao: () => { x1Criar(); } },
         { texto: 'Fechar', classe: 'secundario' },
       ],
     });
+    Amigos.listar().then((lista) => {
+      const caixa = document.getElementById('x1-amigos');
+      if (!caixa) return;
+      caixa.innerHTML = lista.length ? `<div class="lista-jogadores">${lista.map((p) => linhaJogador(p, `<button class="btn-modal principal btn-chamar" data-chamar="${p.uid}">⚔️ Chamar</button>`)).join('')}</div>`
+        : '<p class="aviso">Você ainda não tem amigos no jogo. Adicione em <b>👥 Amigos</b> e depois é só chamar aqui!</p>';
+      caixa.querySelectorAll('[data-chamar]').forEach((b) => (b.onclick = (e) => { e.stopPropagation(); chamarX1(lista.find((p) => p.uid === b.dataset.chamar)); }));
+      ligarPerfis(caixa);
+    }).catch(() => { const caixa = document.getElementById('x1-amigos'); if (caixa) caixa.innerHTML = '<p class="aviso">Não deu pra carregar seus amigos.</p>'; });
     const inp = document.getElementById('x1-codigo');
     inp.oninput = () => { inp.value = inp.value.toUpperCase().replace(/[^A-Z]/g, ''); };
     document.getElementById('x1-btn-entrar').onclick = () => {
@@ -544,8 +566,18 @@
     try {
       espera = UI.modal({ titulo: 'Criando sala...', classe: 'modal-x1', html: '<div class="x1-carregando"></div>', botoes: [{ texto: 'Cancelar', classe: 'secundario', acao: () => { cancelado = true; X1.cancelar(); } }] });
       travarFundo(espera);
+      let semResposta = null;
       const cod = await X1.criarSala({
+        aoResposta: (r) => {
+          if (cancelado || !amigo) return;
+          clearTimeout(semResposta);
+          const corpo = espera.el.querySelector('.modal-corpo');
+          espera.el.querySelector('.modal-titulo').textContent = r.r === 'ocupado' ? 'Está ocupado!' : 'Não deu dessa vez';
+          corpo.innerHTML = `<p class="x1-resposta">${r.r === 'ocupado' ? `⚔️ <b>${esc(amigo.nome)}</b> está numa batalha agora. Tente de novo daqui a pouco!` : `😢 <b>${esc(amigo.nome)}</b> recusou o x1.`}</p>`;
+          espera.el.querySelector('.modal-botoes button').textContent = 'Fechar';
+        },
         aoEntrarAmigo: (amigo) => {
+          clearTimeout(semResposta);
           if (cancelado) return;
           const vs = Atualizacao.versaoDoAmigo(amigo.versao);
           if (vs !== 'igual') {
@@ -562,8 +594,14 @@
       if (amigo) {
         await Amigos.convidar(amigo.uid, cod);
         espera.el.querySelector('.modal-titulo').textContent = 'Convite enviado!';
-        espera.el.querySelector('.modal-corpo').innerHTML = `<p>Chamamos <b>${esc(amigo.nome)}</b> pro x1. Se ele não estiver no jogo, mande o código:</p>
-          <div class="x1-codigo-grande">${cod}</div><p class="x1-esperando">Esperando ${esc(amigo.nome)} entrar<span>...</span></p>`;
+        espera.el.querySelector('.modal-corpo').innerHTML = `<div class="convite"><img src="${avatarDe(amigo.avatar)}" alt="" /><p>Chamando <b>${esc(amigo.nome)}</b> pro x1<span class="x1-esperando"><span>...</span></span></p></div>
+          <div class="convite-tempo"><i></i></div>
+          <p class="aviso">Se ele não estiver no jogo, mande o código: <b class="x1-codigo-peq">${cod}</b></p>`;
+        semResposta = setTimeout(() => {
+          if (cancelado) return;
+          const p = espera.el.querySelector('.convite p');
+          if (p) p.innerHTML = `<b>${esc(amigo.nome)}</b> ainda não respondeu. A sala continua aberta pelo código <b>${cod}</b>.`;
+        }, 30000);
         return;
       }
       espera.el.querySelector('.modal-titulo').textContent = 'Sala criada!';
@@ -1397,6 +1435,7 @@
 
   window.telaPresentear = telaPresentear; // usado pelo mod menu
   window.telaRemover = telaRemover;
+  window.mostrarConviteX1 = conviteX1;
   function tudo() {
     Mod.mostrarBotao(tudo);
     if (Conta.logado()) Amigos.ouvir({ aoMudarPedidos: mudouPedidos, aoConvite: conviteX1 });

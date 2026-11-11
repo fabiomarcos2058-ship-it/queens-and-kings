@@ -8,6 +8,7 @@ const Amigos = (() => {
   const uid = () => Conta.uid();
   const ONLINE_MS = 3 * 60 * 1000;
   let pararPedidos = null, pararConvites = null, batimento = null;
+  const convitesVistos = new Set();
 
   const ref = (...p) => fb().doc(fb().db, 'perfis', ...p);
   const col = (...p) => fb().collection(fb().db, 'perfis', ...p);
@@ -107,9 +108,9 @@ const Amigos = (() => {
   // ---------- Convite de x1 ----------
   async function convidar(id, codigo) {
     const f = fb();
-    await f.setDoc(ref(id, 'convites', uid()), { nome: Estado.d.nome, avatar: Estado.d.avatar, codigo, quando: f.serverTimestamp() });
+    await f.setDoc(ref(id, 'convites', uid()), { nome: Estado.d.nome, estiloNome: Passe.estiloNome(), avatar: Estado.d.avatar, codigo, t: Date.now(), quando: f.serverTimestamp() });
   }
-  const apagarConvite = (de) => fb().deleteDoc(ref(uid(), 'convites', de)).catch(() => {});
+  const apagarConvite = (de) => { try { fb().deleteDoc(ref(uid(), 'convites', de)).catch(() => {}); } catch (e) { /* sem conexão */ } };
 
   // ---------- Ouvir pedidos e convites ----------
   function ouvir({ aoMudarPedidos, aoConvite }) {
@@ -118,10 +119,12 @@ const Amigos = (() => {
     pararPedidos = f.onSnapshot(col(uid(), 'pedidos'), (s) => aoMudarPedidos(s.docs.map((x) => ({ uid: x.id, ...x.data() }))), () => {});
     pararConvites = f.onSnapshot(col(uid(), 'convites'), (s) => {
       s.docChanges().forEach((m) => {
-        if (m.type !== 'added') return;
+        if (m.type === 'removed') return;
         const c = { de: m.doc.id, ...m.doc.data() };
+        if (!c.codigo || convitesVistos.has(c.codigo)) return; // o mesmo convite não aparece duas vezes
         const idade = c.quando && c.quando.toMillis ? Date.now() - c.quando.toMillis() : 0;
-        if (idade > 5 * 60 * 1000) { apagarConvite(c.de); return; } // convite velho
+        if (idade > 90 * 1000) { apagarConvite(c.de); return; } // convite velho
+        convitesVistos.add(c.codigo);
         aoConvite(c);
       });
     }, () => {});

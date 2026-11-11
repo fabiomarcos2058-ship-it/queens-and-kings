@@ -26,7 +26,7 @@ const X1 = (() => {
   function limpar() { desligar.forEach((f) => { try { f(); } catch (e) { /* nada */ } }); desligar = []; }
 
   // ---------- Host ----------
-  async function criarSala({ aoEntrarAmigo }) {
+  async function criarSala({ aoEntrarAmigo, aoResposta }) {
     await iniciar();
     let cod = novoCodigo();
     for (let i = 0; i < 5 && (await m.get(r(`salas/${cod}`))).exists(); i++) cod = novoCodigo();
@@ -34,6 +34,7 @@ const X1 = (() => {
     await m.set(r(`salas/${cod}`), { host: perfil(), status: 'esperando', criado: m.serverTimestamp() });
     m.onDisconnect(r(`salas/${cod}`)).remove();
     desligar.push(m.onValue(r(`salas/${cod}/convidado`), (snap) => { if (snap.exists() && !snap.val().saiu) aoEntrarAmigo(snap.val()); }));
+    if (aoResposta) desligar.push(m.onValue(r(`salas/${cod}/resposta`), (snap) => { if (snap.exists()) aoResposta(snap.val()); }));
     return cod;
   }
 
@@ -84,6 +85,11 @@ const X1 = (() => {
     });
   }
 
+  // quem foi chamado responde sem entrar (recusou / está ocupado)
+  async function responder(codigo, resposta) {
+    try { await iniciar(); await m.set(r(`salas/${codigo}/resposta`), { r: resposta, nome: Estado.d.nome, t: Date.now() }); } catch (e) { /* sala pode já ter acabado */ }
+  }
+
   async function cancelar() {
     try {
       if (souHost && sala) await m.remove(r(`salas/${sala}`));
@@ -93,5 +99,5 @@ const X1 = (() => {
     sala = null;
   }
 
-  return { criarSala, comecar, entrarSala, assistir, cancelar };
+  return { criarSala, comecar, entrarSala, assistir, cancelar, responder };
 })();

@@ -1051,3 +1051,19 @@ button.item-loja:active, button.slot-bau:active, .slot-carta:active { transform:
 .rem-carta img { width: 36px; height: 36px; border-radius: 50%; }
 .rem-carta select { padding: 4px; border-radius: 8px; font-family: inherit; }
 .modal-remover .btn-modal.perigo { width: 100%; }
+
+/* ---------- Convite de x1 ---------- */
+.x1-amigos { max-height: 34vh; overflow-y: auto; margin-bottom: 4px; }
+.btn-chamar { margin: 0; padding: 6px 10px; font-size: 13px; flex: 0 0 auto; }
+.convite-x1 { position: fixed; inset: 0; z-index: 600; background: #10142ecc; display: flex; align-items: center; justify-content: center; padding: 20px; animation: fade 0.2s; }
+.convite-x1.sumir { opacity: 0; transition: opacity 0.25s; }
+.convite-caixa { width: 100%; max-width: 330px; background: linear-gradient(#5B45D6, #2a3170); border: 3px solid #FAC775; border-radius: 22px; padding: 18px 16px; text-align: center; box-shadow: 0 0 40px #8E7CFF88, 0 6px 0 #0d1130; animation: pop 0.35s cubic-bezier(0.3, 1.5, 0.6, 1); }
+.convite-titulo { font-family: 'Lilita One', 'Fredoka', sans-serif; font-size: 26px; color: #FAC775; text-shadow: 0 2px 0 #0007; animation: x1pisca 1.2s infinite; }
+.convite-avatar { width: 92px; height: 92px; border-radius: 50%; margin: 10px auto 4px; display: block; background: #2b3270; object-fit: cover; box-shadow: 0 0 0 4px #FAC775, 0 0 20px #FAC77588; animation: pulsar-torre 1.2s infinite; }
+.convite-tempo { height: 8px; background: #0006; border-radius: 4px; overflow: hidden; margin: 10px 0; }
+.convite-tempo i { display: block; height: 100%; width: 100%; background: linear-gradient(90deg, #5DCAA5, #FAC775); transform-origin: left; animation: tempo-convite 30s linear forwards; }
+@keyframes tempo-convite { to { transform: scaleX(0); } }
+.convite-botoes { display: flex; gap: 8px; }
+.convite-botoes .btn-modal { flex: 1; margin: 0; font-size: 17px; }
+.x1-resposta { font-size: 16px; margin: 10px 0; }
+.x1-codigo-peq { letter-spacing: 3px; color: #FAC775; }
