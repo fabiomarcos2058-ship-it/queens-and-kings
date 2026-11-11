@@ -292,3 +292,11 @@ button { font-family: inherit; cursor: pointer; border: none; }
     1.5px 1.5px 0 #1a1840, -1.5px 1.5px 0 #1a1840, 1.5px -1.5px 0 #1a1840, -1.5px -1.5px 0 #1a1840,
     0 3.5px 0 #1a1840, 1.5px 3.5px 0 #1a1840, -1.5px 3.5px 0 #1a1840, 0 5px 4px #0009;
 }
+
+/* Cartas maiores: menos espaço sobrando nas bordas */
+[data-tela="cartas"] { padding-left: 6px; padding-right: 6px; }
+[data-tela="cartas"] .titulo-secao, [data-tela="cartas"] .aviso, [data-tela="cartas"] .cab-deck { padding-left: 6px; padding-right: 6px; }
+.painel-deck { padding: 8px 5px 4px; border-radius: 12px; }
+.painel-deck .grade-4 { gap: 8px 5px; }
+.painel-deck.colecao .grade-4 { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px 8px; }
+.painel-deck.colecao .nome-3d { font-size: 17px; }
