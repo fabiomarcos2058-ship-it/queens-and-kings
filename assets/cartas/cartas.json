@@ -75,6 +75,151 @@
       "alvo": "tudo"
     },
     {
+      "id": "shizuku",
+      "nome": "Shizuku",
+      "raridade": "rara",
+      "custo": 3,
+      "tipo": "Defensora",
+      "descricao": "Calma e resistente, segura os inimigos na sua frente.",
+      "rosto": [
+        410,
+        270,
+        165
+      ],
+      "arte": [
+        80,
+        0,
+        600
+      ],
+      "vida": 1050,
+      "dano": 80,
+      "velocidade": 40,
+      "alcance": 16,
+      "cadencia": 1.2,
+      "alvo": "tudo"
+    },
+    {
+      "id": "hinata",
+      "nome": "Hinata",
+      "raridade": "epica",
+      "custo": 4,
+      "tipo": "Lutadora",
+      "descricao": "Golpes rápidos e certeiros em quem chegar perto.",
+      "rosto": [
+        330,
+        450,
+        200
+      ],
+      "arte": [
+        56,
+        120,
+        600
+      ],
+      "vida": 820,
+      "dano": 135,
+      "velocidade": 54,
+      "alcance": 16,
+      "cadencia": 0.9,
+      "alvo": "tudo"
+    },
+    {
+      "id": "chichi",
+      "nome": "Chichi",
+      "raridade": "comum",
+      "custo": 3,
+      "tipo": "Lutadora",
+      "descricao": "Brava e decidida, bate forte e não recua.",
+      "rosto": [
+        385,
+        470,
+        165
+      ],
+      "arte": [
+        60,
+        40,
+        600
+      ],
+      "vida": 700,
+      "dano": 110,
+      "velocidade": 48,
+      "alcance": 16,
+      "cadencia": 1.1,
+      "alvo": "tudo"
+    },
+    {
+      "id": "mai",
+      "nome": "Mai",
+      "raridade": "rara",
+      "custo": 3,
+      "tipo": "Atiradora",
+      "descricao": "Atira de longe, ótima para defender.",
+      "rosto": [
+        350,
+        270,
+        150
+      ],
+      "arte": [
+        90,
+        20,
+        600
+      ],
+      "vida": 400,
+      "dano": 75,
+      "velocidade": 46,
+      "alcance": 115,
+      "cadencia": 0.9,
+      "alvo": "tudo"
+    },
+    {
+      "id": "bra",
+      "nome": "Bra",
+      "raridade": "comum",
+      "custo": 2,
+      "tipo": "Rápida",
+      "descricao": "Barata e veloz, perfeita para distrair o inimigo.",
+      "rosto": [
+        360,
+        400,
+        190
+      ],
+      "arte": [
+        40,
+        0,
+        640
+      ],
+      "vida": 320,
+      "dano": 70,
+      "velocidade": 64,
+      "alcance": 16,
+      "cadencia": 0.8,
+      "alvo": "tudo"
+    },
+    {
+      "id": "bulma",
+      "nome": "Bulma",
+      "raridade": "lendaria",
+      "custo": 5,
+      "tipo": "Inventora",
+      "descricao": "Suas invenções explodem e acertam vários inimigos de longe.",
+      "rosto": [
+        420,
+        300,
+        150
+      ],
+      "arte": [
+        100,
+        0,
+        600
+      ],
+      "vida": 700,
+      "dano": 150,
+      "velocidade": 40,
+      "alcance": 100,
+      "cadencia": 1.8,
+      "alvo": "tudo",
+      "area": 40
+    },
+    {
       "id": "chuva",
       "nome": "Chuva de Pétalas",
       "raridade": "comum",

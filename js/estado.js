@@ -25,7 +25,7 @@ const Estado = (() => {
       cla: null,
       eventos: { sequencia: 0, desafioPremio: false, coroas: 0, torneioPremio: false },
       ofertas: { dia: '', compradas: [] },
-      vitorias: 0, derrotas: 0,
+      vitorias: 0, derrotas: 0, vistas: null,
     };
   }
 
@@ -40,6 +40,13 @@ const Estado = (() => {
     for (const c of catalogo) if (!d.colecao[c.id]) d.colecao[c.id] = { nivel: 1, copias: 0 };
     d.deck = d.deck.filter((id) => catalogo.some((c) => c.id === id));
     if (!d.deck.length) d.deck = catalogo.slice(0, 8).map((c) => c.id);
+    // cartas novas entram no deck sozinhas se tiver espaço
+    if (!d.vistas) d.vistas = catalogo.map((c) => c.id);
+    for (const c of catalogo) {
+      if (d.vistas.includes(c.id)) continue;
+      d.vistas.push(c.id);
+      if (d.deck.length < 8 && !d.deck.includes(c.id)) d.deck.push(c.id);
+    }
     salvar();
     return d;
   }
