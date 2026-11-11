@@ -1,0 +1,8 @@
+{
+  "_leia": "rosto = [x, y, raio] do rosto na imagem original (vira o medalhão). arte = [x, y, largura] do recorte da carta (altura = largura x 4/3).",
+  "cartas": [
+    { "id": "itsuki", "nome": "Itsuki", "raridade": "rara", "custo": 4, "tipo": "Tanque", "descricao": "Aguenta muito dano e vai direto nas torres.", "rosto": [368, 440, 215], "arte": [58, 20, 620] },
+    { "id": "rukia", "nome": "Rukia", "raridade": "epica", "custo": 5, "tipo": "Dano em área", "descricao": "Ataca de longe e acerta vários inimigos de uma vez.", "rosto": [400, 230, 145], "arte": [98, 20, 600] },
+    { "id": "akame", "nome": "Akame", "raridade": "lendaria", "custo": 4, "tipo": "Assassina", "descricao": "Muito rápida, causa dano alto em um alvo só.", "rosto": [292, 395, 170], "arte": [40, 20, 600] }
+  ]
+}

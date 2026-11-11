@@ -43,3 +43,9 @@ O bot fica em `bot/`. Ele baixa pacotes 3D com licença CC0 da Kenney, tira "fot
 - O modo **listar** só gera `bot/catalogo.txt` com todos os modelos disponíveis.
 - Para trocar qual modelo vira qual imagem, edite `bot/fontes.json`.
 - Só entram pacotes CC0 de sites da lista `sites_permitidos`.
+
+## Cartas das personagens
+
+1. Coloque a imagem em `assets/cartas/originais/<id>.jpg` (ou `.png`).
+2. Adicione a carta em `assets/cartas/cartas.json`, com nome, raridade, custo, tipo, posição do rosto (medalhão) e recorte da arte.
+3. Rode `python tools/montar_cartas.py`. Ele gera `<id>.jpg`, que é a arte da carta, e `<id>_medalhao.png`, que é a tropa na arena.

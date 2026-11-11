@@ -19,3 +19,7 @@ Imagens geradas pelo bot a partir de modelos 3D com licença CC0:
 | `assets/ui/aba_loja.png` | chest.glb | pirate-kit | Kenney (kenney.nl) | CC0 |
 | `assets/ui/aba_eventos.png` | banner.glb | mini-dungeon | Kenney (kenney.nl) | CC0 |
 | `assets/ui/torre_logo.png` | tower-square-base.glb + tower-square-mid-windows.glb + tower-square-top-roof-high.glb | castle-kit | Kenney (kenney.nl) | CC0 |
+
+## Imagens das personagens
+
+As imagens em `assets/cartas/` foram enviadas pela dona do projeto para uso pessoal neste fangame sem fins lucrativos. As personagens e as ilustrações pertencem aos seus autores e editoras originais.
