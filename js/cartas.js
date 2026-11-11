@@ -7,15 +7,16 @@ const Cartas = (() => {
     const carta = `<div class="carta ${c.raridade}${mini ? ' mini' : ''}">
       <img src="assets/cartas/${c.id}.jpg" alt="${c.nome}" draggable="false" />
       <span class="custo">${c.custo}</span>
+      ${mini ? '' : `<span class="nome-3d">${c.nome}</span>`}
     </div>`;
-    return mini ? carta : `<div class="slot-carta">${carta}<div class="carta-legenda">${c.nome}</div><div class="carta-nivel">Nível 9</div></div>`;
+    return mini ? carta : `<div class="slot-carta">${carta}<div class="carta-nivel">Nível 9</div></div>`;
   }
 
   const vazia = (r, custo, mini = false) => {
     const carta = `<div class="carta-vazia ${r}${mini ? ' mini' : ''}"><span class="custo">${custo}</span><span class="q">?</span></div>`;
     return mini ? carta : `<div class="slot-carta">${carta}<div class="carta-legenda bloqueada">Bloqueada</div><div class="carta-nivel">&nbsp;</div></div>`;
   };
-  const slotVazio = '<div class="slot-carta"><div class="slot-deck">+</div><div class="carta-legenda">&nbsp;</div><div class="carta-nivel">&nbsp;</div></div>';
+  const slotVazio = '<div class="slot-carta"><div class="slot-deck">+</div><div class="carta-nivel">&nbsp;</div></div>';
 
   function tropa(arena, c, { time, x, y, vida = 1, nivel = 9 }) {
     const el = document.createElement('div');

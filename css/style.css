@@ -265,3 +265,30 @@ button { font-family: inherit; cursor: pointer; border: none; }
 .tropa-medalhao { overflow: visible; }
 .tropa-medalhao img { position: absolute; inset: 0; }
 .tropa-medalhao b { z-index: 1; }
+
+/* Nome por cima da carta, estilo cartoon com contorno e sombra */
+.nome-3d {
+  position: absolute; left: 0; right: 0; bottom: 4px; z-index: 2;
+  font-family: 'Lilita One', 'Fredoka', sans-serif; font-size: 14px; letter-spacing: 0.3px;
+  text-align: center; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 2px;
+  -webkit-text-stroke: 3.5px #1a1840; paint-order: stroke fill;
+  text-shadow: 0 2px 0 #1a1840, 0 3px 0 #1a1840, 0 4px 4px #0008;
+}
+.carta.rara .nome-3d { color: #FFE2A3; }
+.carta.epica .nome-3d { color: #EBDDFF; }
+.carta.lendaria .nome-3d { background: linear-gradient(#ffffff, #9FF0D2); -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-stroke: 0; text-shadow: none; filter: drop-shadow(0 0 0 #1a1840) drop-shadow(1.5px 0 0 #1a1840) drop-shadow(-1.5px 0 0 #1a1840) drop-shadow(0 1.5px 0 #1a1840) drop-shadow(0 -1.5px 0 #1a1840) drop-shadow(0 3px 0 #1a1840); }
+.carta::before { z-index: 1; }
+.carta .nome-3d + * { z-index: 3; }
+.slot-carta .carta { box-shadow: 0 3px 0 #0d1130; }
+.slot-carta .carta img { mask-image: linear-gradient(#000 70%, #000c 100%); }
+.carta-nivel { margin-top: 3px; font-family: 'Lilita One', 'Fredoka', sans-serif; font-size: 11px; color: #B5D4F4; }
+.carta-legenda.bloqueada { font-family: 'Lilita One', 'Fredoka', sans-serif; font-size: 11px; }
+
+/* Contorno feito com sombras (funciona em todos os navegadores) */
+.nome-3d {
+  -webkit-text-stroke: 0;
+  text-shadow:
+    2px 0 0 #1a1840, -2px 0 0 #1a1840, 0 2px 0 #1a1840, 0 -2px 0 #1a1840,
+    1.5px 1.5px 0 #1a1840, -1.5px 1.5px 0 #1a1840, 1.5px -1.5px 0 #1a1840, -1.5px -1.5px 0 #1a1840,
+    0 3.5px 0 #1a1840, 1.5px 3.5px 0 #1a1840, -1.5px 3.5px 0 #1a1840, 0 5px 4px #0009;
+}
