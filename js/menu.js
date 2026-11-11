@@ -536,7 +536,8 @@
 
     caixa.innerHTML = `<h2 class="titulo-secao"><span>Clãs</span></h2>
       <button class="btn-modal principal" id="criar-cla">＋ Criar meu clã</button>
-      <input class="busca" id="busca-cla" type="text" placeholder="Buscar clã" value="${esc(busca)}" />
+      <div class="busca-linha"><input class="busca" id="busca-cla" type="text" placeholder="Buscar clã" value="${esc(busca)}" />
+        <button class="btn-atualizar" id="atualizar-clas" title="Atualizar lista">🔄</button></div>
       <div class="lista-clas" id="lista-clas"><p class="aviso">Carregando clãs…</p></div>`;
     $('criar-cla').onclick = criarCla;
     let todos = [];
@@ -556,8 +557,15 @@
     };
     const campo = $('busca-cla');
     campo.oninput = () => { busca = campo.value; desenhar(); };
-    try { todos = await Cla.listar(); desenhar(); }
-    catch (e) { $('lista-clas').innerHTML = `<p class="aviso">${erroNuvem(e)}</p>`; }
+    const carregar = async () => {
+      const b = $('atualizar-clas');
+      b.classList.add('girando'); b.disabled = true;
+      try { todos = await Cla.listar(); desenhar(); }
+      catch (e) { $('lista-clas').innerHTML = `<p class="aviso">${erroNuvem(e)}</p>`; }
+      b.classList.remove('girando'); b.disabled = false;
+    };
+    $('atualizar-clas').onclick = async () => { await carregar(); UI.toast('Lista de clãs atualizada!'); };
+    await carregar();
   }
 
   function criarCla() {
@@ -592,10 +600,11 @@
     const membros = Object.entries(c.membros).map(([u, m]) => ({ u, ...m })).sort((a, b) => (b.trofeus || 0) - (a.trofeus || 0));
     const total = membros.reduce((a, m) => a + (m.trofeus || 0), 0);
     caixa.innerHTML = `<div class="cla-topo">${escudo(c)}<div><b>${esc(c.nome)}</b><span>${membros.length}/${Cla.MAX} membros · 🏆 ${fmt(total)}</span>${c.descricao ? `<small>${esc(c.descricao)}</small>` : ''}</div>
-        <button class="btn-peq perigo" id="sair-cla">Sair</button></div>
+        <div class="cla-botoes"><button class="btn-atualizar" id="atualizar-meu-cla" title="Atualizar">🔄</button><button class="btn-peq perigo" id="sair-cla">Sair</button></div></div>
       <div class="conta-abas cla-abas"><button data-aba="chat" class="${abaCla === 'chat' ? 'ativa' : ''}">💬 Chat</button><button data-aba="membros" class="${abaCla === 'membros' ? 'ativa' : ''}">👥 Membros</button></div>
       <div id="cla-aba"></div>`;
     caixa.querySelectorAll('.cla-abas button').forEach((b) => (b.onclick = () => { abaCla = b.dataset.aba; meuCla(caixa); }));
+    $('atualizar-meu-cla').onclick = () => { meuCla(caixa); UI.toast('Clã atualizado!'); };
     $('sair-cla').onclick = () => UI.modal({ titulo: 'Sair do clã?', html: `<p>Você vai sair de ${esc(c.nome)}.${souLider && membros.length > 1 ? ' Outro membro vira líder.' : ''}${membros.length === 1 ? ' Você é o último membro, então o clã será apagado.' : ''}</p>`,
       botoes: [{ texto: 'Ficar', classe: 'secundario' }, { texto: 'Sair', classe: 'perigo', acao: () => { Cla.sair().then(() => { UI.toast('Você saiu do clã'); cla(); }).catch((e) => UI.toast(erroNuvem(e))); } }] });
 

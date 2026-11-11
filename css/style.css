@@ -812,3 +812,9 @@ button.item-loja:active, button.slot-bau:active, .slot-carta:active { transform:
 .mod-toggle input:checked + span::after { transform: translateX(18px); }
 .mod-vel { display: flex; align-items: center; gap: 6px; font-size: 14px; }
 .mod-vel .ativo { background: #FAC775; color: #412402; border-bottom-color: #BA7517; }
+.busca-linha { display: flex; gap: 8px; align-items: flex-start; }
+.busca-linha .busca { flex: 1; }
+.btn-atualizar { width: 44px; height: 44px; flex-shrink: 0; border-radius: 10px; background: #534AB7; font-size: 20px; border-bottom: 3px solid #26215C; }
+.btn-atualizar.girando { animation: girar 0.8s linear infinite; }
+.cla-botoes { display: flex; gap: 6px; align-items: center; }
+.cla-botoes .btn-atualizar { width: 36px; height: 36px; font-size: 16px; }
