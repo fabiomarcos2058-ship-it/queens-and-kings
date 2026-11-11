@@ -7,7 +7,7 @@ Uso:
   python bot/baixar.py            baixa e gera as imagens
   python bot/baixar.py --listar   só lista os modelos de cada pacote em bot/catalogo.txt
 """
-import json, re, sys, zipfile, shutil, subprocess, tempfile, urllib.request
+import json, re, sys, zipfile, shutil, subprocess, tempfile, urllib.request, http.cookiejar
 from pathlib import Path
 from urllib.parse import urljoin, urlparse
 from PIL import Image, ImageDraw
@@ -26,8 +26,27 @@ def permitido(url):
     return any(host == s or host.endswith('.' + s) for s in CFG['sites_permitidos'])
 
 
-def abrir(url):
-    return urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=120)
+NAVEGADOR = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
+
+
+def abrir(url, referer=None):
+    cab = dict(UA, **({'Referer': referer} if referer else {}))
+    return NAVEGADOR.open(urllib.request.Request(url, headers=cab), timeout=180)
+
+
+def link_assinado(pagina, html):
+    # A Kenney gera um link novo a cada download (botão "Continue without donating")
+    ids = re.findall(r"data-download-id=['\"]([0-9a-fA-F]+)['\"]", html)
+    if not ids:
+        return None
+    r = abrir(urljoin(pagina, '/download-link/' + ids[0]), referer=pagina)
+    if 'zip' in (r.headers.get('Content-Type') or '') or r.geturl().lower().endswith('.zip'):
+        return r  # já é o arquivo
+    texto = r.read().decode('utf-8', 'ignore').replace('\\/', '/')
+    urls = re.findall(r'https?://[^"\'\s<>]+', texto)
+    zips = [u for u in urls if '.zip' in u.lower()] or urls
+    print('  resposta do link:', texto[:150].replace('\n', ' '))
+    return zips[0] if zips else None
 
 
 def pasta_do_pacote(nome):
@@ -38,16 +57,20 @@ def pasta_do_pacote(nome):
     if destino.exists():
         return destino
     html = abrir(info['pagina']).read().decode('utf-8', 'ignore')
+    assinado = link_assinado(info['pagina'], html)
     achados = re.findall(r'''["'(=]([^"'()\s<>]+?\.zip)''', html)
     zips = [z for z in dict.fromkeys(urljoin(info['pagina'], h.replace('\\/', '/')) for h in achados) if permitido(z)]
+    if assinado is not None:
+        zips = [assinado]
     if not zips:
         pistas = [l.strip()[:200] for l in html.splitlines() if 'download' in l.lower()][:15]
         print('  pistas na página:', *pistas, sep='\n    ')
         raise RuntimeError(f'{nome}: não achei o link de download na página')
-    print(f'  baixando {zips[0]}')
     destino.mkdir(parents=True)
     arq = destino / 'pacote.zip'
-    with abrir(zips[0]) as r, open(arq, 'wb') as f:
+    fonte = zips[0] if isinstance(zips[0], str) else None
+    print(f'  baixando {fonte or "(link direto)"}')
+    with (abrir(fonte, referer=info['pagina']) if fonte else zips[0]) as r, open(arq, 'wb') as f:
         shutil.copyfileobj(r, f)
     with zipfile.ZipFile(arq) as z:
         z.extractall(destino)
