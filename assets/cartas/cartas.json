@@ -9,8 +9,8 @@
       "tipo": "Mini",
       "descricao": "Sai do Barril de Minis.",
       "token": true,
-      "vida": 130,
-      "dano": 70,
+      "vida": 140,
+      "dano": 75,
       "velocidade": 70,
       "alcance": 14,
       "cadencia": 0.7,
@@ -34,8 +34,8 @@
         0,
         640
       ],
-      "vida": 320,
-      "dano": 126,
+      "vida": 300,
+      "dano": 120,
       "velocidade": 64,
       "alcance": 16,
       "cadencia": 0.8,
@@ -62,8 +62,8 @@
         120,
         620
       ],
-      "vida": 340,
-      "dano": 130,
+      "vida": 310,
+      "dano": 118,
       "velocidade": 64,
       "alcance": 16,
       "cadencia": 0.8,
@@ -104,7 +104,7 @@
       "descricao": "Pétalas cortantes que acertam todos numa área grande.",
       "feitico": true,
       "imagem": "chuva.svg",
-      "dano": 240,
+      "dano": 420,
       "area": 60,
       "trofeus": 0,
       "inicial": true
@@ -126,8 +126,8 @@
         20,
         600
       ],
-      "vida": 400,
-      "dano": 135,
+      "vida": 410,
+      "dano": 139,
       "velocidade": 46,
       "alcance": 115,
       "cadencia": 0.9,
@@ -154,8 +154,8 @@
         60,
         620
       ],
-      "vida": 420,
-      "dano": 144,
+      "vida": 500,
+      "dano": 170,
       "velocidade": 46,
       "alcance": 78,
       "cadencia": 1.0,
@@ -204,8 +204,8 @@
         0,
         600
       ],
-      "vida": 1050,
-      "dano": 144,
+      "vida": 1070,
+      "dano": 147,
       "velocidade": 40,
       "alcance": 16,
       "cadencia": 1.2,
@@ -230,8 +230,8 @@
         20,
         620
       ],
-      "vida": 1700,
-      "dano": 171,
+      "vida": 1930,
+      "dano": 194,
       "velocidade": 34,
       "alcance": 16,
       "cadencia": 1.4,
@@ -248,7 +248,7 @@
       "descricao": "Uma lanterna em chamas que explode com muito dano.",
       "feitico": true,
       "imagem": "lanterna.svg",
-      "dano": 576,
+      "dano": 680,
       "area": 42,
       "trofeus": 0,
       "inicial": true
@@ -270,8 +270,8 @@
         20,
         600
       ],
-      "vida": 700,
-      "dano": 230,
+      "vida": 1000,
+      "dano": 328,
       "velocidade": 44,
       "alcance": 75,
       "cadencia": 1.6,
@@ -322,8 +322,8 @@
         120,
         600
       ],
-      "vida": 820,
-      "dano": 200,
+      "vida": 860,
+      "dano": 210,
       "velocidade": 54,
       "alcance": 16,
       "cadencia": 0.9,
@@ -331,7 +331,7 @@
       "trofeus": 60,
       "habilidade": {
         "nome": "Cura Suave",
-        "custo": 1,
+        "custo": 2,
         "tipo": "cura",
         "recarga": 10,
         "descricao": "Recupera metade da vida."
@@ -355,8 +355,8 @@
         160,
         500
       ],
-      "vida": 600,
-      "dano": 198,
+      "vida": 750,
+      "dano": 249,
       "velocidade": 44,
       "alcance": 72,
       "cadencia": 1.6,
@@ -380,8 +380,8 @@
         380,
         480
       ],
-      "vida": 680,
-      "dano": 165,
+      "vida": 690,
+      "dano": 168,
       "velocidade": 52,
       "alcance": 18,
       "cadencia": 1.0,
@@ -420,8 +420,8 @@
         0,
         611
       ],
-      "vida": 450,
-      "dano": 153,
+      "vida": 490,
+      "dano": 167,
       "velocidade": 48,
       "alcance": 76,
       "cadencia": 1.0,
@@ -445,8 +445,8 @@
         0,
         620
       ],
-      "vida": 650,
-      "dano": 216,
+      "vida": 730,
+      "dano": 244,
       "velocidade": 46,
       "alcance": 70,
       "cadencia": 1.5,
@@ -470,8 +470,8 @@
         20,
         600
       ],
-      "vida": 780,
-      "dano": 270,
+      "vida": 790,
+      "dano": 273,
       "velocidade": 62,
       "alcance": 18,
       "cadencia": 1.1,
@@ -482,7 +482,8 @@
         "custo": 2,
         "tipo": "golpes",
         "recarga": 10,
-        "descricao": "Os próximos 3 golpes causam o triplo de dano."
+        "descricao": "Os próximos 3 golpes causam 2,5x de dano.",
+        "mult": 2.5
       }
     },
     {
@@ -502,8 +503,8 @@
         10,
         620
       ],
-      "vida": 880,
-      "dano": 210,
+      "vida": 1010,
+      "dano": 241,
       "velocidade": 50,
       "alcance": 18,
       "cadencia": 1.0,
@@ -528,8 +529,8 @@
         20,
         480
       ],
-      "vida": 460,
-      "dano": 155,
+      "vida": 480,
+      "dano": 162,
       "velocidade": 50,
       "alcance": 78,
       "cadencia": 0.9,
@@ -552,8 +553,8 @@
         200,
         620
       ],
-      "vida": 920,
-      "dano": 200,
+      "vida": 1000,
+      "dano": 218,
       "velocidade": 48,
       "alcance": 16,
       "cadencia": 1.05,
@@ -565,7 +566,7 @@
         "tipo": "furia",
         "duracao": 5,
         "recarga": 12,
-        "descricao": "Por 5s causa +40% de dano e fica um pouco mais rápido."
+        "descricao": "Por 5s ataca mais rápido, anda mais rápido e causa +30% de dano."
       }
     },
     {
@@ -586,8 +587,8 @@
         0,
         399
       ],
-      "vida": 950,
-      "dano": 225,
+      "vida": 1020,
+      "dano": 242,
       "velocidade": 50,
       "alcance": 16,
       "cadencia": 1.0,
@@ -611,8 +612,8 @@
         0,
         620
       ],
-      "vida": 750,
-      "dano": 306,
+      "vida": 850,
+      "dano": 346,
       "velocidade": 44,
       "alcance": 75,
       "cadencia": 1.7,
@@ -644,8 +645,8 @@
         0,
         640
       ],
-      "vida": 1100,
-      "dano": 260,
+      "vida": 1310,
+      "dano": 309,
       "velocidade": 50,
       "alcance": 20,
       "cadencia": 1.1,
@@ -656,7 +657,8 @@
         "custo": 2,
         "tipo": "golpes",
         "recarga": 11,
-        "descricao": "Os próximos 2 golpes causam o dobro de dano e atingem em pequena área."
+        "descricao": "Os próximos 3 golpes causam 2,5x de dano.",
+        "mult": 2.5
       }
     },
     {
@@ -676,8 +678,8 @@
         0,
         600
       ],
-      "vida": 720,
-      "dano": 300,
+      "vida": 990,
+      "dano": 413,
       "velocidade": 40,
       "alcance": 72,
       "cadencia": 1.8,
@@ -703,8 +705,8 @@
         0,
         446
       ],
-      "vida": 1800,
-      "dano": 414,
+      "vida": 1630,
+      "dano": 375,
       "velocidade": 46,
       "alcance": 18,
       "cadencia": 1.3,
@@ -716,7 +718,7 @@
         "tipo": "furia",
         "duracao": 6,
         "recarga": 12,
-        "descricao": "Por 6s fica mais rápida e causa +60% de dano."
+        "descricao": "Por 6s ataca mais rápido, anda mais rápido e causa +30% de dano."
       }
     },
     {
@@ -736,8 +738,8 @@
         10,
         620
       ],
-      "vida": 1600,
-      "dano": 380,
+      "vida": 1570,
+      "dano": 373,
       "velocidade": 48,
       "alcance": 20,
       "cadencia": 1.2,
@@ -750,7 +752,7 @@
         "tipo": "furia",
         "duracao": 6,
         "recarga": 14,
-        "descricao": "Por 6s causa +70% de dano e seus ataques atingem em área."
+        "descricao": "Por 6s ataca mais rápido, anda mais rápido e causa +30% de dano."
       }
     },
     {
@@ -782,10 +784,10 @@
         "tipo": "adaptar",
         "intervalo": 1,
         "max": 15,
-        "dano": 0.07,
-        "vel": 0.03,
-        "defesa": 0.025,
-        "descricao": "A cada 1 segundo em campo ganha +7% de dano, +3% de velocidade e 2,5% de resistência (até 15 vezes: mais que o dobro do dano no fim!)."
+        "dano": 0.05,
+        "vel": 0.02,
+        "defesa": 0.02,
+        "descricao": "A cada 1 segundo em campo ganha +5% de dano, +2% de velocidade e 2% de resistência (até 15 vezes: +75% de dano no fim!)."
       }
     },
     {
@@ -806,8 +808,8 @@
         60,
         600
       ],
-      "vida": 540,
-      "dano": 115,
+      "vida": 450,
+      "dano": 96,
       "velocidade": 125,
       "alcance": 18,
       "cadencia": 0.8,
@@ -831,8 +833,8 @@
         300,
         640
       ],
-      "vida": 1050,
-      "dano": 275,
+      "vida": 1010,
+      "dano": 266,
       "velocidade": 54,
       "alcance": 22,
       "cadencia": 1.0,
@@ -844,7 +846,7 @@
         "custo": 3,
         "recarga": 14,
         "duracao": 6,
-        "descricao": "Por 6s fica muito mais rápido e causa +60% de dano."
+        "descricao": "Por 6s ataca mais rápido, anda mais rápido e causa +30% de dano."
       }
     },
     {
@@ -865,8 +867,8 @@
         480,
         600
       ],
-      "vida": 880,
-      "dano": 250,
+      "vida": 1000,
+      "dano": 283,
       "velocidade": 46,
       "alcance": 75,
       "cadencia": 1.4,
@@ -877,10 +879,10 @@
         "tipo": "congelar",
         "custo": 2,
         "recarga": 13,
-        "duracao": 2.5,
+        "duracao": 2,
         "raio": 95,
         "dano": 120,
-        "descricao": "Congela as tropas inimigas perto do alvo por 2,5s (elas não andam nem atacam)."
+        "descricao": "Congela as tropas inimigas perto do alvo por 2s (elas não andam nem atacam)."
       }
     },
     {
@@ -901,8 +903,8 @@
         130,
         620
       ],
-      "vida": 1700,
-      "dano": 390,
+      "vida": 1680,
+      "dano": 386,
       "velocidade": 50,
       "alcance": 20,
       "cadencia": 1.1,
@@ -910,9 +912,10 @@
       "habilidade": {
         "nome": "Punho Meteoro",
         "tipo": "golpes",
-        "custo": 2,
+        "custo": 3,
         "recarga": 11,
-        "descricao": "Os próximos 3 golpes causam o triplo de dano."
+        "descricao": "Os próximos 3 golpes causam 2,2x de dano.",
+        "mult": 2.2
       }
     },
     {
@@ -933,8 +936,8 @@
         250,
         560
       ],
-      "vida": 2200,
-      "dano": 420,
+      "vida": 2100,
+      "dano": 401,
       "velocidade": 44,
       "alcance": 20,
       "cadencia": 1.25,
@@ -945,8 +948,8 @@
         "tipo": "kamehameha",
         "custo": 3,
         "recarga": 14,
-        "dano": 1300,
-        "descricao": "Dispara um Kamehameha gigante que atravessa tudo em linha reta."
+        "dano": 950,
+        "descricao": "Dispara um Kamehameha que atravessa tudo em linha reta (metade do dano nas torres)."
       }
     },
     {
@@ -967,8 +970,8 @@
         60,
         600
       ],
-      "vida": 1600,
-      "dano": 380,
+      "vida": 1550,
+      "dano": 367,
       "velocidade": 54,
       "alcance": 22,
       "cadencia": 1.0,
@@ -976,9 +979,10 @@
       "habilidade": {
         "nome": "Espada Espiritual",
         "tipo": "golpes",
-        "custo": 2,
+        "custo": 3,
         "recarga": 10,
-        "descricao": "Os próximos 3 golpes causam o triplo de dano."
+        "descricao": "Os próximos 3 golpes causam 2,2x de dano.",
+        "mult": 2.2
       }
     },
     {
@@ -999,8 +1003,8 @@
         100,
         620
       ],
-      "vida": 2000,
-      "dano": 450,
+      "vida": 1900,
+      "dano": 427,
       "velocidade": 48,
       "alcance": 20,
       "cadencia": 1.15,
@@ -1012,7 +1016,7 @@
         "custo": 3,
         "recarga": 15,
         "duracao": 7,
-        "descricao": "Por 7s fica muito mais rápido e causa +60% de dano."
+        "descricao": "Por 7s ataca mais rápido, anda mais rápido e causa +30% de dano."
       }
     },
     {

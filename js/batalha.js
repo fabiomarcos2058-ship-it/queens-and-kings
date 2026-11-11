@@ -478,7 +478,7 @@ const Batalha = (() => {
     t.recarga = h.recarga || 10;
     efeito(`ativou ${t.time}`, t.x, t.y, 700);
     if (s.rede) s.eventos.push(['a', Math.round(t.x), Math.round(t.y), t.time === 'azul' ? 0 : 1]);
-    if (h.tipo === 'golpes') { t.golpesFortes = 3; t.el.classList.add('aura-golpes'); }
+    if (h.tipo === 'golpes') { t.golpesFortes = 3; t.multGolpes = h.mult || 2.5; t.el.classList.add('aura-golpes'); }
     if (h.tipo === 'furia') { t.furia = h.duracao || 6; t.el.classList.add('aura-furia'); }
     if (h.tipo === 'fenix') { t.fenix = h.duracao || 10; t.el.classList.add('aura-fenix'); }
     if (h.tipo === 'cura') {
@@ -617,7 +617,7 @@ const Batalha = (() => {
       else { px = bx; py = ladoAlvo === 'cima' ? RIO_TOPO - 16 : RIO_BASE + 16; }
     }
     const dx = px - t.x, dy = py - t.y, d0 = Math.hypot(dx, dy) || 1;
-    const passo = Math.min(d0, t.vel * (t.furia > 0 ? 1.4 : 1) * dt);
+    const passo = Math.min(d0, t.vel * (t.furia > 0 ? 1.25 : 1) * dt);
     let vx = dx / d0, vy = dy / d0;
     // se tem uma torre no caminho (que não é o alvo), desvia pelo lado mais curto
     for (const e of s.ent) {
@@ -645,8 +645,8 @@ const Batalha = (() => {
   function danoDe(a) {
     if (a.torre) return a.dano;
     let d0 = a.dano;
-    if (a.furia > 0) d0 *= 1.6;
-    if (a.golpesFortes > 0) { d0 *= 3; a.golpesFortes--; if (!a.golpesFortes) a.el.classList.remove('aura-golpes'); }
+    if (a.furia > 0) d0 *= 1.3;
+    if (a.golpesFortes > 0) { d0 *= a.multGolpes || 2.5; a.golpesFortes--; if (!a.golpesFortes) a.el.classList.remove('aura-golpes'); }
     return Math.round(d0);
   }
 
@@ -1134,7 +1134,7 @@ const Batalha = (() => {
       if (!t.alvo) continue;
       const alcance = t.alcance + t.alvo.raio + t.raio;
       if (dist(t, t.alvo) <= alcance) {
-        if (t.cd <= 0) { atacar(t, t.alvo); t.cd = t.cadencia * (t.furia > 0 ? 0.65 : 1); }
+        if (t.cd <= 0) { atacar(t, t.alvo); t.cd = t.cadencia * (t.furia > 0 ? 0.8 : 1); }
       } else {
         moverPara(t, t.alvo, dt);
       }
