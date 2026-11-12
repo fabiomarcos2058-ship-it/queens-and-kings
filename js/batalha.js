@@ -2124,7 +2124,13 @@ const Batalha = (() => {
     if (!s || s.acabou || !s.rede) return;
     const D = s.dupla;
     const quem = D ? (cmd.lado && s.jogadores && s.jogadores[cmd.lado] ? cmd.lado : 'azul2') : 'vermelho', time = timeDe(quem);
-    if (D && s.ias.includes(quem)) return; // a vaga virou IA
+    // a vaga tinha virado IA (a internet dele caiu), mas ele continua jogando: devolve o controle
+    if (D && s.ias.includes(quem)) {
+      s.ias = s.ias.filter((l) => l !== quem);
+      const nome = (s.nomes && s.nomes[quem]) || 'Seu parceiro';
+      if (quem === 'azul2' && s.nomeParceiro) s.nomeParceiro = s.nomeParceiro.replace(/ \(IA\)$/, '');
+      UI.toast(`${nome} voltou! 🎮`);
+    }
     const vira = time === 'vermelho'; // quem joga do time vermelho vê a arena virada
     const x = vira ? W - cmd.x : cmd.x, y = vira ? H - cmd.y : cmd.y;
     if (cmd.tipo === 'emote') { emote(quem, cmd.id); return; }
@@ -2145,10 +2151,11 @@ const Batalha = (() => {
     if (!s || s.acabou) return;
     if (s.dupla && !s.convidado) {
       // alguém saiu: a IA assume as cartas dele
-      if (!s.ias.includes(quem)) s.ias.push(quem);
+      if (s.ias.includes(quem)) return;
+      s.ias.push(quem);
       const nome = (s.nomes && s.nomes[quem]) || s.nomeParceiro || 'Um jogador';
       UI.toast(`${nome} saiu. A IA assumiu as cartas! 🤖`);
-      if (quem === 'azul2') s.nomeParceiro = `${s.nomeParceiro} (IA)`;
+      if (quem === 'azul2' && !/ \(IA\)$/.test(s.nomeParceiro || '')) s.nomeParceiro = `${s.nomeParceiro} (IA)`;
       return;
     }
     UI.toast(s.dupla ? 'Seu parceiro saiu da partida!' : 'Seu adversário saiu da partida!');

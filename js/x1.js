@@ -27,6 +27,16 @@ const X1 = (() => {
   }
   const novoCodigo = () => Array.from({ length: 4 }, () => 'ABCDEFGHJKLMNPQRSTUVWXYZ'[Math.floor(Math.random() * 24)]).join('');
 
+  // A internet do celular pisca (tela bloqueada, Wi-Fi → 4G...). O Firebase acha que a pessoa saiu,
+  // mas ela volta em segundos. Por isso: quem volta se recoloca na sala, e o host espera antes de agir.
+  const ESPERA_SAIU = 9000;
+  function vigiarConexao(aoVoltar) {
+    let caiu = false;
+    desligar.push(m.onValue(r('.info/connected'), (snap) => {
+      if (snap.val() === false) { caiu = true; return; }
+      if (caiu) { caiu = false; aoVoltar(); }
+    }));
+  }
   function limpar() { desligar.forEach((f) => { try { f(); } catch (e) { /* nada */ } }); desligar = []; }
 
   // ---------- Host ----------
@@ -51,7 +61,14 @@ const X1 = (() => {
   async function comecar(convidado, fim) {
     await m.update(r(`salas/${sala}`), { status: 'jogando' });
     desligar.push(m.onChildAdded(r(`salas/${sala}/cmds`), (snap) => Batalha.comandoRemoto(snap.val())));
-    desligar.push(m.onValue(r(`salas/${sala}/convidado/saiu`), (snap) => { if (snap.val()) Batalha.adversarioSaiu(); }));
+    const codX1 = sala;
+    desligar.push(m.onValue(r(`salas/${codX1}/convidado/saiu`), (snap) => {
+      if (!snap.val()) return;
+      setTimeout(async () => {
+        const v = await m.get(r(`salas/${codX1}/convidado/saiu`)).catch(() => null);
+        if (v && v.val()) Batalha.adversarioSaiu(); // continua fora depois da espera: saiu de verdade
+      }, ESPERA_SAIU);
+    }));
     let enviando = false;
     Batalha.iniciar({
       modo: modoSala === '2v2' ? '2v2' : 'x1', fim,
@@ -76,7 +93,15 @@ const X1 = (() => {
     await m.update(r(`salas/${sala}`), { status: 'jogando' });
     desligar.push(m.onChildAdded(r(`salas/${sala}/cmds`), (snap) => Batalha.comandoRemoto(snap.val())));
     // quem sair no meio vira IA
-    desligar.push(m.onChildRemoved(r(`salas/${sala}/vagas`), (snap) => { if (snap.key !== 'azul') Batalha.adversarioSaiu(snap.key); }));
+    const cod2 = sala;
+    desligar.push(m.onChildRemoved(r(`salas/${cod2}/vagas`), (snap) => {
+      if (snap.key === 'azul') return;
+      const lado = snap.key;
+      setTimeout(async () => {
+        const v = await m.get(r(`salas/${cod2}/vagas/${lado}`)).catch(() => null);
+        if (v && !v.exists()) Batalha.adversarioSaiu(lado); // não voltou: a IA assume
+      }, ESPERA_SAIU);
+    }));
     let enviando = false;
     Batalha.iniciar({
       modo: '2v2', fim, ranque: extra.ranque || null,
@@ -102,6 +127,7 @@ const X1 = (() => {
       return v;
     });
     if (!res.committed || !novo) return false;
+    m.onDisconnect(r(`salas/${sala}/vagas/${meuLado}`)).cancel().catch(() => {}); // senão a queda da vaga antiga apagaria quem entrou nela
     meuLado = novo;
     m.onDisconnect(r(`salas/${sala}/vagas/${meuLado}`)).remove();
     return meuLado;
@@ -120,6 +146,13 @@ const X1 = (() => {
     sala = cod; souHost = false; modoSala = 'x1'; meuLado = null;
     await m.set(r(`salas/${cod}/convidado`), perfil());
     m.onDisconnect(r(`salas/${cod}/convidado/saiu`)).set(true);
+    vigiarConexao(async () => {
+      if (sala !== cod) return;
+      const ex = await m.get(r(`salas/${cod}/status`)).catch(() => null);
+      if (!ex || !ex.exists()) return;
+      await m.set(r(`salas/${cod}/convidado/saiu`), false).catch(() => {});
+      m.onDisconnect(r(`salas/${cod}/convidado/saiu`)).set(true);
+    });
     let comecou = false;
     desligar.push(m.onValue(r(`salas/${cod}/status`), (s) => {
       if (s.val() === 'jogando' && !comecou) { comecou = true; aoComecar(v.host); }
@@ -144,6 +177,13 @@ const X1 = (() => {
     if (!res.committed || !pegou) throw new Error(v.host.ranq ? 'Essa dupla da ranqueada já está completa.' : 'Essa sala já está cheia (4 jogadores).');
     sala = cod; souHost = false; modoSala = '2v2'; meuLado = pegou; salaRanq = !!v.host.ranq;
     m.onDisconnect(r(`salas/${cod}/vagas/${meuLado}`)).remove();
+    vigiarConexao(async () => {
+      if (sala !== cod || !meuLado) return;
+      const ex = await m.get(r(`salas/${cod}/status`)).catch(() => null);
+      if (!ex || !ex.exists()) return; // a sala já acabou
+      await m.set(r(`salas/${cod}/vagas/${meuLado}`), perfil()).catch(() => {});
+      m.onDisconnect(r(`salas/${cod}/vagas/${meuLado}`)).remove();
+    });
     let comecou = false;
     desligar.push(m.onValue(r(`salas/${cod}/vagas`), (snap) => aoMudarVagas && aoMudarVagas(snap.val() || {}, meuLado)));
     let procurou = false;
