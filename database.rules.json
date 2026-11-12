@@ -17,6 +17,17 @@
           }
         }
       }
+    },
+    "aoVivo": {
+      "$uid": {
+        ".read": "auth != null",
+        ".write": "auth != null && auth.uid === $uid",
+        "assistindo": {
+          "$quem": {
+            ".write": "auth != null && auth.uid === $quem"
+          }
+        }
+      }
     }
   }
 }

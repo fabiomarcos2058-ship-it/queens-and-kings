@@ -383,7 +383,7 @@ const RanqueUI = (() => {
   }
 
   // ---------- histórico de batalhas ----------
-  const MODOS = { normal: '⚔️ Batalha', elixir2x: '⚡ Elixir em dobro', x1: '🤺 X1', '2v2': '🤝 2v2', ranq: '🏅 Ranqueada', ranq2v2: '🏅 Ranqueada 2v2' };
+  const MODOS = { normal: '⚔️ Batalha', elixir2x: '⚡ Elixir em dobro', x1: '🤺 X1', '2v2': '🤝 2v2', ranq: '🏅 Ranqueada', ranq2v2: '🏅 Ranqueada 2v2', evento: '🎪 Evento', tutorial: '🎓 Tutorial' };
   function quando(t) {
     const s = (Date.now() - t) / 1000;
     if (s < 60) return 'agora';

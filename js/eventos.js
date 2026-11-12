@@ -1,0 +1,189 @@
+// Modos de evento (mudam todo dia) + Festival das Quíntuplas (o desafio que dá a Nino Nakano).
+const Eventos = (() => {
+  const $ = (id) => document.getElementById(id);
+  const esc = (t) => String(t ?? '').replace(/[&<>"]/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
+
+  const MODOS = {
+    triplo: { nome: 'Elixir Triplo', ic: '⚡', cor: 'roxo', desc: 'O elixir enche 3x mais rápido o jogo inteiro. Caos total!', cfg: { elixirMult: 3 } },
+    subita: { nome: 'Morte Súbita', ic: '💀', cor: 'vermelho', desc: '2 minutos, elixir em dobro e a primeira torre derrubada vence.', cfg: { subita: true } },
+    draft: { nome: 'Draft', ic: '🎲', cor: 'verde', desc: 'Escolha 1 de 2 cartas, 8 vezes. A que você não pegar vai pro rival! Tudo no nível 7.', cfg: { nivel: 7 } },
+    lendarias: { nome: 'Só Lendárias', ic: '👑', cor: 'dourado', desc: 'Os dois decks são 8 lendárias sorteadas, todas no nível 7.', cfg: { nivel: 7 } },
+    espelho: { nome: 'Espelho', ic: '🪞', cor: 'azul', desc: 'O rival joga com o SEU deck, nos mesmos níveis. Quem joga melhor?', cfg: {} },
+    turbo: { nome: 'Turbo', ic: '🏎️', cor: 'laranja', desc: 'Todas as tropas andam 40% e atacam 30% mais rápido.', cfg: { turbo: true } },
+  };
+  const RODIZIO = ['triplo', 'draft', 'subita', 'lendarias', 'turbo', 'espelho'];
+  const diaN = () => { const t = new Date(); return Math.floor((t.getTime() - t.getTimezoneOffset() * 60000) / 86400000); };
+  const modosDeHoje = () => { const n = diaN(); return [RODIZIO[(n * 2) % RODIZIO.length], RODIZIO[(n * 2 + 1) % RODIZIO.length]]; };
+  const horasAteAmanha = () => 24 - new Date().getHours();
+
+  // ---------- Festival das Quíntuplas (Desafio da Nino) ----------
+  const NINO = 'nino_nakano';
+  const FIM_FESTIVAL = new Date(2026, 10, 26, 23, 59, 59); // 26/11/2026
+  const VITORIAS = 5, VIDAS = 3, PRECO_NOVA = 10;
+  const PREMIOS = [{ ouro: 300 }, { gemas: 20 }, { bau: 'prata' }, { gemas: 40 }, { carta: NINO }];
+  const festivalAberto = () => Date.now() < FIM_FESTIVAL.getTime();
+  const diasFestival = () => Math.max(0, Math.ceil((FIM_FESTIVAL.getTime() - Date.now()) / 86400000));
+  function nino() {
+    const d = Estado.d;
+    if (!d.festivalNino) d.festivalNino = { v: 0, l: 0, tentativas: 0, ativo: false };
+    return d.festivalNino;
+  }
+  const txtPremio = (p) => p.ouro ? `${p.ouro} 🪙` : p.gemas ? `${p.gemas} 💎` : p.bau ? `Baú de ${p.bau}` : p.carta ? 'NINO!' : '';
+
+  // ---------- montar o deck de cada modo ----------
+  const embaralhar = (a) => { const b = [...a]; for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [b[i], b[j]] = [b[j], b[i]]; } return b; };
+  const pool = (filtro = () => true) => Estado.catalogo().filter((c) => !c.token && !c.exclusivo && filtro(c));
+
+  function draft(pronto) {
+    const cartas = embaralhar(pool()).slice(0, 16);
+    const meu = [], rival = [];
+    let r = 0;
+    const md = UI.modal({ titulo: '🎲 Draft', classe: 'modal-draft', html: '<div id="draft-corpo"></div>', botoes: [{ texto: 'Desistir' }] });
+    const corpo = md.el.querySelector('#draft-corpo');
+    const passo = () => {
+      if (r >= 8) { md.fechar(); pronto(meu.map((c) => c.id), rival.map((c) => c.id)); return; }
+      const par = [cartas[r * 2], cartas[r * 2 + 1]];
+      corpo.innerHTML = `<p class="draft-dica">Rodada <b>${r + 1}/8</b> · escolha uma. A outra vai pro rival!</p>
+        <div class="draft-par">${par.map((c, i) => `<button class="draft-op" data-i="${i}">${Cartas.html(c, { mini: true })}<b>${esc(c.nome)}</b></button>`).join('<span class="draft-vs">ou</span>')}</div>
+        <div class="draft-decks"><div><small>Seu deck</small><div class="draft-mini">${meu.map((c) => `<img src="${Cartas.arte(c)}" alt="" />`).join('')}</div></div>
+        <div><small>Rival</small><div class="draft-mini rival">${rival.map((c) => `<img src="${Cartas.arte(c)}" alt="" />`).join('')}</div></div></div>`;
+      corpo.querySelectorAll('.draft-op').forEach((b) => (b.onclick = () => {
+        const i = +b.dataset.i;
+        meu.push(par[i]); rival.push(par[1 - i]); r++;
+        passo();
+      }));
+    };
+    passo();
+  }
+
+  // começa uma batalha de evento
+  function jogarModo(id, iniciar) {
+    const m = MODOS[id];
+    if (!m) return;
+    const ev = { id, nome: m.nome, ...m.cfg };
+    if (id === 'draft') return draft((meu, rival) => iniciar({ ...ev, deck: meu, deckIA: rival }));
+    if (id === 'lendarias') {
+      const l = embaralhar(pool((c) => c.raridade === 'lendaria'));
+      ev.deck = l.slice(0, 8).map((c) => c.id);
+      ev.deckIA = (l.length >= 16 ? l.slice(8, 16) : embaralhar(l).slice(0, 8)).map((c) => c.id);
+    }
+    if (id === 'espelho') {
+      ev.deckIA = [...Estado.d.deck];
+      ev.niveisV = Object.fromEntries(Estado.d.deck.map((c) => [c, Estado.d.colecao[c].nivel]));
+    }
+    iniciar(ev);
+  }
+  function jogarFestival(iniciar) {
+    const f = nino();
+    if (!festivalAberto()) { UI.toast('O festival já acabou 😢'); return; }
+    if (!f.ativo) {
+      // primeira tentativa é grátis; depois custa gemas
+      if (f.tentativas > 0) {
+        if (Estado.d.gemas < PRECO_NOVA) { UI.toast(`Precisa de ${PRECO_NOVA} gemas para tentar de novo`); return; }
+        Estado.d.gemas -= PRECO_NOVA;
+      }
+      f.ativo = true; f.v = 0; f.l = 0; f.tentativas++;
+      Estado.salvar();
+    }
+    // cada vitória deixa o rival mais esperto
+    iniciar({ id: 'festival', nome: `Festival das Quíntuplas · ${f.v + 1}ª batalha`, dif: Math.min(5, 2 + f.v), festival: true });
+  }
+
+  // ---------- tela (dentro da aba Eventos) ----------
+  function html() {
+    const f = nino();
+    const temNino = Estado.tem(NINO);
+    const hoje = modosDeHoje();
+    const pips = Array.from({ length: VITORIAS }, (_, i) => `<span class="fn-pip${i < f.v ? ' ok' : ''}${i === VITORIAS - 1 ? ' final' : ''}" title="${txtPremio(PREMIOS[i])}">${i === VITORIAS - 1 ? '<img src="assets/cartas/nino_nakano_medalhao.png" alt="" />' : i + 1}</span>`).join('');
+    const vidas = Array.from({ length: VIDAS }, (_, i) => `<i class="${i < VIDAS - f.l ? '' : 'perdida'}">❤️</i>`).join('');
+    const botaoF = !festivalAberto() ? '<div class="selo">Encerrado</div>'
+      : f.ativo ? `<button class="selo botao fn-jogar" id="fn-jogar">Jogar ${f.v + 1}ª batalha</button>`
+      : `<button class="selo botao fn-jogar" id="fn-jogar">${f.tentativas ? `Tentar de novo · ${PRECO_NOVA} 💎` : 'Começar (grátis)'}</button>`;
+    const festival = `<div class="banner-nino">
+        <video src="assets/cartas/videos/nino_nakano.mp4" autoplay muted loop playsinline></video>
+        <div class="bn-conteudo">
+          <small class="bn-tag">EVENTO ESPECIAL · ${diasFestival()} dia${diasFestival() === 1 ? '' : 's'}</small>
+          <b>🎀 Festival das Quíntuplas</b>
+          <span>${temNino ? 'Você já tem a <b>Nino Nakano</b>! Jogue de novo pelos prêmios.' : `Vença <b>${VITORIAS}</b> batalhas antes de perder ${VIDAS} e ganhe a <b>Nino Nakano</b> (Lendária só de evento, nível 5)!`}</span>
+          <div class="fn-pips">${pips}</div>
+          <div class="fn-linha"><div class="fn-vidas">${vidas}</div>${botaoF}</div>
+          <button class="fn-ver" id="fn-ver">Ver a carta da Nino</button>
+        </div>
+      </div>`;
+    const modos = hoje.map((id) => { const m = MODOS[id]; return `<div class="evento modo-ev ${m.cor}"><span class="modo-ic">${m.ic}</span><div><b>${m.nome}</b><span>${m.desc}</span><small class="modo-tempo">Troca em ${horasAteAmanha()}h · vitória = 60 🪙</small></div><button class="selo botao" data-modo="${id}">Jogar</button></div>`; }).join('');
+    return `${festival}<div class="eventos-cab">🎪 Modos de hoje</div>${modos}`;
+  }
+  function ligar(raiz, { iniciar, verCarta }) {
+    raiz.querySelectorAll('[data-modo]').forEach((b) => (b.onclick = () => jogarModo(b.dataset.modo, iniciar)));
+    const j = raiz.querySelector('#fn-jogar');
+    if (j) j.onclick = () => jogarFestival(iniciar);
+    const v = raiz.querySelector('#fn-ver');
+    if (v) v.onclick = () => verCarta(Estado.carta(NINO));
+  }
+
+  // ---------- fim de uma batalha de evento ----------
+  function revelarNino(c) {
+    const el = document.createElement('div');
+    el.className = 'revela-evo revela-nino';
+    el.innerHTML = `<div class="re-raios"></div><div class="re-conteudo">
+        <small>LENDÁRIA EXCLUSIVA DE EVENTO</small>
+        <div class="rn-palco">${Cartas.html(c, { mini: true })}</div>
+        <b>${esc(c.nome)}</b>
+        <p>"Hmph… n-não é como se eu quisesse entrar no seu deck… mas já que você venceu, eu vou."</p>
+        <button class="btn-modal principal">Bem-vinda, Nino! 🎀</button></div>`;
+    $('app').appendChild(el);
+    try { navigator.vibrate && navigator.vibrate([80, 50, 160]); } catch (e) { /* nada */ }
+    el.querySelector('button').onclick = () => { el.classList.add('sumir'); setTimeout(() => el.remove(), 300); };
+  }
+  function darPremio(p, mostrarBau) {
+    const d = Estado.d;
+    if (p.ouro) d.ouro += p.ouro;
+    if (p.gemas) d.gemas += p.gemas;
+    Estado.salvar();
+    if (p.bau) mostrarBau(p.bau, Estado.abrirBau(p.bau));
+    if (p.carta) {
+      if (Estado.tem(p.carta)) { d.gemas += 100; Estado.salvar(); UI.toast('Você já tinha a Nino: +100 💎'); }
+      else revelarNino(Ranque.darEvolucao(p.carta));
+    }
+  }
+  function fim(r, { mostrarBau, tudo }) {
+    const ev = r.evento || {};
+    const ganhou = r.resultado === 'vitoria';
+    const d = Estado.d;
+    if (ev.festival) {
+      const f = nino();
+      let msg;
+      if (ganhou) {
+        const premio = PREMIOS[f.v];
+        f.v++;
+        msg = `Vitória ${f.v}/${VITORIAS}! Prêmio: <b>${txtPremio(premio)}</b>`;
+        if (f.v >= VITORIAS) { f.ativo = false; msg = 'Você completou o Festival das Quíntuplas! 🎀'; }
+        Estado.salvar();
+        UI.modal({ titulo: ganhou ? '🎀 Venceu!' : 'Fim', html: `<p class="ev-res">${msg}</p>`, botoes: [{ texto: 'Pegar', classe: 'principal', acao: () => { darPremio(premio, mostrarBau); tudo(); } }] });
+        return;
+      }
+      if (r.resultado === 'derrota') f.l++;
+      const acabou = f.l >= VIDAS;
+      if (acabou) f.ativo = false;
+      Estado.salvar();
+      UI.modal({
+        titulo: acabou ? '💔 Fim do desafio' : r.resultado === 'empate' ? 'Empate!' : 'Derrota',
+        html: `<p class="ev-res">${acabou ? `Você chegou a <b>${f.v}</b> vitória${f.v === 1 ? '' : 's'}. Dá pra tentar de novo por ${PRECO_NOVA} 💎!` : r.resultado === 'empate' ? 'Empate não conta. Bora de novo!' : `Ainda restam <b>${VIDAS - f.l}</b> vida${VIDAS - f.l === 1 ? '' : 's'}.`}</p>`,
+        botoes: [{ texto: 'OK', classe: 'principal', acao: () => tudo() }],
+      });
+      return;
+    }
+    // modos normais de evento: um pouco de ouro, sem troféus
+    const ouro = ganhou ? 60 : r.resultado === 'empate' ? 30 : 15;
+    d.ouro += ouro;
+    if (ganhou) d.vitorias++; else if (r.resultado === 'derrota') d.derrotas++;
+    Estado.salvar();
+    UI.modal({
+      titulo: ganhou ? `🎉 Vitória no ${esc(ev.nome)}!` : r.resultado === 'empate' ? 'Empate!' : `Derrota no ${esc(ev.nome)}`,
+      html: `<p class="ev-res">${r.coroas} 👑 x ${r.coroasInimigo} 👑<br />+${ouro} 🪙</p>`,
+      botoes: [{ texto: 'OK', classe: 'principal', acao: () => tudo() }],
+    });
+  }
+
+  return { html, ligar, fim, MODOS, modosDeHoje, jogarModo, jogarFestival, nino };
+})();

@@ -275,6 +275,13 @@
   }
 
   $('btn-jogar').onclick = () => jogar('normal');
+  // missões, eventos e tutorial
+  const seloMissoes = () => { const n = Missoes.pendentes(); const el = $('selo-missoes'); if (el) { el.textContent = n || ''; el.classList.toggle('oculto', !n); } };
+  Missoes.aoMudar(seloMissoes);
+  $('btn-missoes').onclick = () => Missoes.abrir({ mostrarBau, aoMudar: () => { seloMissoes(); tudo(); } });
+  $('btn-eventos-ir').onclick = () => irPara('eventos');
+  $('btn-tutorial').onclick = () => Tutorial.comecar(fimDeBatalha);
+  window.MenuAPI = { tudo: () => tudo(), mostrarBau: (t, r) => mostrarBau(t, r), irPara: (a) => irPara(a) };
   $('btn-x1').onclick = () => x1();
   $('btn-2v2').onclick = () => dupla();
   $('btn-top').onclick = topGlobal;
@@ -318,6 +325,15 @@
   }
 
   let iniciando = false;
+  async function jogarEvento(evento) {
+    if (iniciando) return;
+    if (!evento.deck && !d().deck.length) { UI.toast('Coloque cartas no deck primeiro!'); irPara('cartas'); return; }
+    iniciando = true;
+    const ok = await Atualizacao.podeJogar();
+    iniciando = false;
+    if (!ok) return;
+    Batalha.iniciar({ modo: 'evento', evento, fim: fimDeBatalha });
+  }
   async function jogar(modo) {
     if (iniciando) return;
     if (!d().deck.length) {
@@ -482,6 +498,21 @@
         chamarX1(lista.find((p) => p.uid === b.dataset.x1));
       }));
       ligarPerfis(aba);
+      // amigos em batalha: botão de assistir ao vivo
+      AoVivo.status(lista.map((p) => p.uid)).then((vivos) => {
+        for (const [uid, info] of Object.entries(vivos)) {
+          const b = aba.querySelector(`[data-x1="${uid}"]`);
+          if (!b || aba.querySelector(`[data-ver="${uid}"]`)) continue;
+          b.insertAdjacentHTML('beforebegin', `<button class="btn-peq btn-assistir" data-ver="${uid}" title="Assistir ao vivo">👁</button>`);
+          const nomeEl = b.closest('.linha-jogador') && b.closest('.linha-jogador').querySelector('b');
+          if (nomeEl) nomeEl.insertAdjacentHTML('beforeend', `<span class="em-batalha-tag">⚔️ ${esc(info.titulo || 'em batalha')}</span>`);
+          aba.querySelector(`[data-ver="${uid}"]`).onclick = (e) => {
+            e.stopPropagation();
+            document.querySelectorAll('.modal-amigos').forEach((m) => m.closest('.modal-fundo').remove());
+            AoVivo.assistir(uid, (lista.find((p) => p.uid === uid) || {}).nome);
+          };
+        }
+      }).catch(() => {});
     } catch (err) { aba.innerHTML = `<p class="aviso">${erroNuvem(err)}</p>`; }
   }
 
@@ -867,7 +898,22 @@
   }
 
   function fimDeBatalha(r) {
-    esgotadas = esgotadas.concat(Estado.contarUsos());
+    if (!(r.evento && r.evento.deck) && !r.tutorial) esgotadas = esgotadas.concat(Estado.contarUsos());
+    // missões
+    if (!r.tutorial) {
+      const ganhou = r.resultado === 'vitoria';
+      Missoes.contar('batalhas', 1);
+      if (ganhou) Missoes.contar('vitorias', 1);
+      if (r.coroas) { Missoes.contar('coroas', r.coroas); Missoes.contar('torres', r.coroas); }
+      if (r.modo === '2v2') Missoes.contar('dupla', 1);
+      if (r.ranque && ganhou) Missoes.contar('ranqueada', 1);
+      if (r.evento) Missoes.contar('evento', 1);
+    }
+    if (r.tutorial) { Tutorial.fim(r); return; }
+    if (r.evento) {
+      Ranque.registrar({ modo: 'evento', res: r.resultado, cz: [r.coroas, r.coroasInimigo], deck: r.deck, deckRival: r.deckRival, rival: { nome: r.evento.nome }, dur: r.duracao });
+      Eventos.fim(r, { mostrarBau, tudo }); return;
+    }
     if (r.ranque) { RanqueUI.fim(r); return; }
     if (r.modo === '2v2') { fimDupla(r); return; }
     if (r.modo === 'x1' || r.modo === 'x1c') { fimX1(r); return; }
@@ -1399,7 +1445,7 @@
     const p = Passe.dados();
     const nv = Passe.nivel();
     const pend = Passe.pendentes();
-    $('eventos-lista').innerHTML =
+    $('eventos-lista').innerHTML = `<div id="eventos-novos">${Eventos.html()}</div><div class="eventos-cab">🎟️ Passe e desafios</div>` +
       `<button class="cartao-passe${p.ultra ? ' ultra' : p.plus ? ' plus' : ''}" id="abrir-passe">
         <div class="passe-topo"><b>🎟️ Passe da Temporada</b><small>${Passe.diasRestantes()} dias restantes</small></div>
         <div class="passe-linha"><span class="passe-nivel">${nv}</span><div class="ev-barra passe-barra"><i style="width:${nv >= Passe.NIVEIS ? 100 : ((p.pontos % Passe.PONTOS_NIVEL) / Passe.PONTOS_NIVEL) * 100}%"></i><small>${nv >= Passe.NIVEIS ? 'Completo!' : `${p.pontos % Passe.PONTOS_NIVEL}/${Passe.PONTOS_NIVEL}`}</small></div><span class="passe-tipo">${p.ultra ? 'ULTRA' : p.plus ? 'PLUS' : 'FREE'}</span></div>
@@ -1410,6 +1456,7 @@
       item('ev4', 'Elixir em dobro', 'A batalha inteira com elixir rápido', '', '<button class="selo botao" data-jogar="elixir2x">Jogar</button>') +
       item('ev3', 'Batalha em dupla', 'Você + parceiro (amigo ou IA) contra uma dupla', '', '<button class="selo botao" id="ev-dupla">Jogar</button>');
     $('abrir-passe').onclick = telaPasse;
+    Eventos.ligar($('eventos-novos'), { iniciar: jogarEvento, verCarta: (c) => Estado.tem(c.id) ? detalhes(c.id) : UI.modal({ titulo: c.nome, classe: 'modal-carta', html: `<div class="detalhe-carta">${Cartas.html(c, { mini: true })}<div><span class="raridade-tag ${c.raridade}">${Cartas.NOMES_RARIDADE[c.raridade]} · só de evento</span><p class="tipo">${c.tipo} · ${c.custo} de elixir</p><p>${c.descricao}</p>${c.passiva ? `<p><b>🧩 ${c.passiva.nome}:</b> ${c.passiva.descricao}</p>` : ''}${c.habilidade ? `<p><b>⚡ ${c.habilidade.nome}:</b> ${c.habilidade.descricao}</p>` : ''}</div></div>`, botoes: [{ texto: 'Quero ela!', classe: 'principal' }] }) });
     $('ev-dupla').onclick = dupla;
     $('eventos-lista').querySelectorAll('[data-jogar]').forEach((b) => (b.onclick = () => jogar(b.dataset.jogar)));
     $('eventos-lista').querySelectorAll('[data-premio]').forEach((b) => (b.onclick = () => {
@@ -1731,6 +1778,7 @@
   window.telaRemover = telaRemover;
   window.mostrarConviteX1 = conviteX1;
   function tudo() {
+    try { seloMissoes(); $('btn-tutorial').classList.toggle('chamando', !Tutorial.feito()); } catch (e) { /* nada */ }
     Mod.mostrarBotao(tudo);
     if (Conta.logado()) Amigos.ouvir({ aoMudarPedidos: mudouPedidos, aoConvite: conviteX1 });
     if (Conta.logado()) Presentes.ouvir(chegaramPresentes);

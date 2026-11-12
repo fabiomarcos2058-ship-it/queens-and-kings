@@ -64,27 +64,39 @@ const Batalha = (() => {
 
   // rede (x1): no celular de quem criou a sala, rede = { tipo: 'host', convidado, enviarEstado, fim }
   // ranque (ranqueada): { dupla, rivais, parceiro, dif, nivelDelta } vindo do Ranque.partida()
-  function iniciar({ modo = 'normal', fim, rede = null, ranque = null } = {}) {
+  // evento: { id, nome, deck, deckIA, nivel, elixirMult, subita, turbo, dif } (modos de evento)
+  function iniciar({ modo = 'normal', fim, rede = null, ranque = null, evento = null, tutorial = null } = {}) {
     ao_fim = fim;
     const dupla = modo === '2v2';
     const x1 = rede && !dupla;
     // 2v2 online: rede.jogadores = { azul2, vermelho, vermelho2 } (perfil de quem está em cada vaga; vaga vazia = IA)
     const jog = dupla && rede ? (rede.jogadores || { azul2: rede.convidado }) : {};
-    const deck = Estado.d.deck;
-    const deckIA = x1 ? embaralhar(rede.convidado.deck) : jog.vermelho ? jog.vermelho.deck : embaralhar(Mod.deckApelao() || deckAleatorioIA()).slice(0, 8);
+    const deck = evento && evento.deck ? evento.deck : tutorial ? tutorial.deck : Estado.d.deck;
+    const deckIA = evento && evento.deckIA ? evento.deckIA : tutorial ? tutorial.deckIA : x1 ? embaralhar(rede.convidado.deck) : jog.vermelho ? jog.vermelho.deck : embaralhar(Mod.deckApelao() || deckAleatorioIA()).slice(0, 8);
     const minhas = Estado.minhasTorres();
     // 2v2: a dupla rival tem torres iguais às suas (sem a "desvantagem de IA"); se tiver gente no time vermelho, usa as torres dela
     const humanoV = jog.vermelho || jog.vermelho2;
-    const delas = x1 ? (rede.convidado.torres || minhas) : humanoV ? (humanoV.torres || minhas) : (dupla || ranque) ? { ...minhas } : torresIA(minhas);
+    const delas = evento || tutorial ? { ...minhas } : x1 ? (rede.convidado.torres || minhas) : humanoV ? (humanoV.torres || minhas) : (dupla || ranque) ? { ...minhas } : torresIA(minhas);
     s = {
       modo, t: 0, prorrogacao: false, acabou: false, pausa: false,
       azul: lado(deck), vermelho: lado(deckIA),
       ent: torres(minhas, delas), proj: [], efeitos: [], agenda: [], selecionada: null, iaTimer: 2, id: 0,
       arenaId: Arena.daQtd(Estado.d.recorde).id,
-      nivelIA: Math.max(1, Math.min(9, Math.round(deck.reduce((a, id) => a + Estado.d.colecao[id].nivel, 0) / deck.length) - (Mod.deckApelao() ? 0 : 1))),
+      nivelIA: (evento && evento.nivel) || (tutorial && 1) || Math.max(1, Math.min(9, Math.round(deck.reduce((a, id) => a + ((Estado.d.colecao[id] || {}).nivel || 1), 0) / deck.length) - (Mod.deckApelao() ? 0 : 1))),
       rede, niveisV: x1 ? rede.convidado.niveis : null, eventos: [], snapTimer: 0,
       ias: x1 ? [] : ['vermelho'],
     };
+    if (evento) {
+      s.evento = evento;
+      if (evento.nivel) s.nivelFixo = evento.nivel;
+      if (evento.elixirMult) s.elixirMult = evento.elixirMult;
+      if (evento.dif) s.difIA = evento.dif;
+      if (evento.turbo) s.turbo = true;
+      if (evento.subita) { s.prorrogacao = true; s.t = DURACAO - 60; } // 2 minutos e a primeira torre decide
+      if (evento.niveisV) s.niveisV = evento.niveisV;
+      if (evento.elixirInicial) { s.azul.elixir = s.vermelho.elixir = evento.elixirInicial; }
+    }
+    if (tutorial) { s.tutorial = tutorial; s.difIA = 1; s.nivelFixo = 1; s.iaTimer = 1e9; }
     if (ranque) {
       s.ranque = ranque;
       s.difIA = ranque.dif;
@@ -108,7 +120,71 @@ const Batalha = (() => {
     }
     const tituloRanq = ranque ? `🏅 Ranqueada${dupla ? ' 2v2' : ''} · vs ${ranque.rivais.map((b) => b.nome).join(' e ')}` : null;
     const humanosV = dupla ? [jog.vermelho, jog.vermelho2].filter(Boolean).map((p) => p.nome) : [];
-    montar(tituloRanq || (dupla ? (rede ? `2v2 · ${humanosV.length ? `vs ${humanosV.join(' e ')}` : `com ${s.nomeParceiro}`}` : '2v2 · Batalha em dupla') : rede ? `X1 contra ${rede.convidado.nome}` : modo === 'elixir2x' ? 'Evento: elixir em dobro' : 'Batalha'));
+    if (typeof AoVivo !== 'undefined' && !tutorial) AoVivo.comecou({ modo: ranque ? (dupla ? 'ranq2v2' : 'ranq') : evento ? 'evento' : modo, titulo: tituloRanq || (evento ? evento.nome : dupla ? '2v2' : rede ? 'X1' : 'Batalha'), sala: rede && typeof X1 !== 'undefined' ? X1.codigo() : null, lado: 'azul', dupla: !!dupla });
+    montar(tituloRanq || (dupla ? (rede ? `2v2 · ${humanosV.length ? `vs ${humanosV.join(' e ')}` : `com ${s.nomeParceiro}`}` : '2v2 · Batalha em dupla') : rede ? `X1 contra ${rede.convidado.nome}` : evento ? `🎪 ${evento.nome}` : tutorial ? '🎓 Tutorial' : modo === 'elixir2x' ? 'Evento: elixir em dobro' : 'Batalha'));
+  }
+
+  // ---------- Emotes ----------
+  const EMOTES = [
+    { id: 'oi', ic: '👋', txt: 'Oi!' }, { id: 'gg', ic: '👍', txt: 'GG!' }, { id: 'boa', ic: '👏', txt: 'Boa jogada!' }, { id: 'kkk', ic: '😂', txt: 'Kkkkk' },
+    { id: 'uau', ic: '😮', txt: 'Uau!' }, { id: 'pensa', ic: '🤔', txt: 'Hmmm...' }, { id: 'raiva', ic: '😡', txt: 'Grrr!' }, { id: 'chora', ic: '😭', txt: 'Buáá...' },
+    { id: 'goku', carta: 'goku_base', txt: 'Oi, eu sou o Goku!' }, { id: 'gojo', carta: 'gojo', txt: 'Relaxa, eu sou o mais forte.' },
+    { id: 'nino', carta: 'nino_nakano', txt: 'Baka!!' }, { id: 'robin', carta: 'robin', txt: 'Fufu~' },
+    { id: 'akame', carta: 'akame', txt: 'Eliminar.' }, { id: 'bulma', carta: 'bulma', txt: 'Gênia, eu sei.' },
+  ];
+  // personagens: só aparecem se você tem a carta
+  const emotesLiberados = () => EMOTES.filter((e) => !e.carta || Estado.tem(e.carta));
+  function mostrarEmote(ladoTela, id) {
+    const e = EMOTES.find((x) => x.id === id);
+    const jan = document.querySelector('.arena-grande-janela');
+    if (!e || !jan) return;
+    jan.querySelectorAll(`.emote-balao.${ladoTela}`).forEach((x) => x.remove());
+    const b = document.createElement('div');
+    b.className = `emote-balao ${ladoTela}${e.carta ? ' de-carta' : ''}`;
+    b.innerHTML = `${e.carta ? `<img src="assets/cartas/${e.carta}_medalhao.png" alt="" />` : `<span class="emote-ic">${e.ic}</span>`}<b>${e.txt}</b>`;
+    jan.appendChild(b);
+    setTimeout(() => b.remove(), 2400);
+  }
+  // quem = lado do host (azul, azul2, vermelho, vermelho2); no host os lados da tela são os mesmos
+  function emote(quem, id) {
+    if (!s || s.acabou || !EMOTES.some((x) => x.id === id)) return;
+    mostrarEmote(quem, id);
+    if (s.rede || s.aoVivo) s.eventos.push(['e', quem, id]);
+    // a IA às vezes responde
+    if (s.ias && s.ias.length && !s.ias.includes(quem) && Math.random() < 0.5) {
+      const rival = s.ias.find((l) => timeDe(l) !== timeDe(quem));
+      if (rival) agendar(0.8 + Math.random() * 1.2, () => emoteIA(rival, id === 'kkk' ? ['raiva', 'kkk'] : id === 'gg' ? ['gg', 'boa'] : id === 'raiva' || id === 'chora' ? ['kkk', 'pensa'] : ['oi', 'kkk', 'uau', 'pensa']));
+    }
+  }
+  function emoteIA(lado, opcoes) {
+    if (!s || s.acabou || (s.iaEmote || 0) > s.t) return;
+    s.iaEmote = s.t + 6;
+    const id = opcoes[Math.floor(Math.random() * opcoes.length)];
+    mostrarEmote(lado, id);
+    if (s.rede || s.aoVivo) s.eventos.push(['e', lado, id]);
+  }
+  function botaoEmote() {
+    const jan = document.querySelector('.arena-grande-janela');
+    jan.querySelectorAll('.btn-emote, .painel-emotes').forEach((x) => x.remove());
+    if (s.espectador) return;
+    const btn = document.createElement('button');
+    btn.className = 'btn-emote'; btn.type = 'button'; btn.textContent = '💬'; btn.title = 'Emotes';
+    const painel = document.createElement('div');
+    painel.className = 'painel-emotes oculto';
+    painel.innerHTML = emotesLiberados().map((e) => `<button type="button" data-emote="${e.id}">${e.carta ? `<img src="assets/cartas/${e.carta}_medalhao.png" alt="" />` : `<span>${e.ic}</span>`}<small>${e.txt}</small></button>`).join('');
+    btn.onpointerdown = (ev) => { ev.stopPropagation(); painel.classList.toggle('oculto'); };
+    painel.onpointerdown = (ev) => {
+      ev.stopPropagation();
+      const b = ev.target.closest('[data-emote]');
+      if (!b || !s || btn.classList.contains('esperando')) return;
+      painel.classList.add('oculto');
+      btn.classList.add('esperando');
+      setTimeout(() => btn.classList.remove('esperando'), 2500);
+      if (s.convidado) { mostrarEmote('azul', b.dataset.emote); s.rede.enviarComando({ tipo: 'emote', id: b.dataset.emote, lado: s.dupla ? s.meuLado : undefined }); }
+      else emote('azul', b.dataset.emote);
+      if (typeof Missoes !== 'undefined') Missoes.contar('emotes', 1);
+    };
+    jan.append(btn, painel);
   }
 
   function montar(titulo) {
@@ -146,6 +222,7 @@ const Batalha = (() => {
       document.querySelector('.arena-grande-janela').appendChild(s.chipP);
     }
     $('btn-sair').onclick = desistir;
+    botaoEmote();
     document.querySelector('.selo-previa').textContent = titulo;
     atualizarPlacar();
     desenharMao();
@@ -199,6 +276,7 @@ const Batalha = (() => {
 
   // Arrastar a carta até a arena (ou tocar na carta e depois na arena)
   function comecarArrastar(ev, i, el) {
+    if (s.espectador) return;
     if (s.acabou) return;
     ev.preventDefault();
     const c = Estado.carta(s.azul.fila[i]);
@@ -273,6 +351,7 @@ const Batalha = (() => {
   }
 
   function tocarArena(ev) {
+    if (s.espectador) return;
     if (s.selecionada === null || s.acabou) return;
     const r = s.arena.getBoundingClientRect();
     const x = ((ev.clientX - r.left) / r.width) * W;
@@ -284,6 +363,7 @@ const Batalha = (() => {
       return;
     }
     if (c.custo > s.azul.elixir) { UI.toast('Elixir insuficiente'); return; }
+    contarCarta(c);
     if (s.convidado) {
       s.rede.enviarComando({ tipo: 'carta', i: s.selecionada, x: Math.round(x), y: Math.round(y), lado: s.dupla ? s.meuLado : undefined }); // o host espelha
       efeito('onda-surgir azul', x, y, 700); // retorno imediato enquanto o host confirma
@@ -306,7 +386,7 @@ const Batalha = (() => {
     L.elixir -= c.custo;
     L.fila.splice(indice, 1);
     L.fila.push(id);
-    const nivel = quem === 'azul' ? Estado.d.colecao[id].nivel
+    const nivel = s.nivelFixo ? s.nivelFixo : quem === 'azul' ? Estado.d.colecao[id].nivel
       : s.niveis && s.niveis[quem] ? (s.niveis[quem][id] || 1)
       : quem === 'azul2' && s.niveisAzul2 ? (s.niveisAzul2[id] || 1)
       : s.niveisV ? (s.niveisV[id] || 1) : nivelCartaIA(id);
@@ -407,7 +487,7 @@ const Batalha = (() => {
     t.el = document.createElement('div');
     t.el.className = `tropa ${time} surgindo${c.token ? ' mini' : ''}${c.habilidade ? ' campea' : ''}${t.escudo ? ' com-escudo' : ''}${t.voo ? ' voando' : ''}${c.evolucao ? ' carta-evo' : ''}${t.evo ? ' evoluida' : ''}${t.infinito ? ' com-infinito' : ''}`;
     t.el.innerHTML = `${barraHp()}
-      <div class="tropa-corpo">${c.evolucao ? '<i class="aura-evo"></i><i class="aura-evo dois"></i>' : ''}${t.evo ? '<span class="selo-evo">EVO</span>' : ''}<div class="tropa-medalhao"><img src="assets/cartas/${c.id}_medalhao.png" alt="" /><b>${nivel}</b>${c.passiva && c.passiva.tipo === 'adaptar' ? '<i class="selo-adapt"></i>' : ''}</div></div><div class="tropa-sombra"></div>`;
+      <div class="tropa-corpo">${c.evolucao ? '<i class="aura-evo"></i><i class="aura-evo dois"></i>' : ''}${t.evo ? '<span class="selo-evo">EVO</span>' : ''}<div class="tropa-medalhao">${c.videoRosto ? `<video src="assets/cartas/${c.videoRosto}" poster="assets/cartas/${c.id}_medalhao.png" autoplay muted loop playsinline></video>` : `<img src="assets/cartas/${c.id}_medalhao.png" alt="" />`}<b>${nivel}</b>${c.passiva && c.passiva.tipo === 'adaptar' ? '<i class="selo-adapt"></i>' : ''}</div></div><div class="tropa-sombra"></div>`;
     s.arena.appendChild(t.el);
     s.ent.push(t);
     posicionar(t);
@@ -419,7 +499,7 @@ const Batalha = (() => {
 
   // barril voa da torre do rei, quebra e solta as minis
   function lancarBarril(time, c, x, y, f, nivel, quem = time) {
-    if (s.rede) s.eventos.push(['b', Math.round(x), Math.round(y), time === 'azul' ? 0 : 1]);
+    if (s.rede || s.aoVivo) s.eventos.push(['b', Math.round(x), Math.round(y), time === 'azul' ? 0 : 1]);
     const rei = s.ent.find((e) => e.torre && e.tipo === 'rei' && e.time === time) || { x: W / 2, y: time === 'azul' ? H - 70 : 60 };
     const b = document.createElement('div');
     b.className = 'barril-voando';
@@ -440,7 +520,7 @@ const Batalha = (() => {
   }
 
   function lancarFeitico(time, c, x, y, dano) {
-    if (s.rede) s.eventos.push(['f', c.id, Math.round(x), Math.round(y), time === 'azul' ? 0 : 1]);
+    if (s.rede || s.aoVivo) s.eventos.push(['f', c.id, Math.round(x), Math.round(y), time === 'azul' ? 0 : 1]);
     const largura = { width: `${((c.area * 2) / W) * 100}%` };
     efeito(`mira-feitico ${time}`, x, y, 650, largura);
     if (c.id === 'lanterna') {
@@ -521,6 +601,7 @@ const Batalha = (() => {
     }
     e.vida -= dano;
     numero(e, dano, opc.crit ? 'critico' : opc.tipo);
+    if (!e.torre && e.atk && e.atk.m && e.atk.m.marmita && fonte) ninoBaka(e, dano);
     atualizarHp(e);
     piscar(e.el, 'levou');
     if (e.torre) {
@@ -537,6 +618,7 @@ const Batalha = (() => {
       efeito('renascer', e.x, e.y, 900);
       particulas(e.x, e.y, '#FAC775', 14, 34);
     } else if (e.vida <= 0) {
+      if (e.isca) borboletas(e);
       e.el.classList.add('morrendo');
       const el = e.el;
       efeito(`poof ${e.time}`, e.x, e.y, 500);
@@ -580,6 +662,11 @@ const Batalha = (() => {
 
   function destruirTorre(t, deTime) {
     t.vida = 0;
+    if (s.ias && s.ias.length) {
+      const perdeu = s.ias.find((l) => timeDe(l) === t.time), ganhou = s.ias.find((l) => timeDe(l) !== t.time);
+      if (perdeu && Math.random() < 0.5) emoteIA(perdeu, ['chora', 'raiva']);
+      else if (ganhou && Math.random() < 0.5) emoteIA(ganhou, ['kkk', 'uau']);
+    }
     const img = s.arena.querySelector(`[data-torre="${t.id}"]`);
     if (img) img.classList.add('destruida');
     t.el.remove();
@@ -634,10 +721,18 @@ const Batalha = (() => {
     document.querySelector('.coroa.azul').textContent = s.azul.coroas;
   }
 
+  // missões: o que EU joguei
+  function contarCarta(c) {
+    if (typeof Missoes === 'undefined' || s.tutorial) return;
+    Missoes.contar('cartas', 1);
+    if (c.id.startsWith('goku')) Missoes.contar('gokus', 1);
+    if (c.feitico) Missoes.contar('feiticos', 1);
+  }
   // ---------- Habilidades especiais (gastam elixir) ----------
   function ativarHabilidade(t) {
     if (s.convidado) {
       if (!t.habilidade || t.recarga > 0 || s.azul.elixir < t.habilidade.custo) return false;
+      if (typeof Missoes !== 'undefined') Missoes.contar('habilidades', 1);
       s.rede.enviarComando({ tipo: 'hab', id: t.hid, lado: s.dupla ? s.meuLado : undefined });
       t.recarga = t.habilidade.recarga || 10;
       return true;
@@ -647,8 +742,9 @@ const Batalha = (() => {
     if (!h || t.vida <= 0 || t.recarga > 0 || L.elixir < h.custo || t.surgir > 0) return false;
     L.elixir -= h.custo;
     t.recarga = h.recarga || 10;
+    if (t.dono === 'azul' && typeof Missoes !== 'undefined' && !s.tutorial) Missoes.contar('habilidades', 1);
     efeito(`ativou ${t.time}`, t.x, t.y, 700);
-    if (s.rede) s.eventos.push(['a', Math.round(t.x), Math.round(t.y), t.time === 'azul' ? 0 : 1]);
+    if (s.rede || s.aoVivo) s.eventos.push(['a', Math.round(t.x), Math.round(t.y), t.time === 'azul' ? 0 : 1]);
     if (h.tipo === 'golpes') { t.golpesFortes = 3; t.multGolpes = h.mult || 2.5; t.el.classList.add('aura-golpes'); }
     if (h.tipo === 'furia') { t.furia = h.duracao || 6; t.el.classList.add('aura-furia'); }
     if (h.tipo === 'fenix') { t.fenix = h.duracao || 10; t.el.classList.add('aura-fenix'); }
@@ -664,6 +760,8 @@ const Batalha = (() => {
       kamehameha(t, Math.round((h.dano || 1100) * (t.f || 1)), { tipo: 2, comp: 420, larg: t.evo ? 56 : 44, torreMult: 0.35, atraso: 0.55 });
     }
     if (h.tipo === 'congelar') congelar(t, h);
+    if (h.tipo === 'quintuplas') quintuplas(t);
+    if (h.tipo === 'gigantescoMano') gigantescoMano(t, h);
     if (h.tipo === 'esquiva') {
       t.esquiva = h.duracao || 5; t.esquivaChance = h.chance || 0.8;
       if (h.furia) { t.furia = t.esquiva; t.el.classList.add('aura-furia'); }
@@ -689,7 +787,7 @@ const Batalha = (() => {
     const centro = (t.alvo && t.alvo.vida > 0 && !t.alvo.torre && dist(t, t.alvo) < 160) ? t.alvo : t;
     efeito('gelo', centro.x, centro.y, 1000);
     particulas(centro.x, centro.y, '#DDF3FF', 16, raio * 0.6);
-    if (s.rede) s.eventos.push(['g', Math.round(centro.x), Math.round(centro.y), 0]);
+    if (s.rede || s.aoVivo) s.eventos.push(['g', Math.round(centro.x), Math.round(centro.y), 0]);
     for (const e of s.ent) {
       if (e.torre || e.time === t.time || e.vida <= 0 || dist(e, centro) > raio + e.raio) continue;
       if (e.atk && e.atk.m && e.atk.m.imune) continue;
@@ -734,7 +832,7 @@ const Batalha = (() => {
     const ang = opc.ang != null ? opc.ang : melhorDirecao(t);
     if (ang == null) return;
     const tipo = opc.tipo || 0, comp = opc.comp || 320, larg = opc.larg || 34;
-    if (s.rede) s.eventos.push(['k', Math.round(t.x), Math.round(t.y), +ang.toFixed(3), tipo, larg]);
+    if (s.rede || s.aoVivo) s.eventos.push(['k', Math.round(t.x), Math.round(t.y), +ang.toFixed(3), tipo, larg]);
     const fx = Math.cos(ang), fy = Math.sin(ang);
     desenharRaio(t.x, t.y, ang, tipo, comp, opc.larg);
     if (!tipo) efeito('kame-carga', t.x, t.y, 600);
@@ -770,7 +868,7 @@ const Batalha = (() => {
     t.el.classList.add('carregando-kame');
     if (t.furiaN >= 3) t.el.classList.add('forte');
     cutin('goku_furia');
-    if (s.rede) s.eventos.push(['c', 0]);
+    if (s.rede || s.aoVivo) s.eventos.push(['c', 0]);
   }
   function soltarFuria(t) {
     t.el.classList.remove('carregando-kame', 'forte');
@@ -789,7 +887,7 @@ const Batalha = (() => {
   }
 
   // tela treme (e avisa quem está assistindo online)
-  function sacudir() { tremer(true); if (s.rede) s.eventos.push(['q']); }
+  function sacudir() { tremer(true); if (s.rede || s.aoVivo) s.eventos.push(['q']); }
   const centroInimigos = (t, raio = 80) => {
     const perto = s.ent.filter((e) => !e.torre && e.vida > 0 && e.time !== t.time && dist(e, t) < raio);
     if (!perto.length) return null;
@@ -841,7 +939,7 @@ const Batalha = (() => {
     agendar(0.3, () => {
       if (!s || t.vida <= 0) return;
       efeito(`teleporte ${t.time}`, t.x, t.y, 450);
-      if (s.rede) s.eventos.push(['t', Math.round(t.x), Math.round(t.y)]);
+      if (s.rede || s.aoVivo) s.eventos.push(['t', Math.round(t.x), Math.round(t.y)]);
       t.alvoTipo = 'construcoes';
       t.vel *= 1.15; t.velBase *= 1.15;
       t.alvo = escolherAlvo(t);
@@ -884,7 +982,7 @@ const Batalha = (() => {
         ferir(e, Math.round(p.dano * 0.3), a.time, a);
       }
       fxEl('fx-gojo-azul', centro.x, centro.y, 520);
-      if (s.rede) s.eventos.push(['x', Math.round(centro.x), Math.round(centro.y), 30, '#4FB4FF']);
+      if (s.rede || s.aoVivo) s.eventos.push(['x', Math.round(centro.x), Math.round(centro.y), 30, '#4FB4FF']);
     } else {
       // Vermelho: explode e empurra
       explosaoArea(a, centro, Math.round(p.dano * 0.45), a.evo ? 44 : 36, { visual: 'impacto', cor: '#FF4F5E', empurrar: 18 });
@@ -892,11 +990,137 @@ const Batalha = (() => {
     }
   }
 
+  // ---------- falas que aparecem em cima da tropa (Clutch!, Baka!, emotes...) ----------
+  function falar(e, texto, classe = '', rede = true) {
+    const n = document.createElement('div');
+    n.className = `dano-num fala ${classe}`;
+    n.textContent = texto;
+    Object.assign(n.style, pct(e.x + (Math.random() * 14 - 7), e.y - 26 - Math.random() * 10));
+    s.arena.appendChild(n);
+    setTimeout(() => n.remove(), 1100);
+    if (rede && (s.rede || s.aoVivo)) s.eventos.push(['z', Math.round(e.x), Math.round(e.y), texto, classe]);
+  }
+  const imuneA = (e) => !!(e.atk && e.atk.m && e.atk.m.imune);
+  function prender(e, seg) {
+    if (e.torre || e.vida <= 0 || imuneA(e)) return;
+    e.atord = Math.max(e.atord, seg);
+    e.el.classList.add('atordoada', 'presa');
+  }
+
+  // ---------- Nico Robin: Hana Hana no Mi (braços brotam do chão, de longe) ----------
+  function bracosFx(x, y, grande = false) {
+    fxEl(grande ? 'fx-mano' : 'fx-bracos', x, y, grande ? 1150 : 620);
+    if (s.rede || s.aoVivo) s.eventos.push(['v', grande ? 1 : 0, Math.round(x), Math.round(y)]);
+  }
+  function hanaAtaque(a, alvo, dano, crit) {
+    bracosFx(alvo.x, alvo.y);
+    a.hanaN = (a.hanaN || 0) + 1;
+    const clutch = a.hanaN % 3 === 0;
+    agendar(0.16, () => {
+      if (!s || alvo.vida <= 0) return;
+      const feito = ferir(alvo, dano, a.time, a, { crit });
+      if (feito) aplicarGolpe(a, alvo, feito);
+      if (clutch && !alvo.torre && alvo.vida > 0) { prender(alvo, 1.2); falar(alvo, 'Clutch!', 'fala-robin'); }
+    });
+  }
+  // se alguém corpo a corpo encosta nela, braços brotam e empurram (a cada 4s)
+  function robinDefesa(t, dt) {
+    if ((t.defCd = (t.defCd || 0) - dt) > 0) return;
+    const e = s.ent.find((o) => !o.torre && o.time !== t.time && o.vida > 0 && o.alcance <= 40 && !(o.surgir > 0) && dist(o, t) < o.raio + t.raio + 12);
+    if (!e) return;
+    t.defCd = 4;
+    bracosFx(e.x, e.y);
+    if (!imuneA(e)) { empurrar(e, t, 26); prender(e, 0.6); }
+    ferir(e, Math.round(t.dano * 0.5), t.time, t);
+  }
+  function gigantescoMano(t, h) {
+    let alvo = t.alvo && t.alvo.vida > 0 && dist(t, t.alvo) < t.alcance + 70 ? t.alvo : null;
+    if (!alvo) alvo = s.ent.filter((e) => e.time !== t.time && e.vida > 0 && dist(e, t) < t.alcance + 70).sort((a, b) => dist(a, t) - dist(b, t))[0] || null;
+    const c = alvo ? { x: alvo.x, y: alvo.y } : { x: t.x, y: t.y + (t.time === 'azul' ? -80 : 80) };
+    bracosFx(c.x, c.y, true);
+    falar(t, 'Gigantesco Mano!', 'fala-robin');
+    const dano = Math.round((h.dano || 650) * (t.f || 1));
+    agendar(0.45, () => {
+      if (!s || s.acabou) return;
+      sacudir();
+      for (const e of [...s.ent]) {
+        if (e.time === t.time || e.vida <= 0 || dist(e, c) > 72 + e.raio) continue;
+        ferir(e, e.torre ? Math.round(dano * 0.35) : dano, t.time, t, { atravessa: true, semEsquiva: true });
+        if (!e.torre) prender(e, 2);
+      }
+    });
+  }
+
+  // ---------- Nino Nakano: marmitas, "Baka!" e as quíntuplas idênticas ----------
+  function ninoPassiva(t, dt) {
+    if (t.isca) {
+      if ((t.vidaIsca -= dt) <= 0) ferir(t, t.vida + 1, t.time === 'azul' ? 'vermelho' : 'azul', null, { atravessa: true, semEsquiva: true });
+      return;
+    }
+    if (t.bakaCd > 0) t.bakaCd -= dt;
+    if ((t.marmitaCd = (t.marmitaCd ?? 3) - dt) > 0) return;
+    let alvo = null, pior = 0.92;
+    for (const e of s.ent) {
+      if (e.torre || e.time !== t.time || e.vida <= 0 || e.isca || dist(e, t) > 160) continue;
+      const p = e.vida / e.max;
+      if (p < pior) { pior = p; alvo = e; }
+    }
+    if (!alvo) { t.marmitaCd = 1; return; }
+    t.marmitaCd = 6;
+    voarSprite('marmita', t, alvo, 0.35, 15, { arco: 22 });
+    if (s.rede || s.aoVivo) s.eventos.push(['n', Math.round(t.x), Math.round(t.y), Math.round(alvo.x), Math.round(alvo.y)]);
+    agendar(0.35, () => {
+      if (!s || alvo.vida <= 0) return;
+      const cura = Math.round(alvo.max * 0.22);
+      alvo.vida = Math.min(alvo.max, alvo.vida + cura);
+      atualizarHp(alvo);
+      alvo.buffDano = 5;
+      alvo.el.classList.add('bem-alimentada');
+      efeito('cura', alvo.x, alvo.y, 800);
+      particulas(alvo.x, alvo.y, '#FFB3C7', 10, 22);
+      falar(alvo, `+${cura} 🍱`, 'fala-cura');
+    });
+  }
+  // levou um golpe forte: "Baka!" e empurra quem está colado nela
+  function ninoBaka(e, dano) {
+    if (e.isca || e.vida <= 0 || e.bakaCd > 0 || dano < e.max * 0.1) return;
+    e.bakaCd = 8;
+    falar(e, 'Baka!!', 'fala-nino');
+    for (const o of s.ent) {
+      if (o.torre || o.time === e.time || o.vida <= 0 || dist(o, e) > 46) continue;
+      if (!imuneA(o)) { empurrar(o, e, 22); o.lento = 2; o.lentoPct = 0.3; o.el.classList.add('lenta'); }
+    }
+  }
+  // as cópias somem soltando borboletas que deixam os inimigos lentos
+  function borboletas(e) {
+    fxEl('fx-borboletas', e.x, e.y, 900);
+    if (s.rede || s.aoVivo) s.eventos.push(['y', Math.round(e.x), Math.round(e.y)]);
+    for (const o of s.ent) {
+      if (o.torre || o.time === e.time || o.vida <= 0 || dist(o, e) > 48 || imuneA(o)) continue;
+      o.lento = 2.5; o.lentoPct = 0.35; o.el.classList.add('lenta');
+    }
+  }
+  function quintuplas(t) {
+    falar(t, 'Qual de nós é a verdadeira?', 'fala-nino');
+    t.quintupla = true;
+    for (let i = 0; i < 4; i++) {
+      const a = (i / 4) * Math.PI * 2 + 0.4;
+      const c = criarTropa(t.time, t.carta, t.x + Math.cos(a) * 22, t.y + Math.sin(a) * 16, t.f, t.nivel);
+      donoDe(c, t.dono);
+      c.isca = true; c.quintupla = true; c.surgir = 0.2; c.habilidade = null; c.vidaIsca = 8;
+      c.max = c.vida = Math.round(t.max * 0.18);
+      c.dano = c.danoBase = Math.round(t.dano * 0.3);
+      atualizarHp(c);
+    }
+    // quem mirava na Nino tem que escolher de novo
+    for (const e of s.ent) if (e.alvo === t) e.alvo = null;
+  }
+
   // Evolução: Expansão de Domínio — Vazio Infinito
   function expansaoDominio(t) {
     const raio = 175;
     dominioVisual(t.x, t.y, t.time);
-    if (s.rede) s.eventos.push(['d', Math.round(t.x), Math.round(t.y), t.time === 'azul' ? 0 : 1]);
+    if (s.rede || s.aoVivo) s.eventos.push(['d', Math.round(t.x), Math.round(t.y), t.time === 'azul' ? 0 : 1]);
     agendar(0.55, () => {
       if (!s || s.acabou) return;
       tremer(true);
@@ -957,7 +1181,8 @@ const Batalha = (() => {
       const d0 = dist(t, e);
       if (!e.torre && d0 > visaoTropa) continue;
       // tropas próximas têm prioridade sobre torres; quem está me batendo tem prioridade ainda maior
-      const peso = e.torre ? d0 + 60 : d0 - (e.alvo === t ? 30 : 0);
+      let peso = e.torre ? d0 + 60 : d0 - (e.alvo === t ? 30 : 0);
+      if (e.quintupla) peso += (e.id * 37 + t.id * 11 + Math.floor(s.t * 2) * 13) % 50; // ninguém sabe qual Nino é a verdadeira
       if (peso < md) { md = peso; melhor = e; }
     }
     return melhor;
@@ -1009,7 +1234,7 @@ const Batalha = (() => {
     }
     const dx = px - t.x, dy = py - t.y, d0 = Math.hypot(dx, dy) || 1;
     const arrancada = t.atk && t.atk.m && t.atk.m.investida && !t.investiu && dist(t, alvo) < 130 ? 2.6 : 1;
-    const passo = Math.min(d0, t.vel * (t.furia > 0 ? 1.25 : 1) * (t.lento > 0 ? 1 - t.lentoPct : 1) * arrancada * dt);
+    const passo = Math.min(d0, t.vel * (t.furia > 0 ? 1.25 : 1) * (t.lento > 0 ? 1 - t.lentoPct : 1) * arrancada * (s.turbo && !t.torre ? 1.4 : 1) * dt);
     if (arrancada > 1 && !t.correndo) { t.correndo = true; t.el.classList.add('arrancada'); }
     let vx = dx / d0, vy = dy / d0;
     // se tem uma torre no caminho (que não é o alvo), desvia pelo lado mais curto
@@ -1049,6 +1274,7 @@ const Batalha = (() => {
     const m = (a.atk && a.atk.m) || {};
     let d0 = a.dano;
     if (a.furia > 0) d0 *= 1.3;
+    if (a.buffDano > 0) d0 *= 1.2;
     if (a.golpesFortes > 0) { d0 *= a.multGolpes || 2.5; a.golpesFortes--; if (!a.golpesFortes) a.el.classList.remove('aura-golpes'); }
     if (alvo) d0 *= multClasse(a, alvo);
     a.golpes++;
@@ -1114,7 +1340,7 @@ const Batalha = (() => {
     evitarTorres(t);
     efeito(`teleporte ${t.time}`, t.x, t.y, 450);
     t.cd = Math.min(t.cd, 0.15);
-    if (s.rede) s.eventos.push(['t', Math.round(t.x), Math.round(t.y)]);
+    if (s.rede || s.aoVivo) s.eventos.push(['t', Math.round(t.x), Math.round(t.y)]);
   }
 
   // dano em área em volta de um ponto
@@ -1126,7 +1352,7 @@ const Batalha = (() => {
       if (!e.torre && opc.empurrar) empurrar(e, centro, opc.empurrar);
     }
     efeitoGolpe(opc.visual || 'impacto', centro, centro, { cor: opc.cor || '#FFD25E', s: opc.s, grande: raio });
-    if (s.rede) s.eventos.push(['x', Math.round(centro.x), Math.round(centro.y), raio, opc.cor || '#FFD25E']);
+    if (s.rede || s.aoVivo) s.eventos.push(['x', Math.round(centro.x), Math.round(centro.y), raio, opc.cor || '#FFD25E']);
     if (raio >= 35) tremer();
   }
 
@@ -1254,7 +1480,7 @@ const Batalha = (() => {
       if (!s) return;
       const el = fxEl('fx-raio-ceu', x, y, 380);
       if (el) el.style.backgroundImage = `url(${spriteUrl('raio')})`;
-      if (s.rede) s.eventos.push(['r', Math.round(x), Math.round(y)]);
+      if (s.rede || s.aoVivo) s.eventos.push(['r', Math.round(x), Math.round(y)]);
       const area = a.area || 30;
       for (const e of [...s.ent]) {
         if (e.time === a.time || e.vida <= 0 || dist(e, { x, y }) > area + e.raio) continue;
@@ -1307,6 +1533,7 @@ const Batalha = (() => {
     if (atacante.alcance > 40) {
       piscar(atacante.el, 'atirando');
       if (m.gojo) { gojoAtaque(atacante, alvo, dano, crit); return; }
+      if (m.hana) { hanaAtaque(atacante, alvo, dano, crit); return; }
       if (v.ceu) { raioDoCeu(atacante, alvo, dano, crit); return; }
       const n = m.rajada || 1;
       for (let i = 0; i < n; i++) {
@@ -1388,6 +1615,7 @@ const Batalha = (() => {
   // cartas da IA: em volta de 1 nível abaixo da média do seu deck; algumas ficam 2 abaixo (sorteado uma vez por partida)
   function nivelCartaIA(id) {
     if (!s.niveisIA) s.niveisIA = {};
+    if (s.nivelFixo) return s.nivelFixo;
     if (!(id in s.niveisIA)) s.niveisIA[id] = Math.max(1, s.nivelIA - (!s.dupla && !s.ranque && !Mod.deckApelao() && Math.random() < 0.4 ? 1 : 0));
     return s.niveisIA[id];
   }
@@ -1518,6 +1746,8 @@ const Batalha = (() => {
         || ((h.tipo === 'golpes' || h.tipo === 'furia') && perto && (t.alvo.torre || t.alvo.vida > t.dano))
         || ((h.tipo === 'kamehameha' || h.tipo === 'vazioPurpura') && t.alvo && dist(t, t.alvo) < 240)
         || (h.tipo === 'esquiva' && perto && t.vida < t.max * 0.8)
+        || (h.tipo === 'quintuplas' && t.vida < t.max * 0.8 && s.ent.some((e) => !e.torre && e.vida > 0 && e.alvo === t))
+        || (h.tipo === 'gigantescoMano' && t.alvo && dist(t, t.alvo) < 200 && s.ent.filter((e) => !e.torre && e.time !== t.time && e.vida > 0 && dist(e, t.alvo) < 72).length >= 2)
         || (h.tipo === 'congelar' && s.ent.filter((e) => !e.torre && e.time !== t.time && e.vida > 0 && dist(e, t) < (h.raio || 95) + 40).length >= 2);
       if (usar && ativarHabilidade(t)) return;
     }
@@ -1639,7 +1869,7 @@ const Batalha = (() => {
       fila: (s.dupla ? s.azul2 : s.vermelho).fila.slice(0, 5), d2: s.dupla ? 1 : 0,
       filas: s.dupla ? Object.fromEntries(['azul2', 'vermelho', 'vermelho2'].filter((l) => s.jogadores && s.jogadores[l]).map((l) => [l, s[l].fila.slice(0, 5)])) : undefined,
       els: s.dupla ? Object.fromEntries(LADOS.map((l) => [l, +s[l].elixir.toFixed(2)])) : undefined,
-      tm: s.t < 3 ? Object.fromEntries(s.ent.filter((e) => e.torre).map((e) => [e.id, e.max])) : undefined,
+      tm: Object.fromEntries(s.ent.filter((e) => e.torre).map((e) => [e.id, e.max])),
       tw: Object.fromEntries(s.ent.filter((e) => e.torre).map((e) => [e.id, Math.round(e.vida)])),
       tr: s.ent.filter((e) => !e.torre).map((e) => [e.id, e.carta.id, e.time === 'azul' ? 0 : 1, Math.round(e.x * 10) / 10, Math.round(e.y * 10) / 10,
         Math.round(e.vida), e.max, e.nivel, (e.surgir > 0 ? 1 : 0) | (e.furia > 0 ? 2 : 0) | (e.golpesFortes > 0 ? 4 : 0) | (e.fenix > 0 ? 8 : 0) | (e.congelado > 0 ? 16 : 0) | (e.esquiva > 0 ? 32 : 0) | (e.atord > 0 ? 64 : 0) | (e.lento > 0 ? 128 : 0) | (e.queima > 0 ? 256 : 0) | (e.escudo > 0 ? 512 : 0) | (e.fraco > 0 ? 1024 : 0) | ((e.adaptacao || 0) << 11) | (e.evo ? 131072 : 0) | (e.infinito > 0 ? 262144 : 0) | (e.canal > 0 ? 524288 : 0), e.recarga > 0 ? +e.recarga.toFixed(1) : 0, e.dono && e.dono.endsWith('2') ? 1 : 0]),
@@ -1668,7 +1898,50 @@ const Batalha = (() => {
     };
     if (dupla) s.azul2 = { elixir: 5 };
     if (rede.ranque) s.ranque = rede.ranque;
+    if (typeof AoVivo !== 'undefined') AoVivo.comecou({ modo: dupla ? '2v2' : 'x1', titulo: dupla ? '2v2' : `X1 contra ${rede.host.nome}`, sala: typeof X1 !== 'undefined' ? X1.codigo() : null, lado: meuLado, dupla: !!dupla });
     montar(rede.ranque ? `🏅 Ranqueada 2v2 · vs ${rede.ranque.rivais.map((b) => b.nome).join(' e ')}` : dupla ? `2v2 · ${rede.titulo || `com ${s.nomeParceiro}`}` : `X1 contra ${rede.host.nome}`);
+  }
+
+  // ---------- Assistindo a batalha de um amigo (só olha, não joga) ----------
+  function iniciarEspectador({ info, nome, sair }) {
+    if (s && !s.acabou) fechar();
+    const dupla = !!info.dupla;
+    const meuLado = info.lado || 'azul';
+    const parceiroLado = { azul: 'azul2', azul2: 'azul', vermelho: 'vermelho2', vermelho2: 'vermelho' }[meuLado];
+    s = {
+      espectador: true, convidado: true, nomeAssistido: nome, sairEsp: sair,
+      dupla, meuLado, parceiroLado, vira: timeDe(meuLado) === 'vermelho',
+      modo: 'espectador', rede: { host: {} }, t: 0, prorrogacao: false, acabou: false, pausa: false,
+      azul: { elixir: 5, fila: [], coroas: 0 }, vermelho: { elixir: 5, fila: [], coroas: 0 },
+      ent: torres(Estado.minhasTorres(), Estado.minhasTorres()), proj: [], efeitos: [], agenda: [], selecionada: null, id: 0, mapa: new Map(), pjEls: [],
+      arenaId: Arena.daQtd(Estado.d.recorde).id,
+    };
+    if (dupla) s.azul2 = { elixir: 5 };
+    document.body.classList.add('espectando');
+    montar(`👁 Assistindo ${nome}${info.titulo ? ` · ${info.titulo}` : ''}`);
+    $('btn-sair').onclick = () => sairEspectador();
+  }
+  function sairEspectador() {
+    if (!s || !s.espectador) return;
+    const f = s.sairEsp;
+    s.acabou = true;
+    document.body.classList.remove('espectando');
+    fechar();
+    if (f) f();
+    if (ao_esp) ao_esp();
+  }
+  let ao_esp = null;
+  function espectadorFim(resultadoHost) {
+    if (!s || !s.espectador || s.mostrouFim) return;
+    s.mostrouFim = true;
+    const inv = { vitoria: 'derrota', derrota: 'vitoria', empate: 'empate' };
+    const res = resultadoHost ? (timeDe(s.meuLado) === 'vermelho' ? inv[resultadoHost] : resultadoHost) : null;
+    const nome = s.nomeAssistido || 'Seu amigo';
+    setTimeout(() => UI.modal({
+      titulo: res === 'vitoria' ? `🎉 ${nome} venceu!` : res === 'derrota' ? `😢 ${nome} perdeu` : res === 'empate' ? '🤝 Empate!' : 'A batalha acabou',
+      html: `<p class="ev-res">${s ? `${s.azul.coroas} 👑 x ${s.vermelho.coroas} 👑` : ''}</p>`,
+      botoes: [{ texto: 'Voltar', classe: 'principal', acao: () => sairEspectador() }],
+    }), 600);
   }
 
   function receberEstado(est) {
@@ -1788,12 +2061,24 @@ const Batalha = (() => {
       } else if (ev[0] === 'r') {
         const el = fxEl('fx-raio-ceu', mx(ev[1]), my(ev[2]), 380);
         if (el) el.style.backgroundImage = `url(${spriteUrl('raio')})`;
+      } else if (ev[0] === 'e') {
+        const lt = paraMim(ev[1]);
+        if (s.espectador || lt !== 'azul') mostrarEmote(lt, ev[2]);
+      } else if (ev[0] === 'v') {
+        fxEl(ev[1] ? 'fx-mano' : 'fx-bracos', mx(ev[2]), my(ev[3]), ev[1] ? 1150 : 620);
+      } else if (ev[0] === 'n') {
+        voarSprite('marmita', { x: mx(ev[1]), y: my(ev[2]) }, { x: mx(ev[3]), y: my(ev[4]) }, 0.35, 15, { arco: 22 });
+      } else if (ev[0] === 'y') {
+        fxEl('fx-borboletas', mx(ev[1]), my(ev[2]), 900);
+      } else if (ev[0] === 'z') {
+        falar({ x: mx(ev[1]), y: my(ev[2]) }, ev[3], ev[4], false);
       } else if (ev[0] === 't') {
         efeito('teleporte', mx(ev[1]), my(ev[2]), 450);
       }
     }
 
     // fim (resultado do ponto de vista do host)
+    if (est.fim && s.espectador) { espectadorFim(est.fim.resultado); return; }
     if (est.fim) {
       s.acabou = true;
       const inv = { vitoria: 'derrota', derrota: 'vitoria', empate: 'empate' };
@@ -1827,6 +2112,7 @@ const Batalha = (() => {
     if (D && s.ias.includes(quem)) return; // a vaga virou IA
     const vira = time === 'vermelho'; // quem joga do time vermelho vê a arena virada
     const x = vira ? W - cmd.x : cmd.x, y = vira ? H - cmd.y : cmd.y;
+    if (cmd.tipo === 'emote') { emote(quem, cmd.id); return; }
     if (cmd.tipo === 'carta') {
       const id = s[quem].fila[cmd.i];
       if (!id || cmd.i > 3) return;
@@ -1865,6 +2151,7 @@ const Batalha = (() => {
       try { passo(dt); } catch (e) { console.error('Erro na batalha (o jogo continua):', e); }
     }
     if (s.rede && !s.acabou && (s.snapTimer -= dt) <= 0) { s.snapTimer = 0.1; s.rede.enviarEstado(foto()); s.eventos = []; }
+    else if (!s.rede && s.aoVivo && !s.acabou && (s.vivoTimer = (s.vivoTimer || 0) - dt) <= 0) { s.vivoTimer = 0.2; AoVivo.publicar(foto()); s.eventos = []; }
     if (s && !s.acabou) desenhar();
     requestAnimationFrame(loop);
   }
@@ -1897,7 +2184,7 @@ const Batalha = (() => {
     const limite = DURACAO + (s.prorrogacao ? PRORROGACAO : 0);
     const resta = Math.max(0, limite - s.t);
     const dobro = s.modo === 'elixir2x' || s.prorrogacao || resta <= 60;
-    const ganho = (dt / ELIXIR_SEG) * (dobro ? 2 : 1);
+    const ganho = (dt / ELIXIR_SEG) * (dobro ? 2 : 1) * (s.elixirMult || 1);
     for (const quem of LADOS) if (s[quem]) s[quem].elixir = Math.min(10, s[quem].elixir + ganho);
     if (Mod.flag('elixirInfinito')) s.azul.elixir = 10;
 
@@ -1933,10 +2220,13 @@ const Batalha = (() => {
       atualizarStatus(t, dt);
       if (t.vida <= 0) continue;
       if (t.congelado > 0) { if ((t.congelado -= dt) <= 0) t.el.classList.remove('congelada'); continue; }
-      if (t.atord > 0) { if ((t.atord -= dt) <= 0) t.el.classList.remove('atordoada'); continue; }
+      if (t.atord > 0) { if ((t.atord -= dt) <= 0) t.el.classList.remove('atordoada', 'presa'); continue; }
       const mm = t.atk && t.atk.m;
       if (mm && mm.gojo && t.infinito < t.infMax && (t.infTimer += dt) >= 6) { t.infTimer = 0; t.infinito++; t.el.classList.add('com-infinito'); }
       if (mm && (mm.furiaNamek || mm.pulosKame || mm.atravessar)) checarFuria(t, dt);
+      if (mm && mm.marmita) ninoPassiva(t, dt);
+      if (mm && mm.hana) robinDefesa(t, dt);
+      if (t.vida <= 0) continue;
       if (t.intocavel > 0) t.intocavel -= dt;
       if (t.canal > 0) { if ((t.canal -= dt) <= 0 && mm && mm.furiaNamek) soltarFuria(t); continue; } // carregando / pulando / atravessando
       // olha em volta 4x por segundo: troca de alvo se o atual está fora do alcance
@@ -2041,6 +2331,7 @@ const Batalha = (() => {
   // velocidade de ataque: fúria, Punho Gentil, berserk e aura da Hatsune
   function cadenciaMult(t) {
     let k = t.furia > 0 ? 0.8 : 1;
+    if (s.turbo) k *= 0.7;
     if (t.lentoAtq > 0) k *= 1 + t.lentoAtqPct;
     const m = t.atk && t.atk.m;
     if (m && m.berserk) k *= 1 - m.berserk * (1 - t.vida / t.max);
@@ -2053,6 +2344,7 @@ const Batalha = (() => {
     if (t.lentoAtq > 0 && (t.lentoAtq -= dt) <= 0) t.el.classList.remove('chakra');
     if (t.fraco > 0 && (t.fraco -= dt) <= 0) t.el.classList.remove('enfraquecida');
     if (t.marcado > 0 && (t.marcado -= dt) <= 0) t.el.classList.remove('marcada');
+    if (t.buffDano > 0 && (t.buffDano -= dt) <= 0) t.el.classList.remove('bem-alimentada');
     queimar(t, dt);
   }
   // veneno / fogo: dano aos poucos (aplicado a cada meio segundo)
@@ -2098,7 +2390,8 @@ const Batalha = (() => {
     }
     const dados = { resultado, coroas: s.azul.coroas, coroasInimigo: s.vermelho.coroas, modo: s.modo, ranque: s.ranque || null,
       deck: s.azul.deck, deckRival: s.vermelho.deck, deckParceiro: s.azul2 && s.azul2.deck, deckRival2: s.vermelho2 && s.vermelho2.deck,
-      nomeRival: s.rede && s.rede.convidado ? s.rede.convidado.nome : null, nomeParceiro: s.nomeParceiro || null, duracao: Math.round(s.t) };
+      nomeRival: s.rede && s.rede.convidado ? s.rede.convidado.nome : null, nomeParceiro: s.nomeParceiro || null, duracao: Math.round(s.t), evento: s.evento || null, tutorial: s.tutorial ? true : undefined };
+    if (typeof AoVivo !== 'undefined') AoVivo.terminou(foto(), resultado);
     if (s.rede && s.rede.fim) { s.rede.enviarEstado({ ...foto(), fim: { resultado } }); s.rede.fim(dados, desistiu); }
     setTimeout(() => ao_fim && ao_fim(dados), 900);
   }
@@ -2125,7 +2418,7 @@ const Batalha = (() => {
 
   function fechar() {
     $('batalha').classList.add('oculto');
-    document.body.classList.remove('em-batalha');
+    document.body.classList.remove('em-batalha', 'espectando');
     if (s) s.acabou = true;
     s = null;
   }
@@ -2139,5 +2432,5 @@ const Batalha = (() => {
   }
 
   // _teste: usado só pelos testes automáticos de balanceamento
-  return { iniciar, iniciarConvidado, receberEstado, comandoRemoto, adversarioSaiu, fechar, vencerAgora, _estado: () => s, _teste: { jogar, criarTropa } };
+  return { iniciar, iniciarConvidado, iniciarEspectador, espectadorFim, sairEspectador, aoSairEspectador: (f) => (ao_esp = f), receberEstado, comandoRemoto, adversarioSaiu, fechar, vencerAgora, _estado: () => s, _teste: { jogar, criarTropa } };
 })();

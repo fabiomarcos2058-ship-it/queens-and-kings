@@ -1651,3 +1651,156 @@ body.em-batalha .telas * { animation-play-state: paused !important; }
 .fx-rastro-mui { width: 9%; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle, #fff 0 20%, #C9DDFF 45%, transparent 70%); animation: fxPulo 0.42s ease-out forwards; }
 .tropa.foco-torre .tropa-medalhao { box-shadow: 0 0 0 2px #E8F4FF, 0 0 12px 4px #9FC3FF; }
 .tropa.foco-torre::after { content: '🏰'; position: absolute; right: -6px; top: -4px; font-size: 11px; filter: drop-shadow(0 1px 0 #000); }
+
+/* ===== Nino Nakano (carta em vídeo, evento) e Nico Robin ===== */
+.carta .carta-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 7px; display: block; pointer-events: none; }
+.slot-carta .carta .carta-video { mask-image: linear-gradient(#000 70%, #000c 100%); }
+.carta.de-evento { box-shadow: 0 0 0 2px #FF8FB1, 0 0 14px #FF6FA0aa; animation: brilhoEvento 2.4s ease-in-out infinite; }
+@keyframes brilhoEvento { 50% { box-shadow: 0 0 0 2px #7FE0D4, 0 0 18px #7FE0D4aa; } }
+.selo-evento { position: absolute; top: 4px; left: 50%; transform: translateX(-50%); z-index: 3; font: 9px 'Lilita One', sans-serif; letter-spacing: 0.06em; color: #fff; padding: 1px 6px; border-radius: 6px; background: linear-gradient(90deg, #FF5C93, #B15CFF, #3FD1C2); box-shadow: 0 1px 0 #0006; text-shadow: 0 1px 0 #0008; }
+.carta.mini .selo-evento { font-size: 7px; padding: 0 4px; top: 2px; }
+.tropa-medalhao video { width: 100%; height: 100%; border-radius: 50%; display: block; object-fit: cover; position: absolute; inset: 0; }
+
+.dano-num.fala { font-size: 12px; white-space: nowrap; animation: falaSobe 1.1s ease-out forwards; z-index: 1950; }
+.dano-num.fala-nino { color: #FF9FC0; font-size: 14px; text-shadow: 0 0 6px #FF3D7F, 0 1px 0 #000, 1px 0 0 #000, -1px 0 0 #000; }
+.dano-num.fala-robin { color: #E4CCFF; text-shadow: 0 0 6px #9D5CFF, 0 1px 0 #000, 1px 0 0 #000, -1px 0 0 #000; }
+.dano-num.fala-cura { color: #B7F58F; font-size: 11px; }
+@keyframes falaSobe { 0% { opacity: 0; transform: translate(-50%, -30%) scale(0.6); } 15% { opacity: 1; transform: translate(-50%, -60%) scale(1.12); } 70% { opacity: 1; transform: translate(-50%, -95%) scale(1); } 100% { opacity: 0; transform: translate(-50%, -130%) scale(0.95); } }
+
+.tropa.bem-alimentada .tropa-medalhao { box-shadow: 0 0 0 2px #FF8FB1, 0 0 10px #FFB3C7; }
+.tropa.presa .tropa-corpo::after { content: ''; position: absolute; left: 50%; bottom: -4px; width: 120%; height: 60%; transform: translateX(-50%); pointer-events: none;
+  background: radial-gradient(ellipse 18% 46% at 18% 70%, #F2C4A0 0 90%, transparent 100%), radial-gradient(ellipse 18% 46% at 82% 70%, #F2C4A0 0 90%, transparent 100%), radial-gradient(ellipse 50% 30% at 50% 92%, #3a1f2fcc 0 70%, transparent 100%);
+  filter: drop-shadow(0 0 3px #FF9FC8); animation: presaAperta 0.5s ease-in-out infinite alternate; }
+@keyframes presaAperta { to { transform: translateX(-50%) scaleX(0.86); } }
+
+.fx-bracos, .fx-mano, .fx-borboletas { position: absolute; pointer-events: none; z-index: 1700; transform: translate(-50%, -78%); aspect-ratio: 1; }
+.fx-bracos { width: 14%; background: radial-gradient(ellipse 34% 12% at 50% 90%, #2a1220 0 80%, #FF9FC855 92%, transparent 100%); animation: sumirFx 0.62s linear forwards; }
+.fx-mano { width: 44%; background: radial-gradient(ellipse 46% 14% at 50% 90%, #2a1220 0 72%, #FF9FC877 88%, transparent 100%); animation: sumirFx 1.15s linear forwards; }
+.fx-bracos::before, .fx-bracos::after, .fx-mano::before, .fx-mano::after { content: ''; position: absolute; bottom: 10%; width: 26%; height: 76%; transform-origin: 50% 100%;
+  background: url(../assets/ataques/braco.svg) center bottom / contain no-repeat;
+  filter: drop-shadow(0 0 3px #FF9FC8) drop-shadow(0 1px 0 #5a2a1a); animation: bracoSobe 0.62s cubic-bezier(0.3, 1.5, 0.5, 1) forwards; }
+.fx-bracos::before { left: 22%; --r: -14deg; }
+.fx-bracos::after { right: 22%; --r: 14deg; animation-delay: 0.05s; }
+.fx-mano::before, .fx-mano::after { width: 34%; height: 96%; animation: manoSobe 1.15s cubic-bezier(0.3, 1.4, 0.5, 1) forwards; }
+.fx-mano::before { left: 10%; --r: 22deg; }
+.fx-mano::after { right: 10%; --r: -22deg; }
+@keyframes bracoSobe { 0% { transform: rotate(var(--r)) scaleY(0); } 35% { transform: rotate(var(--r)) scaleY(1.08); } 60% { transform: rotate(calc(var(--r) * -1.4)) scaleY(0.92); } 85% { transform: rotate(var(--r)) scaleY(1); opacity: 1; } 100% { transform: rotate(var(--r)) scaleY(0.1); opacity: 0; } }
+@keyframes manoSobe { 0% { transform: rotate(var(--r)) scaleY(0); } 30% { transform: rotate(var(--r)) scaleY(1.05); } 48% { transform: rotate(calc(var(--r) * -0.6)) scaleY(0.95); } 80% { transform: rotate(calc(var(--r) * -0.6)) scaleY(0.95); opacity: 1; } 100% { transform: rotate(calc(var(--r) * -0.6)) scaleY(0.1); opacity: 0; } }
+@keyframes sumirFx { 85% { opacity: 1; } 100% { opacity: 0; } }
+.fx-borboletas { width: 20%; transform: translate(-50%, -50%); background: url(../assets/ataques/borboleta.svg) 8% 40% / 34% no-repeat, url(../assets/ataques/borboleta.svg) 78% 12% / 28% no-repeat, url(../assets/ataques/borboleta.svg) 62% 78% / 30% no-repeat; animation: borbVoa 0.9s ease-out forwards; filter: drop-shadow(0 0 4px #FF8FB1); }
+@keyframes borbVoa { 0% { transform: translate(-50%, -40%) scale(0.5); opacity: 0; } 25% { opacity: 1; } 100% { transform: translate(-50%, -120%) scale(1.25) rotate(10deg); opacity: 0; } }
+
+/* ===== Emotes ===== */
+.btn-emote { position: absolute; left: 8px; bottom: 8px; z-index: 2100; width: 42px; height: 42px; border-radius: 50%; border: 2px solid #fff; background: radial-gradient(circle at 35% 30%, #8FD3FF, #2C7BE5); font-size: 20px; box-shadow: 0 3px 0 #0b3a7a, 0 4px 10px #0007; cursor: pointer; transition: transform 0.12s, filter 0.2s; }
+.btn-emote:active { transform: scale(0.9); }
+.btn-emote.esperando { filter: grayscale(1) brightness(0.7); }
+.painel-emotes { position: absolute; left: 8px; bottom: 58px; z-index: 2101; display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; width: min(300px, 82%); padding: 8px; border-radius: 14px; background: #101a3aee; border: 2px solid #6FA8FF; box-shadow: 0 6px 18px #000a; animation: popIn 0.18s ease-out; }
+.painel-emotes.oculto { display: none; }
+.painel-emotes button { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 5px 2px; border-radius: 10px; border: 1px solid #ffffff22; background: #ffffff12; color: #fff; cursor: pointer; }
+.painel-emotes button:active { transform: scale(0.92); background: #ffffff30; }
+.painel-emotes span { font-size: 22px; line-height: 1; }
+.painel-emotes img { width: 30px; height: 30px; border-radius: 50%; border: 2px solid #FFD25E; }
+.painel-emotes small { font-size: 8.5px; line-height: 1.1; text-align: center; opacity: 0.9; max-width: 100%; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.emote-balao { position: absolute; z-index: 2050; display: flex; align-items: center; gap: 6px; padding: 5px 11px 5px 6px; border-radius: 18px; background: #fff; color: #1b1b2e; font: 13px 'Lilita One', 'Fredoka', sans-serif; box-shadow: 0 3px 0 #0003, 0 4px 12px #0006; pointer-events: none; transform: translate(-50%, 0); animation: emotePop 2.4s ease-out forwards; max-width: 62%; }
+.emote-balao::after { content: ''; position: absolute; left: 50%; width: 12px; height: 12px; background: #fff; transform: translateX(-50%) rotate(45deg); }
+.emote-balao.azul, .emote-balao.azul2 { bottom: 15%; } .emote-balao.azul::after, .emote-balao.azul2::after { bottom: -5px; }
+.emote-balao.vermelho, .emote-balao.vermelho2 { top: 9%; } .emote-balao.vermelho::after, .emote-balao.vermelho2::after { top: -5px; }
+.emote-balao.azul, .emote-balao.vermelho { left: 50%; }
+.emote-balao.azul2, .emote-balao.vermelho2 { left: 24%; }
+.emote-balao.vermelho { border: 2px solid #FF6B6B; } .emote-balao.azul { border: 2px solid #4FA3FF; }
+.emote-balao .emote-ic { font-size: 26px; line-height: 1; }
+.emote-balao img { width: 34px; height: 34px; border-radius: 50%; border: 2px solid #FFD25E; }
+.emote-balao b { font-weight: normal; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+@keyframes emotePop { 0% { opacity: 0; transform: translate(-50%, 10px) scale(0.5); } 8% { opacity: 1; transform: translate(-50%, 0) scale(1.12); } 14% { transform: translate(-50%, 0) scale(1); } 85% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -6px) scale(0.95); } }
+body.espectando .btn-emote, body.espectando .painel-emotes { display: none; }
+
+/* ===== Botões extras da tela inicial ===== */
+.linha-extra { display: flex; gap: 6px; width: 86%; margin: -2px auto 10px; }
+.btn-extra { position: relative; flex: 1; padding: 7px 4px; font-size: 13px; font-weight: 700; color: #fff; border-radius: 11px; background: linear-gradient(#FFB648, #E07B12); border-bottom: 3px solid #9A4E06; text-shadow: 0 1px 0 #0005; box-shadow: 0 3px 8px #0004; }
+.btn-extra:nth-child(2) { background: linear-gradient(#FF7FB0, #D83A7A); border-bottom-color: #8E1C4C; }
+.btn-extra:nth-child(3) { background: linear-gradient(#7FD4FF, #2F8FD6); border-bottom-color: #175C93; }
+.btn-extra:active { transform: translateY(2px); border-bottom-width: 1px; }
+.selo-novo { position: absolute; top: -8px; right: -4px; font-style: normal; font-size: 9px; padding: 1px 5px; border-radius: 6px; background: #FFE45C; color: #6A2A00; box-shadow: 0 0 0 2px #1d2350; animation: pulsoNovo 1.4s ease-in-out infinite; }
+@keyframes pulsoNovo { 50% { transform: scale(1.12); } }
+
+/* ===== Missões ===== */
+.modal-missoes .modal-corpo { max-height: 64vh; overflow-y: auto; }
+.missoes-cab { display: flex; justify-content: space-between; align-items: baseline; margin: 10px 2px 6px; }
+.missoes-cab b { font-size: 16px; } .missoes-cab small { opacity: 0.7; font-size: 11px; }
+.missao { display: flex; align-items: center; gap: 10px; padding: 9px 10px; margin-bottom: 7px; border-radius: 12px; background: #ffffff10; border: 1px solid #ffffff1a; }
+.missao.pronta:not(.pega) { background: linear-gradient(90deg, #2f7d32aa, #ffffff10); border-color: #7BE04A88; }
+.missao.pega { opacity: 0.55; }
+.missao.bonus { background: linear-gradient(90deg, #7a3fb855, #ffffff10); }
+.missao-txt { flex: 1; min-width: 0; }
+.missao-txt b { font-size: 13px; display: block; text-align: left; }
+.missao .ev-barra { max-width: none; }
+.missao .ev-barra i { background: linear-gradient(90deg, #7BE04A, #C9F27A); }
+.missao-btn { min-width: 74px; padding: 7px 8px; border-radius: 10px; font-weight: 700; font-size: 12px; color: #fff; background: linear-gradient(#5FD068, #2E9A3A); border-bottom: 3px solid #1C6526; }
+.missao-btn.travado { background: #ffffff22; border-bottom-color: #0004; color: #fffa; }
+.missao-ok { min-width: 74px; text-align: center; font-size: 22px; color: #7BE04A; }
+
+/* ===== Eventos novos ===== */
+.eventos-cab { font: 16px 'Lilita One', 'Fredoka', sans-serif; margin: 14px 4px 8px; text-align: left; text-shadow: 0 2px 0 #0006; }
+.banner-nino { position: relative; overflow: hidden; border-radius: 16px; min-height: 250px; margin-bottom: 8px; border: 2px solid #FF8FB1; box-shadow: 0 0 18px #FF6FA066, 0 6px 14px #0006; text-align: left; }
+.banner-nino video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 20%; }
+.banner-nino::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, #1a0716f0 0%, #1a0716c8 52%, #1a071622 100%); }
+.bn-conteudo { position: relative; z-index: 1; display: flex; flex-direction: column; gap: 6px; padding: 14px; max-width: 72%; }
+.bn-tag { font: 10px 'Lilita One', sans-serif; letter-spacing: 1px; color: #7FE0D4; }
+.bn-conteudo > b { font: 22px 'Lilita One', 'Fredoka', sans-serif; color: #FFC2D8; text-shadow: 0 0 10px #FF3D7F, 0 2px 0 #4a0a22; }
+.bn-conteudo > span { font-size: 12.5px; opacity: 0.95; }
+.fn-pips { display: flex; gap: 5px; margin-top: 4px; }
+.fn-pip { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; font-weight: 700; background: #ffffff18; border: 2px solid #ffffff44; }
+.fn-pip.ok { background: linear-gradient(#FF8FB1, #D83A7A); border-color: #FFD1E1; box-shadow: 0 0 8px #FF6FA0; }
+.fn-pip.final { width: 34px; height: 34px; border-color: #FFD25E; overflow: hidden; padding: 0; }
+.fn-pip.final img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(0.7) brightness(0.7); }
+.fn-pip.final.ok img { filter: none; }
+.fn-linha { display: flex; align-items: center; gap: 10px; margin-top: 4px; }
+.fn-vidas i { font-style: normal; font-size: 15px; }
+.fn-vidas i.perdida { filter: grayscale(1); opacity: 0.35; }
+.fn-jogar { background: linear-gradient(#FF8FB1, #D83A7A) !important; border-bottom: 3px solid #8E1C4C !important; }
+.fn-ver { align-self: flex-start; font-size: 11px; color: #FFC2D8; text-decoration: underline; background: none; padding: 0; }
+.evento.modo-ev { gap: 10px; text-align: left; }
+.modo-ev .modo-ic { font-size: 30px; filter: drop-shadow(0 2px 0 #0006); }
+.modo-ev small.modo-tempo { display: block; font-size: 10.5px; opacity: 0.75; margin-top: 3px; }
+.modo-ev.roxo { background-color: #6a3fd1; } .modo-ev.vermelho { background-color: #b8323f; } .modo-ev.verde { background-color: #2a9a5a; }
+.modo-ev.dourado { background-color: #b98516; } .modo-ev.azul { background-color: #2f73c9; } .modo-ev.laranja { background-color: #d2681b; }
+.ev-res { font-size: 16px; text-align: center; line-height: 1.6; }
+
+/* Draft */
+.draft-dica { text-align: center; font-size: 13px; }
+.draft-par { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 10px 0; }
+.draft-op { display: flex; flex-direction: column; align-items: center; gap: 4px; width: 112px; padding: 6px; border-radius: 12px; background: #ffffff10; border: 2px solid #ffffff22; color: #fff; }
+.draft-op:active { transform: scale(0.95); border-color: #7BE04A; }
+.draft-op .carta { width: 96px; }
+.draft-op b { font-size: 12px; }
+.draft-vs { font: 16px 'Lilita One', sans-serif; opacity: 0.8; }
+.draft-decks { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.draft-decks small { font-size: 11px; opacity: 0.75; }
+.draft-mini { display: flex; flex-wrap: wrap; gap: 3px; min-height: 34px; padding: 4px; border-radius: 8px; background: #2f73c933; }
+.draft-mini.rival { background: #b8323f33; }
+.draft-mini img { width: 22px; height: 29px; object-fit: cover; border-radius: 3px; }
+
+/* revelação da Nino */
+.revela-nino .re-conteudo small { color: #7FE0D4; text-shadow: 0 0 10px #FF3D7F; }
+.revela-nino .re-conteudo > b { background: linear-gradient(#fff, #FFC2D8 60%, #FF6FA0); -webkit-background-clip: text; background-clip: text; }
+.rn-palco { width: 170px; margin: 30px 0 22px; animation: pmEmblema 0.9s 0.1s cubic-bezier(0.2, 1.6, 0.4, 1) both; filter: drop-shadow(0 0 22px #FF6FA0); }
+.rn-palco .carta { width: 100%; }
+
+/* ===== Assistindo amigo ===== */
+body.espectando .hud-baixo, body.espectando #habilidades { display: none; }
+body.espectando .selo-previa { background: linear-gradient(90deg, #D83A7A, #6a3fd1); }
+body.espectando .arena-grande-janela::after { content: '👁 AO VIVO'; position: absolute; top: 8px; left: 12px; z-index: 2100; font: 12px 'Lilita One', sans-serif; padding: 3px 8px; border-radius: 8px; background: #E24B4A; color: #fff; animation: pulsoNovo 1.4s ease-in-out infinite; }
+.btn-assistir { background: linear-gradient(#FF7FB0, #D83A7A) !important; }
+.em-batalha-tag { display: inline-block; font-size: 10px; padding: 1px 6px; border-radius: 6px; background: #E24B4A; color: #fff; margin-left: 6px; vertical-align: middle; }
+
+/* ===== Tutorial ===== */
+.btn-extra.chamando { animation: pulsoNovo 1.2s ease-in-out infinite; box-shadow: 0 0 0 2px #fff, 0 0 14px #7FD4FF; }
+.tutorial-foco { position: absolute; z-index: 2200; border-radius: 14px; border: 3px solid #FFE45C; box-shadow: 0 0 0 9999px #00000066, 0 0 18px #FFE45C; pointer-events: none; animation: focoPulsa 1.2s ease-in-out infinite; }
+@keyframes focoPulsa { 50% { border-color: #fff; } }
+.tutorial-dica { position: absolute; z-index: 2300; left: 50%; top: 22%; transform: translateX(-50%); width: min(92%, 380px); display: flex; gap: 10px; align-items: flex-start; padding: 12px; border-radius: 16px; background: #fff; color: #1b1b2e; box-shadow: 0 8px 24px #000a; animation: popIn 0.25s ease-out; text-align: left; }
+.tutorial-dica.em-cima { top: auto; bottom: 26%; }
+.tutorial-dica img { width: 52px; height: 52px; border-radius: 50%; border: 3px solid #FF8FB1; flex-shrink: 0; }
+.tutorial-dica small { font-size: 10px; color: #8a5; font-weight: 700; letter-spacing: 1px; }
+.tutorial-dica p { margin: 2px 0 8px; font-size: 14px; line-height: 1.35; }
+.tutorial-dica .btn-modal { padding: 7px 18px; }
+.tutorial-espera { font-size: 12px; color: #c05; animation: pulsoNovo 1.2s infinite; display: inline-block; }

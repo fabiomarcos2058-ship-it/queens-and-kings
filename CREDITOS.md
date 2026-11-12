@@ -24,3 +24,7 @@
 ## Personagens
 - As imagens dos personagens foram enviadas pela criadora do jogo. Queens and Kings é um fangame
   sem fins lucrativos; os personagens pertencem aos seus respectivos donos.
+
+## Nino Nakano e Nico Robin
+- O vídeo da Nino (carta animada, rosto animado e banner do Festival) e a imagem da Robin foram enviados pela criadora do jogo; aqui eles só foram recortados.
+- Os desenhos da borboleta, da marmita e do braço (Hana Hana) foram feitos à mão para o jogo, em SVG simples.

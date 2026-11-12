@@ -25,8 +25,8 @@ const Ataques = (() => {
   const CLASSE_DA_CARTA = {
     tanque: ['itsuki', 'shizuku', 'gogeta_ssj4', 'goku_ssj3', 'goku_ssj4', 'goku_blue_lb', 'gogeta_ultra'],
     assassino: ['bra', 'teto', 'pan_dbh', 'akame', 'mbappe', 'kashimo', 'goku_pressagio'],
-    atirador: ['mai', 'miku_nakano', 'pan_gt', 'riruka', 'rukia_remake'],
-    mago: ['rukia', 'nami_last', 'hatsune_miku', 'bambietta', 'bulma', 'gojo'],
+    atirador: ['mai', 'miku_nakano', 'pan_gt', 'riruka', 'rukia_remake', 'nino_nakano'],
+    mago: ['rukia', 'nami_last', 'hatsune_miku', 'bambietta', 'bulma', 'gojo', 'robin'],
     enxame: ['mini'],
   };
   const classeDe = (c) => {
@@ -87,6 +87,8 @@ const Ataques = (() => {
     goku_blue_lb: { v: { g: 'impacto', cor: '#3FC4FF', s: 'ki_azul' }, m: { surgirImpacto: [1.5, 55] }, d: 'Chega quebrando tudo: uma explosão quando entra na arena.' },
     goku_pressagio: { v: { g: 'corte', cor: '#E8F4FF', s: 'ki_prata' }, m: { contraEsquiva: true, pulosKame: true }, d: 'Quando desvia de um ataque, revida na hora. Passiva: se 2 ou 3 inimigos o cercarem, dá dois pulos pra trás e solta um Kamehameha no grupo.' },
     goku_isc: { v: { g: 'impacto', cor: '#E8F4FF', s: 'ki_prata' }, m: { marcar: [0.2, 3], imune: true, atravessar: true }, d: 'Imune a lentidão e atordoamento. Marca o alvo: +20% de dano de todos. Passiva: se 2 ou 3 inimigos o cercarem, desvia, passa no meio deles e vai só atrás das torres, 15% mais rápido.' },
+    nino_nakano: { v: { p: 'borboleta', vel: 220, tam: 16, rastro: '#FF8FB1' }, m: { marmita: true }, d: 'Joga borboletas. Passiva: a cada 6s uma marmita cura a aliada mais ferida (+22% de vida e +20% de dano por 5s). Levou um golpe forte? "Baka!" e empurra quem está colado.' },
+    robin: { v: { g: 'bracos', cor: '#F2C4A0' }, m: { hana: true }, d: 'Hana Hana: braços brotam do chão embaixo do alvo (não dá pra desviar do projétil, não tem projétil!). A cada 3 golpes prende o alvo. Quem encosta nela é empurrado pelos braços.' },
     goku_ui: { v: { g: 'impacto', cor: '#E8F4FF', s: 'ki_prata' }, m: { imune: true }, d: 'Imune a lentidão e atordoamento.' },
   };
   const padrao = (c) => (c && c.alcance > 40 ? { v: { p: 'ki_amarelo', vel: 300, tam: 14 } } : { v: { g: 'soco', cor: '#ffffff' } });

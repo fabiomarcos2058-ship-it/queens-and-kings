@@ -1548,6 +1548,90 @@
       },
       "arena": 1,
       "danoTorre": 0.5
+    },
+    {
+      "id": "nino_nakano",
+      "nome": "Nino Nakano",
+      "raridade": "lendaria",
+      "custo": 4,
+      "tipo": "Cozinheira · Quíntupla",
+      "descricao": "Não é a mais forte, mas cuida do time: joga marmitas que curam e fortalecem os aliados. As borboletas dela deixam os inimigos lentos.",
+      "trofeus": 0,
+      "exclusivo": [],
+      "nivelInicial": 5,
+      "evento": true,
+      "video": "videos/nino_nakano.mp4",
+      "rosto": [
+        395,
+        320,
+        150
+      ],
+      "arte": [
+        0,
+        40,
+        700
+      ],
+      "vida": 820,
+      "dano": 135,
+      "velocidade": 50,
+      "alcance": 75,
+      "cadencia": 1.3,
+      "alvo": "tudo",
+      "arena": 1,
+      "danoTorre": 0.7,
+      "passiva": {
+        "nome": "Marmita da Nino",
+        "tipo": "marmita",
+        "descricao": "A cada 6s joga uma marmita na aliada mais ferida: cura 22% da vida e dá +20% de dano por 5s. Se tomar um golpe forte, grita \"Baka!\" e empurra quem está colado nela."
+      },
+      "habilidade": {
+        "nome": "Quíntuplas Idênticas",
+        "tipo": "quintuplas",
+        "custo": 2,
+        "recarga": 18,
+        "descricao": "Aparecem 4 cópias idênticas da Nino. Ninguém sabe qual é a verdadeira! As cópias somem em 8s e soltam borboletas que deixam os inimigos lentos."
+      },
+      "videoRosto": "videos/nino_nakano_rosto.mp4"
+    },
+    {
+      "id": "robin",
+      "nome": "Nico Robin",
+      "raridade": "lendaria",
+      "custo": 5,
+      "tipo": "Arqueóloga · Hana Hana",
+      "descricao": "Nunca chega perto: faz braços brotarem do chão embaixo do inimigo, de longe. A cada 3 golpes, os braços prendem o alvo.",
+      "trofeus": 1800,
+      "rosto": [
+        170,
+        205,
+        150
+      ],
+      "arte": [
+        0,
+        0,
+        736
+      ],
+      "vida": 1010,
+      "dano": 228,
+      "velocidade": 44,
+      "alcance": 115,
+      "cadencia": 1.4,
+      "alvo": "tudo",
+      "arena": 4,
+      "danoTorre": 0.6,
+      "passiva": {
+        "nome": "Clutch",
+        "tipo": "clutch",
+        "descricao": "A cada 3 golpes, os braços prendem o alvo por 1,2s. Se um inimigo corpo a corpo encostar nela, braços brotam e o empurram pra longe (a cada 4s)."
+      },
+      "habilidade": {
+        "nome": "Mil Fleur: Gigantesco Mano",
+        "tipo": "gigantescoMano",
+        "custo": 4,
+        "recarga": 18,
+        "dano": 650,
+        "descricao": "Duas mãos gigantes brotam do chão em volta do alvo: dano em área e prendem todo mundo por 2s. Torres levam 35%."
+      }
     }
   ]
 }
