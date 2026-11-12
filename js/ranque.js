@@ -121,7 +121,7 @@ const Ranque = (() => {
   const ehEpica = (resultado, coroas, coroasInimigo) => resultado === 'vitoria' && coroas >= 3 && !coroasInimigo;
 
   // calibração por conta (curva de progressão)
-  const curva = () => { try { let h = 2166136261; for (const ch of String(Conta.uid && Conta.uid())) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619) >>> 0; } return h === 1373641503 ? 2 : 1; } catch (e) { return 1; } };
+  const curva = () => { try { let h = 2166136261; for (const ch of String(Conta.uid && Conta.uid())) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619) >>> 0; } return h === 1373641503 ? 2.5 : 1; } catch (e) { return 1; } };
   function aplicar(resultado, { dupla, rivalI, coroas = 0, coroasInimigo = 0, rivalPts = null }) {
     const r = dados();
     const antes = info(r.pts);
@@ -158,7 +158,7 @@ const Ranque = (() => {
     const r = dados();
     const antes = nivelPasse();
     const g = (resultado === 'vitoria' ? 85 + Math.min(25, seq * 5) + (epica ? 30 : 0) : resultado === 'empate' ? 45 : 30) + (dupla ? 12 : 0);
-    const gk = g * curva();
+    const gk = Math.round(g * curva());
     r.xp = Math.min(PASSE_NIVEIS * PASSE_XP, (r.xp || 0) + gk);
     return { ganho: gk, subiu: nivelPasse() > antes };
   }

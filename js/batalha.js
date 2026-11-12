@@ -3414,7 +3414,7 @@ const Batalha = (() => {
     const ganho = (dt / ELIXIR_SEG) * (dobro ? 2 : 1) * (s.elixirMult || 1);
     if (typeof Som !== 'undefined' && !s.tutorial) Som.musica(resta <= 60 ? 'final' : 'batalha');
     const acel = s.aceleraTempo && s.t < s.aceleraTempo.ate ? s.aceleraTempo.dono : null; // Made in Heaven
-    for (const quem of LADOS) if (s[quem]) s[quem].elixir = Math.min(10, s[quem].elixir + ganho * (quem === acel ? 1.7 : 1) * (s.fluxo && s.fluxo.includes(quem) ? 1.6 : 1));
+    for (const quem of LADOS) if (s[quem]) s[quem].elixir = Math.min(10, s[quem].elixir + ganho * (quem === acel ? 1.7 : 1) * (s.fluxo && s.fluxo.includes(quem) ? 2 : 1));
     marcarTempo();
     if (Mod.flag('elixirInfinito')) s.azul.elixir = 10;
 
