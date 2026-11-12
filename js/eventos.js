@@ -287,7 +287,7 @@ const Eventos = (() => {
         <div class="rn-palco">${Cartas.html(c, { mini: true })}</div>
         <b>${esc(c.nome)}</b>
         <p>${fala}</p>
-        <button class="btn-modal principal">Bem-vinda, ${esc(c.nome.split(' ')[0])}! ${c.id === 'mita_malvada' ? '🖤' : '🎀'}</button></div>`;
+        <button class="btn-modal principal">Bem-vinda, ${esc(c.nome.split(' ')[0])}! ${c.id === 'mita_malvada' ? '🖤' : c.id === 'akame_murasame' ? '🗡️' : '🎀'}</button></div>`;
     $('app').appendChild(el);
     try { navigator.vibrate && navigator.vibrate([80, 50, 160]); } catch (e) { /* nada */ }
     el.querySelector('button').onclick = () => { el.classList.add('sumir'); setTimeout(() => el.remove(), 300); };
@@ -350,6 +350,7 @@ const Eventos = (() => {
 
   // ---------- conferências (rodam sempre que o menu atualiza) ----------
   const SAMUEL = 'twJXL5kpGtUVwrx7Br3xCq26ZDG3';
+  const ARTHUR = 'ZwrffaFMcidTzZAGCMJNXOtuuOh2';
   const ENZO = 'EwnFPrCPFUMawnc6dttsQQ98yII2';
   let conferindo = false;
   function conferir() {
@@ -430,6 +431,15 @@ const Eventos = (() => {
         Estado.salvar();
         if (Conta.salvarAgora) Conta.salvarAgora().catch(() => {});
         setTimeout(() => revelarNino(c, 'PRESENTE DA CRIADORA', 'Desculpa pelo bug do festival! Toma a Nino, já no nível 4 💜'), 900);
+      }
+      // Akame (Murasame): exclusiva do Arthur
+      if (uid === ARTHUR && Estado.tem('akame_murasame') && !(d.presentesEspeciais || []).includes('akame-arthur')) {
+        d.presentesEspeciais = [...(d.presentesEspeciais || []), 'akame-arthur'];
+        if (d.presenteNovo === 'akame_murasame') d.presenteNovo = null; // usa a revelação especial no lugar do aviso comum
+        Estado.salvar();
+        if (Conta.salvarAgora) Conta.salvarAgora().catch(() => {});
+        const nome = esc(((d.nome || 'Arthur').split(' ')[0]) || 'Arthur');
+        setTimeout(() => revelarNino(Estado.carta('akame_murasame'), 'LENDÁRIA EXCLUSIVA DO ARTHUR', `"Me disseram que eu luto do seu lado agora, ${nome}. Só aponta o alvo… o resto é comigo."`), 900);
       }
     } catch (e) { console.warn('Eventos.conferir', e); }
     conferindo = false;

@@ -24,7 +24,7 @@ const Ataques = (() => {
 
   const CLASSE_DA_CARTA = {
     tanque: ['itsuki', 'shizuku', 'gogeta_ssj4', 'goku_ssj3', 'goku_ssj4', 'goku_blue_lb', 'gogeta_ultra'],
-    assassino: ['bra', 'teto', 'pan_dbh', 'akame', 'mbappe', 'kashimo', 'goku_pressagio', 'diavolo', 'mita_malvada'],
+    assassino: ['bra', 'teto', 'pan_dbh', 'akame', 'mbappe', 'kashimo', 'goku_pressagio', 'diavolo', 'mita_malvada', 'akame_murasame'],
     atirador: ['mai', 'miku_nakano', 'pan_gt', 'riruka', 'rukia_remake', 'nino_nakano', 'gyro', 'johnny'],
     mago: ['rukia', 'nami_last', 'hatsune_miku', 'bambietta', 'bulma', 'gojo', 'robin', 'pucci', 'mita_gentil'],
     enxame: ['mini'],
@@ -57,6 +57,7 @@ const Ataques = (() => {
     trunks_base: { v: { g: 'corte', s: 'espada_trunks', cor: '#E6F0FF' }, m: { perfura: true }, d: 'Corte de espada que acerta também quem está atrás.' },
     pan_gt: { v: { p: 'ki_laranja', vel: 300, tam: 14, rastro: '#FF9A2E' }, m: { rajada: 2 }, d: 'Rajada dupla de esferas de ki.' },
     hatsune_miku: { v: { p: 'nota', vel: 200, tam: 22, giro: 220, rastro: '#39C5BB' }, m: { auraVel: [75, 0.2] }, d: 'Notas musicais. Aliados perto dela atacam 20% mais rápido.' },
+    akame_murasame: { v: { g: 'corte', s: 'katana', cor: '#E0102F' }, m: { queimar: [0.06, 3, '#B0123A', 'veneno'], murasame: 0.15, sombras: 1.0 }, d: 'Murasame: o corte amaldiçoa com veneno e elimina na hora quem fica fraco demais.' },
     akame: { v: { g: 'corte', s: 'katana', cor: '#FF3B3B' }, m: { queimar: [0.05, 3, '#7BE04A', 'veneno'] }, d: 'Murasame: o corte envenena o alvo.' },
     trunks_ssj: { v: { g: 'corte', s: 'espada_trunks', cor: '#FFD25E' }, m: { especial: [4, 2.2, 32, 'fogo'] }, d: 'A cada 4 golpes, um Burning Attack em área.' },
     riruka: { v: { p: 'coringa', vel: 260, tam: 18, giro: 540, rastro: '#FF6FAE' }, m: { enfraquecer: [0.25, 3] }, d: 'Cartas que prendem na casinha: o alvo causa 25% menos dano.' },

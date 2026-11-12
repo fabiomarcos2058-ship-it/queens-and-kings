@@ -2105,3 +2105,24 @@ body.em-batalha #spotify-player:not(.aberto) .sp-alca { opacity: 0.6; }
 .mita-jogar { background: linear-gradient(#FF8FC0, #D83A7A) !important; border-bottom: 3px solid #8E1C4C !important; }
 .mita-caixa.malvada .mita-jogar { background: linear-gradient(#ff4a6a, #8a0020) !important; border-bottom-color: #3a0010 !important; }
 .mita-trava { background: #0007 !important; font-size: 11px; }
+
+/* ===== Akame (Murasame) — exclusiva do Arthur ===== */
+.tropa.sombra .tropa-corpo { opacity: 0.38; filter: grayscale(0.6) brightness(0.55) drop-shadow(0 0 6px #000); transition: opacity 0.2s; }
+.tropa.sombra .barra-hp { opacity: 0.4; }
+.tropa.amaldicoada .tropa-medalhao { box-shadow: 0 0 0 2px #B0123A, 0 0 10px 2px #E0102F99; }
+.tropa.amaldicoada .tropa-corpo::after { content: ''; position: absolute; left: 50%; top: 52%; width: 120%; aspect-ratio: 1; transform: translate(-50%, -50%); pointer-events: none; border-radius: 50%;
+  background: repeating-conic-gradient(from 0deg, #E0102F00 0 22deg, #E0102Faa 22deg 26deg, #E0102F00 26deg 60deg); -webkit-mask: radial-gradient(transparent 52%, #000 54%, #000 62%, transparent 64%); mask: radial-gradient(transparent 52%, #000 54%, #000 62%, transparent 64%); animation: giraMald 2.4s linear infinite; }
+@keyframes giraMald { to { transform: translate(-50%, -50%) rotate(360deg); } }
+.tropa.aura-trunfo .tropa-medalhao { box-shadow: 0 0 0 3px #E0102F, 0 0 20px 7px #B0123Acc; animation: andar 0.3s ease-in-out infinite; }
+.tropa.aura-trunfo .tropa-medalhao::after { content: ''; position: absolute; inset: 0; border-radius: 50%; pointer-events: none;
+  background: repeating-linear-gradient(115deg, transparent 0 7px, #12000699 7px 9px, transparent 9px 16px), repeating-linear-gradient(35deg, transparent 0 11px, #12000677 11px 12px, transparent 12px 20px); animation: marcasPulsam 0.9s ease-in-out infinite alternate; }
+@keyframes marcasPulsam { from { opacity: 0.55; } to { opacity: 1; } }
+.fx-murasame { position: absolute; pointer-events: none; z-index: 1760; width: 24%; aspect-ratio: 1; transform: translate(-50%, -50%) rotate(-28deg); }
+.fx-murasame::before, .fx-murasame::after { content: ''; position: absolute; left: -10%; right: -10%; top: 50%; height: 5px; border-radius: 3px; background: linear-gradient(90deg, transparent, #fff 30%, #FF2A45 60%, transparent); box-shadow: 0 0 12px #FF2A45; transform: scaleX(0); transform-origin: left; animation: cortaMur 0.75s ease-out forwards; }
+.fx-murasame::after { transform: rotate(56deg) scaleX(0); animation: cortaMur2 0.75s 0.08s ease-out forwards; }
+@keyframes cortaMur { 0% { transform: scaleX(0); opacity: 1; } 35% { transform: scaleX(1); opacity: 1; } 100% { transform: scaleX(1); opacity: 0; } }
+@keyframes cortaMur2 { 0% { transform: rotate(56deg) scaleX(0); opacity: 1; } 35% { transform: rotate(56deg) scaleX(1); opacity: 1; } 100% { transform: rotate(56deg) scaleX(1); opacity: 0; } }
+.fx-trunfo { position: absolute; pointer-events: none; z-index: 1750; width: 34%; aspect-ratio: 1; transform: translate(-50%, -50%); border-radius: 50%;
+  background: radial-gradient(#E0102F55, transparent 60%), repeating-conic-gradient(#120006cc 0 6deg, transparent 6deg 30deg); animation: trunfoFx 0.9s ease-out forwards; }
+@keyframes trunfoFx { from { transform: translate(-50%, -50%) scale(0.3) rotate(0deg); opacity: 1; } to { transform: translate(-50%, -50%) scale(1.5) rotate(90deg); opacity: 0; } }
+.dano-num.fala-akame { color: #FF3355; font-weight: 900; letter-spacing: 1px; text-shadow: 0 0 6px #000, 0 0 10px #B0123A; }

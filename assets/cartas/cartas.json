@@ -522,6 +522,53 @@
       "danoTorre": 0.75
     },
     {
+      "id": "akame_murasame",
+      "intransferivel": true,
+      "nome": "Akame (Murasame)",
+      "raridade": "lendaria",
+      "custo": 4,
+      "tipo": "Assassina · Exclusiva do Arthur",
+      "descricao": "Exclusiva do Arthur. A lâmina amaldiçoada Murasame envenena com um corte, e quem fica fraco demais cai na hora. Ela some nas sombras e já parte pro próximo.",
+      "trofeus": 0,
+      "exclusivo": [
+        "ZwrffaFMcidTzZAGCMJNXOtuuOh2"
+      ],
+      "nivelInicial": 7,
+      "video": "videos/akame_murasame.mp4",
+      "videoRosto": "videos/akame_murasame_rosto.mp4",
+      "rosto": [
+        300,
+        305,
+        125
+      ],
+      "arte": [
+        0,
+        60,
+        720
+      ],
+      "vida": 960,
+      "dano": 290,
+      "velocidade": 64,
+      "alcance": 18,
+      "cadencia": 1.0,
+      "alvo": "tudo",
+      "arena": 1,
+      "danoTorre": 0.6,
+      "passiva": {
+        "nome": "Um corte, uma morte",
+        "tipo": "murasame",
+        "descricao": "Cada corte amaldiçoa o alvo com veneno. Tropa amaldiçoada que ficar com 15% da vida (ou menos) cai na hora. Depois de eliminar, some nas sombras por um instante e salta até o próximo inimigo. Entra no campo escondida nas sombras."
+      },
+      "habilidade": {
+        "nome": "Trunfo: Marcas da Maldição",
+        "tipo": "trunfoMurasame",
+        "custo": 3,
+        "recarga": 20,
+        "duracao": 6,
+        "descricao": "As marcas da Murasame tomam o corpo dela: perde 15% da vida, mas por 6s fica mais rápida, ataca mais rápido, elimina quem estiver com 25% da vida e o corte amaldiçoa quem está em volta."
+      }
+    },
+    {
       "id": "trunks_ssj",
       "nome": "Trunks (SSJ)",
       "raridade": "epica",

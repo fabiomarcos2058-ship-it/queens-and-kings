@@ -138,6 +138,7 @@ const Som = (() => {
         const o = osc('sine', 900, t + 0.5, 0.9, d, 0.4, 0.3); o.frequency.exponentialRampToValueAtTime(60, t + 1.4);
         barulho(t + 0.5, 1.0, d, { tipo: 'lowpass', f: 400, pico: 0.4 }); break;
       }
+      case 'corte': { barulho(t, 0.12, d, { f: 5200, q: 3, pico: 0.3 }); const o = osc('sawtooth', 1800, t, 0.18, d, 0.12); o.frequency.exponentialRampToValueAtTime(240, t + 0.16); osc('sine', 70, t + 0.05, 0.25, d, 0.3); break; }
       case 'acelera': { const o = osc('sawtooth', 80, t, 1.2, d, 0.15, 0.2); o.frequency.exponentialRampToValueAtTime(1600, t + 1.2); break; }
       case 'vitoria': [72, 76, 79, 84].forEach((n, i) => { cowbell(t + i * 0.13, n, d, 2600, 0.35); }); kick(t + 0.52, d); break;
       case 'derrota': [64, 62, 58, 55].forEach((n, i) => osc('triangle', hz(n), t + i * 0.18, 0.25, d, 0.3)); break;
