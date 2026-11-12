@@ -112,7 +112,7 @@ const Estado = (() => {
   let todas = []; // cartas.json inteiro
   let catalogo = []; // só as cartas que este jogador pode ver (as exclusivas aparecem só para os IDs da carta)
   const meuUid = () => (typeof Conta !== 'undefined' && Conta.uid ? Conta.uid() : null);
-  const visivel = (c) => !c.token && (!c.exclusivo || c.exclusivo.includes(meuUid()) || !!(d && d.cartasExtras && d.cartasExtras.includes(c.id))) && !(d && d.esgotadas && d.esgotadas.includes(c.id)); // tokens (ex.: minis do barril) não são cartas
+  const visivel = (c) => !c.token && (!c.exclusivo || c.exclusivo.includes(meuUid()) || (!c.intransferivel && !!(d && d.cartasExtras && d.cartasExtras.includes(c.id)))) && !(d && d.esgotadas && d.esgotadas.includes(c.id)); // tokens (ex.: minis do barril) não são cartas
   let d = null;
 
   function novo() {
@@ -157,7 +157,22 @@ const Estado = (() => {
     if (typeof d.cla === 'string') d.cla = null; // clãs antigos (simulados) não existem mais
     // toda carta do catálogo entra na coleção
     // carta que deixou de ter partidas limitadas (ex.: Goku UI do Samuel) volta pra conta
-    if (Array.isArray(d.esgotadas)) d.esgotadas = d.esgotadas.filter((id) => { const c = todas.find((x) => x.id === id); return c && c.usos; });
+    // (só volta pra conta dona da carta; em quem ganhou de presente ela continua acabada)
+    const uidAgora = meuUid();
+    if (Array.isArray(d.esgotadas) && uidAgora) d.esgotadas = d.esgotadas.filter((id) => { const c = todas.find((x) => x.id === id); return !c || c.usos || !(c.exclusivo && c.exclusivo.includes(uidAgora)); });
+    // carta intransferível (Goku UI do Samuel) nunca fica em outra conta
+    if (uidAgora) for (const c of todas.filter((x) => x.intransferivel && x.exclusivo && !x.exclusivo.includes(uidAgora))) {
+      const tinha = (d.cartasExtras || []).includes(c.id) || (d.deck || []).includes(c.id) || !!(d.colecao && d.colecao[c.id] && d.colecao[c.id].tem);
+      if (d.cartasExtras) d.cartasExtras = d.cartasExtras.filter((x) => x !== c.id);
+      if (d.deck) d.deck = d.deck.filter((x) => x !== c.id);
+      if (d.colecao && d.colecao[c.id]) d.colecao[c.id].tem = false;
+      if (tinha) {
+        d.cartaRetirada = c.id;
+        // completa o deck com a carta mais forte que a pessoa tem
+        const sobra = todas.filter((x) => !x.token && !x.exclusivo && d.colecao[x.id] && d.colecao[x.id].tem && !d.deck.includes(x.id)).sort((a, b) => (d.colecao[b.id].nivel || 1) - (d.colecao[a.id].nivel || 1));
+        while (d.deck.length < 8 && sobra.length) d.deck.push(sobra.shift().id);
+      }
+    }
     catalogo = todas.filter(visivel);
     for (const c of catalogo) if (!d.colecao[c.id]) d.colecao[c.id] = { nivel: 1, copias: 0, tem: false };
     // cartas exclusivas são presenteadas para as contas escolhidas

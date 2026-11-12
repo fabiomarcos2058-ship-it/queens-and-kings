@@ -1469,6 +1469,7 @@
     },
     {
       "id": "goku_ui",
+      "intransferivel": true,
       "nome": "Goku (Instinto Superior)",
       "raridade": "lendaria",
       "custo": 5,

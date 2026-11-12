@@ -84,6 +84,7 @@ const Presentes = (() => {
     if (p.tipo === 'carta') {
       const c = Estado.carta(p.carta);
       if (!c || c.token) return false;
+      if (c.intransferivel && c.exclusivo && !c.exclusivo.includes(Conta.uid())) return false; // carta que é só de uma pessoa
       // carta exclusiva de outra pessoa: passa a existir nesta conta também
       if (c.exclusivo && !c.exclusivo.includes(Conta.uid())) {
         d.cartasExtras = [...new Set([...(d.cartasExtras || []), c.id])];

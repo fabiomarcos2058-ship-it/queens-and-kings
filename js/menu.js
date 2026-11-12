@@ -1664,7 +1664,7 @@
       el.querySelectorAll('.pres-abas button').forEach((b) => b.classList.toggle('ativa', b.dataset.tipo === tipo));
       const o = $q('#pres-opcoes');
       if (tipo === 'carta') {
-        o.innerHTML = `<select id="pres-carta">${cartasTodas.map((c) => `<option value="${c.id}">${c.nome}${c.exclusivo ? ' ⭐ exclusiva' : ''}</option>`).join('')}</select>
+        o.innerHTML = `<select id="pres-carta">${cartasTodas.filter((c) => !c.intransferivel).map((c) => `<option value="${c.id}">${c.nome}${c.exclusivo ? ' ⭐ exclusiva' : ''}</option>`).join('')}</select>
           <div class="pres-linha"><label>Nível <select id="pres-nivel">${Array.from({ length: Estado.NIVEL_MAX }, (_, i) => `<option ${i + 1 === Estado.NIVEL_MAX ? 'selected' : ''}>${i + 1}</option>`).join('')}</select></label>
           <label>Cópias extras <input id="pres-copias" type="number" min="0" max="9999" value="0" /></label></div>
           <div id="pres-previa" class="pres-previa"></div>`;

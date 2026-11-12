@@ -397,6 +397,17 @@ const Eventos = (() => {
           botoes: [{ texto: 'Valeu! 🎉', classe: 'principal', acao: () => { if (window.MenuAPI) window.MenuAPI.tudo(); } }],
         }), 1100);
       }
+      // carta intransferível que tinha vazado pra outra conta (Goku UI do Samuel)
+      if (d.cartaRetirada) {
+        const c = Estado.carta(d.cartaRetirada) || { nome: 'carta' };
+        delete d.cartaRetirada;
+        Estado.salvar();
+        setTimeout(() => UI.modal({
+          titulo: '🔒 Carta exclusiva corrigida',
+          html: `<p>A carta <b>${c.nome}</b> é exclusiva de outro jogador e tinha aparecido na sua conta por um bug.</p><p>Ela foi tirada do seu deck. O resto da sua conta continua igualzinho. Desculpa a confusão! 💜</p>`,
+          botoes: [{ texto: 'Entendi', classe: 'principal', acao: () => { if (window.MenuAPI) window.MenuAPI.tudo(); } }],
+        }), 1300);
+      }
       // Goku UI do Samuel agora é permanente
       if ((Conta.uid && Conta.uid()) === SAMUEL && Estado.tem('goku_ui') && !(d.presentesEspeciais || []).includes('goku-ui-permanente')) {
         d.presentesEspeciais = [...(d.presentesEspeciais || []), 'goku-ui-permanente'];
