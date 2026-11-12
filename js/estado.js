@@ -156,6 +156,8 @@ const Estado = (() => {
     }
     if (typeof d.cla === 'string') d.cla = null; // clãs antigos (simulados) não existem mais
     // toda carta do catálogo entra na coleção
+    // carta que deixou de ter partidas limitadas (ex.: Goku UI do Samuel) volta pra conta
+    if (Array.isArray(d.esgotadas)) d.esgotadas = d.esgotadas.filter((id) => { const c = todas.find((x) => x.id === id); return c && c.usos; });
     catalogo = todas.filter(visivel);
     for (const c of catalogo) if (!d.colecao[c.id]) d.colecao[c.id] = { nivel: 1, copias: 0, tem: false };
     // cartas exclusivas são presenteadas para as contas escolhidas
@@ -375,6 +377,32 @@ const Estado = (() => {
     return { cartas, novas };
   }
 
+  // ---------- 🤖 Fiscal do Goku ----------
+  // Olha as últimas 10 partidas: se o Goku UI foi usado e venceu em quase todas, ele fica cansado
+  // (joga como se tivesse níveis a menos). Usando menos, o cansaço passa sozinho.
+  const VIGIADAS = ['goku_ui'];
+  function registrarUsoVigiado(deckUsado, resultado) {
+    if (!d.fiscal) d.fiscal = {};
+    for (const id of VIGIADAS) {
+      if (!tem(id)) continue;
+      const h = d.fiscal[id] || (d.fiscal[id] = []);
+      h.push((deckUsado || []).includes(id) ? (resultado === 'vitoria' ? 2 : 1) : 0);
+      while (h.length > 10) h.shift();
+    }
+    salvar();
+  }
+  // 0 = normal, 1 = cansado (-2 níveis), 2 = exausto (-4 níveis)
+  function cansaco(id) {
+    const h = (d.fiscal && d.fiscal[id]) || [];
+    if (h.length < 5) return 0;
+    const usou = h.filter((x) => x > 0).length / h.length, venceu = h.filter((x) => x === 2).length / h.length;
+    if (usou >= 0.9 && venceu >= 0.7) return 2;
+    if (usou >= 0.6 && venceu >= 0.5) return 1;
+    return 0;
+  }
+  // nível que a carta usa de verdade na batalha
+  const nivelEfetivo = (id) => Math.max(1, ((d.colecao[id] && d.colecao[id].nivel) || 1) - cansaco(id) * 2);
+
   // ---------- Habilidade do jogador (a IA se adapta a ela) ----------
   // 1 = começando, 5 = joga muito. Começa pelos troféus e muda a cada partida contra a IA.
   function habilidade() {
@@ -459,7 +487,7 @@ const Estado = (() => {
 
   return {
     get d() { return d; }, carregar, salvar, apagar, importar, recarregarCatalogo, aoSalvar, carta, stats, catalogo: () => catalogo, tem, liberada, disponiveis, proximaLiberacao, baisAteLendaria,
-    habilidade, ajustarHabilidade, COPIAS, COPIAS_RAR, copiasNivel, OURO, OURO_RAR, ouroNivel, NIVEL_MAX, BAUS, XP_NIVEL, CORINGAS, darCoringa, usarCoringa, maxada, faltaParaMax,
+    habilidade, ajustarHabilidade, registrarUsoVigiado, cansaco, nivelEfetivo, COPIAS, COPIAS_RAR, copiasNivel, OURO, OURO_RAR, ouroNivel, NIVEL_MAX, BAUS, XP_NIVEL, CORINGAS, darCoringa, usarCoringa, maxada, faltaParaMax,
     contarUsos, usosRestantes, todasCartas: () => todas.filter((c) => !c.token),
     TORRE_OURO, TROPAS_TORRE, nivelRei, minhasTorres, statsTorre, podeEvoluirTorre, evoluirTorre, escolherTropaTorre,
     ganharXp, podeEvoluir, evoluir, abrirBau, tempoRestante, sortearCopias, ofertasDoDia, presenteDiario, sorteio,

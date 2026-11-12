@@ -291,6 +291,17 @@ const Eventos = (() => {
           botoes: [{ texto: 'Valeu! 🎉', classe: 'principal', acao: () => { if (window.MenuAPI) window.MenuAPI.tudo(); } }],
         }), 1100);
       }
+      // Goku UI do Samuel agora é permanente
+      if ((Conta.uid && Conta.uid()) === SAMUEL && Estado.tem('goku_ui') && !(d.presentesEspeciais || []).includes('goku-ui-permanente')) {
+        d.presentesEspeciais = [...(d.presentesEspeciais || []), 'goku-ui-permanente'];
+        if (d.deck.length < 8 && !d.deck.includes('goku_ui')) d.deck.push('goku_ui');
+        Estado.salvar();
+        setTimeout(() => UI.modal({
+          titulo: '🐉 Seu Goku UI voltou!',
+          html: `<div class="compra">${Cartas.html(Estado.carta('goku_ui'), { mini: true })}<div><p>O <b>Goku (Instinto Superior)</b> agora é <b>seu pra sempre</b>, sem limite de partidas!</p><p>Ele ficou um pouco mais fraco, mas continua muito forte.</p><p class="aviso">🤖 Mas tem um Fiscal: se você usar ele em quase toda partida e só ganhar com ele, ele fica cansado (−2 níveis) ou exausto (−4). Jogando umas partidas sem ele, ele descansa.</p></div></div>`,
+          botoes: [{ texto: 'Bora! 🔥', classe: 'principal' }],
+        }), 2200);
+      }
       // presente da criadora pro Samuel (foi prejudicado pelo bug do festival)
       const uid = Conta.uid && Conta.uid();
       if (uid === SAMUEL && !(d.presentesEspeciais || []).includes('nino-samuel')) {

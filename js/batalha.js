@@ -407,7 +407,7 @@ const Batalha = (() => {
     L.elixir -= c.custo;
     L.fila.splice(indice, 1);
     L.fila.push(id);
-    const nivel = s.nivelFixo ? s.nivelFixo : quem === 'azul' ? Estado.d.colecao[id].nivel
+    const nivel = s.nivelFixo ? s.nivelFixo : quem === 'azul' ? Estado.nivelEfetivo(id)
       : s.niveis && s.niveis[quem] ? (s.niveis[quem][id] || 1)
       : quem === 'azul2' && s.niveisAzul2 ? (s.niveisAzul2[id] || 1)
       : s.niveisV ? (s.niveisV[id] || 1) : nivelCartaIA(id);

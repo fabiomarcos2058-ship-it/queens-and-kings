@@ -901,6 +901,19 @@
 
   function fimDeBatalha(r) {
     if (!(r.evento && r.evento.deck) && !r.tutorial) esgotadas = esgotadas.concat(Estado.contarUsos());
+    // 🤖 Fiscal do Goku
+    if (!r.tutorial && !(r.evento && r.evento.deck)) {
+      const antes = Estado.cansaco('goku_ui');
+      Estado.registrarUsoVigiado(r.deck, r.resultado);
+      const agora = Estado.cansaco('goku_ui');
+      if (agora !== antes) setTimeout(() => UI.modal({
+        titulo: '🤖 Fiscal do Goku',
+        html: agora > antes
+          ? `<p>O <b>Goku (Instinto Superior)</b> está sendo usado em quase toda partida… ele ficou <b>${agora === 2 ? 'exausto (−4 níveis)' : 'cansado (−2 níveis)'}</b>!</p><p class="aviso">Jogue algumas partidas sem ele pra ele descansar.</p>`
+          : agora ? '<p>O Goku descansou um pouco: agora está só <b>cansado (−2 níveis)</b>.</p>' : '<p>O <b>Goku (Instinto Superior)</b> descansou e voltou com <b>força total</b>! 💪</p>',
+        botoes: [{ texto: 'Entendi', classe: 'principal' }],
+      }), 2500);
+    }
     // missões
     if (!r.tutorial) {
       const ganhou = r.resultado === 'vitoria';
@@ -1181,6 +1194,8 @@
       const col = d().colecao[id];
       const u = Estado.usosRestantes(id);
       if (u !== null) return `Nível ${col.nivel} · ${u} partida${u === 1 ? '' : 's'}`;
+      const cz = Estado.cansaco(id);
+      if (cz) return `😴 ${cz === 2 ? 'Exausto' : 'Cansado'} · Nv ${Estado.nivelEfetivo(id)}`;
       return col.nivel >= Estado.NIVEL_MAX ? `Nível ${col.nivel} · máx` : `Nível ${col.nivel}`;
     };
     const barraCopias = (id) => {

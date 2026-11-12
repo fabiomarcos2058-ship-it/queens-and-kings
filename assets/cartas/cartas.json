@@ -1471,15 +1471,14 @@
       "id": "goku_ui",
       "nome": "Goku (Instinto Superior)",
       "raridade": "lendaria",
-      "custo": 4,
+      "custo": 5,
       "tipo": "Lendário exclusivo",
-      "descricao": "Exclusivo e absurdamente forte. Só pode lutar em 4 partidas, então use com sabedoria!",
+      "descricao": "Exclusivo do Samuel e muito forte, agora pra sempre na conta! Mas cuidado: o 🤖 Fiscal do Goku vigia. Se usar ele em quase toda partida, ele fica cansado e mais fraco por um tempo.",
       "trofeus": 0,
       "exclusivo": [
         "twJXL5kpGtUVwrx7Br3xCq26ZDG3"
       ],
       "nivelInicial": 9,
-      "usos": 4,
       "rosto": [
         440,
         480,
@@ -1490,19 +1489,19 @@
         200,
         620
       ],
-      "vida": 4000,
-      "dano": 620,
-      "velocidade": 62,
+      "vida": 1500,
+      "dano": 330,
+      "velocidade": 58,
       "alcance": 20,
-      "cadencia": 0.75,
+      "cadencia": 0.85,
       "alvo": "tudo",
-      "area": 30,
+      "area": 26,
       "habilidade": {
         "nome": "Kamehameha",
         "tipo": "kamehameha",
-        "custo": 2,
-        "recarga": 12,
-        "dano": 1600,
+        "custo": 3,
+        "recarga": 14,
+        "dano": 900,
         "descricao": "Dispara um Kamehameha gigante que atravessa tudo em linha reta."
       },
       "arena": 1
