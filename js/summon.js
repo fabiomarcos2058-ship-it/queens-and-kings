@@ -30,8 +30,29 @@ const Summon = (() => {
       rara: ['mbappe'],
     },
     chances: { ultra: 0.02, lendaria: 0.12, epica: 0.41, rara: 0.45 },
+  }, {
+    id: 'invencivel',
+    nome: 'INVENCÍVEL',
+    sub: 'A Guerra dos Marks',
+    tema: 'invencivel',
+    logo: true,
+    fim: new Date(2027, 0, 15, 23, 59, 59), // 15/01/2027
+    centro: 'mark_eve',
+    destaque: ['invencivel', 'mark_eve', 'eve_atomica'],
+    lados: ['conquest'],
+    pool: {
+      ultra: ['mark_eve', 'invencivel', 'eve_atomica', 'conquest'],
+      lendaria: ['mark_azul', 'mark_cabelo_longo', 'mark_sem_lentes'],
+      epica: ['mark_flaxan', 'mark_prisioneiro'],
+    },
+    // dentro das Ultras, Mark & Eve é bem mais difícil de vir
+    pesos: { mark_eve: 1, invencivel: 3, eve_atomica: 3, conquest: 3 },
+    chances: { ultra: 0.025, lendaria: 0.2, epica: 0.775 },
+    // garantia do destaque: Mark & Eve vem com certeza na 180ª invocação sem ele neste banner
+    pityDestaque: 180,
   }];
-  const banner = () => BANNERS[0];
+  let atualI = 1; // abre no banner mais novo
+  const banner = () => BANNERS[Math.min(atualI, BANNERS.length - 1)];
   const diasRestantes = (b = banner()) => Math.max(0, Math.ceil((b.fim.getTime() - Date.now()) / 86400000));
   // só entra no sorteio quem existe na lista de cartas
   function pool(b = banner()) {
@@ -48,14 +69,31 @@ const Summon = (() => {
 
   function dados() {
     const d = Estado.d;
-    if (!d.summon) d.summon = { semUltra: 0, total: 0, ultras: 0, hist: [] };
-    return d.summon;
+    if (!d.summon) d.summon = { total: 0, ultras: 0, hist: [] };
+    const ds = d.summon;
+    if (!ds.b) ds.b = {};
+    // a garantia antiga (de antes de ter vários banners) era do primeiro banner
+    if (ds.semUltra != null) { ds.b[BANNERS[0].id] = { semUltra: ds.semUltra, semDestaque: 0 }; delete ds.semUltra; }
+    return ds;
   }
-  const faltaPity = () => Math.max(1, PITY - dados().semUltra);
+  // garantia de cada banner
+  function pity(b = banner()) {
+    const ds = dados();
+    return ds.b[b.id] || (ds.b[b.id] = { semUltra: 0, semDestaque: 0 });
+  }
+  const faltaPity = (b = banner()) => Math.max(1, PITY - pity(b).semUltra);
+  const faltaDestaque = (b = banner()) => (b.pityDestaque ? Math.max(1, b.pityDestaque - pity(b).semDestaque) : 0);
+  const escolher = (lista, pesos) => {
+    if (!pesos) return lista[Math.floor(Math.random() * lista.length)];
+    const soma = lista.reduce((a, id) => a + (pesos[id] || 1), 0);
+    let x = Math.random() * soma;
+    for (const id of lista) { if ((x -= pesos[id] || 1) <= 0) return id; }
+    return lista[lista.length - 1];
+  };
 
   // ---------- sorteio ----------
   function sortearRaridade(garantirLendaria) {
-    const ds = dados(), ch = chances();
+    const ds = pity(), ch = chances();
     let pUltra = ch.ultra || 0;
     if (ds.semUltra + 1 >= PITY) pUltra = 1;
     else if (ds.semUltra + 1 >= SUAVE) pUltra = Math.min(1, pUltra + (ds.semUltra + 2 - SUAVE) * 0.05);
@@ -68,14 +106,17 @@ const Summon = (() => {
     return resto[0][0];
   }
   function sortear(n) {
-    const ds = dados(), p = pool(), res = [];
+    const ds = dados(), b = banner(), pb = pity(b), p = pool(), res = [];
     for (let i = 0; i < n; i++) {
       const ultimaDaDezena = n === 10 && i === 9 && !res.some((r) => r.raridade === 'ultra' || r.raridade === 'lendaria');
-      const rar = sortearRaridade(ultimaDaDezena);
-      const lista = p[rar];
-      const id = lista[Math.floor(Math.random() * lista.length)];
+      let rar = sortearRaridade(ultimaDaDezena);
+      let id;
+      // garantia do destaque (Mark & Eve)
+      if (b.centro && b.pityDestaque && pb.semDestaque + 1 >= b.pityDestaque && Estado.carta(b.centro)) { rar = 'ultra'; id = b.centro; }
+      else id = escolher(p[rar], b.pesos);
       ds.total++;
-      if (rar === 'ultra') { ds.semUltra = 0; ds.ultras = (ds.ultras || 0) + 1; } else ds.semUltra++;
+      if (rar === 'ultra') { pb.semUltra = 0; ds.ultras = (ds.ultras || 0) + 1; } else pb.semUltra++;
+      if (b.centro) { if (id === b.centro) pb.semDestaque = 0; else pb.semDestaque = (pb.semDestaque || 0) + 1; }
       res.push({ id, raridade: rar, ...receber(id) });
     }
     // as 10 aparecem misturadas, mas a garantida não fica sempre no fim
@@ -117,19 +158,23 @@ const Summon = (() => {
     el.id = 'summon-tela';
     const paineis = b.destaque.filter((id) => Estado.carta(id)).map((id, i) => {
       const c = Estado.carta(id);
-      return `<div class="smb-painel" style="--i:${i}"><img src="${Cartas.arte(c)}" alt="" draggable="false" /><span>${esc(c.nome)}</span></div>`;
+      return `<div class="smb-painel${id === b.centro ? ' centro' : ''}" style="--i:${i}"><img src="${Cartas.arte(c)}" alt="" draggable="false" /><span>${esc(c.nome)}</span></div>`;
     }).join('');
     const pct = Math.round(((PITY - faltaPity()) / PITY) * 100);
+    const abas = BANNERS.map((x, i) => `<button class="sm-aba${i === atualI ? ' ativa' : ''}${x.tema ? ` t-${x.tema}` : ''}" data-b="${i}"><img src="${Cartas.arte(Estado.carta(x.centro || x.destaque[0]) || {})}" alt="" /><span>${esc(x.nome)}</span></button>`).join('');
+    const titulo = b.logo ? logoInvencivel(b) : `<div class="smb-titulo"><em>NOVA RARIDADE</em><b>${esc(b.nome)}</b><small>${esc(b.sub)}</small></div>`;
     el.innerHTML = `${fundoMultiverso()}
       <div class="sm-topo"><button class="tr-voltar" id="sm-voltar">‹</button><div><b>Summon</b><small>Termina em ${diasRestantes()} dia${diasRestantes() === 1 ? '' : 's'}</small></div>
         <span class="sm-gemas">💎 ${fmt(Estado.d.gemas)}</span></div>
       <div class="sm-rolagem">
-        <div class="sm-banner">
+        <div class="sm-abas">${abas}</div>
+        <div class="sm-banner${b.tema ? ` t-${b.tema}` : ''}">
           <div class="smb-paineis">${paineis}</div>
-          <div class="smb-titulo"><em>NOVA RARIDADE</em><b>${esc(b.nome)}</b><small>${esc(b.sub)}</small></div>
+          ${titulo}
           <div class="smb-chip">🌀 ULTRA</div>
         </div>
         <div class="sm-pity"><div><b>Ultra garantido em ${faltaPity()}</b><small>A chance sobe a partir da invocação ${SUAVE}</small></div><i><i style="width:${pct}%"></i></i></div>
+        ${b.centro && Estado.carta(b.centro) ? `<div class="sm-pity destaque"><div><b>${esc(Estado.carta(b.centro).nome)} garantido em ${faltaDestaque()}</b><small>Super raro: só ${(chances().ultra * 100 * (b.pesos[b.centro] / Object.values(b.pesos).reduce((a, v) => a + v, 0))).toFixed(2).replace('.', ',')}% por invocação</small></div><i><i style="width:${Math.round(((b.pityDestaque - faltaDestaque()) / b.pityDestaque) * 100)}%"></i></i></div>` : ''}
         <p class="sm-regra">✨ Toda invocação de 10x tem <b>pelo menos 1 Lendária ou melhor</b>.</p>
         <button class="sm-info" id="sm-info">📜 Personagens e chances</button>
         <div class="sm-botoes">
@@ -141,6 +186,7 @@ const Summon = (() => {
     $('app').appendChild(el);
     if (typeof Assets !== 'undefined') Assets.fill();
     el.querySelector('#sm-voltar').onclick = () => fechar();
+    el.querySelectorAll('.sm-aba').forEach((x) => (x.onclick = () => { atualI = +x.dataset.b; abrir(); }));
     el.querySelector('#sm-info').onclick = () => info();
     el.querySelector('#sm-1').onclick = () => invocar(1);
     el.querySelector('#sm-10').onclick = () => invocar(10);
@@ -153,6 +199,16 @@ const Summon = (() => {
     setTimeout(() => el.remove(), 250);
     aoFechar();
   }
+  // logo do banner do Invencível (desenho próprio do jogo)
+  function logoInvencivel(b) {
+    return `<div class="smb-logo-inv"><svg class="sli-emblema" viewBox="0 0 120 120" aria-hidden="true">
+        <defs><linearGradient id="sliG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFE45C"/><stop offset=".55" stop-color="#FFB100"/><stop offset="1" stop-color="#E07A00"/></linearGradient>
+          <linearGradient id="sliA" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7FD3FF"/><stop offset="1" stop-color="#1E6BFF"/></linearGradient></defs>
+        <circle cx="60" cy="60" r="52" fill="none" stroke="url(#sliA)" stroke-width="6" stroke-dasharray="230 97" transform="rotate(-30 60 60)"/>
+        <path d="M60 14 L72 48 L108 50 L80 72 L90 106 L60 86 L30 106 L40 72 L12 50 L48 48 Z" fill="url(#sliG)" stroke="#5a2a00" stroke-width="3" stroke-linejoin="round"/>
+        <path d="M52 46 L60 22 L68 46 Z" fill="#fff" opacity=".55"/></svg>
+      <div class="sli-txt"><b>${esc(b.nome)}</b><small>${esc(b.sub)}</small></div></div>`;
+  }
   function fundoMultiverso() {
     const estrelas = Array.from({ length: 3 }, (_, k) => `<i class="sm-estrelas e${k}"></i>`).join('');
     return `<div class="sm-fundo"><i class="sm-nebulosa"></i>${estrelas}<i class="sm-anel a1"></i><i class="sm-anel a2"></i><i class="sm-anel a3"></i><i class="sm-fenda f1"></i><i class="sm-fenda f2"></i></div>`;
@@ -162,9 +218,10 @@ const Summon = (() => {
   function info() {
     const ch = chances(), p = pool();
     const blocos = ORDEM.filter((r) => ch[r]).map((r) => {
-      const cada = (ch[r] / p[r].length) * 100;
+      const b = banner(), somaP = p[r].reduce((a, id) => a + ((b.pesos && b.pesos[id]) || 1), 0);
+      const cada = (id) => (ch[r] * (((b.pesos && b.pesos[id]) || 1) / somaP)) * 100;
       return `<div class="smi-bloco" style="--cor:${COR[r]}"><div class="smi-cab"><b>${NOME_RAR[r]}</b><span>${(ch[r] * 100).toFixed(1).replace('.', ',')}%</span></div>
-        <div class="smi-grade">${p[r].map((id) => { const c = Estado.carta(id); return `<button class="smi-carta" data-id="${id}">${Cartas.html(c, { mini: true })}<b>${esc(c.nome)}</b><small>${cada.toFixed(2).replace('.', ',')}%</small>${Estado.tem(id) ? '<i>✓ sua</i>' : ''}</button>`; }).join('')}</div></div>`;
+        <div class="smi-grade">${p[r].map((id) => { const c = Estado.carta(id); return `<button class="smi-carta" data-id="${id}">${Cartas.html(c, { mini: true })}<b>${esc(c.nome)}</b><small>${cada(id).toFixed(2).replace('.', ',')}%</small>${Estado.tem(id) ? '<i>✓ sua</i>' : ''}</button>`; }).join('')}</div></div>`;
     }).join('');
     const md = UI.modal({
       titulo: '📜 Personagens e chances',
@@ -335,7 +392,7 @@ const Summon = (() => {
         <div class="smu-velocidade"></div>
         <div class="smu-arte"><img src="${Cartas.arte(c)}" alt="" draggable="false" /><i class="smu-holo"></i></div>
         <div class="smu-texto"><div class="smu-ultra">${letras}</div><b class="smu-nome">${esc(c.nome)}</b><small>${esc(c.tipo)}</small>
-          <p>Um prodígio atravessou o multiverso!</p>${r.novo ? '<em class="smu-novo">NOVO!</em>' : `<em class="smu-novo rep">${r.copias ? `+${r.copias} cópia` : `+${fmt(r.ouro)} 🪙`}</em>`}</div>
+          <p>${banner().tema === 'invencivel' ? 'Atravessou o multiverso pra lutar do seu lado!' : 'Um prodígio atravessou o multiverso!'}</p>${r.novo ? '<em class="smu-novo">NOVO!</em>' : `<em class="smu-novo rep">${r.copias ? `+${r.copias} cópia` : `+${fmt(r.ouro)} 🪙`}</em>`}</div>
         ${Array.from({ length: 30 }, (_, k) => `<i class="smu-brilho" style="--x:${Math.round(Math.random() * 100)}%;--d:${(1.8 + Math.random() * 2).toFixed(2)}s;--a:${(Math.random() * 2).toFixed(2)}s;--h:${k * 37 % 360}"></i>`).join('')}
       </div>
       <small class="smu-toque">toque para continuar</small>`;
@@ -362,7 +419,7 @@ const Summon = (() => {
 
   // ---------- botão do menu ----------
   function htmlBotao() {
-    const b = banner();
+    const b = BANNERS[BANNERS.length - 1];
     return `<span class="bsm-arte">${b.destaque.filter((id) => Estado.carta(id)).map((id) => `<img src="${Cartas.arte(Estado.carta(id))}" alt="" />`).join('')}</span>
       <span class="bsm-txt"><b>🌀 Summon</b><small>${esc(b.sub)} · ${diasRestantes()}d</small></span><em class="bsm-novo">ULTRA</em>`;
   }

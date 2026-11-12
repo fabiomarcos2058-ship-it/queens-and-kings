@@ -658,6 +658,7 @@ const Batalha = (() => {
         return 0;
       }
     }
+    if (ms && ms.veterano && !opc.atravessa) dano = Math.round(dano * (1 - ms.veterano));
     if (e.adaptacao && e.carta && e.carta.passiva && e.carta.passiva.tipo === 'adaptar') dano = Math.round(dano * (1 - e.carta.passiva.defesa * e.adaptacao));
     if (e.marcado > 0) dano = Math.round(dano * (1 + e.marcaPct));
     // escudo absorve primeiro
@@ -876,6 +877,10 @@ const Batalha = (() => {
     if (h.tipo === 'hiperRajada') hiperRajada(t, h);
     if (h.tipo === 'reinoSombras') reinoSombras(t, h);
     if (h.tipo === 'visaoGenio') visaoGenio(t, h);
+    if (h.tipo === 'juntos') juntosInvenciveis(t, h);
+    if (h.tipo === 'investidaInv') investidaInv(t, h);
+    if (h.tipo === 'barreiraAtomica') barreiraAtomica(t, h);
+    if (h.tipo === 'esmagar') esmagar(t, h);
     if (h.tipo === 'flowDestruicao') flowDestruicao(t, h);
     if (h.tipo === 'golDireto') golDireto(t, h);
     if (h.tipo === 'docesTravessuras') docesTravessuras(t, h);
@@ -938,7 +943,7 @@ const Batalha = (() => {
   }
 
   // tipo: 0 = Kamehameha, 1 = Super Kamehameha (fúria do Goku), 2 = Vazio Púrpura (Gojo)
-  const CLASSE_RAIO = ['kamehameha', 'kamehameha super', 'kamehameha vazio-purpura', 'kamehameha bola-aco', 'kamehameha boost-dourado', 'kamehameha soul-surge', 'kamehameha direct-shot'];
+  const CLASSE_RAIO = ['kamehameha', 'kamehameha super', 'kamehameha vazio-purpura', 'kamehameha bola-aco', 'kamehameha boost-dourado', 'kamehameha soul-surge', 'kamehameha direct-shot', 'kamehameha investida-inv'];
   function desenharRaio(x, y, ang, tipo, comp, larg) {
     const raio = document.createElement('div');
     raio.className = CLASSE_RAIO[tipo] || 'kamehameha';
@@ -1074,8 +1079,8 @@ const Batalha = (() => {
   }
 
   // corte de cena por cima da arena (aparece pra todo mundo da partida)
-  const CUTINS = ['goku_furia', 'jojo_jotaro', 'jojo_dio', 'jojo_diavolo', 'jojo_pucci', 'jojo_gyro', 'jojo_johnny', 'sonic_shadow', 'sonic_super', 'sonic_dark', 'sonic_excalibur', 'sonic_hyper', 'yugi_reino', 'ultra_sae', 'ultra_rin', 'ultra_isagi', 'ultra_anri'];
-  const TEXTO_CUTIN_2 = { sonic_shadow: 'Chaos Control!', sonic_super: 'Super Boost!', sonic_dark: 'Explosão Sombria!', sonic_excalibur: 'Soul Surge!', sonic_hyper: 'Hiper Velocidade!', yugi_reino: 'Reino das Sombras!', ultra_sae: 'Visão do Gênio!', ultra_rin: 'Flow: Destruição!', ultra_isagi: 'Direct Shot!', ultra_anri: 'Doces ou Travessuras?' };
+  const CUTINS = ['goku_furia', 'jojo_jotaro', 'jojo_dio', 'jojo_diavolo', 'jojo_pucci', 'jojo_gyro', 'jojo_johnny', 'sonic_shadow', 'sonic_super', 'sonic_dark', 'sonic_excalibur', 'sonic_hyper', 'yugi_reino', 'ultra_sae', 'ultra_rin', 'ultra_isagi', 'ultra_anri', 'inv_mark_eve', 'inv_mark', 'inv_eve', 'inv_conquest'];
+  const TEXTO_CUTIN_2 = { sonic_shadow: 'Chaos Control!', sonic_super: 'Super Boost!', sonic_dark: 'Explosão Sombria!', sonic_excalibur: 'Soul Surge!', sonic_hyper: 'Hiper Velocidade!', yugi_reino: 'Reino das Sombras!', ultra_sae: 'Visão do Gênio!', ultra_rin: 'Flow: Destruição!', ultra_isagi: 'Direct Shot!', ultra_anri: 'Doces ou Travessuras?', inv_mark_eve: 'Juntos somos invencíveis!', inv_mark: 'Investida Invencível!', inv_eve: 'Barreira Atômica!', inv_conquest: 'Esmagar!' };
   const TEXTO_CUTIN = { ...TEXTO_CUTIN_2, goku_furia: "You're going to pay for this!", jojo_jotaro: 'Star Platinum: The World!', jojo_dio: 'ZA WARUDO! Toki yo tomare!', jojo_diavolo: 'King Crimson!', jojo_pucci: 'Made in Heaven!', jojo_gyro: 'Ball Breaker!', jojo_johnny: 'Tusk Act 4!' };
   const cutinRede = (qual) => { cutin(qual); if (s.rede || s.aoVivo) s.eventos.push(['c', CUTINS.indexOf(qual)]); };
   function cutin(qual) {
@@ -1241,6 +1246,58 @@ const Batalha = (() => {
     }
     // quem mirava na Nino tem que escolher de novo
     for (const e of s.ent) if (e.alvo === t) e.alvo = null;
+  }
+
+  // =================== Invencível ===================
+  function separarDupla(t) {
+    t.separou = true;
+    const f = t.f || 1, nivel = t.nivel || 1, dono = t.dono;
+    fxEl('fx-separar', t.x, t.y, 900); fxJ(25, t.x, t.y);
+    falar(t, 'Se separando!', 'fala-inv');
+    particulas(t.x, t.y, '#FF5CC8', 12, 30); particulas(t.x, t.y, '#3B9BFF', 12, 30);
+    const nascer = (id, dx) => {
+      const c = Estado.carta(id);
+      if (!c) return null;
+      const n = donoDe(criarTropa(t.time, c, Math.max(20, Math.min(W - 20, t.x + dx)), t.y, f, nivel), dono);
+      n.surgir = 0.25; n.vida = Math.round(n.max * 0.7); atualizarHp(n);
+      if (t.alvo && t.alvo.vida > 0) n.alvo = t.alvo;
+      return n;
+    };
+    nascer('invencivel', -14); nascer('eve_atomica', 14);
+    // a dupla sai de cena (sem contar como derrubada)
+    t.vida = 0;
+    t.el.classList.add('morrendo');
+    const el = t.el; setTimeout(() => el.remove(), 300);
+    s.ent = s.ent.filter((x) => x !== t);
+  }
+  function linhaVoando(t, h, mult) {
+    kamehameha(t, Math.round(t.dano * mult), { tipo: 7, comp: 230, larg: 28, torreMult: 0.4, atraso: 0.15 });
+    const alvo = t.alvo && t.alvo.vida > 0 && dist(t, t.alvo) < 240 ? t.alvo : null;
+    if (alvo) agendar(0.3, () => { if (t.vida > 0 && alvo.vida > 0) { teleportar(t, alvo); for (const e of inimigosPerto(t, 40)) if (!imuneA(e)) { e.atord = Math.max(e.atord, 0.6); e.el.classList.add('atordoada'); } } });
+  }
+  function juntosInvenciveis(t, h) {
+    cutinRede('inv_mark_eve');
+    for (const e of aliadosPerto(t, 150)) { e.escudo = Math.max(e.escudo || 0, Math.round(e.max * 0.2)); e.escudoMax = Math.max(e.escudoMax || 0, e.escudo); e.el.classList.add('com-escudo'); }
+    fxEl('fx-barreira', t.x, t.y, 900); fxJ(26, t.x, t.y);
+    linhaVoando(t, h, h.mult || 2.4);
+  }
+  function investidaInv(t, h) { cutinRede('inv_mark'); linhaVoando(t, h, h.mult || 2.6); }
+  function barreiraAtomica(t, h) {
+    cutinRede('inv_eve');
+    fxEl('fx-barreira', t.x, t.y, 900); fxJ(26, t.x, t.y);
+    for (const e of aliadosPerto(t, 130)) { e.escudo = Math.max(e.escudo || 0, Math.round(e.max * 0.3)); e.escudoMax = Math.max(e.escudoMax || 0, e.escudo); e.el.classList.add('com-escudo'); }
+    for (const e of inimigosPerto(t, 110)) empurrar(e, t, 26);
+  }
+  function esmagar(t, h) {
+    cutinRede('inv_conquest');
+    const alvo = inimigosPerto(t, 220).sort((a, b) => b.vida - a.vida)[0];
+    const bater = () => {
+      if (t.vida <= 0) return;
+      fxEl('fx-esmagar', t.x, t.y, 800); fxJ(27, t.x, t.y); tremer(true);
+      explosaoArea(t, t, Math.round(t.dano * (h.mult || 2.6)), 60, { visual: 'impacto', cor: '#B9B4D6', empurrar: 18 });
+      for (const e of inimigosPerto(t, 60)) if (!imuneA(e)) { e.atord = Math.max(e.atord, 1.2); e.el.classList.add('atordoada'); }
+    };
+    if (alvo) { teleportar(t, alvo); agendar(0.2, bater); } else bater();
   }
 
   // =================== Ultras do Blue Lock + Anri (Halloween) ===================
@@ -1523,7 +1580,7 @@ const Batalha = (() => {
 
   // =================== JoJo: Stands ===================
   const fxJ = (i, x, y) => { if (s.rede || s.aoVivo) s.eventos.push(['j', i, Math.round(x), Math.round(y)]); };
-  const FX_J = [['fx-ora', 650], ['fx-facas', 2600], ['fx-rolo', 1100], ['fx-kc', 800], ['fx-disco', 700], ['fx-tusk', 900], ['fx-coracao', 1200], ['fx-arquivo', 1400], ['fx-glitch', 700], ['fx-murasame', 750], ['fx-trunfo', 900], ['fx-carta-yugi', 900], ['fx-reino', 1300], ['fx-aneis', 800], ['fx-chaos', 900], ['fx-hyper-flash', 600], ['fx-sombria', 900], ['fx-spin', 450], ['fx-espelho', 500], ['fx-soul', 900], ['fx-passe', 500], ['fx-flow', 900], ['fx-cha', 700], ['fx-abobora', 700], ['fx-fantasma', 600]];
+  const FX_J = [['fx-ora', 650], ['fx-facas', 2600], ['fx-rolo', 1100], ['fx-kc', 800], ['fx-disco', 700], ['fx-tusk', 900], ['fx-coracao', 1200], ['fx-arquivo', 1400], ['fx-glitch', 700], ['fx-murasame', 750], ['fx-trunfo', 900], ['fx-carta-yugi', 900], ['fx-reino', 1300], ['fx-aneis', 800], ['fx-chaos', 900], ['fx-hyper-flash', 600], ['fx-sombria', 900], ['fx-spin', 450], ['fx-espelho', 500], ['fx-soul', 900], ['fx-passe', 500], ['fx-flow', 900], ['fx-cha', 700], ['fx-abobora', 700], ['fx-fantasma', 600], ['fx-separar', 900], ['fx-barreira', 900], ['fx-esmagar', 800]];
   // Tempo parado: o outro time congela (tropas e torres). Quem tem moveNoTempo (Jotaro, Dio) continua andando.
   function pararTempo(t, seg, raio, nome) {
     typeof Som !== 'undefined' && Som.tocar('tempoParado');
@@ -2196,6 +2253,8 @@ const Batalha = (() => {
     golpeVisual(atacante, alvo, v);
     if (m.ora && atacante.golpes % m.ora === 0) { oraOra(atacante, alvo, dano, crit); return; }
     if (m.chaosSpear && atacante.golpes % m.chaosSpear === 0) chaosSpear(atacante, alvo, dano);
+    if (m.dupla) agendar(0.1, () => { if (alvo.vida > 0 && atacante.vida > 0) criarProjetil(atacante, alvo, Math.round(dano * m.dupla), { p: 'cristal', vel: 380, tam: 16, rastro: '#FF5CC8' }); });
+    if (m.furiaAzul) { atacante.seguidos = atacante.ultimoAlvo === alvo ? Math.min(m.furiaAzul, (atacante.seguidos || 0) + 1) : 0; atacante.ultimoAlvo = alvo; }
     if (m.tabelinha && atacante.golpes % m.tabelinha === 0) {
       const amigo = s.ent.filter((e) => e !== atacante && !e.torre && e.time === atacante.time && e.vida > 0 && dist(e, atacante) < 130).sort((x, y) => dist(x, atacante) - dist(y, atacante))[0];
       if (amigo) agendar(0.12, () => { if (alvo.vida > 0 && amigo.vida > 0) { efeitoGolpe('chute', amigo, alvo, { cor: '#FF4F8B' }); ferir(alvo, Math.round(amigo.dano * 0.6 * multClasse(amigo, alvo)), amigo.time, amigo, { crit: true }); } });
@@ -2412,6 +2471,10 @@ const Batalha = (() => {
         || ((h.tipo === 'kamehameha' || h.tipo === 'vazioPurpura') && t.alvo && dist(t, t.alvo) < 240)
         || (h.tipo === 'esquiva' && perto && t.vida < t.max * 0.8)
         || (h.tipo === 'mitaJoga' && L.fila.slice(0, 4).some((id) => { const c = Estado.carta(id); return !c.feitico && !c.barril && c.custo >= 4; }))
+        || (h.tipo === 'juntos' && t.alvo && dist(t, t.alvo) < 240)
+        || (h.tipo === 'investidaInv' && t.alvo && dist(t, t.alvo) < 230 && (t.alvo.torre || s.ent.filter((e) => !e.torre && e.time !== t.time && e.vida > 0 && dist(e, t) < 230).length >= 2 || t.alvo.vida > t.dano * 2))
+        || (h.tipo === 'barreiraAtomica' && (s.ent.filter((e) => !e.torre && e.time === t.time && e.vida > 0 && dist(e, t) < 130).length >= 2 || s.ent.filter((e) => !e.torre && e.time !== t.time && e.vida > 0 && dist(e, t) < 110).length >= 2))
+        || (h.tipo === 'esmagar' && s.ent.some((e) => !e.torre && e.time !== t.time && e.vida > 0 && dist(e, t) < 220))
         || (h.tipo === 'visaoGenio' && s.ent.filter((e) => !e.torre && e.time === t.time && e.vida > 0 && dist(e, t) < 200).length >= 2)
         || (h.tipo === 'flowDestruicao' && perto)
         || (h.tipo === 'golDireto' && t.alvo && dist(t, t.alvo) < 240 && (t.alvo.torre || s.ent.filter((e) => !e.torre && e.time !== t.time && e.vida > 0 && dist(e, t) < 240).length >= 2))
@@ -2961,6 +3024,7 @@ const Batalha = (() => {
       if (mm && mm.mitaGentil) mitaGentilPassiva(t);
       if (mm && mm.marmita) ninoPassiva(t, dt);
       if (mm && mm.murasame) murasamePassiva(t, dt);
+      if (mm && mm.separar && !t.separou && t.vida > 0 && t.vida < t.max * mm.separar) { separarDupla(t); continue; }
       if (mm && mm.chaEncantado && (t.chaT = (t.chaT || 0) + dt) >= mm.chaEncantado[0]) { t.chaT = 0; chaEncantado(t, mm.chaEncantado); }
       if (mm && (mm.superForma || mm.spinDash || mm.inibidores || mm.hyperFlash || mm.duelista || mm.raivaSombria)) passivasSonic(t, dt);
       if (t.temporario > 0 && (t.temporario -= dt) <= 0) { ferir(t, t.vida + 1, t.time === 'azul' ? 'vermelho' : 'azul', null, { atravessa: true, semEsquiva: true }); continue; }
@@ -3075,6 +3139,7 @@ const Batalha = (() => {
     if (t.trunfo > 0) k *= 0.6;
     if (t.semLimite) k *= 0.8;
     if (t.flow > 0) k *= 0.8;
+    if (t.seguidos) k *= 1 - 0.07 * t.seguidos;
     if (t.passe > 0) k *= 0.77;
     if (t.lentoAtq > 0) k *= 1 + t.lentoAtqPct;
     const m = t.atk && t.atk.m;

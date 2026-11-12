@@ -23,10 +23,10 @@ const Ataques = (() => {
   const NA_TORRE = { tanque: 1.1, lutador: 0.85, assassino: 0.8, atirador: 0.7, mago: 0.65, enxame: 1 };
 
   const CLASSE_DA_CARTA = {
-    tanque: ['itsuki', 'shizuku', 'gogeta_ssj4', 'goku_ssj3', 'goku_ssj4', 'goku_blue_lb', 'gogeta_ultra', 'sonic_excalibur'],
+    tanque: ['itsuki', 'shizuku', 'gogeta_ssj4', 'goku_ssj3', 'goku_ssj4', 'goku_blue_lb', 'gogeta_ultra', 'sonic_excalibur', 'conquest'],
     assassino: ['bra', 'teto', 'pan_dbh', 'akame', 'mbappe', 'kashimo', 'goku_pressagio', 'diavolo', 'mita_malvada', 'akame_murasame', 'sonic', 'dark_sonic', 'kurona'],
     atirador: ['mai', 'miku_nakano', 'pan_gt', 'riruka', 'rukia_remake', 'nino_nakano', 'gyro', 'johnny'],
-    mago: ['rukia', 'nami_last', 'hatsune_miku', 'bambietta', 'bulma', 'gojo', 'robin', 'pucci', 'mita_gentil', 'yugi_moto', 'anri_halloween'],
+    mago: ['rukia', 'nami_last', 'hatsune_miku', 'bambietta', 'bulma', 'gojo', 'robin', 'pucci', 'mita_gentil', 'yugi_moto', 'anri_halloween', 'eve_atomica'],
     enxame: ['mini'],
   };
   const classeDe = (c) => {
@@ -64,6 +64,15 @@ const Ataques = (() => {
     sonic_excalibur: { v: { g: 'corte', s: 'espada_trunks', cor: '#BFE8FF' }, m: { escudo: 0.2, aparar: 7 }, d: 'Corte em área, escudo e aparar com contra-ataque.' },
     hyper_sonic: { v: { g: 'impacto', cor: '#F5F5FF' }, m: { esmeraldas: 7, hyperFlash: [5, 90, 0.45], voo: true }, d: '7 Esmeraldas do Caos seguram golpes. Hiper Flash atordoa em volta.' },
     yugi_moto: { v: { p: 'coringa', vel: 300, tam: 18, giro: 540, rastro: '#FFD25E' }, m: { duelista: 8 }, d: 'Joga cartas de longe e compra uma carta especial a cada 8s.' },
+    mark_eve: { v: { g: 'soco', cor: '#3B9BFF' }, m: { dupla: 0.5, separar: 0.5, voo: true }, d: 'Soco do Mark + rajada da Eve no mesmo alvo.' },
+    invencivel: { v: { g: 'soco', cor: '#FFC21A', pesado: true }, m: { combo: 4, empurrar: 10, regen: 0.012, voo: true }, d: 'Socos Viltrumitas: a cada 4, um golpe dobrado.' },
+    eve_atomica: { v: { p: 'cristal', vel: 360, tam: 18, rastro: '#FF5CC8' }, m: { chaEncantado: [6, 0.12, 120], voo: true }, d: 'Energia rosa de longe. Reconstrói a matéria pra curar aliados.' },
+    conquest: { v: { g: 'soco', cor: '#B9B4D6', pesado: true }, m: { berserk: 0.4, empurrar: 14, veterano: 0.2 }, d: 'Veterano Viltrumita: leva menos dano e bate em área.' },
+    mark_azul: { v: { g: 'soco', cor: '#3B6BFF' }, m: { furiaAzul: 5, voo: true }, d: 'Cada soco seguido no mesmo alvo fica mais rápido.' },
+    mark_cabelo_longo: { v: { g: 'soco', cor: '#FFC21A' }, m: { vampiro: 0.2, berserk: 0.3, voo: true }, d: 'Rouba vida a cada soco.' },
+    mark_sem_lentes: { v: { g: 'soco', cor: '#FFC21A' }, m: { critico: [0.3, 2], voo: true }, d: '30% de chance de crítico.' },
+    mark_flaxan: { v: { g: 'soco', cor: '#7FB8A8' }, m: { escudo: 0.3 }, d: 'Armadura Flaxan: começa com escudo.' },
+    mark_prisioneiro: { v: { g: 'soco', cor: '#E8A07A' }, d: 'Rápido e escorregadio: desvia de golpes.' },
     kurona: { v: { g: 'chute', cor: '#FF4F8B', s: 'bola' }, m: { tabelinha: 2 }, d: 'Tabelinha: a cada 2 golpes um aliado bate junto.' },
     itoshi_sae: { v: { g: 'chute', cor: '#E8E4D8', s: 'bola' }, m: { passePerfeito: 3 }, d: 'Passa a bola pro aliado mais forte, que bate na hora e fica mais forte.' },
     itoshi_rin: { v: { g: 'chute', cor: '#4FD1C5', s: 'bola' }, m: { chuteFantasma: 4 }, d: 'Chute Fantasma: curva, não dá pra esquivar e ricocheteia.' },

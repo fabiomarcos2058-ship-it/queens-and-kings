@@ -2767,3 +2767,35 @@ body.em-batalha #spotify-player:not(.aberto) .sp-alca { opacity: 0.6; }
 .v-ultra .gs-gooool span { font-size: 30px; }
 .v-ultra.gol .gs-portal { animation: girarAng 0.5s linear infinite, portalCresce 0.8s ease-out forwards; }
 @keyframes portalCresce { to { transform: scale(1.6); opacity: 1; } }
+
+/* ===== Summon: abas de banner + banner do Invencível ===== */
+.sm-abas { display: flex; gap: 8px; width: 100%; max-width: 420px; overflow-x: auto; }
+.sm-aba { flex: 1; display: flex; align-items: center; gap: 6px; padding: 5px 8px 5px 5px; border-radius: 12px; color: #fff; background: #0008; border: 2px solid #ffffff22; min-width: 0; }
+.sm-aba img { width: 30px; height: 40px; object-fit: cover; border-radius: 6px; flex: none; }
+.sm-aba span { font: 12.5px 'Lilita One', sans-serif; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sm-aba.ativa { border-color: #FF5CF4; box-shadow: 0 0 12px #FF5CF488; background: #2a0f4a; }
+.sm-aba.t-invencivel.ativa { border-color: #FFC21A; box-shadow: 0 0 12px #FFC21A88; background: #0f2a5a; }
+.sm-banner.t-invencivel { background: linear-gradient(160deg, #0b2a6b, #10153a 60%, #3a0d2a); }
+.sm-banner.t-invencivel::before { background: conic-gradient(from var(--ang), #FFC21A, #3B9BFF, #FF5CC8, #FFC21A); }
+.sm-banner.t-invencivel .smb-painel { flex: 0.85; }
+.sm-banner.t-invencivel .smb-painel.centro { flex: 1.5; z-index: 2; clip-path: polygon(14% 0, 86% 0, 100% 100%, 0 100%); filter: drop-shadow(0 0 10px #FF5CC8); }
+.sm-banner.t-invencivel .smb-painel.centro img { animation: painelRespira 5s ease-in-out infinite alternate; }
+.sm-banner.t-invencivel .smb-painel.centro::before { content: 'DESTAQUE'; position: absolute; top: 8px; left: 50%; transform: translateX(-50%); z-index: 3; font: 10px 'Lilita One', sans-serif; letter-spacing: 1.5px; padding: 2px 8px; border-radius: 6px; color: #1a0630; background: linear-gradient(90deg, #FFC21A, #FF5CC8); }
+.sm-banner.t-invencivel .smb-painel span { bottom: 34%; text-shadow: 0 2px 4px #000, 0 0 8px #3B9BFF; }
+.smb-logo-inv { position: absolute; left: 0; right: 0; bottom: 6px; z-index: 3; display: flex; align-items: center; justify-content: center; gap: 4px; }
+.sli-emblema { width: 64px; height: 64px; filter: drop-shadow(0 3px 0 #0008); animation: emblemaGira 6s ease-in-out infinite; }
+@keyframes emblemaGira { 0%, 100% { transform: rotate(-8deg) scale(1); } 50% { transform: rotate(8deg) scale(1.06); } }
+.sli-txt { display: flex; flex-direction: column; align-items: flex-start; transform: skewX(-10deg); }
+.sli-txt b { font: 36px 'Lilita One', sans-serif; line-height: 0.95; letter-spacing: 1px; color: #FFE45C; background: linear-gradient(180deg, #FFF6B0 10%, #FFC21A 55%, #E07A00); -webkit-background-clip: text; background-clip: text; color: transparent;
+  filter: drop-shadow(3px 3px 0 #1E3A9A) drop-shadow(0 0 10px #3B9BFF88); }
+.sli-txt small { font: 12px 'Lilita One', sans-serif; letter-spacing: 2px; color: #7FD3FF; text-shadow: 0 1px 2px #000; padding-left: 4px; }
+.sm-pity.destaque { border-color: #FF5CC888; background: linear-gradient(90deg, #3a0d2a99, #0b2a6b99); }
+.sm-pity.destaque > i > i { background: linear-gradient(90deg, #FFC21A, #FF5CC8, #3B9BFF); box-shadow: 0 0 10px #FF5CC8; }
+.kamehameha.investida-inv { height: 28px; background: linear-gradient(transparent 0%, #1E6BFF55 12%, #FFC21A 34%, #fff 50%, #3B9BFF 66%, #1E6BFF55 88%, transparent 100%); border-radius: 0 999px 999px 0; box-shadow: 0 0 22px 6px #FFC21Aaa; }
+.fx-separar { position: absolute; pointer-events: none; z-index: 1760; width: 36%; aspect-ratio: 1; transform: translate(-50%, -50%); border-radius: 50%; background: conic-gradient(#FF5CC8 0 50%, #3B9BFF 50% 100%); -webkit-mask: radial-gradient(transparent 50%, #000 54%, #000 62%, transparent 66%); mask: radial-gradient(transparent 50%, #000 54%, #000 62%, transparent 66%); animation: trunfoFx 0.9s ease-out forwards; }
+.fx-barreira { position: absolute; pointer-events: none; z-index: 1760; width: 70%; aspect-ratio: 1; transform: translate(-50%, -50%); border-radius: 50%; border: 3px solid #FF5CC8; background: radial-gradient(circle, transparent 55%, #FF5CC855 70%, #FF5CC822 80%, transparent 82%); box-shadow: 0 0 20px #FF5CC8, inset 0 0 20px #FF5CC8; animation: trunfoFx 0.9s ease-out forwards; }
+.fx-esmagar { position: absolute; pointer-events: none; z-index: 1760; width: 40%; aspect-ratio: 1; transform: translate(-50%, -50%); border-radius: 50%; background: radial-gradient(circle, #ffffffcc 0 10%, #B9B4D688 30%, #6a648a44 50%, transparent 66%); animation: trunfoFx 0.8s ease-out forwards; }
+.dano-num.fala-inv { font: 13px 'Lilita One', sans-serif; color: #FFE45C; white-space: nowrap; text-shadow: 2px 2px 0 #1E3A9A, -1px -1px 0 #000, 1px 1px 0 #000, 0 0 8px #3B9BFF; }
+.cutin[class*="inv_"] .cutin-faixa { border-color: #FFC21A; box-shadow: 0 0 22px #FFC21A, 0 0 40px #3B9BFF88; }
+.cutin[class*="inv_"] .cutin-legenda { color: #FFE45C; text-shadow: 3px 3px 0 #1E3A9A, -1px -1px 0 #000, 1px 1px 0 #000; }
+.cutin.inv_eve .cutin-faixa { border-color: #FF5CC8; box-shadow: 0 0 22px #FF5CC8; }

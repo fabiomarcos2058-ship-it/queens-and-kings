@@ -2488,6 +2488,344 @@
         "tipo": "tabelinha",
         "descricao": "A cada 2 golpes, o aliado mais perto também acerta o alvo dele na hora (60% do dano do aliado). Sem aliado perto, o golpe sai 40% mais forte."
       }
+    },
+    {
+      "id": "mark_eve",
+      "nome": "Mark & Eve",
+      "raridade": "ultra",
+      "custo": 7,
+      "tipo": "Ultra · A Dupla Invencível",
+      "descricao": "Mark e Eve lutam juntos: cada soco do Mark vem com uma rajada da Eve. Quando ficam machucados, se separam e cada um luta do seu jeito.",
+      "vida": 2200,
+      "dano": 300,
+      "velocidade": 80,
+      "alcance": 18,
+      "cadencia": 0.95,
+      "danoTorre": 0.55,
+      "passiva": {
+        "nome": "Juntos ou Separados",
+        "tipo": "dupla",
+        "descricao": "Atacam juntos (soco + rajada de energia). Com metade da vida, se separam: viram o Invencível e a Eve Atômica, cada um com 70% da própria vida e as próprias habilidades."
+      },
+      "habilidade": {
+        "nome": "Juntos Somos Invencíveis",
+        "tipo": "juntos",
+        "custo": 3,
+        "recarga": 20,
+        "descricao": "A Eve cria um escudo rosa nos aliados em volta e o Mark atravessa a linha inteira num voo devastador."
+      },
+      "trofeus": 0,
+      "exclusivo": [],
+      "summon": true,
+      "alvo": "tudo",
+      "arena": 1,
+      "rosto": [
+        265,
+        345,
+        145
+      ],
+      "arte": [
+        0,
+        40,
+        600
+      ]
+    },
+    {
+      "id": "invencivel",
+      "nome": "Invencível",
+      "raridade": "ultra",
+      "custo": 5,
+      "tipo": "Ultra · Mark Grayson",
+      "descricao": "Meio Viltrumita, voa e bate muito forte. A cada 4 socos, um golpe com o dobro de força. Se recupera um pouco a cada soco.",
+      "vida": 1500,
+      "dano": 290,
+      "velocidade": 85,
+      "alcance": 18,
+      "cadencia": 0.9,
+      "danoTorre": 0.55,
+      "passiva": {
+        "nome": "Viltrumita",
+        "tipo": "viltrumita",
+        "descricao": "Voa. A cada 4 socos, um golpe de dano dobrado. Cada soco empurra e recupera 1,2% da vida."
+      },
+      "habilidade": {
+        "nome": "Investida Invencível",
+        "tipo": "investidaInv",
+        "custo": 3,
+        "recarga": 18,
+        "mult": 2.6,
+        "descricao": "Voa em linha reta atravessando todo mundo no caminho e para colado no alvo."
+      },
+      "trofeus": 0,
+      "exclusivo": [],
+      "summon": true,
+      "alvo": "tudo",
+      "arena": 1,
+      "rosto": [
+        478,
+        340,
+        115
+      ],
+      "arte": [
+        0,
+        0,
+        677
+      ]
+    },
+    {
+      "id": "eve_atomica",
+      "nome": "Eve Atômica",
+      "raridade": "ultra",
+      "custo": 5,
+      "tipo": "Ultra · Mestra da Matéria",
+      "descricao": "Ataca de longe com energia rosa e reconstrói a matéria: cura os aliados e levanta barreiras.",
+      "vida": 1150,
+      "dano": 210,
+      "velocidade": 65,
+      "alcance": 80,
+      "cadencia": 1.0,
+      "danoTorre": 0.6,
+      "passiva": {
+        "nome": "Reconstruir Matéria",
+        "tipo": "reconstruir",
+        "descricao": "Voa. A cada 6s, cura 12% da vida dos aliados perto dela."
+      },
+      "habilidade": {
+        "nome": "Barreira Atômica",
+        "tipo": "barreiraAtomica",
+        "custo": 3,
+        "recarga": 20,
+        "descricao": "Dá um escudo de 30% da vida pros aliados em volta e empurra os inimigos pra longe."
+      },
+      "trofeus": 0,
+      "exclusivo": [],
+      "summon": true,
+      "alvo": "tudo",
+      "arena": 1,
+      "rosto": [
+        420,
+        686,
+        140
+      ],
+      "arte": [
+        0,
+        250,
+        736
+      ]
+    },
+    {
+      "id": "conquest",
+      "nome": "Conquest",
+      "raridade": "ultra",
+      "custo": 6,
+      "tipo": "Ultra · Veterano Viltrumita",
+      "descricao": "O guerreiro Viltrumita mais duro de matar. Leva menos dano, bate em área e fica mais perigoso quanto mais apanha.",
+      "vida": 2300,
+      "dano": 330,
+      "velocidade": 55,
+      "alcance": 20,
+      "cadencia": 1.15,
+      "area": 24,
+      "danoTorre": 0.6,
+      "passiva": {
+        "nome": "Veterano",
+        "tipo": "veterano",
+        "descricao": "Leva 20% menos dano. Ataca mais rápido quanto menos vida tiver, e os golpes empurram."
+      },
+      "habilidade": {
+        "nome": "Esmagar",
+        "tipo": "esmagar",
+        "custo": 3,
+        "recarga": 18,
+        "mult": 2.6,
+        "descricao": "Salta no inimigo mais forte e esmaga o chão: dano em área e atordoa por 1,2s."
+      },
+      "trofeus": 0,
+      "exclusivo": [],
+      "summon": true,
+      "alvo": "tudo",
+      "arena": 1,
+      "rosto": [
+        322,
+        118,
+        95
+      ],
+      "arte": [
+        0,
+        0,
+        644
+      ]
+    },
+    {
+      "id": "mark_azul",
+      "nome": "Mark (Traje Azul)",
+      "raridade": "lendaria",
+      "custo": 5,
+      "tipo": "Mark Alternativo",
+      "descricao": "Uma versão do Mark de traje azul. Quanto mais bate no mesmo alvo, mais rápido fica.",
+      "vida": 1250,
+      "dano": 255,
+      "velocidade": 80,
+      "alcance": 18,
+      "cadencia": 0.9,
+      "danoTorre": 0.55,
+      "passiva": {
+        "nome": "Fúria Azul",
+        "tipo": "furiaAzul",
+        "descricao": "Cada soco seguido no mesmo alvo deixa ele 7% mais rápido (até 5 vezes)."
+      },
+      "trofeus": 0,
+      "exclusivo": [],
+      "summon": true,
+      "alvo": "tudo",
+      "arena": 1,
+      "rosto": [
+        470,
+        520,
+        230
+      ],
+      "arte": [
+        0,
+        100,
+        736
+      ]
+    },
+    {
+      "id": "mark_cabelo_longo",
+      "nome": "Mark Cabelo Longo",
+      "raridade": "lendaria",
+      "custo": 5,
+      "tipo": "Mark Alternativo",
+      "descricao": "O Mark de cabelo comprido de outro universo. Rouba vida a cada soco e fica mais rápido quando machucado.",
+      "vida": 1300,
+      "dano": 245,
+      "velocidade": 75,
+      "alcance": 18,
+      "cadencia": 0.95,
+      "danoTorre": 0.55,
+      "passiva": {
+        "nome": "Sem Limites",
+        "tipo": "semLimites",
+        "descricao": "Recupera 20% do dano que causa. Ataca mais rápido quanto menos vida tiver."
+      },
+      "trofeus": 0,
+      "exclusivo": [],
+      "summon": true,
+      "alvo": "tudo",
+      "arena": 1,
+      "rosto": [
+        470,
+        560,
+        230
+      ],
+      "arte": [
+        0,
+        100,
+        736
+      ]
+    },
+    {
+      "id": "mark_sem_lentes",
+      "nome": "Mark sem Lentes",
+      "raridade": "lendaria",
+      "custo": 4,
+      "tipo": "Mark Alternativo",
+      "descricao": "Uma versão do Mark sem as lentes do uniforme. Golpes certeiros com muita chance de crítico.",
+      "vida": 1050,
+      "dano": 240,
+      "velocidade": 85,
+      "alcance": 18,
+      "cadencia": 0.9,
+      "danoTorre": 0.55,
+      "passiva": {
+        "nome": "Olhos Abertos",
+        "tipo": "olhos",
+        "descricao": "30% de chance de acertar um crítico com o dobro de dano."
+      },
+      "trofeus": 0,
+      "exclusivo": [],
+      "summon": true,
+      "alvo": "tudo",
+      "arena": 1,
+      "rosto": [
+        470,
+        500,
+        230
+      ],
+      "arte": [
+        0,
+        80,
+        736
+      ]
+    },
+    {
+      "id": "mark_flaxan",
+      "nome": "Mark Flaxan",
+      "raridade": "epica",
+      "custo": 4,
+      "tipo": "Mark Alternativo",
+      "descricao": "O Mark que conquistou os Flaxans e usa a armadura deles.",
+      "vida": 1150,
+      "dano": 190,
+      "velocidade": 60,
+      "alcance": 18,
+      "cadencia": 1.0,
+      "danoTorre": 0.6,
+      "passiva": {
+        "nome": "Armadura Flaxan",
+        "tipo": "armadura",
+        "descricao": "Começa com um escudo de 30% da vida."
+      },
+      "trofeus": 0,
+      "exclusivo": [],
+      "summon": true,
+      "alvo": "tudo",
+      "arena": 1,
+      "rosto": [
+        300,
+        500,
+        210
+      ],
+      "arte": [
+        0,
+        80,
+        736
+      ]
+    },
+    {
+      "id": "mark_prisioneiro",
+      "nome": "Mark Prisioneiro",
+      "raridade": "epica",
+      "custo": 3,
+      "tipo": "Mark Alternativo",
+      "descricao": "Um Mark que passou tempo demais preso. Rápido e escorregadio.",
+      "vida": 760,
+      "dano": 150,
+      "velocidade": 80,
+      "alcance": 18,
+      "cadencia": 0.8,
+      "danoTorre": 0.6,
+      "passiva": {
+        "nome": "Fuga",
+        "tipo": "esquiva",
+        "chance": 0.2,
+        "descricao": "Desvia de 20% dos golpes."
+      },
+      "trofeus": 0,
+      "exclusivo": [],
+      "summon": true,
+      "alvo": "tudo",
+      "arena": 1,
+      "rosto": [
+        256,
+        322,
+        130
+      ],
+      "arte": [
+        0,
+        50,
+        436
+      ]
     }
   ]
 }
