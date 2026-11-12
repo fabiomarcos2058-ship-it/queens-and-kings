@@ -39,6 +39,11 @@ const Mod = (() => {
         ['Liberar Plus e Ultra', () => { const p = Passe.dados(); p.plus = true; p.ultra = true; }],
         ['Completar o passe', () => { Passe.dados().pontos = Passe.NIVEIS * Passe.PONTOS_NIVEL; }],
       ]],
+      ['🏅 Pro Pass (Ranqueada)', [
+        ['+5 níveis do Pro Pass', () => { const r = Ranque.dados(); r.xp = Math.min(Ranque.PASSE_NIVEIS * Ranque.PASSE_XP, (r.xp || 0) + 5 * Ranque.PASSE_XP); }],
+        ['Liberar o Pro Pass (grátis)', () => { Ranque.dados().pro = true; }],
+        ['Completar o Pro Pass', () => { const r = Ranque.dados(); r.pro = true; r.xp = Ranque.PASSE_NIVEIS * Ranque.PASSE_XP; }],
+      ]],
     ];
   }
 
