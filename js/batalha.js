@@ -775,7 +775,7 @@ const Batalha = (() => {
       particulas(t.x, t.y, '#97C459', 12, 26);
       efeito('cura', t.x, t.y, 800);
     }
-    if (h.tipo === 'kamehameha') kamehameha(t, Math.round((h.dano || 1500) * (t.f || 1)));
+    if (h.tipo === 'kamehameha') kamehameha(t, Math.round((h.dano || 1500) * (t.f || 1)), { torreMult: 0.3 });
     if (h.tipo === 'vazioPurpura') {
       fxEl('fx-gojo-carga', t.x, t.y - 6, 650);
       kamehameha(t, Math.round((h.dano || 1100) * (t.f || 1)), { tipo: 2, comp: 420, larg: t.evo ? 56 : 44, torreMult: 0.35, atraso: 0.55 });
@@ -883,7 +883,7 @@ const Batalha = (() => {
     if (mm.pulosKame) return pulosEKame(t, Math.min(3, n));
     if (mm.atravessar) return atravessarGrupo(t);
     t.furiaN = Math.min(3, n);
-    t.furiaCd = 16;
+    t.furiaCd = 20;
     sacudir();
     t.canal = 1.75; // o corte de cena some antes do raio sair
     t.el.classList.add('carregando-kame');
@@ -903,7 +903,7 @@ const Batalha = (() => {
     }
     // com 3, antes solta uma explosão de ki em volta
     if (forte) explosaoArea(t, t, Math.round(t.dano * 1.5), 46, { visual: 'impacto', cor: '#FFE45C', empurrar: 16 });
-    kamehameha(t, Math.round(t.dano * (forte ? 5 : 3)), { tipo: 1, comp: forte ? 380 : 330, larg: forte ? 58 : 42, torreMult: 0.4, atraso: 0.2, ang });
+    kamehameha(t, Math.round(t.dano * (forte ? 3.6 : 2.1)), { tipo: 1, comp: forte ? 380 : 330, larg: forte ? 58 : 42, torreMult: 0.25, atraso: 0.2, ang });
     particulas(t.x, t.y, '#FFE45C', forte ? 18 : 10, forte ? 40 : 26);
   }
 
@@ -928,7 +928,7 @@ const Batalha = (() => {
 
   // Goku (Presságio): dois pulos pra trás e Kamehameha no grupo
   function pulosEKame(t, n) {
-    t.furiaCd = 14; t.canal = 1.0; t.intocavel = 0.75;
+    t.furiaCd = 18; t.canal = 1.0; t.intocavel = 0.75;
     t.el.classList.add('carregando-kame', 'prata');
     sacudir();
     const c = centroInimigos(t) || t.alvo || t;
@@ -941,7 +941,7 @@ const Batalha = (() => {
       t.el.classList.remove('carregando-kame', 'prata');
       const alvo = centroInimigos(t, 130) || c;
       const ang = Math.atan2(alvo.y - t.y, alvo.x - t.x);
-      kamehameha(t, Math.round(t.dano * (n >= 3 ? 4 : 2.2)), { tipo: 1, comp: 360, larg: n >= 3 ? 52 : 40, torreMult: 0.4, atraso: 0.18, ang });
+      kamehameha(t, Math.round(t.dano * (n >= 3 ? 3.1 : 1.7)), { tipo: 1, comp: 360, larg: n >= 3 ? 52 : 40, torreMult: 0.25, atraso: 0.18, ang });
       sacudir();
     });
   }
