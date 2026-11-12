@@ -190,11 +190,46 @@ const Summon = (() => {
     const preco = n === 10 ? PRECO10 : PRECO1;
     if (Estado.d.gemas < preco) { UI.toast(`Faltam ${preco - Estado.d.gemas} 💎 para invocar ${n}x`); return; }
     if (!pool().ultra.length) { UI.toast('Banner indisponível agora'); return; }
-    Estado.d.gemas -= preco;
-    const res = sortear(n);
     animando = true;
-    try { await animacao(res, n); } catch (e) { console.warn('Summon', e); }
+    Estado.d.gemas -= preco;
+    let res;
+    try { res = sortear(n); } catch (e) {
+      // se o sorteio falhar, as gemas voltam
+      console.warn('Summon: sorteio', e);
+      Estado.d.gemas += preco; Estado.salvar(); animando = false;
+      UI.toast('Não deu pra invocar agora. Suas gemas voltaram 💎');
+      return;
+    }
+    // vigia: se a animação não aparecer na tela (celular antigo, erro, etc.), mostra o resultado do jeito simples
+    let resolvido = false;
+    const vigia = setTimeout(() => {
+      const a = document.querySelector('.sm-anim');
+      const r = a && a.getBoundingClientRect();
+      if (!resolvido && (!a || !r || r.height < 100 || r.width < 100)) {
+        resolvido = true;
+        if (a) a.remove();
+        animando = false;
+        resultadoSimples(res, n);
+      }
+    }, 2500);
+    try { await animacao(res, n); } catch (e) {
+      console.warn('Summon: animação', e);
+      document.querySelectorAll('.sm-anim, .sm-ultra').forEach((x) => x.remove());
+      if (!resolvido) { resolvido = true; resultadoSimples(res, n); }
+    }
+    resolvido = true;
+    clearTimeout(vigia);
     animando = false;
+  }
+  // plano B: mostra o que veio numa janela simples (nunca deixa a pessoa sem ver o que ganhou)
+  function resultadoSimples(res, n) {
+    try { abrir(); } catch (e) { /* nada */ }
+    UI.modal({
+      titulo: `🌀 Invocação ${n}x`,
+      classe: 'modal-summon-res',
+      html: `<div class="smr-grade">${res.map((r) => { const c = Estado.carta(r.id); return `<div class="smr-item r-${r.raridade}" style="--cor:${COR[r.raridade]}">${Cartas.html(c, { mini: true })}<b>${esc(c.nome)}</b><small>${r.novo ? 'NOVO!' : r.copias ? `+${r.copias} cópia${r.copias > 1 ? 's' : ''}` : `+${fmt(r.ouro || 0)} 🪙`}</small></div>`; }).join('')}</div>`,
+      botoes: [{ texto: 'Oba!', classe: 'principal' }],
+    });
   }
 
   // ---------- animação ----------

@@ -2579,3 +2579,6 @@ body.em-batalha #spotify-player:not(.aberto) .sp-alca { opacity: 0.6; }
 .sm-anim.cartas .sma-tunel, .sm-anim.cor-ultra.cartas .sma-tunel { animation: none !important; opacity: 0.16; transform: scale(1.4); transition: opacity 0.5s; }
 .smu-glitch i { height: 7% !important; opacity: 0.8; }
 .smu-glitch i:nth-child(2) { height: 2.5% !important; } .smu-glitch i:nth-child(4) { height: 1.5% !important; }
+.smr-grade { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-top: 8px; }
+.smr-item { display: flex; flex-direction: column; align-items: center; gap: 1px; text-align: center; }
+.smr-item .carta { width: 100%; } .smr-item b { font-size: 9.5px; line-height: 1.1; } .smr-item small { font-size: 9px; color: #FFD25E; }

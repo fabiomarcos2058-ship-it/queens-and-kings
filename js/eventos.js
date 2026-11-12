@@ -624,6 +624,21 @@ const Eventos = (() => {
           botoes: [{ texto: 'Depois' }, { texto: 'Ir pro Summon! 🌀', classe: 'principal', acao: () => Summon.abrir(() => { if (window.MenuAPI) window.MenuAPI.tudo(); }) }],
         }), 1500);
       }
+      // Arthur: a invocação 10x dele não mostrou nada (bug): 500 gemas e mostra o que ele ganhou
+      if (uid === ARTHUR && !(d.presentesEspeciais || []).includes('summon-bug-arthur')) {
+        d.presentesEspeciais = [...(d.presentesEspeciais || []), 'summon-bug-arthur'];
+        d.gemas += 500;
+        Estado.salvar();
+        if (Conta.salvarAgora) Conta.salvarAgora().catch(() => {});
+        const hist = (d.summon && d.summon.hist) || [];
+        const ult = hist.length ? hist.filter((h) => h.t === hist[0].t) : [];
+        setTimeout(() => UI.modal({
+          titulo: '💜 Desculpa pelo bug!',
+          classe: 'modal-summon-res',
+          html: `<p>A sua invocação não mostrou a animação. Já consertei, e aqui vão <b>+500 💎</b> pelo susto!</p>${ult.length ? `<p>O que veio naquela invocação já está na sua coleção:</p><div class="smr-grade">${ult.map((h) => { const c = Estado.carta(h.id); return c ? `<div class="smr-item">${Cartas.html(c, { mini: true })}<b>${esc(c.nome)}</b></div>` : ''; }).join('')}</div>` : ''}`,
+          botoes: [{ texto: 'Valeu! 💜', classe: 'principal' }],
+        }), 1600);
+      }
       // Enzo perdeu a Mita Malvada quando a nuvem parou de salvar: devolve
       if (uid === ENZO && !Estado.tem('mita_malvada') && !(d.presentesEspeciais || []).includes('mita-enzo')) {
         d.presentesEspeciais = [...(d.presentesEspeciais || []), 'mita-enzo'];
