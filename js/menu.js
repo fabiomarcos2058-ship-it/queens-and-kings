@@ -1784,6 +1784,7 @@
     if (Conta.logado()) Presentes.ouvir(chegaramPresentes);
     topo(); telaBatalha(); loja(); cartas(); cla(); eventos();
     RanqueUI.atualizarBotao();
+    Eventos.conferir();
   }
 
   // ---------- Início ----------

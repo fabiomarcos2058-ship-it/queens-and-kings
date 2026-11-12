@@ -85,6 +85,11 @@ const Eventos = (() => {
       f.ativo = true; f.v = 0; f.l = 0; f.tentativas++;
       Estado.salvar();
     }
+    if (f.l >= VIDAS) { f.ativo = false; Estado.salvar(); UI.toast('Suas vidas acabaram 💔'); return; }
+    // a vida já sai antes da batalha: sair/fechar o app no meio conta como derrota.
+    // Se vencer ou empatar, a vida volta no fim.
+    f.l++; f.emJogo = true;
+    Estado.salvar();
     // cada vitória deixa o rival mais esperto
     iniciar({ id: 'festival', nome: `Festival das Quíntuplas · ${f.v + 1}ª batalha`, dif: Math.min(5, 2 + f.v), festival: true });
   }
@@ -122,14 +127,15 @@ const Eventos = (() => {
   }
 
   // ---------- fim de uma batalha de evento ----------
-  function revelarNino(c) {
+  function revelarNino(c, tag = 'LENDÁRIA EXCLUSIVA DE EVENTO', fala = '"Hmph… n-não é como se eu quisesse entrar no seu deck… mas já que você venceu, eu vou."') {
+    if (!c || document.querySelector('.revela-nino')) return;
     const el = document.createElement('div');
     el.className = 'revela-evo revela-nino';
     el.innerHTML = `<div class="re-raios"></div><div class="re-conteudo">
-        <small>LENDÁRIA EXCLUSIVA DE EVENTO</small>
+        <small>${tag}</small>
         <div class="rn-palco">${Cartas.html(c, { mini: true })}</div>
         <b>${esc(c.nome)}</b>
-        <p>"Hmph… n-não é como se eu quisesse entrar no seu deck… mas já que você venceu, eu vou."</p>
+        <p>${fala}</p>
         <button class="btn-modal principal">Bem-vinda, Nino! 🎀</button></div>`;
     $('app').appendChild(el);
     try { navigator.vibrate && navigator.vibrate([80, 50, 160]); } catch (e) { /* nada */ }
@@ -152,17 +158,21 @@ const Eventos = (() => {
     const d = Estado.d;
     if (ev.festival) {
       const f = nino();
-      let msg;
+      const contava = f.emJogo;
+      f.emJogo = false;
+      if (contava && r.resultado !== 'derrota') f.l = Math.max(0, f.l - 1); // devolve a vida
+      if (!contava && r.resultado === 'derrota') f.l++;
       if (ganhou) {
-        const premio = PREMIOS[f.v];
+        const premio = PREMIOS[Math.min(f.v, PREMIOS.length - 1)];
         f.v++;
-        msg = `Vitória ${f.v}/${VITORIAS}! Prêmio: <b>${txtPremio(premio)}</b>`;
-        if (f.v >= VITORIAS) { f.ativo = false; msg = 'Você completou o Festival das Quíntuplas! 🎀'; }
+        if (f.v >= VITORIAS) { f.ativo = false; f.completo = true; }
         Estado.salvar();
-        UI.modal({ titulo: ganhou ? '🎀 Venceu!' : 'Fim', html: `<p class="ev-res">${msg}</p>`, botoes: [{ texto: 'Pegar', classe: 'principal', acao: () => { darPremio(premio, mostrarBau); tudo(); } }] });
+        // o prêmio é entregue NA HORA (antes dependia de tocar em "Pegar")
+        const msg = f.v >= VITORIAS ? 'Você completou o Festival das Quíntuplas! 🎀' : `Vitória ${f.v}/${VITORIAS}! Você ganhou <b>${txtPremio(premio)}</b>`;
+        UI.modal({ titulo: '🎀 Venceu!', html: `<p class="ev-res">${msg}</p>`, botoes: [{ texto: 'Oba!', classe: 'principal' }] });
+        setTimeout(() => { darPremio(premio, mostrarBau); tudo(); }, 120);
         return;
       }
-      if (r.resultado === 'derrota') f.l++;
       const acabou = f.l >= VIDAS;
       if (acabou) f.ativo = false;
       Estado.salvar();
@@ -185,5 +195,43 @@ const Eventos = (() => {
     });
   }
 
-  return { html, ligar, fim, MODOS, modosDeHoje, jogarModo, jogarFestival, nino };
+  // ---------- conferências (rodam sempre que o menu atualiza) ----------
+  const SAMUEL = 'twJXL5kpGtUVwrx7Br3xCq26ZDG3';
+  let conferindo = false;
+  function conferir() {
+    if (conferindo || !Estado.d) return;
+    const bat = Batalha._estado();
+    if (bat && !bat.acabou) return;
+    conferindo = true;
+    try {
+      const d = Estado.d, f = nino();
+      // saiu no meio de uma batalha do festival (fechou o app/recarregou): a vida já foi descontada
+      if (f.emJogo) {
+        f.emJogo = false;
+        if (f.l >= VIDAS) f.ativo = false;
+        Estado.salvar();
+        UI.toast('Você saiu no meio de uma batalha do Festival: contou como derrota 💔');
+      }
+      // completou o festival mas a Nino não veio (bug antigo do botão "Pegar")
+      if ((f.completo || f.v >= VITORIAS) && !Estado.tem(NINO)) {
+        f.completo = true; f.ativo = false;
+        setTimeout(() => { if (!Estado.tem(NINO)) revelarNino(Ranque.darEvolucao(NINO)); }, 900);
+      }
+      // presente da criadora pro Samuel (foi prejudicado pelo bug do festival)
+      const uid = Conta.uid && Conta.uid();
+      if (uid === SAMUEL && !(d.presentesEspeciais || []).includes('nino-samuel')) {
+        d.presentesEspeciais = [...(d.presentesEspeciais || []), 'nino-samuel'];
+        const tinha = Estado.tem(NINO);
+        const c = Ranque.darEvolucao(NINO);
+        if (!tinha) d.colecao[NINO].nivel = 4;
+        else d.colecao[NINO].nivel = Math.max(4, d.colecao[NINO].nivel);
+        Estado.salvar();
+        if (Conta.salvarAgora) Conta.salvarAgora().catch(() => {});
+        setTimeout(() => revelarNino(c, 'PRESENTE DA CRIADORA', 'Desculpa pelo bug do festival! Toma a Nino, já no nível 4 💜'), 900);
+      }
+    } catch (e) { console.warn('Eventos.conferir', e); }
+    conferindo = false;
+  }
+
+  return { html, ligar, fim, conferir, MODOS, modosDeHoje, jogarModo, jogarFestival, nino };
 })();
