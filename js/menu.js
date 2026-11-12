@@ -816,6 +816,9 @@
     $('loja-baus').innerHTML = Object.keys(precosBau).map((t) => { const B = Estado.BAUS[t]; return `<button class="item-loja bau-loja b-${t}${t === 'ouro' ? ' destaque' : ''}" data-t="${t}">
       ${t === 'ouro' ? '<div class="faixa">Melhor oferta</div>' : ''}<img src="assets/ui/bau_${t}.svg" alt="" />
       <div class="item-nome">${B.nome}</div><small class="bau-info">${B.copias} cartas · ${Math.round(B.chanceNova * 100)}% de carta nova</small><div class="preco"><i class="ic-gema"></i>${precosBau[t]}</div></button>`; }).join('');
+    { const faltam = Estado.disponiveis().some((c) => c.raridade === 'lendaria' && !Estado.tem(c.id));
+      const n = Estado.baisAteLendaria();
+      $('loja-baus').insertAdjacentHTML('beforeend', faltam ? `<div class="garantia-lenda">✨ Lendária nova garantida em até <b>${n} ${n === 1 ? 'baú' : 'baús'}</b></div>` : ''); }
     $('loja-baus').querySelectorAll('button').forEach((el) => (el.onclick = () => {
       const t = el.dataset.t, p = precosBau[t], B = Estado.BAUS[t];
       UI.modal({ titulo: `Comprar ${B.nome.toLowerCase()}?`, html: `<img class="bau-aberto" src="assets/ui/bau_${t}.svg" alt="" /><p>Abre na hora: <b>${B.copias} cartas</b> e até <b>${B.ouro[1]} de ouro</b>.<br><small>${Math.round(B.chanceNova * 100)}% de chance de uma carta nova.</small></p>`,

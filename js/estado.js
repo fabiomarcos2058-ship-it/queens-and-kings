@@ -100,6 +100,7 @@ const Estado = (() => {
       cla: null,
       eventos: { sequencia: 0, desafioPremio: false, coroas: 0, torneioPremio: false },
       ofertas: { dia: '', compradas: [] },
+      semLendaria: 0, // baús seguidos sem lendária nova (garantia)
       vitorias: 0, derrotas: 0,
       torres: { princesa: 1, tropa: 'princesa' },
     };
@@ -234,15 +235,33 @@ const Estado = (() => {
     let r = Math.random() * soma;
     return lista.find((x) => (r -= PESO[x.raridade]) < 0) || lista[0];
   }
+  // carta nova: primeiro sorteia a raridade (entre as que ainda faltam), depois a carta.
+  // Assim cada lendária não fica "escondida" no meio de dezenas de cartas comuns.
+  const CHANCE_RARIDADE = { comum: 40, rara: 32, epica: 20, lendaria: 8 };
+  const GARANTIA_LENDARIA = 25; // no máximo 25 baús seguidos sem lendária nova
+  function novaPorRaridade(lista) {
+    const grupos = {};
+    for (const c of lista) (grupos[c.raridade] = grupos[c.raridade] || []).push(c);
+    const rars = Object.keys(grupos);
+    let r = Math.random() * rars.reduce((a, k) => a + (CHANCE_RARIDADE[k] || 1), 0);
+    const rar = rars.find((k) => (r -= CHANCE_RARIDADE[k] || 1) < 0) || rars[0];
+    return grupos[rar][Math.floor(Math.random() * grupos[rar].length)];
+  }
+  function baisAteLendaria() { return Math.max(1, GARANTIA_LENDARIA - (d.semLendaria || 0)); }
   function sortearCopias(total, chanceNova = 0) {
     const ganhos = {};
     const lista = disponiveis();
     const minhas = lista.filter((c) => tem(c.id)), outras = lista.filter((c) => !tem(c.id));
-    if (outras.length && (Math.random() < chanceNova || !minhas.length)) {
-      const nova = pesado(outras);
+    const lendasFaltando = outras.filter((c) => c.raridade === 'lendaria');
+    const garantida = lendasFaltando.length && chanceNova > 0 && (d.semLendaria || 0) + 1 >= GARANTIA_LENDARIA;
+    let veioLenda = false;
+    if (outras.length && (garantida || Math.random() < chanceNova || !minhas.length)) {
+      const nova = garantida ? lendasFaltando[Math.floor(Math.random() * lendasFaltando.length)] : novaPorRaridade(outras);
       ganhos[nova.id] = 1; // a 1ª cópia desbloqueia
       total -= 1;
+      veioLenda = nova.raridade === 'lendaria';
     }
+    if (chanceNova > 0) d.semLendaria = veioLenda || !lendasFaltando.length ? 0 : (d.semLendaria || 0) + 1;
     const pool = minhas.length ? minhas : lista;
     while (total > 0 && pool.length) {
       const c = pesado(pool);
@@ -331,7 +350,7 @@ const Estado = (() => {
   }
 
   return {
-    get d() { return d; }, carregar, salvar, apagar, importar, recarregarCatalogo, aoSalvar, carta, stats, catalogo: () => catalogo, tem, liberada, disponiveis, proximaLiberacao,
+    get d() { return d; }, carregar, salvar, apagar, importar, recarregarCatalogo, aoSalvar, carta, stats, catalogo: () => catalogo, tem, liberada, disponiveis, proximaLiberacao, baisAteLendaria,
     COPIAS, OURO, NIVEL_MAX, BAUS, XP_NIVEL,
     contarUsos, usosRestantes, todasCartas: () => todas.filter((c) => !c.token),
     TORRE_OURO, TROPAS_TORRE, nivelRei, minhasTorres, statsTorre, podeEvoluirTorre, evoluirTorre, escolherTropaTorre,

@@ -1236,3 +1236,8 @@ button.item-loja:active, button.slot-bau:active, .slot-carta:active { transform:
 .btn-jogar { position: relative; overflow: hidden; }
 .btn-jogar::after { content: ''; position: absolute; top: 0; bottom: 0; width: 40%; left: -60%; background: linear-gradient(100deg, transparent, #ffffff88, transparent); transform: skewX(-20deg); animation: brilhoJogar 3.2s ease-in-out infinite; }
 @keyframes brilhoJogar { 0%, 60% { left: -60%; } 100% { left: 130%; } }
+
+/* garantia de lendária na loja */
+.garantia-lenda { grid-column: 1 / -1; text-align: center; font-size: 13px; padding: 7px 10px; border-radius: 10px;
+  background: linear-gradient(90deg, rgba(255,196,60,.18), rgba(255,120,220,.18)); color: #ffe7a8; border: 1px solid rgba(255,210,120,.35); }
+.garantia-lenda b { color: #fff; }
