@@ -1905,3 +1905,5 @@ body.espectando .arena-grande-janela::after { content: '👁 AO VIVO'; position:
 .inv-sec small b { font: inherit; font-weight: 700; display: inline; }
 .ev-tokens .modo-tempo b, .ev-tokens span b { display: inline; font: inherit; font-weight: 700; }
 .evento.ev-tokens .ev-tk-ic { width: 46px !important; height: 46px !important; flex: none; }
+.copias.sem-ouro i { background: linear-gradient(90deg, #B9650F, #F2A93B); }
+.copias.sem-ouro b { color: #FFE9A8; text-shadow: 0 1px 0 #000; }

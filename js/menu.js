@@ -1187,7 +1187,9 @@
       if (col.nivel >= Estado.NIVEL_MAX) return '';
       const prec = Estado.copiasNivel(id, col.nivel);
       const pode = Estado.podeEvoluir(id).ok;
-      return `<div class="copias${pode ? ' pode' : ''}"><i style="width:${Math.min(100, (col.copias / prec) * 100)}%"></i><b>${pode ? 'Evoluir!' : `${col.copias}/${prec}`}</b></div>`;
+      // tem as cópias, mas falta ouro: mostra quanto ouro precisa (antes parecia que era só tocar)
+      const semOuro = !pode && col.copias >= prec;
+      return `<div class="copias${pode ? ' pode' : ''}${semOuro ? ' sem-ouro' : ''}"><i style="width:${Math.min(100, (col.copias / prec) * 100)}%"></i><b>${pode ? 'Evoluir!' : semOuro ? `🪙 ${fmt(Estado.OURO[col.nivel])}` : `${col.copias}/${prec}`}</b></div>`;
     };
     painelTorres();
     $('deck').innerHTML = Array.from({ length: 8 }, (_, i) => {
