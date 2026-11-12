@@ -533,7 +533,7 @@
       "exclusivo": [
         "ZwrffaFMcidTzZAGCMJNXOtuuOh2"
       ],
-      "nivelInicial": 7,
+      "nivelInicial": 9,
       "video": "videos/akame_murasame.mp4",
       "videoRosto": "videos/akame_murasame_rosto.mp4",
       "rosto": [
@@ -546,26 +546,26 @@
         60,
         720
       ],
-      "vida": 960,
-      "dano": 290,
+      "vida": 1150,
+      "dano": 310,
       "velocidade": 64,
       "alcance": 18,
-      "cadencia": 1.0,
+      "cadencia": 0.95,
       "alvo": "tudo",
       "arena": 1,
       "danoTorre": 0.6,
       "passiva": {
         "nome": "Um corte, uma morte",
         "tipo": "murasame",
-        "descricao": "Cada corte amaldiçoa o alvo com veneno. Tropa amaldiçoada que ficar com 15% da vida (ou menos) cai na hora. Depois de eliminar, some nas sombras por um instante e salta até o próximo inimigo. Entra no campo escondida nas sombras."
+        "descricao": "Cada corte amaldiçoa o alvo com veneno. Tropa amaldiçoada que ficar com 20% da vida (ou menos) cai na hora, e a Akame recupera 12% da vida. Depois de eliminar, some nas sombras e salta até o próximo inimigo. Entra no campo escondida nas sombras."
       },
       "habilidade": {
         "nome": "Trunfo: Marcas da Maldição",
         "tipo": "trunfoMurasame",
         "custo": 3,
-        "recarga": 20,
-        "duracao": 6,
-        "descricao": "As marcas da Murasame tomam o corpo dela: perde 15% da vida, mas por 6s fica mais rápida, ataca mais rápido, elimina quem estiver com 25% da vida e o corte amaldiçoa quem está em volta."
+        "recarga": 16,
+        "duracao": 7,
+        "descricao": "As marcas da Murasame tomam o corpo dela: perde 10% da vida, mas por 7s fica bem mais rápida, ataca muito mais rápido, elimina quem estiver com 35% da vida e o corte amaldiçoa quem está em volta."
       }
     },
     {

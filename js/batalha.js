@@ -1185,15 +1185,16 @@ const Batalha = (() => {
   function checarExecucao(a, e) {
     if (!a || a.vida <= 0 || !e || e.torre || e.vida <= 0 || !(e.maldAte > s.t)) return false;
     const m = a.atk && a.atk.m; if (!m || !m.murasame) return false;
-    const limiar = a.trunfo > 0 ? 0.25 : m.murasame;
+    const limiar = a.trunfo > 0 ? 0.35 : m.murasame;
     // em tropas enormes o corte só mata se faltar pouco (no máximo 3 golpes dela)
-    if (e.vida > e.max * limiar || e.vida > a.dano * 3) return false;
+    if (e.vida > e.max * limiar || e.vida > a.dano * 4) return false;
     fxEl('fx-murasame', e.x, e.y, 750); fxJ(9, e.x, e.y);
     typeof Som !== 'undefined' && Som.tocar('corte');
     ferir(e, Math.ceil(e.vida + (e.escudo || 0) + 1), a.time, a, { atravessa: true, semEsquiva: true, semContra: true, crit: true });
     if (e.vida > 0) return false; // voltou (ex.: Mita Malvada, fênix)
     // some nas sombras e salta pro próximo
-    if (!(a.sombraCd > s.t)) { a.sombraCd = s.t + 3; a.intocavel = Math.max(a.intocavel || 0, 0.6); a.sombra = Math.max(a.sombra || 0, 0.6); a.el.classList.add('sombra'); }
+    a.vida = Math.min(a.max, a.vida + Math.round(a.max * 0.12)); atualizarHp(a);
+    if (!(a.sombraCd > s.t)) { a.sombraCd = s.t + 2; a.intocavel = Math.max(a.intocavel || 0, 0.8); a.sombra = Math.max(a.sombra || 0, 0.8); a.el.classList.add('sombra'); }
     const prox = s.ent.filter((x) => !x.torre && x.time !== a.time && x.vida > 0 && dist(x, a) < 130).sort((x, y) => dist(x, a) - dist(y, a))[0];
     if (prox) { a.alvo = prox; agendar(0.2, () => { if (a.vida > 0 && prox.vida > 0) teleportar(a, prox); }); }
     return true;
@@ -1206,7 +1207,7 @@ const Batalha = (() => {
     for (const e of [...s.ent]) if (!e.torre && e.time !== t.time && e.maldDe === t && e.maldAte > s.t && dist(e, t) < 160) checarExecucao(t, e);
   }
   function trunfoMurasame(t, h) {
-    t.vida = Math.max(1, t.vida - Math.round(t.max * 0.15));
+    t.vida = Math.max(1, t.vida - Math.round(t.max * 0.1));
     atualizarHp(t);
     t.trunfo = h.duracao || 6;
     t.el.classList.add('aura-trunfo');
@@ -1552,7 +1553,7 @@ const Batalha = (() => {
     }
     const dx = px - t.x, dy = py - t.y, d0 = Math.hypot(dx, dy) || 1;
     const arrancada = t.atk && t.atk.m && t.atk.m.investida && !t.investiu && dist(t, alvo) < 130 ? 2.6 : 1;
-    const passo = Math.min(d0, t.vel * (t.furia > 0 ? 1.25 : 1) * (t.lento > 0 ? 1 - t.lentoPct : 1) * arrancada * (s.turbo && !t.torre ? 1.4 : 1) * (t.acelerado > 0 ? 1.5 : 1) * (t.trunfo > 0 ? 1.3 : 1) * dt);
+    const passo = Math.min(d0, t.vel * (t.furia > 0 ? 1.25 : 1) * (t.lento > 0 ? 1 - t.lentoPct : 1) * arrancada * (s.turbo && !t.torre ? 1.4 : 1) * (t.acelerado > 0 ? 1.5 : 1) * (t.trunfo > 0 ? 1.4 : 1) * dt);
     if (arrancada > 1 && !t.correndo) { t.correndo = true; t.el.classList.add('arrancada'); }
     let vx = dx / d0, vy = dy / d0;
     // se tem uma torre no caminho (que não é o alvo), desvia pelo lado mais curto
@@ -1632,7 +1633,7 @@ const Batalha = (() => {
     if (m.murasame && tropa && alvo.vida > 0) {
       amaldicoar(alvo, a);
       // Trunfo: o corte amaldiçoa quem está em volta também
-      if (a.trunfo > 0) for (const e of s.ent) if (e !== alvo && !e.torre && e.time !== a.time && e.vida > 0 && dist(e, alvo) < 36 + e.raio) {
+      if (a.trunfo > 0) for (const e of s.ent) if (e !== alvo && !e.torre && e.time !== a.time && e.vida > 0 && dist(e, alvo) < 42 + e.raio) {
         amaldicoar(e, a);
         e.queima = 3; e.queimaDps = Math.max(e.queimaDps || 0, (dano * 0.6) / 3); e.queimaCor = '#B0123A'; e.queimaFonte = a.time; e.el.classList.add('envenenada');
       }
@@ -2727,7 +2728,7 @@ const Batalha = (() => {
     let k = t.furia > 0 ? 0.8 : 1;
     if (s.turbo) k *= 0.7;
     if (t.acelerado > 0) k *= 0.67;
-    if (t.trunfo > 0) k *= 0.7;
+    if (t.trunfo > 0) k *= 0.6;
     if (t.lentoAtq > 0) k *= 1 + t.lentoAtqPct;
     const m = t.atk && t.atk.m;
     if (m && m.berserk) k *= 1 - m.berserk * (1 - t.vida / t.max);

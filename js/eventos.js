@@ -432,6 +432,14 @@ const Eventos = (() => {
         if (Conta.salvarAgora) Conta.salvarAgora().catch(() => {});
         setTimeout(() => revelarNino(c, 'PRESENTE DA CRIADORA', 'Desculpa pelo bug do festival! Toma a Nino, já no nível 4 💜'), 900);
       }
+      // Akame (Murasame): ficou mais forte e sobe pro nível 9 (o Arthur achou ela fraca)
+      if (uid === ARTHUR && Estado.tem('akame_murasame') && !(d.presentesEspeciais || []).includes('akame-buff')) {
+        d.presentesEspeciais = [...(d.presentesEspeciais || []), 'akame-buff'];
+        d.colecao.akame_murasame.nivel = Math.max(d.colecao.akame_murasame.nivel || 1, 9);
+        Estado.salvar();
+        if (Conta.salvarAgora) Conta.salvarAgora().catch(() => {});
+        if ((d.presentesEspeciais || []).includes('akame-arthur')) setTimeout(() => UI.toast('🗡️ Sua Akame ficou mais forte e subiu pro nível 9!'), 1200);
+      }
       // Akame (Murasame): exclusiva do Arthur
       if (uid === ARTHUR && Estado.tem('akame_murasame') && !(d.presentesEspeciais || []).includes('akame-arthur')) {
         d.presentesEspeciais = [...(d.presentesEspeciais || []), 'akame-arthur'];
