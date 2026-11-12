@@ -249,18 +249,25 @@ const Summon = (() => {
     let pulou = false;
     el.querySelector('.sma-pular').onclick = () => { pulou = true; el.classList.add('pulando'); };
 
-    // 1) a fenda abre
-    som('carga');
-    await espera(80);
-    el.classList.add('abrindo');
-    await espera(pulou ? 0 : 1300);
-    // 2) túnel do multiverso
+    // 1) a jogada: 3 jogadores tocam a bola e você chuta pro gol (variação conforme o melhor que veio)
+    const variante = melhor === 'ultra' ? 'ultra' : melhor === 'lendaria' ? 'lendaria' : 'normal';
+    if (typeof GolSummon !== 'undefined') {
+      const cena = document.createElement('div');
+      el.insertBefore(cena, el.querySelector('.sma-flash'));
+      try { await GolSummon.jogar(cena, variante, { pulou: () => pulou, som }); } catch (e) { console.warn('GolSummon', e); }
+      el.classList.add('flash');
+      await espera(pulou ? 0 : 200);
+      cena.remove();
+    } else {
+      // (reserva) a fenda abre
+      el.classList.add('abrindo'); som('carga');
+      await espera(pulou ? 0 : 1300);
+      el.classList.add('flash');
+    }
+    // 2) o gol vira a fenda do multiverso e as cartas atravessam
     el.classList.add('tunel');
     som('portal');
-    try { navigator.vibrate && navigator.vibrate(melhor === 'ultra' ? [40, 30, 40, 30, 120] : 60); } catch (e) { /* nada */ }
-    await espera(pulou ? 0 : 1000);
-    el.classList.add('flash');
-    await espera(pulou ? 0 : 250);
+    await espera(pulou ? 0 : 450);
     // 3) as cartas atravessam
     el.classList.add('cartas');
     const area = el.querySelector('.sma-cartas');

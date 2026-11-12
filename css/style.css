@@ -2673,3 +2673,97 @@ body.em-batalha #spotify-player:not(.aberto) .sp-alca { opacity: 0.6; }
 .tt-op.com-img > *:not(img) { grid-column: 2; }
 .tt-op .tt-barra { width: 100%; }
 .cartao-batalha.medio { --w: 168px; }
+
+/* =====================================================================
+   Summon: a jogada (3 jogadores tocam a bola e você chuta pro gol)
+   ===================================================================== */
+.gol-summon { position: absolute; inset: 0; z-index: 3; overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none; opacity: 0; transition: opacity 0.35s; }
+.gol-summon.entra { opacity: 1; }
+.gs-ceu { position: absolute; left: 0; right: 0; top: 0; height: 22%; background: linear-gradient(#050a24, #0d1a4a 70%, #16285e); overflow: hidden; }
+.v-lendaria .gs-ceu { background: linear-gradient(#1a0f02, #3a2306 60%, #5a3a0c); }
+.v-ultra .gs-ceu { background: radial-gradient(ellipse at 50% 120%, #3a0b5c, #12002a 60%, #04020f); }
+.gs-torcida { position: absolute; left: 0; right: 0; bottom: 0; height: 52%;
+  background: radial-gradient(circle, #ffffff55 0 1.5px, transparent 2px) 0 0 / 9px 8px, radial-gradient(circle, #ffd25e44 0 1.5px, transparent 2px) 4px 4px / 11px 9px, linear-gradient(#0a1030, #121c48);
+  animation: torcidaPula 0.5s steps(2) infinite; }
+@keyframes torcidaPula { 50% { background-position: 0 -1px, 4px 3px, 0 0; } }
+.gs-refletor { position: absolute; top: -40%; width: 40%; height: 160%; background: linear-gradient(#ffffff55, transparent 70%); filter: blur(6px); transform-origin: top; }
+.gs-refletor.e { left: 4%; transform: rotate(-24deg); } .gs-refletor.d { right: 4%; transform: rotate(24deg); }
+.v-lendaria .gs-refletor { background: linear-gradient(#ffd25e77, transparent 70%); }
+.v-ultra .gs-refletor { background: linear-gradient(#ff5cf455, transparent 70%); animation: hueGira 3s linear infinite; }
+.gs-racha { position: absolute; left: 30%; top: 0; width: 3px; height: 100%; background: linear-gradient(#fff, #FF5CF4, #5CE1FF); box-shadow: 0 0 12px #FF5CF4, 0 0 24px #5CE1FF; transform: rotate(18deg) scaleY(0); transform-origin: top; }
+.gs-racha.r2 { left: 72%; transform: rotate(-26deg) scaleY(0); }
+.gol-summon.racha .gs-racha { animation: rachaCeu 0.8s ease-out forwards; }
+.gol-summon.racha .gs-racha.r2 { animation-delay: 0.25s; }
+@keyframes rachaCeu { to { transform: rotate(var(--rot, 18deg)) scaleY(1); } }
+.gs-racha.r2 { --rot: -26deg; }
+.gs-campo { position: absolute; left: 0; right: 0; top: 22%; bottom: 0; background: repeating-linear-gradient(180deg, #2f9a3e 0 9%, #37ad48 9% 18%); }
+.v-ultra .gs-campo { background: repeating-linear-gradient(180deg, #1d5a5a 0 9%, #23706e 9% 18%); }
+.v-lendaria .gs-campo { background: repeating-linear-gradient(180deg, #3a8f2f 0 9%, #46a338 9% 18%); }
+.gs-campo::after { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 0%, #ffffff22, transparent 60%), linear-gradient(transparent 70%, #0005); }
+.gs-linhas { position: absolute; inset: 2% 4% -2%; border: 2px solid #ffffffaa; border-bottom: none; }
+.gs-area { position: absolute; left: 22%; right: 22%; top: 2%; height: 22%; border: 2px solid #ffffffaa; border-top: none; }
+.gs-circulo { position: absolute; left: 50%; bottom: -12%; width: 40%; aspect-ratio: 1; transform: translateX(-50%); border-radius: 50%; border: 2px solid #ffffff88; }
+.gs-gol { position: absolute; left: 50%; top: 9%; width: 46%; height: 14%; transform: translateX(-50%); }
+.gs-rede { position: absolute; inset: 4% 3% 0; background: repeating-linear-gradient(90deg, #ffffff66 0 1px, transparent 1px 7px), repeating-linear-gradient(0deg, #ffffff66 0 1px, transparent 1px 7px), #0006; border-radius: 4px 4px 0 0; transform-origin: top; }
+.gs-trave { position: absolute; inset: 0; border: 4px solid #fff; border-bottom: none; border-radius: 4px 4px 0 0; box-shadow: 0 0 8px #fff8; }
+.v-lendaria .gs-trave { border-color: #FFE29A; box-shadow: 0 0 14px #FFC53D; }
+.v-ultra .gs-trave { border-color: transparent; border-image: linear-gradient(90deg, #FF5CF4, #5CE1FF, #7CFF8A, #FFE45C) 1; box-shadow: none; filter: drop-shadow(0 0 6px #FF5CF4); }
+.gs-portal { position: absolute; inset: 6% 5% 0; border-radius: 50% 50% 8px 8px; opacity: 0; background: conic-gradient(from 0deg, #FF5CF4, #5CE1FF, #7CFF8A, #FFE45C, #FF5CF4); -webkit-mask: radial-gradient(ellipse, transparent 0 20%, #000 60%); mask: radial-gradient(ellipse, transparent 0 20%, #000 60%); }
+.v-ultra.sua-vez .gs-portal, .v-ultra.gol .gs-portal { opacity: 0.85; animation: girar 1.4s linear infinite; }
+.gs-jog, .gs-goleiro { position: absolute; width: 13%; transform: translate(-50%, -85%); z-index: 2; }
+.gs-goleiro { width: 11%; z-index: 1; animation: goleiroBalanca 1.2s ease-in-out infinite alternate; }
+@keyframes goleiroBalanca { from { margin-left: -9%; } to { margin-left: 9%; } }
+.gs-goleiro.pula-e { animation: pulaE 0.4s ease-out forwards; } .gs-goleiro.pula-d { animation: pulaD 0.4s ease-out forwards; }
+@keyframes pulaE { to { margin-left: -16%; transform: translate(-50%, -70%) rotate(-80deg); } }
+@keyframes pulaD { to { margin-left: 16%; transform: translate(-50%, -70%) rotate(80deg); } }
+.gs-svg { width: 100%; display: block; overflow: visible; }
+.gs-nome { position: absolute; left: 50%; top: -12px; transform: translateX(-50%); font: 10px 'Lilita One', sans-serif; white-space: nowrap; padding: 0 5px; border-radius: 6px; background: #0008; color: #fff; }
+.v-lendaria .gs-nome { background: #7a4a00cc; } .v-ultra .gs-nome { background: linear-gradient(90deg, #FF5CF4aa, #5CE1FFaa); }
+.gs-jog.corre .gs-perna-a { animation: correA 0.28s ease-in-out infinite alternate; transform-origin: 20px 52px; }
+.gs-jog.corre .gs-perna-b { animation: correA 0.28s ease-in-out infinite alternate-reverse; transform-origin: 28px 52px; }
+@keyframes correA { from { transform: rotate(-22deg); } to { transform: rotate(22deg); } }
+.gs-jog.chuta .gs-perna-b { animation: chute 0.32s ease-out; transform-origin: 28px 52px; }
+@keyframes chute { 0% { transform: rotate(30deg); } 40% { transform: rotate(-70deg); } 100% { transform: rotate(0); } }
+.gs-jog.calcanhar .gs-perna-a { animation: calcanhar 0.3s ease-out; transform-origin: 20px 52px; }
+@keyframes calcanhar { 50% { transform: rotate(80deg); } }
+.v-lendaria .gs-jog { filter: drop-shadow(0 0 6px #FFC53D); }
+.v-ultra .gs-jog { filter: drop-shadow(3px 0 0 #ff00ea88) drop-shadow(-3px 0 0 #00e5ff88); }
+.gs-jog.comemora { animation: comemora 0.45s ease-in-out infinite alternate; }
+@keyframes comemora { from { transform: translate(-50%, -85%); } to { transform: translate(-50%, -110%) rotate(6deg); } }
+.gs-bola { position: absolute; width: 6.5%; aspect-ratio: 1; transform: translate(-50%, -50%); z-index: 4; cursor: grab; touch-action: none; }
+.gs-bola i { position: absolute; inset: 0; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff 0 25%, #e8e8e8 45%, #9a9a9a 100%); box-shadow: 0 3px 4px #0006;
+  -webkit-mask: none; animation: bolaGira 0.6s linear infinite; }
+.gs-bola i::before { content: ''; position: absolute; inset: 28%; background: #222; clip-path: polygon(50% 0, 100% 38%, 82% 100%, 18% 100%, 0 38%); }
+@keyframes bolaGira { to { transform: rotate(360deg); } }
+.gol-summon.fogo .gs-bola { filter: drop-shadow(0 0 6px #FFC53D) drop-shadow(0 0 14px #FF8A00); }
+.gol-summon.fogo .gs-bola::after { content: ''; position: absolute; left: 50%; top: 50%; width: 220%; height: 120%; transform: translate(-50%, -10%); background: radial-gradient(ellipse at 50% 20%, #fff8 0 15%, #FFC53D 30%, #FF6A00aa 50%, transparent 70%); z-index: -1; filter: blur(2px); animation: chamaBola 0.15s steps(2) infinite; }
+@keyframes chamaBola { 50% { transform: translate(-50%, -6%) scaleY(1.15); } }
+.gs-bola.prisma i { background: conic-gradient(#FF5CF4, #5CE1FF, #7CFF8A, #FFE45C, #FF5CF4); box-shadow: 0 0 10px #FF5CF4, 0 0 20px #5CE1FF; }
+.gs-bola.some { opacity: 0; transition: opacity 0.15s; }
+.gs-fenda { position: absolute; left: 50%; top: 66%; width: 2px; height: 0; transform: translate(-50%, -50%); background: #fff; box-shadow: 0 0 12px #FF5CF4, 0 0 26px #5CE1FF; border-radius: 50%; z-index: 3; }
+.gol-summon.fenda-abre .gs-fenda { animation: fendaAbreCampo 0.9s ease-out forwards; }
+@keyframes fendaAbreCampo { 0% { height: 0; width: 2px; } 30% { height: 14%; width: 10px; } 60% { height: 14%; width: 26px; background: conic-gradient(#FF5CF4, #5CE1FF, #7CFF8A, #FFE45C, #FF5CF4); } 100% { height: 0; width: 2px; opacity: 0; } }
+.gs-dica { position: absolute; left: 0; right: 0; top: 46%; z-index: 5; display: flex; flex-direction: column; align-items: center; gap: 4px; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+.gs-dica b { font: 18px 'Lilita One', sans-serif; padding: 4px 14px; border-radius: 12px; background: #000a; text-shadow: 0 2px 0 #000; }
+.v-lendaria .gs-dica b { background: linear-gradient(90deg, #8a5a00dd, #c88a00dd); } .v-ultra .gs-dica b { background: linear-gradient(90deg, #8a1fd0dd, #2f80f7dd); }
+.gs-dedo { font-size: 36px; font-style: normal; animation: dedoArrasta 1.2s ease-in-out infinite; }
+@keyframes dedoArrasta { 0% { transform: translateY(40px); opacity: 0; } 20% { opacity: 1; } 80% { transform: translateY(-40px); opacity: 1; } 100% { transform: translateY(-50px); opacity: 0; } }
+.gol-summon.sua-vez .gs-dica { opacity: 1; }
+.gol-summon.sua-vez .gs-bola { animation: bolaChama 0.8s ease-in-out infinite; }
+@keyframes bolaChama { 50% { filter: drop-shadow(0 0 10px #fff) drop-shadow(0 0 16px #FFD25E); } }
+.gol-summon.arrastando .gs-dica { opacity: 0; }
+.gol-summon.gol .gs-rede { animation: redeBalanca 0.6s ease-out; }
+@keyframes redeBalanca { 30% { transform: scaleY(0.82) translateY(-6%); } 60% { transform: scaleY(1.06); } }
+.gol-summon.gol .gs-bola { animation: none; }
+.gs-gooool { position: absolute; left: 0; right: 0; top: 38%; z-index: 6; display: flex; justify-content: center; flex-wrap: wrap; padding: 0 10px; pointer-events: none; }
+.gs-gooool span { font: 52px 'Lilita One', sans-serif; line-height: 1; color: #fff; opacity: 0; text-shadow: 0 5px 0 #1A3A9A, 0 0 20px #2F6BFF; animation: letraUltra 0.45s calc(var(--k) * 0.05s) cubic-bezier(0.3, 2, 0.5, 1) forwards; }
+.v-lendaria .gs-gooool span { color: #FFE29A; text-shadow: 0 5px 0 #8a5a00, 0 0 24px #FFC53D; }
+.v-ultra .gs-gooool span { font-size: 40px; text-shadow: 3px 0 0 #ff00ea, -3px 0 0 #00e5ff, 0 5px 0 #3a0b5c, 0 0 24px #FF5CF4; }
+.gs-confetes i { position: absolute; top: -10px; left: var(--x); width: 8px; height: 13px; background: var(--c); border-radius: 2px; transform: rotate(var(--r)); z-index: 6; animation: pmCai 2.4s var(--d) linear forwards; }
+.v-lendaria.gol { animation: flashOuro 0.5s; } @keyframes flashOuro { 30% { filter: brightness(1.8) sepia(0.4); } }
+.v-ultra.gol { animation: rgbSplit 0.15s steps(2) 5; }
+.gs-portal { border-radius: 50%; background: conic-gradient(from var(--ang), #FF5CF4, #5CE1FF, #7CFF8A, #FFE45C, #FF5CF4); }
+.v-ultra.sua-vez .gs-portal, .v-ultra.gol .gs-portal { animation: girarAng 1.2s linear infinite; transform: none; }
+.v-ultra .gs-gooool span { font-size: 30px; }
+.v-ultra.gol .gs-portal { animation: girarAng 0.5s linear infinite, portalCresce 0.8s ease-out forwards; }
+@keyframes portalCresce { to { transform: scale(1.6); opacity: 1; } }
