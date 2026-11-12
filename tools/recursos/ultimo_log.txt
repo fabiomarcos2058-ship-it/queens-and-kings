@@ -1,3 +1,26 @@
-26M	assets/texturas
+ok rust_coarse_01
+ok rusty_metal_04
+ok velour_velvet
+ok crepe_satin
+ok marble_cliff_04
+ok acg Cardboard001
+ok acg Cardboard004
+ok acg Paper005
+ok acg Metal053C
+ok acg Metal055A
+ok acg Metal041A
+ok acg Metal063
+ok acg Metal017
+ok acg Metal015
+ok acg Metal047A
+ok acg Metal049A
+ok acg Metal050A
+ok acg Metal048A
+ok acg Metal048C
+ok acg Metal062C
+ok acg Metal061B
+ok acg Metal046A
+ornamentos: 202
+30M	assets/texturas
 4.0K	assets/efeitos
 108K	assets/icones
