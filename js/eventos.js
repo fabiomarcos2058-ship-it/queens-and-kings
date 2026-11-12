@@ -625,7 +625,7 @@ const Eventos = (() => {
         }), 1500);
       }
       // Arthur pediu mais 500 pelo "xingamento" da Claude kkkk
-      if (uid === ARTHUR && (d.presentesEspeciais || []).includes('summon-bug-arthur') && !(d.presentesEspeciais || []).includes('desculpa-arthur')) {
+      if (uid === ARTHUR && !(d.presentesEspeciais || []).includes('desculpa-arthur')) {
         d.presentesEspeciais = [...(d.presentesEspeciais || []), 'desculpa-arthur'];
         d.gemas += 500;
         Estado.salvar();
