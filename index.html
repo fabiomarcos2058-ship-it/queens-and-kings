@@ -4,13 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
   <meta name="theme-color" content="#1d2350" />
-  <meta name="versao-pagina" content="1794507158" />
+  <meta name="versao-pagina" content="1794508854" />
   <meta http-equiv="Cache-Control" content="no-cache" />
   <title>Queens and Kings</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Lilita+One&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/style.css?v=1794507158" />
+  <link rel="stylesheet" href="css/style.css?v=1794508854" />
 </head>
 <body>
   <div id="app">
@@ -37,6 +37,7 @@
         <!-- LOJA -->
         <section class="tela" data-tela="loja">
           <div class="loja-banner"><b>Loja</b><span>Novas ofertas em <i id="loja-tempo">--:--:--</i></span></div>
+          <button class="btn-summon na-loja" id="loja-summon"></button>
           <div id="loja-presente"></div>
           <div class="loja-secao"><h2 class="fita"><span>Ofertas do dia</span></h2>
             <div class="grade-3 ofertas" id="ofertas"></div></div>
@@ -77,6 +78,7 @@
           </div>
           <button class="btn-jogar" id="btn-jogar">Jogar</button>
           <button class="btn-ranq" id="btn-ranq"></button>
+          <button class="btn-summon" id="btn-summon"></button>
           <div class="linha-modos"><button class="btn-x1" id="btn-x1">⚔️ X1 com amigo</button><button class="btn-x1 btn-2v2" id="btn-2v2">🤝 2v2</button></div>
           <div class="linha-extra"><button class="btn-extra" id="btn-missoes">📜 Missões<i class="selo-pedidos oculto" id="selo-missoes"></i></button><button class="btn-extra" id="btn-eventos-ir">🎪 Eventos<i class="selo-novo" id="selo-eventos">NOVO</i></button><button class="btn-extra" id="btn-inventario">🎒 Inventário</button><button class="btn-extra" id="btn-tutorial">🎓 Tutorial</button></div>
           <p class="dica-inicio" id="dica-inicio"></p>
@@ -146,7 +148,7 @@
       css.rel = 'stylesheet';
       css.href = 'css/style.css?v=' + v;
       document.head.appendChild(css);
-      for (const f of ['assets', 'estado', 'ui', 'som', 'arena', 'cartas', 'ataques', 'batalha', 'titulo', 'conta', 'cla', 'passe', 'ranque', 'ranqueui', 'mod', 'atualizacao', 'x1', 'amigos', 'presentes', 'premios', 'inventario', 'missoes', 'eventos', 'aovivo', 'tutorial', 'menu']) {
+      for (const f of ['assets', 'estado', 'ui', 'som', 'arena', 'cartas', 'ataques', 'batalha', 'titulo', 'conta', 'cla', 'passe', 'ranque', 'ranqueui', 'mod', 'atualizacao', 'x1', 'amigos', 'presentes', 'premios', 'inventario', 'summon', 'missoes', 'eventos', 'aovivo', 'tutorial', 'menu']) {
         await new Promise((ok) => {
           const el = document.createElement('script');
           el.src = 'js/' + f + '.js?v=' + v;

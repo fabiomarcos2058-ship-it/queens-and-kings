@@ -2287,6 +2287,173 @@
         "pct": 0.35,
         "descricao": "O Enigma do Milênio manda os inimigos em volta para o Reino das Sombras por 3s. Quando voltam, perdem 35% da vida. Ele ainda compra uma carta."
       }
+    },
+    {
+      "id": "itoshi_sae",
+      "nome": "Itoshi Sae",
+      "raridade": "ultra",
+      "custo": 5,
+      "tipo": "Ultra · O Gênio do Meio-Campo",
+      "trofeus": 0,
+      "exclusivo": [],
+      "summon": true,
+      "descricao": "O prodígio que enxerga o jogo inteiro. Toca a bola pros aliados e deixa todo mundo mais forte.",
+      "rosto": [
+        220,
+        480,
+        120
+      ],
+      "arte": [
+        0,
+        330,
+        560
+      ],
+      "vida": 1450,
+      "dano": 250,
+      "velocidade": 62,
+      "alcance": 70,
+      "cadencia": 1.0,
+      "alvo": "tudo",
+      "arena": 1,
+      "danoTorre": 0.6,
+      "passiva": {
+        "nome": "Passe Perfeito",
+        "tipo": "passePerfeito",
+        "descricao": "A cada 3 chutes, passa a bola pro aliado mais forte perto: ele bate na hora e fica +30% mais forte e rápido por 4s. Sem aliado perto, o chute vai direto no alvo com +60%."
+      },
+      "habilidade": {
+        "nome": "Visão do Gênio",
+        "tipo": "visaoGenio",
+        "custo": 3,
+        "recarga": 20,
+        "duracao": 6,
+        "descricao": "Lê o campo inteiro: aliados em volta ficam +30% mais fortes e rápidos por 6s, e os inimigos perto ficam lentos."
+      }
+    },
+    {
+      "id": "itoshi_rin",
+      "nome": "Itoshi Rin",
+      "raridade": "ultra",
+      "custo": 5,
+      "tipo": "Ultra · O Destruidor",
+      "trofeus": 0,
+      "exclusivo": [],
+      "summon": true,
+      "descricao": "Atacante destrutivo. O Chute Fantasma faz curva, ignora esquivas e ricocheteia. No Flow, ninguém para ele.",
+      "rosto": [
+        365,
+        515,
+        125
+      ],
+      "arte": [
+        120,
+        200,
+        616
+      ],
+      "vida": 1250,
+      "dano": 315,
+      "velocidade": 70,
+      "alcance": 55,
+      "cadencia": 0.95,
+      "alvo": "tudo",
+      "arena": 1,
+      "danoTorre": 0.6,
+      "passiva": {
+        "nome": "Chute Fantasma",
+        "tipo": "chuteFantasma",
+        "descricao": "A cada 4 chutes, solta um chute em curva que não dá pra esquivar: 2,2x de dano e ricocheteia em mais 2 inimigos."
+      },
+      "habilidade": {
+        "nome": "Flow: Destruição",
+        "tipo": "flowDestruicao",
+        "custo": 3,
+        "recarga": 20,
+        "duracao": 7,
+        "descricao": "Entra no Flow por 7s: +40% de dano, mais rápido, imune a atordoar e lentidão, e cada inimigo que cai devolve 15% da vida."
+      }
+    },
+    {
+      "id": "isagi_ultra",
+      "nome": "Isagi Yoichi",
+      "raridade": "ultra",
+      "custo": 5,
+      "tipo": "Ultra · Metavisão",
+      "trofeus": 0,
+      "exclusivo": [],
+      "summon": true,
+      "descricao": "O Isagi que devora o campo. Cada inimigo que cai perto dele deixa ele mais forte, e a Metavisão prevê os golpes.",
+      "rosto": [
+        235,
+        603,
+        120
+      ],
+      "arte": [
+        0,
+        330,
+        600
+      ],
+      "vida": 1300,
+      "dano": 275,
+      "velocidade": 66,
+      "alcance": 60,
+      "cadencia": 1.0,
+      "alvo": "tudo",
+      "arena": 1,
+      "danoTorre": 0.6,
+      "passiva": {
+        "nome": "Metavisão",
+        "tipo": "esquiva",
+        "chance": 0.22,
+        "descricao": "Prevê 22% dos golpes e desvia. Cada inimigo que cai perto dele deixa o Isagi +4% mais forte (até +40%) até o fim da batalha."
+      },
+      "habilidade": {
+        "nome": "Direct Shot",
+        "tipo": "golDireto",
+        "custo": 4,
+        "recarga": 22,
+        "descricao": "Metavisão total: aliados em volta atacam mais rápido por 5s e o Isagi solta um chute direto que atravessa a linha inteira."
+      }
+    },
+    {
+      "id": "anri_halloween",
+      "nome": "Anri (Halloween)",
+      "raridade": "lendaria",
+      "custo": 4,
+      "tipo": "Suporte · Edição Halloween",
+      "trofeus": 0,
+      "exclusivo": [],
+      "summon": true,
+      "descricao": "A Anri fantasiada de bruxinha. Serve chá encantado pros aliados e joga abóboras nos inimigos. Doces ou travessuras?",
+      "rosto": [
+        365,
+        360,
+        170
+      ],
+      "arte": [
+        0,
+        70,
+        735
+      ],
+      "vida": 1050,
+      "dano": 150,
+      "velocidade": 55,
+      "alcance": 75,
+      "cadencia": 1.15,
+      "alvo": "tudo",
+      "arena": 1,
+      "danoTorre": 0.6,
+      "passiva": {
+        "nome": "Chá Encantado",
+        "tipo": "chaEncantado",
+        "descricao": "A cada 5s, cura 10% da vida dos aliados perto dela."
+      },
+      "habilidade": {
+        "nome": "Doces ou Travessuras?",
+        "tipo": "docesTravessuras",
+        "custo": 3,
+        "recarga": 18,
+        "descricao": "Doces: cura 25% dos aliados em volta e deixa eles mais fortes por 5s. Travessuras: transforma os inimigos perto em abóboras por 2,5s (não andam nem atacam). Ela escolhe o que for melhor na hora."
+      }
     }
   ]
 }

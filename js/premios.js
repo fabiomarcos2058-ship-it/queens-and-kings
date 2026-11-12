@@ -1,7 +1,7 @@
 // Prêmios dos passes (Passe da Temporada e Pro Pass): entregar, ícone e texto.
 // Tipos: ouro, gemas, bau, carta (cópias de uma carta sua da raridade), coringa, tokens, evolucao.
 const Premios = (() => {
-  const NOME_RAR = { comum: 'comum', rara: 'rara', epica: 'épica', lendaria: 'lendária' };
+  const NOME_RAR = { comum: 'comum', rara: 'rara', epica: 'épica', lendaria: 'lendária', ultra: 'ultra' };
   const NOME_BAU = { madeira: 'madeira', prata: 'prata', ouro: 'ouro', lendario: 'Lendário' };
 
   function texto(r) {

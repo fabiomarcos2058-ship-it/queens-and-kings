@@ -284,6 +284,8 @@
   $('btn-eventos-ir').onclick = () => irPara('eventos');
   $('btn-tutorial').onclick = () => Tutorial.comecar(fimDeBatalha);
   $('btn-inventario').onclick = () => Inventario.abrir(() => tudo());
+  $('btn-summon').onclick = () => Summon.abrir(() => tudo());
+  $('loja-summon').onclick = () => Summon.abrir(() => tudo());
   $('btn-som').onclick = () => Som.abrirConfig();
   Som.musica('menu');
   window.MenuAPI = { tudo: () => tudo(), mostrarBau: (t, r) => mostrarBau(t, r), irPara: (a) => irPara(a) };
@@ -1030,7 +1032,7 @@
   }
 
   // ---------- Loja ----------
-  const COR_RAR = { comum: '#9FB4C8', rara: '#FFB347', epica: '#C77DFF', lendaria: '#5EE6C8' };
+  const COR_RAR = { comum: '#9FB4C8', rara: '#FFB347', epica: '#C77DFF', lendaria: '#5EE6C8', ultra: '#FF5CF4' };
   function tempoLoja() {
     const el = $('loja-tempo');
     if (!el || abaAtual !== 'loja') return;
@@ -1911,6 +1913,7 @@
   window.telaRemover = telaRemover;
   window.mostrarConviteX1 = conviteX1;
   function tudo() {
+    try { $('btn-summon').innerHTML = Summon.htmlBotao(); $('loja-summon').innerHTML = Summon.htmlBotao(); } catch (e) { /* nada */ }
     try { seloMissoes(); $('btn-tutorial').classList.toggle('chamando', !Tutorial.feito()); } catch (e) { /* nada */ }
     Mod.mostrarBotao(tudo);
     if (Conta.logado()) Amigos.ouvir({ aoMudarPedidos: mudouPedidos, aoConvite: conviteX1 });

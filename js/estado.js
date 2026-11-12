@@ -10,6 +10,7 @@ const Estado = (() => {
     rara: [0, 2, 4, 8, 15, 30, 60, 110, 200],
     epica: [0, 1, 2, 4, 8, 15, 30, 50, 90],
     lendaria: [0, 1, 2, 3, 5, 8, 14, 22, 35],
+    ultra: [0, 1, 1, 2, 3, 4, 6, 9, 14], // só saem no Summon
   };
   // cópias que a carta precisa para sair do nível n
   function copiasNivel(id, n) {
@@ -23,6 +24,7 @@ const Estado = (() => {
     rara: [0, 15, 40, 100, 250, 500, 1000, 1900, 3400],
     epica: [0, 25, 60, 150, 350, 700, 1400, 2600, 4500],
     lendaria: [0, 40, 100, 250, 550, 1000, 1900, 3400, 6000],
+    ultra: [0, 60, 150, 350, 700, 1300, 2400, 4200, 7500],
   };
   function ouroNivel(id, n) {
     const c = typeof id === 'string' ? carta(id) : id;
@@ -161,7 +163,7 @@ const Estado = (() => {
     const uidAgora = meuUid();
     if (Array.isArray(d.esgotadas) && uidAgora) d.esgotadas = d.esgotadas.filter((id) => { const c = todas.find((x) => x.id === id); return !c || c.usos || !(c.exclusivo && c.exclusivo.includes(uidAgora)); });
     // carta de evento que está na coleção mas sumiu da lista de extras (ex.: save da nuvem atrasado) volta a aparecer
-    for (const c of todas) if (c.evento && Array.isArray(c.exclusivo) && !c.exclusivo.length && d.colecao && d.colecao[c.id] && d.colecao[c.id].tem && !(d.cartasExtras || []).includes(c.id)) d.cartasExtras = [...(d.cartasExtras || []), c.id];
+    for (const c of todas) if ((c.evento || c.summon) && Array.isArray(c.exclusivo) && !c.exclusivo.length && d.colecao && d.colecao[c.id] && d.colecao[c.id].tem && !(d.cartasExtras || []).includes(c.id)) d.cartasExtras = [...(d.cartasExtras || []), c.id];
     // carta intransferível (Goku UI do Samuel) nunca fica em outra conta
     if (uidAgora) for (const c of todas.filter((x) => x.intransferivel && x.exclusivo && !x.exclusivo.includes(uidAgora))) {
       const tinha = (d.cartasExtras || []).includes(c.id) || (d.deck || []).includes(c.id) || !!(d.colecao && d.colecao[c.id] && d.colecao[c.id].tem);

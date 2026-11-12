@@ -1,6 +1,6 @@
 // Visual das cartas e leitura de assets/cartas/cartas.json.
 const Cartas = (() => {
-  const NOMES_RARIDADE = { comum: 'Comum', rara: 'Rara', epica: 'Épica', lendaria: 'Lendária' };
+  const NOMES_RARIDADE = { comum: 'Comum', rara: 'Rara', epica: 'Épica', lendaria: 'Lendária', ultra: 'Ultra' };
   const arte = (c) => `assets/cartas/${c.imagem || c.id + '.jpg'}`;
 
   // Tenta várias vezes. Se não der (sem internet), devolve null: o jogo NÃO pode seguir com a lista vazia,
@@ -28,7 +28,7 @@ const Cartas = (() => {
       ${mini ? '' : `<span class="nome-3d">${c.nome}</span>`}
       ${c.habilidade ? '<span class="selo-hab" title="Tem habilidade especial">⚡</span>' : ''}
       ${c.passiva ? `<span class="selo-hab passiva" title="Tem habilidade passiva">${c.passiva.tipo === 'esquiva' ? '✨' : '🧩'}</span>` : ''}
-      ${evo ? '<i class="evo-borda"></i><span class="evo-selo">EVO</span>' : ''}${c.evento ? '<span class="selo-evento">EVENTO</span>' : ''}
+      ${evo ? '<i class="evo-borda"></i><span class="evo-selo">EVO</span>' : ''}${c.evento ? '<span class="selo-evento">EVENTO</span>' : ''}${c.raridade === 'ultra' ? '<i class="ultra-holo"></i><i class="ultra-borda"></i><span class="selo-evento selo-ultra">ULTRA</span>' : c.summon ? '<span class="selo-evento selo-summon">SUMMON</span>' : ''}
       ${extra}
     </div>`;
     // cartas de evolução: moldura especial + aura roxa animada em volta

@@ -611,6 +611,19 @@ const Eventos = (() => {
         if (k === 'yugi' && fd.completo && !Estado.tem(YUGI)) setTimeout(() => { if (!Estado.tem(YUGI)) revelarNino(Ranque.darEvolucao(YUGI), 'LENDÁRIA EXCLUSIVA DE EVENTO', DESAFIOS.yugi.fala.replace('{n}', esc(nomeJ()))); }, 900);
         if (k === 'sonic' && fd.completo && !fd.escolheu && !document.querySelector('.modal-escolha-sonic')) setTimeout(() => escolherSonic(() => { if (window.MenuAPI) window.MenuAPI.tudo(); }), 1000);
       }
+      // presente da atualização do Summon: 500 gemas pra todo mundo
+      if (!(d.presentesEspeciais || []).includes('summon-500')) {
+        d.presentesEspeciais = [...(d.presentesEspeciais || []), 'summon-500'];
+        d.gemas += 500;
+        Estado.salvar();
+        if (Conta.salvarAgora) Conta.salvarAgora().catch(() => {});
+        setTimeout(() => UI.modal({
+          titulo: '🌀 Chegou o Summon!',
+          classe: 'modal-presente-summon',
+          html: `<p>A fenda do multiverso abriu e trouxe uma raridade nova: <b>ULTRA</b>!</p><p class="psm-gemas">+500 💎</p><p>Presente pra você invocar os primeiros Ultras: <b>Itoshi Sae</b>, <b>Itoshi Rin</b> e <b>Isagi Yoichi</b>.</p>`,
+          botoes: [{ texto: 'Depois' }, { texto: 'Ir pro Summon! 🌀', classe: 'principal', acao: () => Summon.abrir(() => { if (window.MenuAPI) window.MenuAPI.tudo(); }) }],
+        }), 1500);
+      }
       // Enzo perdeu a Mita Malvada quando a nuvem parou de salvar: devolve
       if (uid === ENZO && !Estado.tem('mita_malvada') && !(d.presentesEspeciais || []).includes('mita-enzo')) {
         d.presentesEspeciais = [...(d.presentesEspeciais || []), 'mita-enzo'];
