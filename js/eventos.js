@@ -624,6 +624,18 @@ const Eventos = (() => {
           botoes: [{ texto: 'Depois' }, { texto: 'Ir pro Summon! 🌀', classe: 'principal', acao: () => Summon.abrir(() => { if (window.MenuAPI) window.MenuAPI.tudo(); }) }],
         }), 1500);
       }
+      // Arthur pediu mais 500 pelo "xingamento" da Claude kkkk
+      if (uid === ARTHUR && (d.presentesEspeciais || []).includes('summon-bug-arthur') && !(d.presentesEspeciais || []).includes('desculpa-arthur')) {
+        d.presentesEspeciais = [...(d.presentesEspeciais || []), 'desculpa-arthur'];
+        d.gemas += 500;
+        Estado.salvar();
+        if (Conta.salvarAgora) Conta.salvarAgora().catch(() => {});
+        setTimeout(() => UI.modal({
+          titulo: '😤 Tá bom, tá bom...',
+          html: '<p>Desculpa por ter implicado com você, Arthur. Aqui estão <b>+500 💎</b>.</p><p>N-não se acostuma, hein! 💜</p>',
+          botoes: [{ texto: 'Desculpa aceita 😎', classe: 'principal' }],
+        }), 2200);
+      }
       // Arthur: a invocação 10x dele não mostrou nada (bug): 500 gemas e mostra o que ele ganhou
       if (uid === ARTHUR && !(d.presentesEspeciais || []).includes('summon-bug-arthur')) {
         d.presentesEspeciais = [...(d.presentesEspeciais || []), 'summon-bug-arthur'];
