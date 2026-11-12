@@ -12,6 +12,10 @@ const Batalha = (() => {
 
   const $ = (id) => document.getElementById(id);
   const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+  // 2v2: cada jogador é um "lado" (azul, azul2, vermelho, vermelho2); o time é azul ou vermelho
+  const LADOS = ['azul', 'azul2', 'vermelho', 'vermelho2'];
+  const timeDe = (lado) => (lado.startsWith('azul') ? 'azul' : 'vermelho');
+  const jogadorDe = (e) => s[e.dono || e.time] || s[e.time];
   const pct = (x, y) => ({ left: `${(x / W) * 100}%`, top: `${(y / H) * 100}%` });
   // ---------- desempenho ----------
   // tropas e projéteis andam com transform (a placa de vídeo faz o trabalho, sem recalcular a página)
@@ -61,19 +65,35 @@ const Batalha = (() => {
   // rede (x1): no celular de quem criou a sala, rede = { tipo: 'host', convidado, enviarEstado, fim }
   function iniciar({ modo = 'normal', fim, rede = null } = {}) {
     ao_fim = fim;
+    const dupla = modo === '2v2';
+    const x1 = rede && !dupla;
     const deck = Estado.d.deck;
-    const deckIA = rede ? embaralhar(rede.convidado.deck) : embaralhar(Mod.deckApelao() || deckAleatorioIA()).slice(0, 8);
+    const deckIA = x1 ? embaralhar(rede.convidado.deck) : embaralhar(Mod.deckApelao() || deckAleatorioIA()).slice(0, 8);
     const minhas = Estado.minhasTorres();
-    const delas = rede ? (rede.convidado.torres || minhas) : torresIA(minhas);
+    // 2v2: a dupla rival tem torres iguais às suas (sem a "desvantagem de IA")
+    const delas = x1 ? (rede.convidado.torres || minhas) : dupla ? { ...minhas } : torresIA(minhas);
     s = {
       modo, t: 0, prorrogacao: false, acabou: false, pausa: false,
       azul: lado(deck), vermelho: lado(deckIA),
       ent: torres(minhas, delas), proj: [], efeitos: [], agenda: [], selecionada: null, iaTimer: 2, id: 0,
       arenaId: Arena.daQtd(Estado.d.recorde).id,
       nivelIA: Math.max(1, Math.min(9, Math.round(deck.reduce((a, id) => a + Estado.d.colecao[id].nivel, 0) / deck.length) - (Mod.deckApelao() ? 0 : 1))),
-      rede, niveisV: rede ? rede.convidado.niveis : null, eventos: [], snapTimer: 0,
+      rede, niveisV: x1 ? rede.convidado.niveis : null, eventos: [], snapTimer: 0,
+      ias: x1 ? [] : ['vermelho'],
     };
-    montar(rede ? `X1 contra ${rede.convidado.nome}` : modo === 'elixir2x' ? 'Evento: elixir em dobro' : 'Batalha');
+    if (dupla) {
+      s.dupla = true;
+      s.azul2 = lado(rede ? rede.convidado.deck : deckAleatorioIA());
+      s.vermelho2 = lado(deckAleatorioIA());
+      s.niveisAzul2 = rede ? rede.convidado.niveis : null;
+      s.ias = rede ? ['vermelho', 'vermelho2'] : ['vermelho', 'vermelho2', 'azul2'];
+      s.nomeParceiro = rede ? rede.convidado.nome : 'Parceiro IA';
+      s.iaTimer_vermelho2 = 3.2; s.iaTimer_azul2 = 2.6;
+      // com 4 jogadores as torres aguentam mais
+      for (const t of s.ent) if (t.torre) { t.max = Math.round(t.max * 1.9); t.vida = t.max; }
+      if (!Mod.deckApelao()) s.nivelIA = Math.min(9, s.nivelIA + 1); // cartas da dupla rival no mesmo nível médio das suas
+    }
+    montar(dupla ? (rede ? `2v2 com ${rede.convidado.nome}` : '2v2 · Batalha em dupla') : rede ? `X1 contra ${rede.convidado.nome}` : modo === 'elixir2x' ? 'Evento: elixir em dobro' : 'Batalha');
   }
 
   function montar(titulo) {
@@ -102,11 +122,20 @@ const Batalha = (() => {
     if (!hab) { hab = document.createElement('div'); hab.id = 'habilidades'; document.querySelector('.arena-grande-janela').appendChild(hab); }
     hab.innerHTML = '';
     s.habTimer = 0;
+    document.querySelectorAll('.chip-parceiro').forEach((e) => e.remove());
+    s.chipP = null;
+    if (s.dupla) {
+      s.chipP = document.createElement('div');
+      s.chipP.className = 'chip-parceiro';
+      s.chipP.innerHTML = '<span>🤝</span><b></b><i class="gota-mini"></i><em>5</em>';
+      document.querySelector('.arena-grande-janela').appendChild(s.chipP);
+    }
     $('btn-sair').onclick = desistir;
     document.querySelector('.selo-previa').textContent = titulo;
     atualizarPlacar();
     desenharMao();
     $('batalha').classList.remove('oculto');
+    document.body.classList.add('em-batalha');
     s.ultimo = performance.now();
     requestAnimationFrame(loop);
   }
@@ -245,22 +274,32 @@ const Batalha = (() => {
     desenharMao();
   }
 
-  function jogar(time, indice, x, y) {
-    const L = s[time];
+  function jogar(quem, indice, x, y) {
+    const time = timeDe(quem);
+    const L = s[quem];
     const id = L.fila[indice];
     const c = Estado.carta(id);
     L.elixir -= c.custo;
     L.fila.splice(indice, 1);
     L.fila.push(id);
-    const nivel = time === 'azul' ? Estado.d.colecao[id].nivel : s.niveisV ? (s.niveisV[id] || 1) : nivelCartaIA(id);
-    const f = Math.pow(1.1, nivel - 1) * (time === 'azul' && Mod.flag('danoX5') ? 5 : 1);
+    const nivel = quem === 'azul' ? Estado.d.colecao[id].nivel
+      : quem === 'azul2' ? (s.niveisAzul2 ? (s.niveisAzul2[id] || 1) : nivelCartaIA(id))
+      : s.niveisV ? (s.niveisV[id] || 1) : nivelCartaIA(id);
+    const f = Math.pow(1.1, nivel - 1) * (quem === 'azul' && Mod.flag('danoX5') ? 5 : 1);
     if (c.feitico) {
       lancarFeitico(time, c, x, y, Math.round(c.dano * f));
     } else if (c.barril) {
-      lancarBarril(time, c, x, y, f, nivel);
+      lancarBarril(time, c, x, y, f, nivel, quem);
     } else {
-      criarTropa(time, c, x, y, f, nivel);
+      donoDe(criarTropa(time, c, x, y, f, nivel), quem);
     }
+  }
+  // marca de quem é a tropa (no 2v2 as do parceiro ganham um selo)
+  function donoDe(t, quem) {
+    if (!t) return t;
+    t.dono = quem;
+    if (s.dupla && quem === 'azul2') t.el.classList.add('parceiro');
+    return t;
   }
 
   // ---------- Barras de vida e efeitos ----------
@@ -315,7 +354,7 @@ const Batalha = (() => {
   // ---------- Entidades ----------
   function criarTropa(time, c, x, y, f, nivel) {
     const t = {
-      id: ++s.id, time, carta: c, x, y, raio: 13,
+      id: ++s.id, time, dono: time, carta: c, x, y, raio: 13,
       vida: Math.round(c.vida * f), max: Math.round(c.vida * f), dano: Math.round(c.dano * f),
       alcance: c.alcance, vel: c.velocidade, cadencia: c.cadencia, cd: 0.6, area: c.area || 0,
       alvoTipo: c.alvo || 'tudo', surgir: 1, alvo: null,
@@ -343,7 +382,7 @@ const Batalha = (() => {
   }
 
   // barril voa da torre do rei, quebra e solta as minis
-  function lancarBarril(time, c, x, y, f, nivel) {
+  function lancarBarril(time, c, x, y, f, nivel, quem = time) {
     if (s.rede) s.eventos.push(['b', Math.round(x), Math.round(y), time === 'azul' ? 0 : 1]);
     const rei = s.ent.find((e) => e.torre && e.tipo === 'rei' && e.time === time) || { x: W / 2, y: time === 'azul' ? H - 70 : 60 };
     const b = document.createElement('div');
@@ -359,7 +398,7 @@ const Batalha = (() => {
       const mini = Estado.carta(c.barril.tropa);
       for (let i = 0; i < c.barril.qtd; i++) {
         const a = (i / c.barril.qtd) * Math.PI * 2;
-        criarTropa(time, mini, x + Math.cos(a) * 12, y + Math.sin(a) * 10, f, nivel);
+        donoDe(criarTropa(time, mini, x + Math.cos(a) * 12, y + Math.sin(a) * 10, f, nivel), quem);
       }
     }, 750);
   }
@@ -558,7 +597,7 @@ const Batalha = (() => {
       return true;
     }
     const h = t.habilidade;
-    const L = s[t.time];
+    const L = jogadorDe(t);
     if (!h || t.vida <= 0 || t.recarga > 0 || L.elixir < h.custo || t.surgir > 0) return false;
     L.elixir -= h.custo;
     t.recarga = h.recarga || 10;
@@ -580,7 +619,7 @@ const Batalha = (() => {
       if (h.furia) { t.furia = t.esquiva; t.el.classList.add('aura-furia'); }
       t.el.classList.add('aura-instinto');
     }
-    if (t.time === 'azul') UI.toast(`⚡ ${h.nome}!`);
+    if (t.dono === 'azul') UI.toast(`⚡ ${h.nome}!`);
     return true;
   }
 
@@ -656,7 +695,7 @@ const Batalha = (() => {
   function desenharHabilidades() {
     const caixa = document.getElementById('habilidades');
     if (!caixa) return;
-    const minhas = s.ent.filter((e) => !e.torre && e.time === 'azul' && e.habilidade && e.vida > 0);
+    const minhas = s.ent.filter((e) => !e.torre && (e.dono || e.time) === 'azul' && e.habilidade && e.vida > 0);
     const ids = minhas.map((t) => t.id).join(',');
     if (caixa.dataset.ids !== ids) {
       caixa.dataset.ids = ids;
@@ -796,10 +835,10 @@ const Batalha = (() => {
       if (!alvo.torre) { alvo.el.classList.add(tipo === 'veneno' ? 'envenenada' : 'queimando'); }
     }
     if (m.roubo && Math.random() < m.roubo[0]) {
-      const inimigo = a.time === 'azul' ? 'vermelho' : 'azul';
-      const q = Math.min(m.roubo[1], s[inimigo].elixir);
-      s[inimigo].elixir -= q; s[a.time].elixir = Math.min(10, s[a.time].elixir + q);
-      if (q > 0) { voarSprite('moeda', alvo, a, 0.45, 16); if (a.time === 'azul') numero(a, 0, 'roubou'); }
+      const vit = alvo.torre ? s[alvo.time] : jogadorDe(alvo), meu = jogadorDe(a);
+      const q = Math.min(m.roubo[1], vit.elixir);
+      vit.elixir -= q; meu.elixir = Math.min(10, meu.elixir + q);
+      if (q > 0) { voarSprite('moeda', alvo, a, 0.45, 16); if (a.dono === 'azul') numero(a, 0, 'roubou'); }
     }
     if (m.vampiro && a.vida > 0) { a.vida = Math.min(a.max, a.vida + dano * m.vampiro); atualizarHp(a); }
     if (m.regen && a.vida > 0) { a.vida = Math.min(a.max, a.vida + a.max * m.regen); atualizarHp(a); }
@@ -1096,7 +1135,7 @@ const Batalha = (() => {
   // cartas da IA: em volta de 1 nível abaixo da média do seu deck; algumas ficam 2 abaixo (sorteado uma vez por partida)
   function nivelCartaIA(id) {
     if (!s.niveisIA) s.niveisIA = {};
-    if (!(id in s.niveisIA)) s.niveisIA[id] = Math.max(1, s.nivelIA - (!Mod.deckApelao() && Math.random() < 0.4 ? 1 : 0));
+    if (!(id in s.niveisIA)) s.niveisIA[id] = Math.max(1, s.nivelIA - (!s.dupla && !Mod.deckApelao() && Math.random() < 0.4 ? 1 : 0));
     return s.niveisIA[id];
   }
 
@@ -1123,14 +1162,30 @@ const Batalha = (() => {
     return deck.map((c) => c.id);
   }
 
+  // a IA sempre "pensa" como se estivesse em cima (time vermelho).
+  // Para a parceira IA (time azul, embaixo) a arena é virada: visao() espelha posições e times.
+  let iaLado = 'vermelho', iaFlip = false;
+  const tkIA = (quem) => (quem === 'vermelho' ? 'iaTimer' : `iaTimer_${quem}`);
+  const fxI = (x) => (iaFlip ? W - x : x), fyI = (y) => (iaFlip ? H - y : y);
+  const outroTime = (t) => (t === 'azul' ? 'vermelho' : 'azul');
+  const torreVivaIA = (id) => torreViva(iaFlip ? espelhoTorre(id) : id);
+  function visao(e) {
+    if (!iaFlip) return e;
+    const v = Object.create(e);
+    v.x = W - e.x; v.y = H - e.y; v.time = outroTime(e.time);
+    if (e.torre) v.id = espelhoTorre(e.id);
+    v.alvo = e.alvo ? { x: W - e.alvo.x, y: H - e.alvo.y, torre: e.alvo.torre, time: outroTime(e.alvo.time), raio: e.alvo.raio, vida: e.alvo.vida } : null;
+    return v;
+  }
   function iaJogar(m, x, y) {
+    const meuT = timeDe(iaLado);
     if (!m.c.feitico && !m.c.barril) {
-      for (let k = 0; k < 8 && !podeColocar('vermelho', x, y); k++) y -= 15;
-      if (!podeColocar('vermelho', x, y)) return false;
+      for (let k = 0; k < 8 && !podeColocar(meuT, fxI(x), fyI(y)); k++) y -= 15;
+      if (!podeColocar(meuT, fxI(x), fyI(y))) return false;
     }
-    jogar('vermelho', m.i, Math.max(28, Math.min(W - 28, x)), y);
+    jogar(iaLado, m.i, fxI(Math.max(28, Math.min(W - 28, x))), fyI(y));
     const d = dificuldadeIA();
-    s.iaTimer = ({ 1: 1.2, 2: 0.8, 3: 0.5, 4: 0.35, 5: 0.22 }[d] || 0.45) + Math.random() * 0.25;
+    s[tkIA(iaLado)] = ({ 1: 1.2, 2: 0.8, 3: 0.5, 4: 0.35, 5: 0.22 }[d] || 0.45) + Math.random() * 0.25 + (s.dupla ? 0.25 : 0);
     return true;
   }
 
@@ -1185,18 +1240,23 @@ const Batalha = (() => {
     return nota;
   }
 
-  function ia(dt) {
-    if (Mod.flag('iaParada') || s.rede) return;
-    const L = s.vermelho;
+  function ia(dt, quem = 'vermelho') {
+    if (Mod.flag('iaParada') || (s.rede && !s.dupla) || !s[quem]) return;
+    iaLado = quem; iaFlip = timeDe(quem) === 'azul';
+    const tk = tkIA(quem);
+    const meuT = timeDe(quem), outroT = outroTime(meuT);
+    const L = s[quem];
     const dif = dificuldadeIA();
-    s.iaTimer -= dt;
-    if (s.iaTimer > 0) return;
+    s[tk] = (s[tk] === undefined ? 2 : s[tk]) - dt;
+    if (s[tk] > 0) return;
     // tempo de reação conforme dificuldade (fácil = lento, 1500+ = bem rápido)
     const delay = { 1: 1.4, 2: 0.9, 3: 0.55, 4: 0.32, 5: 0.18 }[dif] || 0.4;
-    s.iaTimer = delay + Math.random() * (delay * 0.5);
+    s[tk] = delay + Math.random() * (delay * 0.5);
+    const ents = s.ent.map(visao);
+    const elixirInimigo = Math.min(...LADOS.filter((l) => timeDe(l) === outroT && s[l]).map((l) => s[l].elixir));
 
     // 0) habilidades das campeãs
-    for (const t of s.ent.filter((e) => !e.torre && e.time === 'vermelho' && e.habilidade && e.recarga <= 0 && e.surgir <= 0)) {
+    for (const t of s.ent.filter((e) => !e.torre && (e.dono || e.time) === quem && e.habilidade && e.recarga <= 0 && e.surgir <= 0)) {
       const h = t.habilidade;
       if (L.elixir < h.custo) continue;
       const perto = t.alvo && t.alvo.vida > 0 && dist(t, t.alvo) < t.alcance + 60;
@@ -1205,7 +1265,7 @@ const Batalha = (() => {
         || ((h.tipo === 'golpes' || h.tipo === 'furia') && perto && (t.alvo.torre || t.alvo.vida > t.dano))
         || (h.tipo === 'kamehameha' && t.alvo && dist(t, t.alvo) < 240)
         || (h.tipo === 'esquiva' && perto && t.vida < t.max * 0.8)
-        || (h.tipo === 'congelar' && s.ent.filter((e) => !e.torre && e.time === 'azul' && e.vida > 0 && dist(e, t) < (h.raio || 95) + 40).length >= 2);
+        || (h.tipo === 'congelar' && s.ent.filter((e) => !e.torre && e.time !== t.time && e.vida > 0 && dist(e, t) < (h.raio || 95) + 40).length >= 2);
       if (usar && ativarHabilidade(t)) return;
     }
 
@@ -1226,13 +1286,13 @@ const Batalha = (() => {
       }
     }
 
-    const torresAzuis = s.ent.filter((e) => e.torre && e.time === 'azul');
-    const inimigos = s.ent.filter((e) => !e.torre && e.time === 'azul' && e.vida > 0);
-    const meus = s.ent.filter((e) => !e.torre && e.time === 'vermelho' && e.vida > 0);
+    const torresAzuis = ents.filter((e) => e.torre && e.time === 'azul');
+    const inimigos = ents.filter((e) => !e.torre && e.time === 'azul' && e.vida > 0);
+    const meus = ents.filter((e) => !e.torre && e.time === 'vermelho' && e.vida > 0);
     const resta = DURACAO + (s.prorrogacao ? PRORROGACAO : 0) - s.t;
     const dobro = s.modo === 'elixir2x' || s.prorrogacao || resta <= 60;
-    const ganhando = s.vermelho.coroas > s.azul.coroas;
-    const perdendo = s.vermelho.coroas < s.azul.coroas;
+    const ganhando = s[meuT].coroas > s[outroT].coroas;
+    const perdendo = s[meuT].coroas < s[outroT].coroas;
 
     // 1) feitiço que vale a pena (finaliza torre, acerta grupo, mata atiradora/campeã)
     for (const m of pode.filter((x) => x.c.feitico)) {
@@ -1268,7 +1328,7 @@ const Batalha = (() => {
             return iaJogar(melhor.m, W / 2 + (alvo.x < W / 2 ? -20 : 20), 150);
           }
           // espera o tanque atravessar para a torre ajudar; contra os outros, vai direto
-          if (!atravessou && grupo.every((e) => e.alvoTipo === 'construcoes')) { s.iaTimer = 0.2; return; }
+          if (!atravessou && grupo.every((e) => e.alvoTipo === 'construcoes')) { s[tk] = 0.2; return; }
           const q = prever(alvo, 0.6);
           return iaJogar(melhor.m, q.x + (Math.random() * 12 - 6), Math.max(130, Math.min(RIO_TOPO - 10, q.y - 30)));
         }
@@ -1292,18 +1352,18 @@ const Batalha = (() => {
 
     // 5) ataque: evita desperdiçar elixir e aproveita quando o jogador gasta
     const limite = dobro ? 6.5 : perdendo && resta < 70 ? 7 : 8.8;
-    const oportunidade = s.azul.elixir < 3 && L.elixir >= 5;
+    const oportunidade = elixirInimigo < 3 && L.elixir >= 5;
     if (L.elixir < limite && !oportunidade) return;
 
     // escolhe a torre mais fraca (ou o lado com menos defesa)
-    const vida = (id) => { const t = s.ent.find((e) => e.id === id); return t ? t.vida : -1; };
+    const vida = (id) => { const t = ents.find((e) => e.id === id); return t ? t.vida : -1; };
     const ve = vida('esq-azul'), vd = vida('dir-azul');
     const defEsq = inimigos.filter((e) => e.x < W / 2).length, defDir = inimigos.length - defEsq;
     let lado = ve < 0 ? 0 : vd < 0 ? 1 : (ve - defEsq * 150) <= (vd - defDir * 150) ? 0 : 1;
     if (dobro && Math.random() < 0.35) lado = 1 - lado; // ataque dividido no elixir em dobro
     const x = PONTES[lado];
-    const bolso = !torreViva(lado ? 'dir-azul' : 'esq-azul');
-    const torreAlvo = s.ent.find((e) => e.id === (lado ? 'dir-azul' : 'esq-azul')) || s.ent.find((e) => e.id === 'rei-azul');
+    const bolso = !torreVivaIA(lado ? 'dir-azul' : 'esq-azul');
+    const torreAlvo = ents.find((e) => e.id === (lado ? 'dir-azul' : 'esq-azul')) || ents.find((e) => e.id === 'rei-azul');
 
     // barril quando a torre está sem defesa
     const barril = pode.find((m) => m.c.barril);
@@ -1322,11 +1382,12 @@ const Batalha = (() => {
   function foto() {
     return {
       t: +s.t.toFixed(2), p: s.prorrogacao ? 1 : 0,
-      cz: [s.azul.coroas, s.vermelho.coroas], el: [+s.azul.elixir.toFixed(2), +s.vermelho.elixir.toFixed(2)],
-      fila: s.vermelho.fila.slice(0, 5),
+      cz: [s.azul.coroas, s.vermelho.coroas], el: [+s.azul.elixir.toFixed(2), +s.vermelho.elixir.toFixed(2), s.dupla ? +s.azul2.elixir.toFixed(2) : 0],
+      fila: (s.dupla ? s.azul2 : s.vermelho).fila.slice(0, 5), d2: s.dupla ? 1 : 0,
+      tm: s.t < 3 ? Object.fromEntries(s.ent.filter((e) => e.torre).map((e) => [e.id, e.max])) : undefined,
       tw: Object.fromEntries(s.ent.filter((e) => e.torre).map((e) => [e.id, Math.round(e.vida)])),
       tr: s.ent.filter((e) => !e.torre).map((e) => [e.id, e.carta.id, e.time === 'azul' ? 0 : 1, Math.round(e.x * 10) / 10, Math.round(e.y * 10) / 10,
-        Math.round(e.vida), e.max, e.nivel, (e.surgir > 0 ? 1 : 0) | (e.furia > 0 ? 2 : 0) | (e.golpesFortes > 0 ? 4 : 0) | (e.fenix > 0 ? 8 : 0) | (e.congelado > 0 ? 16 : 0) | (e.esquiva > 0 ? 32 : 0) | (e.atord > 0 ? 64 : 0) | (e.lento > 0 ? 128 : 0) | (e.queima > 0 ? 256 : 0) | (e.escudo > 0 ? 512 : 0) | (e.fraco > 0 ? 1024 : 0) | ((e.adaptacao || 0) << 11), e.recarga > 0 ? +e.recarga.toFixed(1) : 0]),
+        Math.round(e.vida), e.max, e.nivel, (e.surgir > 0 ? 1 : 0) | (e.furia > 0 ? 2 : 0) | (e.golpesFortes > 0 ? 4 : 0) | (e.fenix > 0 ? 8 : 0) | (e.congelado > 0 ? 16 : 0) | (e.esquiva > 0 ? 32 : 0) | (e.atord > 0 ? 64 : 0) | (e.lento > 0 ? 128 : 0) | (e.queima > 0 ? 256 : 0) | (e.escudo > 0 ? 512 : 0) | (e.fraco > 0 ? 1024 : 0) | ((e.adaptacao || 0) << 11), e.recarga > 0 ? +e.recarga.toFixed(1) : 0, e.dono && e.dono.endsWith('2') ? 1 : 0]),
       pj: s.proj.map((p) => [Math.round(p.x), Math.round(p.y - (p.alt || 0)), p.time === 'azul' ? 0 : 1, p.el.classList.contains('de-torre') ? 1 : 0, p.sprite || 0, Math.round(p.giro || 0)]),
       ev: s.eventos,
     };
@@ -1338,20 +1399,27 @@ const Batalha = (() => {
 
   function iniciarConvidado({ fim, rede }) {
     ao_fim = fim;
+    const dupla = rede.host.modo === '2v2';
     s = {
+      dupla, nomeParceiro: dupla ? rede.host.nome : null,
       modo: 'x1c', convidado: true, rede, t: 0, prorrogacao: false, acabou: false, pausa: false,
       azul: { elixir: 5, fila: [], coroas: 0 }, vermelho: { elixir: 5, fila: [], coroas: 0 },
       ent: torres(Estado.minhasTorres(), rede.host.torres || Estado.minhasTorres()), proj: [], efeitos: [], agenda: [], selecionada: null, id: 0, mapa: new Map(), pjEls: [],
       arenaId: rede.host.arena || 'festival',
     };
-    montar(`X1 contra ${rede.host.nome}`);
+    if (dupla) s.azul2 = { elixir: 5 };
+    montar(dupla ? `2v2 com ${rede.host.nome}` : `X1 contra ${rede.host.nome}`);
   }
 
   function receberEstado(est) {
     if (!s || !s.convidado || s.acabou || !est) return;
+    // x1: a arena do convidado é espelhada. 2v2: o convidado está no mesmo time do host, nada vira.
+    const D = s.dupla;
+    const mx = (x) => (D ? x : W - x), my = (y) => (D ? y : H - y);
+    const mt = (n) => (D ? (n === 0 ? 'azul' : 'vermelho') : espelhoTime(n));
     s.t = est.t; s.prorrogacao = !!est.p;
-    s.azul.coroas = est.cz[1]; s.vermelho.coroas = est.cz[0];
-    s.azul.elixir = est.el[1]; s.vermelho.elixir = est.el[0];
+    if (D) { s.azul.coroas = est.cz[0]; s.vermelho.coroas = est.cz[1]; s.azul.elixir = est.el[2] || 0; s.azul2.elixir = est.el[0]; }
+    else { s.azul.coroas = est.cz[1]; s.vermelho.coroas = est.cz[0]; s.azul.elixir = est.el[1]; s.vermelho.elixir = est.el[0]; }
     const filaMudou = (est.fila || []).join() !== s.azul.fila.join();
     s.azul.fila = est.fila || [];
     if (filaMudou) desenharMao();
@@ -1359,21 +1427,24 @@ const Batalha = (() => {
 
     // torres
     for (const t of s.ent.filter((e) => e.torre)) {
-      const idHost = espelhoTorre(t.id);
+      const idHost = D ? t.id : espelhoTorre(t.id);
       const v = est.tw ? est.tw[idHost] : undefined;
       if (v === undefined) { torreCaiuVisual(t); continue; }
+      if (est.tm && est.tm[idHost] && !t.maxOk) { t.maxOk = true; t.max = est.tm[idHost]; t.vida = v; atualizarHp(t); t.el.querySelector('b').textContent = v; }
       if (v < t.vida) { t.vida = v; atualizarHp(t); t.el.querySelector('b').textContent = v; piscar(t.el, 'levou'); }
     }
 
     // tropas
     const vistas = new Set();
-    for (const [hid, cartaId, timeN, hx, hy, vida, max, nivel, flags, recarga] of est.tr || []) {
+    for (const [hid, cartaId, timeN, hx, hy, vida, max, nivel, flags, recarga, segundo] of est.tr || []) {
       vistas.add(hid);
       let t = s.mapa.get(hid);
-      const x = W - hx, y = H - hy;
+      const x = mx(hx), y = my(hy);
       if (!t) {
-        criarTropa(espelhoTime(timeN), Estado.carta(cartaId), x, y, 1, nivel);
-        t = s.ent[s.ent.length - 1];
+        const time = mt(timeN);
+        t = criarTropa(time, Estado.carta(cartaId), x, y, 1, nivel);
+        // 2v2: a tropa "segunda" do host (azul2) é a minha; a principal (azul) é do meu parceiro
+        if (D && time === 'azul') { t.dono = segundo ? 'azul' : 'azul2'; if (!segundo) t.el.classList.add('parceiro'); }
         t.hid = hid; t.max = max; t.vida = vida;
         s.mapa.set(hid, t);
       }
@@ -1411,9 +1482,9 @@ const Batalha = (() => {
     s.pjEls.forEach((el) => el.remove());
     s.pjEls = (est.pj || []).map(([px, py, timeN, deTorre, sprite, giro]) => {
       const el = document.createElement('div');
-      el.className = `projetil ${espelhoTime(timeN)}${deTorre ? ' de-torre' : ''}${sprite ? ' com-sprite' : ''}`;
-      Object.assign(el.style, pct(W - px, H - py));
-      if (sprite) { el.style.backgroundImage = `url(${spriteUrl(sprite)})`; el.style.width = `${(16 / W) * 100}%`; el.style.transform = `translate(-50%, -50%) rotate(${(giro || 0) + 180}deg)`; }
+      el.className = `projetil ${mt(timeN)}${deTorre ? ' de-torre' : ''}${sprite ? ' com-sprite' : ''}`;
+      Object.assign(el.style, pct(mx(px), my(py)));
+      if (sprite) { el.style.backgroundImage = `url(${spriteUrl(sprite)})`; el.style.width = `${(16 / W) * 100}%`; el.style.transform = `translate(-50%, -50%) rotate(${(giro || 0) + (D ? 0 : 180)}deg)`; }
       s.arena.appendChild(el);
       return el;
     });
@@ -1421,15 +1492,15 @@ const Batalha = (() => {
     // efeitos
     for (const ev of est.ev || []) {
       if (ev[0] === 'f') {
-        const c = Estado.carta(ev[1]); const x = W - ev[2], y = H - ev[3];
+        const c = Estado.carta(ev[1]); const x = mx(ev[2]), y = my(ev[3]);
         const largura = { width: `${((c.area * 2) / W) * 100}%` };
-        efeito(`mira-feitico ${espelhoTime(ev[4])}`, x, y, 650, largura);
+        efeito(`mira-feitico ${mt(ev[4])}`, x, y, 650, largura);
         if (c.id === 'lanterna') efeito('lanterna-caindo', x, y, 460);
         setTimeout(() => { if (!s || s.acabou) return; efeito(`feitico ${c.id}`, x, y, 700, largura); particulas(x, y, c.id === 'lanterna' ? '#FAC775' : '#F4C0D1', 12, c.area); if (c.id === 'lanterna') tremer(); }, 450);
       } else if (ev[0] === 'b') {
-        efeito('barril-quebra', W - ev[1], H - ev[2], 500);
+        efeito('barril-quebra', mx(ev[1]), my(ev[2]), 500);
       } else if (ev[0] === 'k') {
-        const x = W - ev[1], y = H - ev[2], ang = ev[3] + Math.PI;
+        const x = mx(ev[1]), y = my(ev[2]), ang = ev[3] + (D ? 0 : Math.PI);
         const raio = document.createElement('div');
         raio.className = 'kamehameha';
         Object.assign(raio.style, pct(x, y), { width: `${(320 / W) * 100}%`, transform: `translate(0, -50%) rotate(${ang}rad)` });
@@ -1437,19 +1508,19 @@ const Batalha = (() => {
         setTimeout(() => raio.remove(), 900);
         setTimeout(() => tremer(true), 300);
       } else if (ev[0] === 'a') {
-        efeito(`ativou ${espelhoTime(ev[3])}`, W - ev[1], H - ev[2], 700);      } else if (ev[0] === 'g') {
-        efeito('gelo', W - ev[1], H - ev[2], 1000);
-        particulas(W - ev[1], H - ev[2], '#DDF3FF', 16, 55);
+        efeito(`ativou ${mt(ev[3])}`, mx(ev[1]), my(ev[2]), 700);      } else if (ev[0] === 'g') {
+        efeito('gelo', mx(ev[1]), my(ev[2]), 1000);
+        particulas(mx(ev[1]), my(ev[2]), '#DDF3FF', 16, 55);
       } else if (ev[0] === 'h') {
         const c = Estado.carta(ev[5]);
-        if (c) { const v = Ataques.de(c).v; efeitoGolpe(v.g || 'soco', { x: W - ev[1], y: H - ev[2] }, { x: W - ev[3], y: H - ev[4] }, v); }
+        if (c) { const v = Ataques.de(c).v; efeitoGolpe(v.g || 'soco', { x: mx(ev[1]), y: my(ev[2]) }, { x: mx(ev[3]), y: my(ev[4]) }, v); }
       } else if (ev[0] === 'x') {
-        efeitoGolpe('impacto', { x: W - ev[1], y: H - ev[2] }, { x: W - ev[1], y: H - ev[2] }, { cor: ev[4], grande: ev[3] });
+        efeitoGolpe('impacto', { x: mx(ev[1]), y: my(ev[2]) }, { x: mx(ev[1]), y: my(ev[2]) }, { cor: ev[4], grande: ev[3] });
       } else if (ev[0] === 'r') {
-        const el = fxEl('fx-raio-ceu', W - ev[1], H - ev[2], 380);
+        const el = fxEl('fx-raio-ceu', mx(ev[1]), my(ev[2]), 380);
         if (el) el.style.backgroundImage = `url(${spriteUrl('raio')})`;
       } else if (ev[0] === 't') {
-        efeito('teleporte', W - ev[1], H - ev[2], 450);
+        efeito('teleporte', mx(ev[1]), my(ev[2]), 450);
       }
     }
 
@@ -1457,7 +1528,8 @@ const Batalha = (() => {
     if (est.fim) {
       s.acabou = true;
       const inv = { vitoria: 'derrota', derrota: 'vitoria', empate: 'empate' };
-      const dados = { resultado: inv[est.fim.resultado] || 'empate', coroas: est.cz[1], coroasInimigo: est.cz[0], modo: 'x1' };
+      const dados = D ? { resultado: est.fim.resultado || 'empate', coroas: est.cz[0], coroasInimigo: est.cz[1], modo: '2v2' }
+        : { resultado: inv[est.fim.resultado] || 'empate', coroas: est.cz[1], coroasInimigo: est.cz[0], modo: 'x1' };
       setTimeout(() => ao_fim && ao_fim(dados), 900);
     }
   }
@@ -1481,24 +1553,33 @@ const Batalha = (() => {
   // jogada do convidado (vem com as coordenadas da tela dele, que é espelhada)
   function comandoRemoto(cmd) {
     if (!s || s.acabou || !s.rede) return;
-    const x = W - cmd.x, y = H - cmd.y;
+    const D = s.dupla;
+    const quem = D ? 'azul2' : 'vermelho', time = timeDe(quem);
+    const x = D ? cmd.x : W - cmd.x, y = D ? cmd.y : H - cmd.y;
     if (cmd.tipo === 'carta') {
-      const id = s.vermelho.fila[cmd.i];
+      const id = s[quem].fila[cmd.i];
       if (!id || cmd.i > 3) return;
       const c = Estado.carta(id);
-      if (c.custo > s.vermelho.elixir) return;
-      if (!c.feitico && !c.barril && !podeColocar('vermelho', x, y)) return;
-      jogar('vermelho', cmd.i, x, y);
+      if (c.custo > s[quem].elixir) return;
+      if (!c.feitico && !c.barril && !podeColocar(time, x, y)) return;
+      jogar(quem, cmd.i, x, y);
     } else if (cmd.tipo === 'hab') {
-      const t = s.ent.find((e) => e.id === cmd.id && e.time === 'vermelho');
+      const t = s.ent.find((e) => e.id === cmd.id && (e.dono || e.time) === quem);
       if (t) ativarHabilidade(t);
     }
   }
 
   function adversarioSaiu() {
     if (!s || s.acabou) return;
-    UI.toast('Seu adversário saiu da partida!');
-    s.forcar = 'vitoria';
+    if (s.dupla && !s.convidado) {
+      // o parceiro saiu: a IA assume as cartas dele
+      if (!s.ias.includes('azul2')) s.ias.push('azul2');
+      UI.toast(`${s.nomeParceiro} saiu. A IA assumiu as cartas dele! 🤖`);
+      s.nomeParceiro = `${s.nomeParceiro} (IA)`;
+      return;
+    }
+    UI.toast(s.dupla ? 'Seu parceiro saiu da partida!' : 'Seu adversário saiu da partida!');
+    s.forcar = s.dupla ? 'empate' : 'vitoria';
     terminar();
   }
 
@@ -1532,6 +1613,11 @@ const Batalha = (() => {
     if (txt !== s.hudTxt) { s.hudTxt = txt; s.hudEl.tempo.textContent = txt; s.hudEl.tempo.classList.toggle('dobro', s.modo === 'elixir2x' || !!s.prorrogacao || resta <= 60); }
     const el = Math.round(s.azul.elixir * 50) / 50;
     if (el !== s.hudElixir) { s.hudElixir = el; atualizarElixir(); }
+    if (s.chipP && s.azul2) {
+      const ep = Math.floor(s.azul2.elixir);
+      if (ep !== s.hudParc) { s.hudParc = ep; s.chipP.querySelector('em').textContent = ep; }
+      if (s.nomeParceiro !== s.chipNome) { s.chipNome = s.nomeParceiro; s.chipP.querySelector('b').textContent = s.nomeParceiro || 'Parceiro'; }
+    }
   }
 
   function passo(dt) {
@@ -1540,7 +1626,7 @@ const Batalha = (() => {
     const resta = Math.max(0, limite - s.t);
     const dobro = s.modo === 'elixir2x' || s.prorrogacao || resta <= 60;
     const ganho = (dt / ELIXIR_SEG) * (dobro ? 2 : 1);
-    for (const time of ['azul', 'vermelho']) s[time].elixir = Math.min(10, s[time].elixir + ganho);
+    for (const quem of LADOS) if (s[quem]) s[quem].elixir = Math.min(10, s[quem].elixir + ganho);
     if (Mod.flag('elixirInfinito')) s.azul.elixir = 10;
 
     if (resta <= 0) {
@@ -1550,7 +1636,7 @@ const Batalha = (() => {
       } else return terminar();
     }
 
-    ia(dt);
+    for (const quem of s.ias) ia(dt, quem);
 
     // habilidades: recarga e duração dos efeitos
     for (const t of s.ent) {
@@ -1724,9 +1810,9 @@ const Batalha = (() => {
   function desistir() {
     if (!s || s.acabou) { fechar(); return; }
     if (s.convidado) {
-      UI.modal({ titulo: 'Sair do x1?', html: '<p>Se sair, seu amigo vence.</p>', botoes: [
+      UI.modal({ titulo: s.dupla ? 'Sair do 2v2?' : 'Sair do x1?', html: s.dupla ? '<p>Se sair, a IA assume suas cartas e conta como derrota pra você.</p>' : '<p>Se sair, seu amigo vence.</p>', botoes: [
         { texto: 'Continuar', classe: 'secundario' },
-        { texto: 'Sair', classe: 'perigo', acao: () => { s.rede.sair(); s.acabou = true; ao_fim && ao_fim({ resultado: 'derrota', coroas: s.azul.coroas, coroasInimigo: 3, modo: 'x1' }); } },
+        { texto: 'Sair', classe: 'perigo', acao: () => { s.rede.sair(); s.acabou = true; ao_fim && ao_fim({ resultado: 'derrota', coroas: s.azul.coroas, coroasInimigo: 3, modo: s.dupla ? '2v2' : 'x1' }); } },
       ] });
       return;
     }
@@ -1743,6 +1829,7 @@ const Batalha = (() => {
 
   function fechar() {
     $('batalha').classList.add('oculto');
+    document.body.classList.remove('em-batalha');
     if (s) s.acabou = true;
     s = null;
   }

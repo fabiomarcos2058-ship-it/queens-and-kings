@@ -106,9 +106,9 @@ const Amigos = (() => {
   }
 
   // ---------- Convite de x1 ----------
-  async function convidar(id, codigo) {
+  async function convidar(id, codigo, modo = 'x1') {
     const f = fb();
-    await f.setDoc(ref(id, 'convites', uid()), { nome: Estado.d.nome, estiloNome: Passe.estiloNome(), avatar: Estado.d.avatar, codigo, t: Date.now(), quando: f.serverTimestamp() });
+    await f.setDoc(ref(id, 'convites', uid()), { nome: Estado.d.nome, estiloNome: Passe.estiloNome(), avatar: Estado.d.avatar, codigo, modo, t: Date.now(), quando: f.serverTimestamp() });
   }
   const apagarConvite = (de) => { try { fb().deleteDoc(ref(uid(), 'convites', de)).catch(() => {}); } catch (e) { /* sem conexão */ } };
 

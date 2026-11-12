@@ -1241,3 +1241,47 @@ button.item-loja:active, button.slot-bau:active, .slot-carta:active { transform:
 .garantia-lenda { grid-column: 1 / -1; text-align: center; font-size: 13px; padding: 7px 10px; border-radius: 10px;
   background: linear-gradient(90deg, rgba(255,196,60,.18), rgba(255,120,220,.18)); color: #ffe7a8; border: 1px solid rgba(255,210,120,.35); }
 .garantia-lenda b { color: #fff; }
+
+/* ---------- 2v2 ---------- */
+.linha-modos { display: flex; gap: 8px; width: 86%; margin: -4px auto 10px; }
+.linha-modos .btn-x1 { width: auto; flex: 1.6; margin: 0; font-size: 16px; }
+.linha-modos .btn-2v2 { flex: 1; background: linear-gradient(#3EE0C9, #129C8C); border-bottom-color: #0A6157; }
+/* tropas do parceiro: borda verde-água e selinho */
+.tropa.azul.parceiro .tropa-medalhao { border-color: #2EC4B6; box-shadow: 0 2px 0 #0E6B63; }
+.tropa.azul.parceiro .tropa-medalhao::after { content: '🤝'; position: absolute; left: -7px; top: -6px; font-size: 10px; line-height: 1; filter: drop-shadow(0 1px 0 #0008); }
+.chip-parceiro { position: absolute; left: 12px; top: 6px; z-index: 40; display: flex; align-items: center; gap: 5px; max-width: 46%;
+  padding: 4px 9px 4px 6px; border-radius: 999px; background: #0E6B63e6; border: 2px solid #2EC4B6; color: #fff; font-size: 12px; box-shadow: 0 3px 8px #0006; pointer-events: none; }
+.chip-parceiro b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 700; }
+.chip-parceiro em { font-style: normal; font-weight: 800; color: #F6B8FF; min-width: 10px; }
+.chip-parceiro .gota-mini { width: 10px; height: 13px; flex: none; background: radial-gradient(circle at 40% 35%, #FFD3FF, #D94BE6 60%, #8A1F9C); border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%; }
+.dupla-explica { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 2px 0 8px; }
+.dupla-explica b { font-size: 18px; color: #FFD25E; text-shadow: 0 2px 0 #0006; }
+.dupla-time { padding: 6px 10px; border-radius: 10px; font-weight: 700; font-size: 13px; color: #fff; }
+.dupla-time.azul { background: linear-gradient(#4FA3F0, #2A6FC4); }
+.dupla-time.vermelho { background: linear-gradient(#F06A5E, #B7362B); }
+.btn-dupla-ia { display: block; width: 100%; margin: 4px 0 10px; }
+.convite-2v2 .convite-caixa { border-color: #2EC4B6; }
+.convite-2v2 .convite-caixa { background: linear-gradient(#17A394, #1F3B6E); }
+
+/* ---------- menus mais leves ----------
+   Brilhos animando box-shadow/left/background-position obrigavam o celular a redesenhar a tela a cada quadro.
+   Agora só mexem em opacity/transform (a placa de vídeo faz sozinha). */
+@keyframes brilhoSuave { 50% { opacity: 1; } }
+.slot-bau.pronto { animation: none; }
+.slot-bau.pronto::after { content: ''; position: absolute; inset: -2px; border-radius: 12px; box-shadow: 0 0 14px 2px #5DCAA5aa; opacity: 0; animation: brilhoSuave 1.2s ease-in-out infinite; pointer-events: none; }
+.presente-diario.pronto { animation: none; }
+.presente-diario.pronto::after { content: ''; position: absolute; inset: -2px; border-radius: 18px; box-shadow: 0 0 20px #5EE6C8aa; opacity: 0; animation: brilhoSuave 1.6s ease-in-out infinite; pointer-events: none; }
+.btn-jogar::after { left: 0; transform: translateX(-150%) skewX(-20deg); animation: brilhoJogarT 3.2s ease-in-out infinite; will-change: transform; }
+@keyframes brilhoJogarT { 0%, 60% { transform: translateX(-150%) skewX(-20deg); } 100% { transform: translateX(330%) skewX(-20deg); } }
+@keyframes reflexoT { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
+.carta.lendaria::before { background-size: 100% 100%; animation: reflexoT 3.5s linear infinite; }
+.cartao-passe { overflow: hidden; }
+.cartao-passe::after { background-size: 100% 100%; animation: reflexoT 4s linear infinite; }
+/* abas que não estão na tela ficam paradas */
+.tela:not(.tela-ativa) *, .tela:not(.tela-ativa) *::before, .tela:not(.tela-ativa) *::after { animation-play-state: paused !important; }
+/* durante a batalha o menu de trás nem é desenhado */
+body.em-batalha .telas { visibility: hidden; }
+body.em-batalha .telas * { animation-play-state: paused !important; }
+/* brilho das lendárias: só em destaque (detalhes da carta, carta nova). Na coleção e na mão ficava pesado (uns 30% do processador) */
+.carta.lendaria::before { animation: none; opacity: 0; }
+.modal .carta.lendaria::before, .liberada .carta.lendaria::before, .nova-arena .carta.lendaria::before { opacity: 1; animation: reflexoT 3.5s linear infinite; }

@@ -4,7 +4,7 @@
 const X1 = (() => {
   const SDK = 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
   let m = null, db = null;
-  let sala = null, souHost = false;
+  let sala = null, souHost = false, modoSala = 'x1';
   let desligar = [];
 
   async function iniciar() {
@@ -26,12 +26,13 @@ const X1 = (() => {
   function limpar() { desligar.forEach((f) => { try { f(); } catch (e) { /* nada */ } }); desligar = []; }
 
   // ---------- Host ----------
-  async function criarSala({ aoEntrarAmigo, aoResposta }) {
+  async function criarSala({ aoEntrarAmigo, aoResposta, modo = 'x1' }) {
     await iniciar();
     let cod = novoCodigo();
     for (let i = 0; i < 5 && (await m.get(r(`salas/${cod}`))).exists(); i++) cod = novoCodigo();
-    sala = cod; souHost = true;
-    await m.set(r(`salas/${cod}`), { host: perfil(), status: 'esperando', criado: m.serverTimestamp() });
+    sala = cod; souHost = true; modoSala = modo;
+    // o modo vai dentro do perfil do host (2v2 = os dois no mesmo time contra 2 IAs)
+    await m.set(r(`salas/${cod}`), { host: { ...perfil(), modo }, status: 'esperando', criado: m.serverTimestamp() });
     m.onDisconnect(r(`salas/${cod}`)).remove();
     desligar.push(m.onValue(r(`salas/${cod}/convidado`), (snap) => { if (snap.exists() && !snap.val().saiu) aoEntrarAmigo(snap.val()); }));
     if (aoResposta) desligar.push(m.onValue(r(`salas/${cod}/resposta`), (snap) => { if (snap.exists()) aoResposta(snap.val()); }));
@@ -44,7 +45,7 @@ const X1 = (() => {
     desligar.push(m.onValue(r(`salas/${sala}/convidado/saiu`), (snap) => { if (snap.val()) Batalha.adversarioSaiu(); }));
     let enviando = false;
     Batalha.iniciar({
-      modo: 'x1', fim,
+      modo: modoSala === '2v2' ? '2v2' : 'x1', fim,
       rede: {
         tipo: 'host', convidado,
         enviarEstado: (est) => { if (enviando && !est.fim) return; enviando = true; m.set(r(`salas/${sala}/estado`), est).finally(() => (enviando = false)); },
