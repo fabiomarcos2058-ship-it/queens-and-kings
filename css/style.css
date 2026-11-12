@@ -1516,3 +1516,9 @@ body.em-batalha .telas * { animation-play-state: paused !important; }
 .rq-mais { font-family: 'Lilita One', 'Fredoka', sans-serif; font-size: 26px; color: #FFD25E; }
 .modal-escolher2v2 .e2-btn { width: 100%; margin: 8px 0 0; }
 .btn-modal.desativado { filter: grayscale(0.7); opacity: 0.7; }
+/* admin: ajustar troféus/vitórias/derrotas */
+.aj-estat { display: flex; flex-direction: column; gap: 6px; }
+.aj-linha { display: grid; grid-template-columns: 1fr 34px 110px 34px; align-items: center; gap: 6px; background: #1d2350; border-radius: 10px; padding: 6px 8px; }
+.aj-linha input { width: 100%; text-align: center; font-size: 16px; font-weight: 700; padding: 6px; border-radius: 8px; border: 2px solid #ffffff33; background: #0d1030; color: #fff; }
+.aj-rapidos { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 12px; }
+#aj-salvar { width: 100%; }

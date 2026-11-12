@@ -335,7 +335,9 @@
 
   // ---------- Presentes da criadora ----------
   function chegaramPresentes(lista) {
-    const ok = lista.filter((p) => p.ok && p.tipo !== 'remover'), msgs = [...new Set(lista.filter((p) => p.tipo !== 'remover').map((p) => p.mensagem).filter(Boolean))];
+    // remoções e ajustes de troféus/estatísticas são aplicados em silêncio
+    const silencio = (p) => p.tipo === 'remover' || p.tipo === 'ajustar';
+    const ok = lista.filter((p) => p.ok && !silencio(p)), msgs = [...new Set(lista.filter((p) => !silencio(p)).map((p) => p.mensagem).filter(Boolean))];
     tudo();
     if (!ok.length) return;
     const cartasP = ok.filter((p) => p.tipo === 'carta').map((p) => ({ c: Estado.carta(p.carta), nivel: p.nivel })).filter((x) => x.c);
@@ -1532,7 +1534,7 @@
     if (!Mod.ehCriador()) return;
     let alvo = null, inv = null;
     const md = UI.modal({
-      titulo: '🗑️ Remover itens',
+      titulo: '🛠️ Editar conta',
       classe: 'modal-presentear modal-remover',
       html: `<p class="aviso">Só você vê isto. A remoção é aplicada em silêncio, mesmo se a pessoa estiver jogando agora.</p>
         <div class="pres-passo"><b>1. De quem?</b>
@@ -1555,7 +1557,15 @@
       const cartasDela = Object.entries(inv.colecao || {}).filter(([id, c]) => c.tem && Estado.carta(id) && !(inv.esgotadas || []).includes(id))
         .map(([id, c]) => ({ c: Estado.carta(id), nivel: c.nivel })).sort((a, b) => b.nivel - a.nivel || a.c.nome.localeCompare(b.c.nome));
       const recurso = (k, ic, nome, v) => `<div class="rem-recurso"><span>${ic} ${nome}: <b>${fmt(v || 0)}</b></span><input type="number" min="1" data-qtd="${k}" placeholder="quanto" /><button class="btn-peq perigo" data-tirar="${k}">Tirar</button></div>`;
-      caixa.innerHTML = `<div class="pres-passo"><b>2. O que tirar?</b>
+      const est = (k, ic, nome) => `<label class="aj-linha"><span>${ic} ${nome}</span>
+          <button class="btn-peq" data-menos="${k}">−</button><input type="number" min="0" inputmode="numeric" data-aj="${k}" value="${Math.max(0, Math.round(inv[k] || 0))}" /><button class="btn-peq" data-mais="${k}">+</button></label>`;
+      caixa.innerHTML = `<div class="pres-passo aj-estat"><b>📊 Troféus e estatísticas</b>
+          <small class="aviso">Coloque os valores novos (pra mais ou pra menos). Muda em segredo.</small>
+          ${est('trofeus', '🏆', 'Troféus')}${est('vitorias', '✅', 'Vitórias')}${est('derrotas', '❌', 'Derrotas')}
+          <div class="aj-rapidos"><span>Troféus rápido:</span>${[100, 500, 1000].map((q) => `<button class="btn-peq" data-rap="${q}">+${q}</button>`).join('')}<button class="btn-peq" data-rap="-100">−100</button></div>
+          <button class="btn-modal principal" id="aj-salvar">Salvar estatísticas</button>
+        </div>
+        <div class="pres-passo"><b>2. O que tirar?</b>
           ${recurso('ouro', '🪙', 'Ouro', inv.ouro)}${recurso('gemas', '💎', 'Gemas', inv.gemas)}${recurso('trofeus', '🏆', 'Troféus', inv.trofeus)}
           <div class="rem-recurso"><span>🎟️ Passe: <b>${ps && ps.ultra ? 'Ultra' : ps && ps.plus ? 'Plus' : 'nenhum'}</b></span>${ps && (ps.plus || ps.ultra) ? '<button class="btn-peq perigo" id="rem-passe">Tirar passe</button>' : ''}</div>
         </div>
@@ -1564,6 +1574,26 @@
             <select data-nv="${c.id}">${Array.from({ length: nivel }, (_, i) => `<option ${i + 1 === nivel ? 'selected' : ''}>${i + 1}</option>`).join('')}</select>
             <button class="btn-peq" data-baixar="${c.id}" title="Baixar nível">⬇️</button><button class="btn-peq perigo" data-tirar-carta="${c.id}" title="Tirar a carta">🗑️</button></div>`).join('') || '<p class="aviso">Nenhuma carta.</p>'}</div>
         </div>`;
+      const campo = (k) => caixa.querySelector(`[data-aj="${k}"]`);
+      const somar = (k, q) => { const c = campo(k); c.value = Math.max(0, (Math.round(+c.value) || 0) + q); };
+      caixa.querySelectorAll('[data-mais]').forEach((b) => (b.onclick = (e) => { e.preventDefault(); somar(b.dataset.mais, b.dataset.mais === 'trofeus' ? 10 : 1); }));
+      caixa.querySelectorAll('[data-menos]').forEach((b) => (b.onclick = (e) => { e.preventDefault(); somar(b.dataset.menos, b.dataset.menos === 'trofeus' ? -10 : -1); }));
+      caixa.querySelectorAll('[data-rap]').forEach((b) => (b.onclick = () => somar('trofeus', +b.dataset.rap)));
+      caixa.querySelector('#aj-salvar').onclick = async () => {
+        const novo = {};
+        for (const k of ['trofeus', 'vitorias', 'derrotas']) {
+          const v = Math.max(0, Math.round(+campo(k).value || 0));
+          if (v !== Math.round(inv[k] || 0)) novo[k] = v;
+        }
+        if (!Object.keys(novo).length) { UI.toast('Nada mudou'); return; }
+        try {
+          await Presentes.enviar(alvo.uid, { tipo: 'ajustar', ...novo });
+          Object.assign(inv, novo);
+          if (novo.trofeus !== undefined) inv.recorde = Math.max(inv.recorde || 0, novo.trofeus);
+          UI.toast('🤫 Estatísticas atualizadas em segredo');
+          desenhar();
+        } catch (e) { UI.toast(e.code ? erroNuvem(e) : e.message); }
+      };
       caixa.querySelectorAll('[data-tirar]').forEach((b) => (b.onclick = async () => {
         const k = b.dataset.tirar, q = Math.round(+caixa.querySelector(`[data-qtd="${k}"]`).value || 0);
         if (q <= 0) { UI.toast('Coloque quanto quer tirar'); return; }

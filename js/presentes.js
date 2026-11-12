@@ -2,6 +2,7 @@
 // A criadora manda pelo mod menu; o jogador recebe quando abrir o jogo logado (ou na hora, se já estiver jogando).
 // Tipos: passe { passe: 'plus'|'ultra', temporada }, carta { carta, nivel, copias }, ouro { qtd }, gemas { qtd }.
 // Remoção (só a criadora, aplicada em silêncio): remover { alvo: 'carta'|'nivel'|'ouro'|'gemas'|'trofeus'|'passe', carta?, nivel?, qtd? }
+// Ajuste (só a criadora, em silêncio): ajustar { trofeus?, vitorias?, derrotas? } = valores novos (pra mais ou pra menos)
 const Presentes = (() => {
   const fb = () => Conta.fb();
   let parar = null;
@@ -31,6 +32,7 @@ const Presentes = (() => {
       return { carta: `🗑️ Tirar a carta ${c ? c.nome : p.carta}`, nivel: `⬇️ ${c ? c.nome : p.carta} para o nível ${p.nivel}`, ouro: `🗑️ Tirar ${UI.fmt(p.qtd)} de ouro`,
         gemas: `🗑️ Tirar ${UI.fmt(p.qtd)} gemas`, trofeus: `🗑️ Tirar ${UI.fmt(p.qtd)} troféus`, passe: '🗑️ Tirar o passe Plus/Ultra' }[p.alvo] || '🗑️ Remoção';
     }
+    if (p.tipo === 'ajustar') return `📊 Ajustar: ${[p.trofeus !== undefined ? `🏆 ${UI.fmt(p.trofeus)}` : '', p.vitorias !== undefined ? `${UI.fmt(p.vitorias)} vitórias` : '', p.derrotas !== undefined ? `${UI.fmt(p.derrotas)} derrotas` : ''].filter(Boolean).join(' · ')}`;
     if (p.tipo === 'passe') return `🎟️ Passe ${p.passe === 'ultra' ? 'Ultra' : 'Plus'} (${p.temporada})`;
     if (p.tipo === 'ouro') return `🪙 ${UI.fmt(p.qtd)} de ouro`;
     if (p.tipo === 'gemas') return `💎 ${UI.fmt(p.qtd)} gemas`;
@@ -64,6 +66,13 @@ const Presentes = (() => {
   function aplicar(p) {
     const d = Estado.d;
     if (p.tipo === 'remover') return remover(p);
+    if (p.tipo === 'ajustar') {
+      const n = (v) => Math.max(0, Math.min(99999999, Math.round(+v || 0)));
+      if (p.trofeus !== undefined) { d.trofeus = n(p.trofeus); d.recorde = Math.max(d.recorde || 0, d.trofeus); } // recorde sobe junto (libera as arenas)
+      if (p.vitorias !== undefined) d.vitorias = n(p.vitorias);
+      if (p.derrotas !== undefined) d.derrotas = n(p.derrotas);
+      return true;
+    }
     if (p.tipo === 'ouro') { d.ouro += Math.max(0, Math.round(p.qtd || 0)); return true; }
     if (p.tipo === 'gemas') { d.gemas += Math.max(0, Math.round(p.qtd || 0)); return true; }
     if (p.tipo === 'passe') {
@@ -117,5 +126,5 @@ const Presentes = (() => {
 
   function pararDeOuvir() { if (parar) parar(); parar = null; }
 
-  return { enviar, pendentes, cancelar, descrever, ouvir, inventario, parar: pararDeOuvir };
+  return { enviar, pendentes, cancelar, descrever, ouvir, inventario, aplicar, parar: pararDeOuvir };
 })();
