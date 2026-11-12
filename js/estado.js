@@ -16,7 +16,18 @@ const Estado = (() => {
     const c = typeof id === 'string' ? carta(id) : id;
     return (COPIAS_RAR[c && c.raridade] || COPIAS)[n] || 0;
   }
-  const OURO = [0, 25, 80, 200, 500, 1200, 3000, 6000, 12000]; // OURO[n] = preço para evoluir uma carta do nível n ao n+1
+  const OURO = [0, 25, 80, 200, 500, 1200, 3000, 6000, 12000]; // tabela antiga (não é mais usada nas cartas)
+  // ouro para evoluir do nível n ao n+1, conforme a raridade: comuns baratas, lendárias mais caras
+  const OURO_RAR = {
+    comum: [0, 10, 25, 60, 150, 350, 700, 1400, 2500],
+    rara: [0, 15, 40, 100, 250, 500, 1000, 1900, 3400],
+    epica: [0, 25, 60, 150, 350, 700, 1400, 2600, 4500],
+    lendaria: [0, 40, 100, 250, 550, 1000, 1900, 3400, 6000],
+  };
+  function ouroNivel(id, n) {
+    const c = typeof id === 'string' ? carta(id) : id;
+    return (OURO_RAR[c && c.raridade] || OURO_RAR.rara)[n] || 0;
+  }
   const XP_NIVEL = (n) => 30 + n * 20; // nível 2 com ~2 vitórias; nível 9 com ~40 batalhas
 
   // ---------- Torres (igual Clash Royale) ----------
@@ -227,7 +238,7 @@ const Estado = (() => {
     const n = d.colecao[id].nivel;
     if (n >= NIVEL_MAX) return { ok: false, motivo: 'Nível máximo' };
     if (d.colecao[id].copias < copiasNivel(id, n)) return { ok: false, motivo: `Faltam cópias (${d.colecao[id].copias}/${copiasNivel(id, n)})` };
-    if (d.ouro < OURO[n]) return { ok: false, motivo: `Falta ouro (${OURO[n]})` };
+    if (d.ouro < ouroNivel(id, n)) return { ok: false, motivo: `Falta ouro (${ouroNivel(id, n)})` };
     return { ok: true };
   }
 
@@ -235,7 +246,7 @@ const Estado = (() => {
     if (!podeEvoluir(id).ok) return false;
     const n = d.colecao[id].nivel;
     d.colecao[id].copias -= copiasNivel(id, n);
-    d.ouro -= OURO[n];
+    d.ouro -= ouroNivel(id, n);
     d.colecao[id].nivel++;
     d.conquistas.evolucoes++;
     const niveis = ganharXp(10 + n * 5); // evoluir carta dá bastante XP, igual ao Clash
@@ -432,7 +443,7 @@ const Estado = (() => {
 
   return {
     get d() { return d; }, carregar, salvar, apagar, importar, recarregarCatalogo, aoSalvar, carta, stats, catalogo: () => catalogo, tem, liberada, disponiveis, proximaLiberacao, baisAteLendaria,
-    COPIAS, COPIAS_RAR, copiasNivel, OURO, NIVEL_MAX, BAUS, XP_NIVEL, CORINGAS, darCoringa, usarCoringa, maxada, faltaParaMax,
+    COPIAS, COPIAS_RAR, copiasNivel, OURO, OURO_RAR, ouroNivel, NIVEL_MAX, BAUS, XP_NIVEL, CORINGAS, darCoringa, usarCoringa, maxada, faltaParaMax,
     contarUsos, usosRestantes, todasCartas: () => todas.filter((c) => !c.token),
     TORRE_OURO, TROPAS_TORRE, nivelRei, minhasTorres, statsTorre, podeEvoluirTorre, evoluirTorre, escolherTropaTorre,
     ganharXp, podeEvoluir, evoluir, abrirBau, tempoRestante, sortearCopias, ofertasDoDia, presenteDiario, sorteio,

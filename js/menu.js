@@ -1189,7 +1189,7 @@
       const pode = Estado.podeEvoluir(id).ok;
       // tem as cópias, mas falta ouro: mostra quanto ouro precisa (antes parecia que era só tocar)
       const semOuro = !pode && col.copias >= prec;
-      return `<div class="copias${pode ? ' pode' : ''}${semOuro ? ' sem-ouro' : ''}"><i style="width:${Math.min(100, (col.copias / prec) * 100)}%"></i><b>${pode ? 'Evoluir!' : semOuro ? `🪙 ${fmt(Estado.OURO[col.nivel])}` : `${col.copias}/${prec}`}</b></div>`;
+      return `<div class="copias${pode ? ' pode' : ''}${semOuro ? ' sem-ouro' : ''}"><i style="width:${Math.min(100, (col.copias / prec) * 100)}%"></i><b>${pode ? 'Evoluir!' : semOuro ? `🪙 ${fmt(Estado.ouroNivel(id, col.nivel))}` : `${col.copias}/${prec}`}</b></div>`;
     };
     painelTorres();
     $('deck').innerHTML = Array.from({ length: 8 }, (_, i) => {
@@ -1257,7 +1257,7 @@
       if (d().deck.length < 8) { d().deck.push(id); Estado.salvar(); cartas(); UI.toast('Carta adicionada ao deck!'); }
       else { trocando = id; cartas(); irPara('cartas'); }
     } });
-    if (col.nivel < Estado.NIVEL_MAX) botoes.push({ texto: `Evoluir · ${fmt(Estado.OURO[col.nivel])} ouro`, classe: 'principal', desativado: !ev.ok, motivo: ev.motivo,
+    if (col.nivel < Estado.NIVEL_MAX) botoes.push({ texto: `Evoluir · ${fmt(Estado.ouroNivel(id, col.nivel))} ouro`, classe: 'principal', desativado: !ev.ok, motivo: ev.motivo,
       acao: () => {
         const antes = Estado.stats(id);
         const r = Estado.evoluir(id);
