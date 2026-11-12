@@ -64,6 +64,7 @@ const Ataques = (() => {
     sonic_excalibur: { v: { g: 'corte', s: 'espada_trunks', cor: '#BFE8FF' }, m: { escudo: 0.2, aparar: 7 }, d: 'Corte em área, escudo e aparar com contra-ataque.' },
     hyper_sonic: { v: { g: 'impacto', cor: '#F5F5FF' }, m: { esmeraldas: 7, hyperFlash: [5, 90, 0.45], voo: true }, d: '7 Esmeraldas do Caos seguram golpes. Hiper Flash atordoa em volta.' },
     yugi_moto: { v: { p: 'coringa', vel: 300, tam: 18, giro: 540, rastro: '#FFD25E' }, m: { duelista: 8 }, d: 'Joga cartas de longe e compra uma carta especial a cada 8s.' },
+    anissa: { v: { g: 'soco', cor: '#E8EEF8' }, m: { combo: 3, atordoar: [0.25, 0.4], veterano: 0.1, voo: true }, d: 'Socos Viltrumitas rápidos que deixam tonto.' },
     omni_man: { v: { g: 'soco', cor: '#E8463C', pesado: true }, m: { combo: 3, empurrar: 22, atordoar: [1, 0.25], veterano: 0.2, voo: true }, d: 'O Regente de Viltrum: socos que arremessam longe.' },
     mark_eve: { v: { g: 'soco', cor: '#3B9BFF' }, m: { dupla: 0.5, separar: 0.5, voo: true }, d: 'Soco do Mark + rajada da Eve no mesmo alvo.' },
     invencivel: { v: { g: 'soco', cor: '#FFC21A', pesado: true }, m: { combo: 4, empurrar: 10, regen: 0.012, voo: true }, d: 'Socos Viltrumitas: a cada 4, um golpe dobrado.' },

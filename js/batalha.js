@@ -882,6 +882,7 @@ const Batalha = (() => {
     if (h.tipo === 'barreiraAtomica') barreiraAtomica(t, h);
     if (h.tipo === 'esmagar') esmagar(t, h);
     if (h.tipo === 'furiaViltrum') furiaViltrum(t, h);
+    if (h.tipo === 'rajadaViltrum') rajadaViltrum(t, h);
     if (h.tipo === 'flowDestruicao') flowDestruicao(t, h);
     if (h.tipo === 'golDireto') golDireto(t, h);
     if (h.tipo === 'docesTravessuras') docesTravessuras(t, h);
@@ -1080,8 +1081,8 @@ const Batalha = (() => {
   }
 
   // corte de cena por cima da arena (aparece pra todo mundo da partida)
-  const CUTINS = ['goku_furia', 'jojo_jotaro', 'jojo_dio', 'jojo_diavolo', 'jojo_pucci', 'jojo_gyro', 'jojo_johnny', 'sonic_shadow', 'sonic_super', 'sonic_dark', 'sonic_excalibur', 'sonic_hyper', 'yugi_reino', 'ultra_sae', 'ultra_rin', 'ultra_isagi', 'ultra_anri', 'inv_mark_eve', 'inv_mark', 'inv_eve', 'inv_conquest', 'inv_omni'];
-  const TEXTO_CUTIN_2 = { sonic_shadow: 'Chaos Control!', sonic_super: 'Super Boost!', sonic_dark: 'Explosão Sombria!', sonic_excalibur: 'Soul Surge!', sonic_hyper: 'Hiper Velocidade!', yugi_reino: 'Reino das Sombras!', ultra_sae: 'Visão do Gênio!', ultra_rin: 'Flow: Destruição!', ultra_isagi: 'Direct Shot!', ultra_anri: 'Doces ou Travessuras?', inv_mark_eve: 'Juntos somos invencíveis!', inv_mark: 'Investida Invencível!', inv_eve: 'Barreira Atômica!', inv_conquest: 'Esmagar!', inv_omni: 'Fúria do Regente!' };
+  const CUTINS = ['goku_furia', 'jojo_jotaro', 'jojo_dio', 'jojo_diavolo', 'jojo_pucci', 'jojo_gyro', 'jojo_johnny', 'sonic_shadow', 'sonic_super', 'sonic_dark', 'sonic_excalibur', 'sonic_hyper', 'yugi_reino', 'ultra_sae', 'ultra_rin', 'ultra_isagi', 'ultra_anri', 'inv_mark_eve', 'inv_mark', 'inv_eve', 'inv_conquest', 'inv_omni', 'inv_anissa'];
+  const TEXTO_CUTIN_2 = { sonic_shadow: 'Chaos Control!', sonic_super: 'Super Boost!', sonic_dark: 'Explosão Sombria!', sonic_excalibur: 'Soul Surge!', sonic_hyper: 'Hiper Velocidade!', yugi_reino: 'Reino das Sombras!', ultra_sae: 'Visão do Gênio!', ultra_rin: 'Flow: Destruição!', ultra_isagi: 'Direct Shot!', ultra_anri: 'Doces ou Travessuras?', inv_mark_eve: 'Juntos somos invencíveis!', inv_mark: 'Investida Invencível!', inv_eve: 'Barreira Atômica!', inv_conquest: 'Esmagar!', inv_omni: 'Fúria do Regente!', inv_anissa: 'Rajada Viltrumita!' };
   const TEXTO_CUTIN = { ...TEXTO_CUTIN_2, goku_furia: "You're going to pay for this!", jojo_jotaro: 'Star Platinum: The World!', jojo_dio: 'ZA WARUDO! Toki yo tomare!', jojo_diavolo: 'King Crimson!', jojo_pucci: 'Made in Heaven!', jojo_gyro: 'Ball Breaker!', jojo_johnny: 'Tusk Act 4!' };
   const cutinRede = (qual) => { cutin(qual); if (s.rede || s.aoVivo) s.eventos.push(['c', CUTINS.indexOf(qual)]); };
   function cutin(qual) {
@@ -1281,6 +1282,20 @@ const Batalha = (() => {
     for (const e of aliadosPerto(t, 150)) { e.escudo = Math.max(e.escudo || 0, Math.round(e.max * 0.2)); e.escudoMax = Math.max(e.escudoMax || 0, e.escudo); e.el.classList.add('com-escudo'); }
     fxEl('fx-barreira', t.x, t.y, 900); fxJ(26, t.x, t.y);
     linhaVoando(t, h, h.mult || 2.4);
+  }
+  function rajadaViltrum(t, h) {
+    cutinRede('inv_anissa');
+    const ja = new Set();
+    for (let i = 0; i < (h.golpes || 4); i++) agendar(0.05 + i * 0.18, () => {
+      if (t.vida <= 0) return;
+      const prox = inimigosPerto(t, 170).filter((e) => !ja.has(e)).sort((a, b) => dist(a, t) - dist(b, t))[0];
+      if (!prox) return;
+      ja.add(prox);
+      teleportar(t, prox);
+      golpeVisual(t, prox, t.atk.v);
+      ferir(prox, Math.round(t.dano * (h.mult || 1.8) * multClasse(t, prox)), t.time, t, { crit: true });
+      if (!imuneA(prox)) { prox.atord = Math.max(prox.atord, 0.6); prox.el.classList.add('atordoada'); }
+    });
   }
   function furiaViltrum(t, h) {
     cutinRede('inv_omni');
@@ -2492,6 +2507,7 @@ const Batalha = (() => {
         || (h.tipo === 'juntos' && t.alvo && dist(t, t.alvo) < 240)
         || (h.tipo === 'investidaInv' && t.alvo && dist(t, t.alvo) < 230 && (t.alvo.torre || s.ent.filter((e) => !e.torre && e.time !== t.time && e.vida > 0 && dist(e, t) < 230).length >= 2 || t.alvo.vida > t.dano * 2))
         || (h.tipo === 'barreiraAtomica' && (s.ent.filter((e) => !e.torre && e.time === t.time && e.vida > 0 && dist(e, t) < 130).length >= 2 || s.ent.filter((e) => !e.torre && e.time !== t.time && e.vida > 0 && dist(e, t) < 110).length >= 2))
+        || (h.tipo === 'rajadaViltrum' && s.ent.filter((e) => !e.torre && e.time !== t.time && e.vida > 0 && dist(e, t) < 170).length >= 2)
         || (h.tipo === 'furiaViltrum' && s.ent.some((e) => !e.torre && e.time !== t.time && e.vida > 0 && dist(e, t) < 200))
         || (h.tipo === 'esmagar' && s.ent.some((e) => !e.torre && e.time !== t.time && e.vida > 0 && dist(e, t) < 220))
         || (h.tipo === 'visaoGenio' && s.ent.filter((e) => !e.torre && e.time === t.time && e.vida > 0 && dist(e, t) < 200).length >= 2)

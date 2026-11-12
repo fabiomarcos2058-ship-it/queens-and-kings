@@ -41,12 +41,12 @@ const Summon = (() => {
     destaque: ['omni_man', 'invencivel', 'mark_eve', 'eve_atomica', 'conquest'],
     lados: ['conquest'],
     pool: {
-      ultra: ['mark_eve', 'omni_man', 'invencivel', 'eve_atomica', 'conquest'],
+      ultra: ['mark_eve', 'omni_man', 'invencivel', 'eve_atomica', 'conquest', 'anissa'],
       lendaria: ['mark_azul', 'mark_cabelo_longo', 'mark_sem_lentes'],
       epica: ['mark_flaxan', 'mark_prisioneiro'],
     },
     // dentro das Ultras, Mark & Eve é bem mais difícil de vir
-    pesos: { mark_eve: 1, omni_man: 2, invencivel: 3, eve_atomica: 3, conquest: 3 },
+    pesos: { mark_eve: 1, omni_man: 2, invencivel: 3, eve_atomica: 3, conquest: 3, anissa: 3 },
     chances: { ultra: 0.025, lendaria: 0.2, epica: 0.775 },
     // garantia do destaque: Mark & Eve vem com certeza na 180ª invocação sem ele neste banner
     pityDestaque: 180,

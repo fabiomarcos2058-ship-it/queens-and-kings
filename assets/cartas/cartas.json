@@ -2869,6 +2869,49 @@
         "mult": 4,
         "descricao": "Agarra o inimigo mais forte por perto, arremessa no chão com força total (4x de dano) e a onda de choque atordoa todo mundo em volta."
       }
+    },
+    {
+      "id": "anissa",
+      "nome": "Anissa",
+      "raridade": "ultra",
+      "custo": 6,
+      "tipo": "Ultra · Guerreira Viltrumita",
+      "trofeus": 0,
+      "exclusivo": [],
+      "summon": true,
+      "descricao": "Guerreira Viltrumita veloz e implacável. Socos rápidos que deixam o inimigo tonto, e uma rajada que atravessa o campo de inimigo em inimigo.",
+      "rosto": [
+        330,
+        170,
+        115
+      ],
+      "arte": [
+        0,
+        0,
+        736
+      ],
+      "vida": 1900,
+      "dano": 290,
+      "velocidade": 90,
+      "alcance": 18,
+      "cadencia": 0.75,
+      "alvo": "tudo",
+      "arena": 1,
+      "danoTorre": 0.55,
+      "passiva": {
+        "nome": "Velocidade Viltrumita",
+        "tipo": "velocidadeViltrum",
+        "descricao": "Voa. Leva 10% menos dano, a cada 3 socos vem um dobrado e cada soco tem chance de deixar o inimigo tonto."
+      },
+      "habilidade": {
+        "nome": "Rajada Viltrumita",
+        "tipo": "rajadaViltrum",
+        "custo": 3,
+        "recarga": 16,
+        "golpes": 4,
+        "mult": 1.8,
+        "descricao": "Voa de inimigo em inimigo (até 4), acertando cada um com um golpe de 1,8x e deixando tonto."
+      }
     }
   ]
 }
