@@ -373,6 +373,20 @@ const Estado = (() => {
     return { cartas, novas };
   }
 
+  // ---------- Habilidade do jogador (a IA se adapta a ela) ----------
+  // 1 = começando, 5 = joga muito. Começa pelos troféus e muda a cada partida contra a IA.
+  function habilidade() {
+    if (typeof d.habilidade !== 'number') d.habilidade = Math.max(1.5, Math.min(4.5, 2 + (d.trofeus || 0) / 900));
+    return d.habilidade;
+  }
+  function ajustarHabilidade(resultado, contraSuper, saldoCoroas) {
+    const h = habilidade();
+    let delta = resultado === 'vitoria' ? 0.25 + Math.max(0, saldoCoroas - 1) * 0.08 : resultado === 'derrota' ? -0.3 - Math.max(0, -saldoCoroas - 1) * 0.08 : 0;
+    if (contraSuper) delta = resultado === 'vitoria' ? 0.4 : 0; // perder pra super IA não pesa
+    d.habilidade = Math.max(1, Math.min(5, h + delta));
+    salvar();
+  }
+
   // ---------- Coringas e tokens ----------
   // Coringa = 1 cópia de qualquer carta da raridade dele (o Universal serve em qualquer carta).
   const CORINGAS = {
@@ -443,7 +457,7 @@ const Estado = (() => {
 
   return {
     get d() { return d; }, carregar, salvar, apagar, importar, recarregarCatalogo, aoSalvar, carta, stats, catalogo: () => catalogo, tem, liberada, disponiveis, proximaLiberacao, baisAteLendaria,
-    COPIAS, COPIAS_RAR, copiasNivel, OURO, OURO_RAR, ouroNivel, NIVEL_MAX, BAUS, XP_NIVEL, CORINGAS, darCoringa, usarCoringa, maxada, faltaParaMax,
+    habilidade, ajustarHabilidade, COPIAS, COPIAS_RAR, copiasNivel, OURO, OURO_RAR, ouroNivel, NIVEL_MAX, BAUS, XP_NIVEL, CORINGAS, darCoringa, usarCoringa, maxada, faltaParaMax,
     contarUsos, usosRestantes, todasCartas: () => todas.filter((c) => !c.token),
     TORRE_OURO, TROPAS_TORRE, nivelRei, minhasTorres, statsTorre, podeEvoluirTorre, evoluirTorre, escolherTropaTorre,
     ganharXp, podeEvoluir, evoluir, abrirBau, tempoRestante, sortearCopias, ofertasDoDia, presenteDiario, sorteio,

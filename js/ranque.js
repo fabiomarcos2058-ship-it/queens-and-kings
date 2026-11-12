@@ -94,7 +94,8 @@ const Ranque = (() => {
     const meuI = info(r.pts).i;
     // dificuldade e nível das cartas dos bots crescem com a patente deles
     const dif = PATENTES[rivalI].dif;
-    const nivelDelta = (rivalI > meuI ? 1 : 0) + (rivalI >= 8 ? 1 : 0) - (rivalI < meuI ? 1 : 0);
+    // cartas dos bots: nunca acima das suas (1 abaixo se a patente dele for igual ou menor); a esperteza vem do 'dif'
+    const nivelDelta = rivalI > meuI ? -1 : -2;
     return { dupla, rivais, parceiro, rivalI, meuI, dif, nivelDelta };
   }
 

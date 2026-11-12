@@ -1907,3 +1907,85 @@ body.espectando .arena-grande-janela::after { content: '👁 AO VIVO'; position:
 .evento.ev-tokens .ev-tk-ic { width: 46px !important; height: 46px !important; flex: none; }
 .copias.sem-ouro i { background: linear-gradient(90deg, #B9650F, #F2A93B); }
 .copias.sem-ouro b { color: #FFE9A8; text-shadow: 0 1px 0 #000; }
+
+/* ===== IA super inteligente ===== */
+.aviso-super-ia { position: absolute; left: 50%; top: 38%; z-index: 2200; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 12px 18px; border-radius: 16px; background: linear-gradient(120deg, #2a0a4a, #6a1fc0 50%, #c2307a); border: 2px solid #FFD25E; box-shadow: 0 0 30px #B15CFF, 0 6px 18px #000a; pointer-events: none; animation: superIA 3.2s ease-out forwards; white-space: nowrap; }
+.aviso-super-ia b { font: 20px 'Lilita One', 'Fredoka', sans-serif; color: #fff; text-shadow: 0 0 10px #FF8FE0, 0 2px 0 #000; }
+.aviso-super-ia small { font-size: 12px; color: #FFE9A8; }
+@keyframes superIA { 0% { opacity: 0; transform: translate(-50%, -50%) scale(0.4); } 10% { opacity: 1; transform: translate(-50%, -50%) scale(1.12); } 16% { transform: translate(-50%, -50%) scale(1); } 85% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -70%) scale(0.95); } }
+.arena-grande-janela.contra-super { box-shadow: 0 0 0 3px #B15CFF, 0 0 22px #B15CFFaa; }
+
+/* ===== Arrastar cartas pro deck ===== */
+.fantasma-deck { position: fixed; z-index: 5000; pointer-events: none; transform: rotate(-5deg) scale(1.08); filter: drop-shadow(0 12px 16px #000b); opacity: 0.95; transition: transform 0.12s; }
+.arrastando-origem { opacity: 0.35; transform: scale(0.94); }
+body.arrastando-carta { user-select: none; -webkit-user-select: none; }
+body.arrastando-carta #deck .slot-carta { animation: tremerSlot 0.9s ease-in-out infinite; }
+@keyframes tremerSlot { 25% { transform: rotate(-1.2deg); } 75% { transform: rotate(1.2deg); } }
+#deck .slot-carta.alvo-arrasto { outline: 3px solid #FFE45C; outline-offset: 2px; border-radius: 10px; box-shadow: 0 0 18px #FFE45C; transform: scale(1.06); animation: none; }
+#colecao.alvo-arrasto { outline: 3px dashed #FF8A8A; outline-offset: 4px; border-radius: 12px; }
+#deck .slot-carta, #colecao .slot-carta { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
+
+/* =====================================================================
+   Menu "castelo real": pedra azul de fundo, madeira, veludo e ouro
+   (texturas CC0 do Poly Haven / ambientCG, recoloridas e bem leves)
+   ===================================================================== */
+#app {
+  background-color: #10163d;
+  background-image:
+    radial-gradient(ellipse 120% 60% at 50% -10%, #6a78ff55, transparent 60%),
+    radial-gradient(ellipse 140% 90% at 50% 120%, #00000099, transparent 60%),
+    url(../assets/ui/menu/fundo_pedra.jpg);
+  background-size: auto, auto, 300px;
+}
+/* barra de cima e abas: madeira escura com friso de ouro */
+.topbar {
+  background: linear-gradient(#00000033, #00000066), url(../assets/ui/menu/madeira.jpg) 0 0 / 260px;
+  box-shadow: 0 3px 0 #0007, 0 6px 14px #0006; position: relative;
+}
+.topbar::after, .abas::before { content: ''; position: absolute; left: 0; right: 0; height: 4px; background: url(../assets/ui/menu/ouro.jpg) 0 0 / 120px; box-shadow: 0 1px 0 #0008, 0 -1px 0 #fff3 inset; pointer-events: none; }
+.topbar::after { bottom: -4px; }
+.abas { position: relative; background: linear-gradient(#0000004d, #00000080), url(../assets/ui/menu/madeira.jpg) 0 0 / 260px; border-top: none; }
+.abas::before { top: -4px; }
+.abas button { background: #00000026; box-shadow: inset 0 1px 0 #ffffff14; }
+.abas button.ativa {
+  border: 2px solid transparent;
+  background: linear-gradient(#6d5ad8cc, #2c1d74e6) padding-box, url(../assets/ui/menu/veludo.jpg) 0 0 / 160px padding-box, url(../assets/ui/menu/ouro.jpg) 0 0 / 90px border-box;
+  box-shadow: 0 4px 0 #0009, 0 0 12px #FFD25E44;
+}
+/* painéis: veludo real com moldura dourada */
+.painel-deck, .loja-secao, .painel-torres {
+  border: 3px solid transparent;
+  background:
+    linear-gradient(#ffffff10, #00000040) padding-box,
+    linear-gradient(#24186acc, #140d3ee6) padding-box,
+    url(../assets/ui/menu/veludo.jpg) 0 0 / 180px padding-box,
+    url(../assets/ui/menu/ouro.jpg) 0 0 / 110px border-box;
+  box-shadow: 0 5px 0 #05061a, 0 8px 18px #0008, inset 0 0 18px #0007;
+}
+/* títulos: faixa de veludo com borda de ouro */
+.titulo-secao span {
+  border: 2px solid transparent;
+  background: linear-gradient(#7b62e8, #4a33b0) padding-box, url(../assets/ui/menu/veludo.jpg) 0 0 / 120px padding-box, url(../assets/ui/menu/ouro.jpg) 0 0 / 80px border-box;
+  background-blend-mode: soft-light, normal, normal;
+  box-shadow: 0 3px 0 #120a33, 0 0 10px #0006;
+}
+/* cartões da loja: mármore azul */
+.item-loja {
+  border: 2px solid #ffffff22;
+  background: linear-gradient(#ffffff1a, #00000040), url(../assets/ui/menu/marmore.jpg) 0 0 / 150px;
+  box-shadow: 0 4px 0 #0b0f2e, 0 6px 10px #0006;
+}
+/* janelas (modais): veludo + ouro */
+.modal {
+  border: 3px solid transparent;
+  background:
+    linear-gradient(#3b2a96e6, #1a1150f2) padding-box,
+    url(../assets/ui/menu/veludo.jpg) 0 0 / 200px padding-box,
+    url(../assets/ui/menu/ouro.jpg) 0 0 / 120px border-box;
+  box-shadow: 0 8px 0 #07051a, 0 14px 30px #000c;
+}
+/* moedas e gemas no topo */
+.moeda { background: linear-gradient(#00000080, #0009), url(../assets/ui/menu/madeira.jpg) 0 0 / 160px; border: 2px solid #c99a3a88; }
+/* botão Batalhar com brilho de ouro de verdade */
+.btn-jogar { background: linear-gradient(#ffe7a0dd, #f2b23ecc), url(../assets/ui/menu/ouro.jpg) 0 0 / 140px; border-bottom-color: #8a5a10; text-shadow: 0 1px 0 #fff8; }
+.evento { border: 2px solid #ffffff26; }

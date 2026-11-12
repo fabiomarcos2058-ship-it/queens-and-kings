@@ -28,3 +28,6 @@
 ## Nino Nakano e Nico Robin
 - O vídeo da Nino (carta animada, rosto animado e banner do Festival) e a imagem da Robin foram enviados pela criadora do jogo; aqui eles só foram recortados.
 - Os desenhos da borboleta, da marmita e do braço (Hana Hana) foram feitos à mão para o jogo, em SVG simples.
+
+## Texturas do menu
+- `assets/ui/menu/*.jpg`: recortes pequenos e recoloridos de texturas CC0 (Poly Haven: large_sandstone_blocks_01, velour_velvet, oak_wood_planks, marble_01; ambientCG: Metal048A).

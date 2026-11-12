@@ -82,7 +82,7 @@ const Batalha = (() => {
       azul: lado(deck), vermelho: lado(deckIA),
       ent: torres(minhas, delas), proj: [], efeitos: [], agenda: [], selecionada: null, iaTimer: 2, id: 0,
       arenaId: Arena.daQtd(Estado.d.recorde).id,
-      nivelIA: (evento && evento.nivel) || (tutorial && 1) || Math.max(1, Math.min(9, Math.round(deck.reduce((a, id) => a + ((Estado.d.colecao[id] || {}).nivel || 1), 0) / deck.length) - (Mod.deckApelao() || (Estado.d.trofeus || 0) >= 1500 ? 0 : 1))),
+      nivelIA: (evento && evento.nivel) || (tutorial && 1) || Math.max(1, Math.min(9, Math.round(deck.reduce((a, id) => a + ((Estado.d.colecao[id] || {}).nivel || 1), 0) / deck.length) - (Mod.deckApelao() ? 0 : 2))),
       rede, niveisV: x1 ? rede.convidado.niveis : null, eventos: [], snapTimer: 0,
       ias: x1 ? [] : ['vermelho'],
     };
@@ -99,7 +99,7 @@ const Batalha = (() => {
     if (tutorial) { s.tutorial = tutorial; s.difIA = 1; s.nivelFixo = 1; s.iaTimer = 1e9; }
     if (ranque) {
       s.ranque = ranque;
-      s.difIA = ranque.dif;
+      s.difBaseRanque = ranque.dif;
       const media = Math.round(deck.reduce((a, id) => a + Estado.d.colecao[id].nivel, 0) / deck.length);
       s.nivelIA = Math.max(1, Math.min(9, media + ranque.nivelDelta));
     }
@@ -121,6 +121,18 @@ const Batalha = (() => {
     const tituloRanq = ranque ? `🏅 Ranqueada${dupla ? ' 2v2' : ''} · vs ${ranque.rivais.map((b) => b.nome).join(' e ')}` : null;
     const humanosV = dupla ? [jog.vermelho, jog.vermelho2].filter(Boolean).map((p) => p.nome) : [];
     if (typeof AoVivo !== 'undefined' && !tutorial) AoVivo.comecou({ modo: ranque ? (dupla ? 'ranq2v2' : 'ranq') : evento ? 'evento' : modo, titulo: tituloRanq || (evento ? evento.nome : dupla ? '2v2' : rede ? 'X1' : 'Batalha'), sala: rede && typeof X1 !== 'undefined' ? X1.codigo() : null, lado: 'azul', dupla: !!dupla });
+    // IA adaptativa: joga no nível de quem ela enfrenta; às vezes vem uma IA super inteligente
+    if (!s.difIA && !tutorial && !(rede && !dupla)) {
+      const hab = Estado.habilidade();
+      s.adaptativa = true;
+      s.difBase = Math.max(1, Math.min(5, Math.round(s.difBaseRanque ? (s.difBaseRanque + hab) / 2 : hab)));
+      s.difAjuste = 0;
+      if (!evento && Math.random() < 0.08) {
+        s.superIA = true;
+        s.nivelIA = Math.min(9, s.nivelIA + 1); // a super IA tem cartas só 1 nível abaixo
+        if (s.niveisIA) s.niveisIA = {};
+      }
+    }
     montar(tituloRanq || (dupla ? (rede ? `2v2 · ${humanosV.length ? `vs ${humanosV.join(' e ')}` : `com ${s.nomeParceiro}`}` : '2v2 · Batalha em dupla') : rede ? `X1 contra ${rede.convidado.nome}` : evento ? `🎪 ${evento.nome}` : tutorial ? '🎓 Tutorial' : modo === 'elixir2x' ? 'Evento: elixir em dobro' : 'Batalha'));
   }
 
@@ -223,6 +235,15 @@ const Batalha = (() => {
     }
     $('btn-sair').onclick = desistir;
     botaoEmote();
+    if (s.superIA) {
+      const jan = document.querySelector('.arena-grande-janela');
+      const b = document.createElement('div');
+      b.className = 'aviso-super-ia';
+      b.innerHTML = '<b>🧠 IA SUPER INTELIGENTE</b><small>Essa é rara! Vencer ela vale muito.</small>';
+      jan.appendChild(b);
+      setTimeout(() => b.remove(), 3200);
+      jan.classList.add('contra-super');
+    } else document.querySelector('.arena-grande-janela').classList.remove('contra-super');
     document.querySelector('.selo-previa').textContent = titulo;
     atualizarPlacar();
     desenharMao();
@@ -1601,13 +1622,16 @@ const Batalha = (() => {
 
   // Dificuldade da IA baseada nos troféus do jogador
   function dificuldadeIA() {
-    if (s && s.difIA) return s.difIA; // ranqueada: a dificuldade é a da patente do bot
+    if (!s) return 3;
+    if (s.difIA) return s.difIA; // eventos com dificuldade fixa e tutorial
+    if (s.superIA) return 6;     // IA super inteligente (rara)
+    if (s.adaptativa) return Math.max(1, Math.min(5, s.difBase + s.difAjuste));
     const t = Estado.d.trofeus || 0;
-    if (t >= 1500) return 5; // muito difícil
-    if (t >= 900)  return 4; // raciocínio
-    if (t >= 400)  return 3; // difícil
-    if (t >= 200)  return 2; // médio
-    return 1;                // fácil (ruim)
+    // a IA joga bem (as cartas dela é que são de nível mais baixo)
+    if (t >= 1200) return 5; // muito esperta
+    if (t >= 500)  return 4;
+    if (t >= 100)  return 3;
+    return 2;                // primeiras partidas
   }
 
 
@@ -1616,7 +1640,7 @@ const Batalha = (() => {
   function nivelCartaIA(id) {
     if (!s.niveisIA) s.niveisIA = {};
     if (s.nivelFixo) return s.nivelFixo;
-    if (!(id in s.niveisIA)) s.niveisIA[id] = Math.max(1, s.nivelIA - (!s.dupla && !s.ranque && !Mod.deckApelao() && (Estado.d.trofeus || 0) < 600 && Math.random() < 0.4 ? 1 : 0));
+    if (!(id in s.niveisIA)) s.niveisIA[id] = Math.max(1, s.nivelIA);
     return s.niveisIA[id];
   }
 
@@ -1624,14 +1648,20 @@ const Batalha = (() => {
   function torresIA(m) {
     const apelao = !!Mod.deckApelao();
     const rei = Math.min(Estado.NIVEL_MAX, m.rei + (apelao ? 1 : 0));
-    const princesa = Math.max(1, Math.min(rei, m.princesa + (apelao ? 1 : (Estado.d.trofeus || 0) >= 1500 ? 0 : -Math.floor(Math.random() * 2))));
+    const princesa = Math.max(1, Math.min(rei, m.princesa + (apelao ? 1 : -Math.floor(Math.random() * 2))));
     const tropas = Object.entries(Estado.TROPAS_TORRE).filter(([, t]) => t.rei <= rei).map(([id]) => id);
     return { rei, princesa, tropa: tropas[Math.floor(Math.random() * tropas.length)] };
   }
 
   // deck aleatório e equilibrado: 1 tanque, 2 feitiços/barril, 1 dano em área, 1 atiradora e o resto sorteado
   function deckAleatorioIA() {
-    const pool = embaralhar(Estado.catalogo().filter((c) => !c.exclusivo && !c.token));
+    // só cartas que VOCÊ já liberou (arena/troféus); antes vinha Goku MUI na Arena 1
+    let base = Estado.disponiveis().filter((c) => !c.token);
+    if (base.length < 12) {
+      const resto = Estado.catalogo().filter((c) => !c.exclusivo && !c.token && !base.includes(c)).sort((a, b) => (a.trofeus || 0) - (b.trofeus || 0));
+      base = base.concat(resto.slice(0, 12 - base.length));
+    }
+    const pool = embaralhar(base);
     const deck = [];
     const pega = (filtro, n) => { for (const c of pool) { if (deck.length >= 8 || n <= 0) break; if (!deck.includes(c) && filtro(c)) { deck.push(c); n--; } } };
     pega(ehTanque, 1);
@@ -1735,7 +1765,7 @@ const Batalha = (() => {
     s[tk] = (s[tk] === undefined ? 2 : s[tk]) - dt;
     if (s[tk] > 0) return;
     // tempo de reação conforme dificuldade (fácil = lento, 1500+ = bem rápido)
-    const delay = { 1: 1.4, 2: 0.9, 3: 0.55, 4: 0.32, 5: 0.18 }[dif] || 0.4;
+    const delay = { 1: 1.4, 2: 0.9, 3: 0.55, 4: 0.32, 5: 0.2, 6: 0.12 }[dif] || 0.4;
     s[tk] = delay + Math.random() * (delay * 0.5);
     const ents = s.ent.map(visao);
     const elixirInimigo = Math.min(...LADOS.filter((l) => timeDe(l) === outroT && s[l]).map((l) => s[l].elixir));
@@ -1785,17 +1815,17 @@ const Batalha = (() => {
     // Como uma pessoa: só "enxerga" a tropa nova depois de um tempo de reação (antes ela
     // jogava o feitiço no instante em que a carta aparecia), erra um pouco a mira e não
     // fica jogando feitiço atrás de feitiço.
-    const reacao = { 1: 2.2, 2: 1.8, 3: 1.5, 4: 1.25, 5: 1.05 }[dif] || 1.3;
+    const reacao = { 1: 2.2, 2: 1.8, 3: 1.5, 4: 1.25, 5: 1.05, 6: 0.85 }[dif] || 1.3;
     const vistos = inimigos.filter((e) => s.t - (e.nasceu || 0) >= reacao + ((e.id * 7) % 10) / 15);
     if (!s.iaFeitCd) s.iaFeitCd = {};
     if (s.t >= (s.iaFeitCd[quem] || 0)) for (const m of pode.filter((x) => x.c.feitico)) {
       const p = melhorFeitico(m, nivel, vistos, torresAzuis);
       const baseMin = perdendo && resta < 45 ? 90 : 165;
       // fácil/médio exige valor bem maior → quase nunca joga feitiço no momento certo
-      const multDif = { 1: 2.4, 2: 1.7, 3: 1.25, 4: 1.05, 5: 0.9 }[dif] || 1;
+      const multDif = { 1: 2.4, 2: 1.7, 3: 1.25, 4: 1.05, 5: 0.9, 6: 0.8 }[dif] || 1;
       const minimo = m.c.custo * baseMin * multDif;
       if (p && p.v >= minimo) {
-        const erro = { 1: 24, 2: 20, 3: 15, 4: 11, 5: 9 }[dif] || 12;
+        const erro = { 1: 24, 2: 20, 3: 15, 4: 11, 5: 9, 6: 6 }[dif] || 12;
         const a = Math.random() * Math.PI * 2, r = Math.random() * erro;
         s.iaFeitCd[quem] = s.t + 4 + Math.random() * 3;
         return iaJogar(m, p.x + Math.cos(a) * r, p.y + Math.sin(a) * r);
@@ -2217,6 +2247,7 @@ const Batalha = (() => {
       } else return terminar();
     }
 
+    if (s.adaptativa && !s.superIA && (s.adaptaTimer = (s.adaptaTimer ?? 12) - dt) <= 0) { s.adaptaTimer = 12; adaptarIA(); }
     for (const quem of s.ias) ia(dt, quem);
 
     // habilidades: recarga e duração dos efeitos
@@ -2393,6 +2424,13 @@ const Batalha = (() => {
     for (const t of tropas) if (t.el) t.el.classList.toggle('com-aura', t.buffVel > 0);
   }
 
+  // Durante a partida: se o jogador está apanhando muito, a IA alivia; se está atropelando, ela aperta.
+  function adaptarIA() {
+    const vida = (time) => { const ts = s.ent.filter((e) => e.torre && e.time === time); return ts.reduce((a, t) => a + t.vida / t.max, 0) / 3; };
+    const vant = (vida('azul') - vida('vermelho')) + (s.azul.coroas - s.vermelho.coroas) * 0.3;
+    s.difAjuste = vant < -0.35 ? -1 : vant > 0.35 ? 1 : 0;
+  }
+
   // ---------- Fim ----------
   function vidaMinima(time) {
     const ts = s.ent.filter((e) => e.torre && e.time === time);
@@ -2413,6 +2451,7 @@ const Batalha = (() => {
     const dados = { resultado, coroas: s.azul.coroas, coroasInimigo: s.vermelho.coroas, modo: s.modo, ranque: s.ranque || null,
       deck: s.azul.deck, deckRival: s.vermelho.deck, deckParceiro: s.azul2 && s.azul2.deck, deckRival2: s.vermelho2 && s.vermelho2.deck,
       nomeRival: s.rede && s.rede.convidado ? s.rede.convidado.nome : null, nomeParceiro: s.nomeParceiro || null, duracao: Math.round(s.t), evento: s.evento || null, tutorial: s.tutorial ? true : undefined };
+    if (s.adaptativa) Estado.ajustarHabilidade(resultado, s.superIA, s.azul.coroas - s.vermelho.coroas);
     if (typeof AoVivo !== 'undefined') AoVivo.terminou(foto(), resultado);
     if (s.rede && s.rede.fim) { s.rede.enviarEstado({ ...foto(), fim: { resultado } }); s.rede.fim(dados, desistiu); }
     setTimeout(() => ao_fim && ao_fim(dados), 900);

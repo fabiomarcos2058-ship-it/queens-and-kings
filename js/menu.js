@@ -1216,7 +1216,7 @@
       }).join('');
     $('aviso-colecao').textContent = trocando
       ? `Toque numa carta do deck para trocar por ${Estado.carta(trocando).nome}.`
-      : 'Toque numa carta para ver detalhes, colocar no deck ou evoluir. Desbloqueie mais cartas ganhando troféus e abrindo baús!';
+      : 'Segure uma carta e arraste até o deck pra trocar 👆 · Toque pra ver detalhes ou evoluir.';
     document.querySelector('.painel-deck').classList.toggle('trocando', !!trocando);
 
     $('deck').querySelectorAll('.slot-carta').forEach((el) => (el.onclick = () => {
@@ -1236,7 +1236,113 @@
       if (Estado.liberada(id)) UI.modal({ titulo: c.nome, html: `<div class="compra">${Cartas.html(c, { mini: true })}<p>${Cartas.NOMES_RARIDADE[c.raridade]} · ${c.tipo}<br>Já pode aparecer nos <b>baús</b> e nas <b>ofertas da loja</b>. Ganhe a primeira cópia para desbloquear!</p></div>` });
       else UI.modal({ titulo: 'Carta misteriosa', html: `<div class="carta-silhueta grande">🔒</div><p>Chegue a <b>${c.trofeus} troféus</b> para liberar esta carta.</p><p class="aviso">Você tem ${d().recorde} de recorde.</p>` });
     }));
+    ligarArrastar();
+    if (trocando) setTimeout(() => document.querySelector('.painel-deck').scrollIntoView({ behavior: 'smooth', block: 'center' }), 60);
   }
+
+  // ---------- Segurar e arrastar cartas pro deck ----------
+  // Segura a carta (~0,25s) e arrasta: da coleção pra um espaço do deck (troca), entre espaços do deck (muda a ordem)
+  // ou do deck pra coleção (tira). A tela rola sozinha quando você chega perto da borda.
+  let arrasto = null, ignorarClique = false;
+  function rolavel(el) {
+    for (let p = el.parentElement; p; p = p.parentElement) {
+      const st = getComputedStyle(p);
+      if (/(auto|scroll)/.test(st.overflowY) && p.scrollHeight > p.clientHeight + 4) return p;
+    }
+    return document.scrollingElement;
+  }
+  function ligarArrastar() {
+    const cartasArrastaveis = [...$('deck').querySelectorAll('.slot-carta[data-id]'), ...$('colecao').querySelectorAll('.slot-carta[data-id]')].filter((el) => Estado.tem(el.dataset.id));
+    for (const el of cartasArrastaveis) {
+      el.addEventListener('pointerdown', (ev) => {
+        if (ev.button > 0 || arrasto) return;
+        const x0 = ev.clientX, y0 = ev.clientY;
+        const daDeck = !!el.closest('#deck');
+        let timer = setTimeout(() => comecar(), 260);
+        const cancelar = () => { clearTimeout(timer); timer = null; document.removeEventListener('pointermove', cedo); document.removeEventListener('pointerup', cancelar); };
+        // mexeu antes do tempo: é rolagem da tela, não arrasto
+        const cedo = (e) => { if (Math.hypot(e.clientX - x0, e.clientY - y0) > 9) cancelar(); };
+        document.addEventListener('pointermove', cedo);
+        document.addEventListener('pointerup', cancelar, { once: true });
+        const comecar = () => {
+          cancelar();
+          const r = el.getBoundingClientRect();
+          const fantasma = el.cloneNode(true);
+          fantasma.className += ' fantasma-deck';
+          Object.assign(fantasma.style, { width: `${r.width}px`, left: `${x0 - r.width / 2}px`, top: `${y0 - r.height * 0.6}px` });
+          document.body.appendChild(fantasma);
+          el.classList.add('arrastando-origem');
+          document.body.classList.add('arrastando-carta');
+          try { navigator.vibrate && navigator.vibrate(25); } catch (e) { /* nada */ }
+          arrasto = { id: el.dataset.id, daDeck, slot: daDeck ? d().deck.indexOf(el.dataset.id) : -1, fantasma, el, alvo: null, x: x0, y: y0, rolar: rolavel(el), w: r.width, h: r.height };
+          arrasto.loop = requestAnimationFrame(rolarSozinho);
+        };
+      });
+      el.addEventListener('click', (e) => { if (ignorarClique) { e.stopImmediatePropagation(); e.preventDefault(); ignorarClique = false; } }, true);
+    }
+  }
+  function alvoEm(x, y) {
+    const el = document.elementFromPoint(x, y);
+    if (!el) return null;
+    const slot = el.closest('#deck .slot-carta');
+    if (slot) return { tipo: 'deck', el: slot, i: slot.dataset.slot !== undefined ? +slot.dataset.slot : d().deck.indexOf(slot.dataset.id) };
+    if (el.closest('#colecao, .painel-colecao')) return { tipo: 'colecao', el: $('colecao') };
+    return null;
+  }
+  function rolarSozinho() {
+    if (!arrasto) return;
+    const a = arrasto, h = window.innerHeight;
+    const borda = 110;
+    if (a.y < borda) a.rolar.scrollTop -= (borda - a.y) * 0.25;
+    else if (a.y > h - borda) a.rolar.scrollTop += (a.y - (h - borda)) * 0.25;
+    a.loop = requestAnimationFrame(rolarSozinho);
+  }
+  document.addEventListener('pointermove', (e) => {
+    if (!arrasto) return;
+    const a = arrasto;
+    a.x = e.clientX; a.y = e.clientY;
+    a.fantasma.style.left = `${a.x - a.w / 2}px`;
+    a.fantasma.style.top = `${a.y - a.h * 0.6}px`;
+    const alvo = alvoEm(a.x, a.y);
+    if (a.alvo && (!alvo || alvo.el !== a.alvo.el)) a.alvo.el.classList.remove('alvo-arrasto');
+    if (alvo && !(alvo.tipo === 'colecao' && !a.daDeck)) alvo.el.classList.add('alvo-arrasto');
+    a.alvo = alvo;
+  });
+  // enquanto arrasta, o dedo não rola a tela (quem rola é a borda)
+  document.addEventListener('touchmove', (e) => { if (arrasto) e.preventDefault(); }, { passive: false });
+  const soltar = () => {
+    if (!arrasto) return;
+    const a = arrasto;
+    arrasto = null;
+    cancelAnimationFrame(a.loop);
+    a.fantasma.remove();
+    a.el.classList.remove('arrastando-origem');
+    document.body.classList.remove('arrastando-carta');
+    document.querySelectorAll('.alvo-arrasto').forEach((x) => x.classList.remove('alvo-arrasto'));
+    ignorarClique = true; setTimeout(() => (ignorarClique = false), 350);
+    const deck = d().deck, alvo = a.alvo;
+    if (!alvo) return;
+    if (alvo.tipo === 'deck') {
+      if (a.daDeck) {
+        if (alvo.i === a.slot || alvo.i < 0) return;
+        const j = Math.min(alvo.i, deck.length - 1);
+        [deck[a.slot], deck[j]] = [deck[j], deck[a.slot]];
+      } else if (alvo.i >= deck.length || alvo.i < 0) deck.push(a.id);
+      else deck[alvo.i] = a.id;
+      trocando = null;
+      Estado.salvar(); cartas();
+      UI.toast(a.daDeck ? 'Ordem do deck trocada!' : `${Estado.carta(a.id).nome} entrou no deck!`);
+      return;
+    }
+    if (alvo.tipo === 'colecao' && a.daDeck) {
+      if (deck.length <= 1) { UI.toast('O deck precisa de pelo menos 1 carta'); return; }
+      d().deck = deck.filter((x) => x !== a.id);
+      Estado.salvar(); cartas();
+      UI.toast(`${Estado.carta(a.id).nome} saiu do deck`);
+    }
+  };
+  document.addEventListener('pointerup', soltar);
+  document.addEventListener('pointercancel', soltar);
 
   function detalhes(id) {
     const c = Estado.stats(id);
