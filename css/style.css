@@ -2805,3 +2805,10 @@ body.em-batalha #spotify-player:not(.aberto) .sp-alca { opacity: 0.6; }
 .carta.ultra .ultra-holo { opacity: 0.2; }
 .carta.ultra .ultra-video { opacity: 0.6; }
 .carta.ultra .custo, .carta.ultra .selo-hab, .carta.ultra .selo-evento { z-index: 4; }
+.sm-banner.t-invencivel .smb-painel { flex: 0.7; }
+.sm-banner.t-invencivel .smb-painel.centro { flex: 1.45; }
+.sm-banner.t-invencivel .smb-painel span { font-size: 10px; }
+.sm-banner.t-invencivel .smb-painel { margin: 0 -3.5%; }
+.sm-banner.t-invencivel .smb-painel:first-child { margin-left: 0; } .sm-banner.t-invencivel .smb-painel:last-child { margin-right: 0; }
+.sm-banner.t-invencivel .smb-painel img { object-position: 50% 12%; }
+.sm-banner.t-invencivel .smb-painel:not(.centro) span { display: none; }
