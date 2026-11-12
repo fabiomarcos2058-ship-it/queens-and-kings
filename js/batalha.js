@@ -82,7 +82,7 @@ const Batalha = (() => {
       azul: lado(deck), vermelho: lado(deckIA),
       ent: torres(minhas, delas), proj: [], efeitos: [], agenda: [], selecionada: null, iaTimer: 2, id: 0,
       arenaId: Arena.daQtd(Estado.d.recorde).id,
-      nivelIA: (evento && evento.nivel) || (tutorial && 1) || Math.max(1, Math.min(9, Math.round(deck.reduce((a, id) => a + ((Estado.d.colecao[id] || {}).nivel || 1), 0) / deck.length) - (Mod.deckApelao() ? 0 : 1))),
+      nivelIA: (evento && evento.nivel) || (tutorial && 1) || Math.max(1, Math.min(9, Math.round(deck.reduce((a, id) => a + ((Estado.d.colecao[id] || {}).nivel || 1), 0) / deck.length) - (Mod.deckApelao() || (Estado.d.trofeus || 0) >= 1500 ? 0 : 1))),
       rede, niveisV: x1 ? rede.convidado.niveis : null, eventos: [], snapTimer: 0,
       ias: x1 ? [] : ['vermelho'],
     };
@@ -471,7 +471,7 @@ const Batalha = (() => {
       id: ++s.id, time, dono: time, carta: c, x, y, raio: 13,
       vida: Math.round(c.vida * f), max: Math.round(c.vida * f), dano: Math.round(c.dano * f),
       alcance: c.alcance, vel: c.velocidade, cadencia: c.cadencia, cd: 0.6, area: c.area || 0,
-      alvoTipo: c.alvo || 'tudo', surgir: 1, alvo: null,
+      alvoTipo: c.alvo || 'tudo', surgir: 1, alvo: null, nasceu: s.t,
       habilidade: c.habilidade || null, recarga: 0, golpesFortes: 0, furia: 0, fenix: 0, nivel, f,
       congelado: 0, adaptacao: 0, adaptTimer: 0, danoBase: Math.round(c.dano * f), velBase: c.velocidade,
       atk: Ataques.de(c), classe: Ataques.classeDe(c), golpes: 0,
@@ -1616,7 +1616,7 @@ const Batalha = (() => {
   function nivelCartaIA(id) {
     if (!s.niveisIA) s.niveisIA = {};
     if (s.nivelFixo) return s.nivelFixo;
-    if (!(id in s.niveisIA)) s.niveisIA[id] = Math.max(1, s.nivelIA - (!s.dupla && !s.ranque && !Mod.deckApelao() && Math.random() < 0.4 ? 1 : 0));
+    if (!(id in s.niveisIA)) s.niveisIA[id] = Math.max(1, s.nivelIA - (!s.dupla && !s.ranque && !Mod.deckApelao() && (Estado.d.trofeus || 0) < 600 && Math.random() < 0.4 ? 1 : 0));
     return s.niveisIA[id];
   }
 
@@ -1624,7 +1624,7 @@ const Batalha = (() => {
   function torresIA(m) {
     const apelao = !!Mod.deckApelao();
     const rei = Math.min(Estado.NIVEL_MAX, m.rei + (apelao ? 1 : 0));
-    const princesa = Math.max(1, Math.min(rei, m.princesa + (apelao ? 1 : -Math.floor(Math.random() * 2))));
+    const princesa = Math.max(1, Math.min(rei, m.princesa + (apelao ? 1 : (Estado.d.trofeus || 0) >= 1500 ? 0 : -Math.floor(Math.random() * 2))));
     const tropas = Object.entries(Estado.TROPAS_TORRE).filter(([, t]) => t.rei <= rei).map(([id]) => id);
     return { rei, princesa, tropa: tropas[Math.floor(Math.random() * tropas.length)] };
   }
@@ -1685,12 +1685,16 @@ const Batalha = (() => {
     let melhor = null;
     const candidatos = [...inimigos.map((e) => prever(e, 0.55)), ...torres.map((t) => ({ x: t.x, y: t.y }))];
     for (const p of candidatos) {
-      let v = 0;
+      let v = 0, acertos = 0, mata = false, custoMorto = 0;
       for (const e of inimigos) {
         const q = prever(e, 0.55);
         if (Math.hypot(q.x - p.x, q.y - p.y) > area + e.raio) continue;
+        acertos++;
+        if (e.vida <= dano) { mata = true; custoMorto = Math.max(custoMorto, (e.carta && e.carta.custo) || 0); }
         v += Math.min(e.vida, dano) + (e.vida <= dano ? 120 + dpsE(e) * 3 : 0);
       }
+      // numa tropa sozinha, só vale se for troca boa de elixir (matar algo mais caro que o feitiço)
+      if (acertos === 1) v = mata ? Math.max(0, custoMorto - 0.5) * 165 : v * 0.25;
       for (const t of torres) {
         if (Math.hypot(t.x - p.x, t.y - p.y) > area + t.raio) continue;
         const dt0 = dano * 0.35;
@@ -1778,13 +1782,24 @@ const Batalha = (() => {
     const perdendo = s[meuT].coroas < s[outroT].coroas;
 
     // 1) feitiço que vale a pena (finaliza torre, acerta grupo, mata atiradora/campeã)
-    for (const m of pode.filter((x) => x.c.feitico)) {
-      const p = melhorFeitico(m, nivel, inimigos, torresAzuis);
-      const baseMin = perdendo && resta < 45 ? 70 : 130;
+    // Como uma pessoa: só "enxerga" a tropa nova depois de um tempo de reação (antes ela
+    // jogava o feitiço no instante em que a carta aparecia), erra um pouco a mira e não
+    // fica jogando feitiço atrás de feitiço.
+    const reacao = { 1: 2.2, 2: 1.8, 3: 1.5, 4: 1.25, 5: 1.05 }[dif] || 1.3;
+    const vistos = inimigos.filter((e) => s.t - (e.nasceu || 0) >= reacao + ((e.id * 7) % 10) / 15);
+    if (!s.iaFeitCd) s.iaFeitCd = {};
+    if (s.t >= (s.iaFeitCd[quem] || 0)) for (const m of pode.filter((x) => x.c.feitico)) {
+      const p = melhorFeitico(m, nivel, vistos, torresAzuis);
+      const baseMin = perdendo && resta < 45 ? 90 : 165;
       // fácil/médio exige valor bem maior → quase nunca joga feitiço no momento certo
-      const multDif = { 1: 2.4, 2: 1.7, 3: 1.2, 4: 1.0, 5: 0.75 }[dif] || 1;
+      const multDif = { 1: 2.4, 2: 1.7, 3: 1.25, 4: 1.05, 5: 0.9 }[dif] || 1;
       const minimo = m.c.custo * baseMin * multDif;
-      if (p && p.v >= minimo) return iaJogar(m, p.x, p.y);
+      if (p && p.v >= minimo) {
+        const erro = { 1: 24, 2: 20, 3: 15, 4: 11, 5: 9 }[dif] || 12;
+        const a = Math.random() * Math.PI * 2, r = Math.random() * erro;
+        s.iaFeitCd[quem] = s.t + 4 + Math.random() * 3;
+        return iaJogar(m, p.x + Math.cos(a) * r, p.y + Math.sin(a) * r);
+      }
     }
 
     // 2) defesa
