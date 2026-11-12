@@ -103,6 +103,7 @@ const Batalha = (() => {
     if (ranque) {
       s.ranque = ranque;
       s.difBaseRanque = ranque.dif;
+      s.difMinRanque = ranque.difMin || 0; // Platina pra cima: a IA não alivia abaixo disso
       const media = Math.round(deck.reduce((a, id) => a + Estado.d.colecao[id].nivel, 0) / deck.length);
       s.nivelIA = Math.max(1, Math.min(9, media + ranque.nivelDelta));
     }
@@ -128,11 +129,11 @@ const Batalha = (() => {
     if (!s.difIA && !tutorial && !(rede && !dupla)) {
       const hab = Estado.habilidade();
       s.adaptativa = true;
-      s.difBase = Math.max(1, Math.min(5, Math.round(s.difBaseRanque ? (s.difBaseRanque + hab) / 2 : hab)));
+      s.difBase = Math.max(s.difMinRanque || 1, Math.min(5, Math.round(s.difBaseRanque ? (s.difBaseRanque + hab) / 2 : hab)));
       s.difAjuste = 0;
-      if (!evento && Math.random() < 0.08) {
+      if (!evento && Math.random() < Math.max(0.08, (ranque && ranque.chanceSuper) || 0)) {
         s.superIA = true;
-        s.nivelIA = Math.min(9, s.nivelIA + 1); // a super IA tem cartas só 1 nível abaixo
+        if (!ranque || ranque.nivelDelta < 0) s.nivelIA = Math.min(9, s.nivelIA + 1); // a super IA tem cartas só 1 nível abaixo (nunca acima das suas)
         if (s.niveisIA) s.niveisIA = {};
       }
     }
@@ -2167,7 +2168,7 @@ const Batalha = (() => {
     if (!s) return 3;
     if (s.difIA) return s.difIA; // eventos com dificuldade fixa e tutorial
     if (s.superIA) return 6;     // IA super inteligente (rara)
-    if (s.adaptativa) return Math.max(1, Math.min(5, s.difBase + s.difAjuste));
+    if (s.adaptativa) return Math.max(s.difMinRanque || 1, Math.min(5, s.difBase + s.difAjuste));
     const t = Estado.d.trofeus || 0;
     // a IA joga bem (as cartas dela é que são de nível mais baixo)
     if (t >= 1200) return 5; // muito esperta

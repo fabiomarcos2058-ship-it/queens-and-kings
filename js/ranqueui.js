@@ -50,6 +50,9 @@ const RanqueUI = (() => {
           ${f.prox ? `<div class="tr-barra"><i style="width:${Math.round(f.prog * 100)}%"></i><span>${fmt(r.pts - f.base)} / ${fmt(f.prox - f.base)} para ${Ranque.info(f.prox).nome}</span></div>` : '<div class="tr-topo-mundo">👑 Topo do ranque! Cada vitória soma PR.</div>'}
           <div class="tr-chips">
             ${r.seq >= 1 ? `<span class="chip-fogo">🔥 ${r.seq} vitória${r.seq > 1 ? 's' : ''} seguida${r.seq > 1 ? 's' : ''}${r.seq >= 1 ? ` · próxima +${Math.min(16, r.seq * 4)} bônus` : ''}</span>` : '<span>🔥 Vença seguidas para ganhar bônus</span>'}
+            <span class="chip-epica">💥 Vitória Épica (3x0): +${Ranque.BONUS_EPICA} PR${r.epicas ? ` · ${r.epicas} nesta temporada` : ''}</span>
+            <span class="chip-xp">⚡ XP turbinado na ranqueada</span>
+            ${f.i >= 6 ? '<span class="chip-dificil">☠️ Do Platina pra cima os rivais não aliviam</span>' : ''}
             ${r.escudo ? `<span class="chip-escudo">🛡️ Proteção: ${r.escudo} derrota${r.escudo > 1 ? 's' : ''} sem cair de patente</span>` : ''}
           </div>
         </div>
@@ -57,7 +60,7 @@ const RanqueUI = (() => {
           <button class="tr-btn um" id="tr-1v1"><span>⚔️</span><b>Ranqueada 1v1</b><small>Vitória +${pv1.ganho} · derrota -${pv1.perda}</small></button>
           <button class="tr-btn dois" id="tr-2v2"><span>🤝</span><b>Ranqueada 2v2</b><small>Vale mais! Vitória +${pv2.ganho} · derrota -${pv2.perda}</small></button>
         </div>
-        <p class="tr-dica">Você pode cair contra bots de <b>patente mais alta</b>: vencer deles vale bônus.</p>
+        <p class="tr-dica">Você pode cair contra rivais de <b>patente mais alta</b>: cada patente acima vale <b>+12 PR</b> e cada divisão acima <b>+3 PR</b>, e a derrota pra eles tira menos.</p>
         <button class="tr-passe${r.pro ? ' pro' : ''}" id="tr-passe">
           <div class="trp-topo"><b>${r.pro ? '💠 Pro Pass' : '🎫 Passe da Ranqueada'}</b><small>${nv}/${Ranque.PASSE_NIVEIS}</small></div>
           <div class="trp-barra"><i style="width:${nv >= Ranque.PASSE_NIVEIS ? 100 : ((r.xp % Ranque.PASSE_XP) / Ranque.PASSE_XP) * 100}%"></i></div>
@@ -93,11 +96,11 @@ const RanqueUI = (() => {
     const time = [lado(d.nome || 'Você', d.avatar, f, true)].concat(pt.parceiro ? [lado(pt.parceiro.nome, pt.parceiro.avatar, Ranque.info(pt.parceiro.pts))] : []);
     const rivais = pt.rivais.map((b) => lado(b.nome, b.avatar, Ranque.info(b.pts)));
     const meuI = f.i;
-    const pv = Ranque.previsao(pt.dupla, pt.rivalI);
+    const pv = Ranque.previsao(pt.dupla, pt.rivalI, pt.rivalPts);
     el.classList.add('achou');
     el.innerHTML = `<div class="pr-raios"></div><div class="vs-tela">
         <div class="vs-time rival">${rivais.join('')}</div>
-        <div class="vs-meio"><span>VS</span>${pt.rivalI > meuI ? `<em class="vs-alta">⬆ Patente mais alta! Vitória vale +${pv.ganho} PR</em>` : `<em>Vitória +${pv.ganho} PR · derrota -${pv.perda}</em>`}</div>
+        <div class="vs-meio"><span>VS</span>${pt.rivalI > meuI ? `<em class="vs-alta">⬆ Rival mais forte! Vitória vale +${pv.ganho} PR</em>` : pv.bonusRival ? `<em class="vs-alta">⬆ Rival acima de você: +${pv.ganho} PR</em>` : `<em>Vitória +${pv.ganho} PR · derrota -${pv.perda}</em>`}</div>
         <div class="vs-time meu">${time.join('')}</div></div>`;
     try { navigator.vibrate && navigator.vibrate(80); } catch (e) { /* nada */ }
   }
@@ -241,10 +244,13 @@ const RanqueUI = (() => {
   // ---------- fim da partida ranqueada ----------
   function fim(r) {
     const rq = r.ranque;
-    const res = Ranque.aplicar(r.resultado, { dupla: rq.dupla, rivalI: rq.rivalI, coroas: r.coroas });
-    const ouro = r.resultado === 'vitoria' ? 20 + r.coroas * 5 + (rq.dupla ? 10 : 0) : 5;
+    const rivalPts = rq.rivalPts != null ? rq.rivalPts : Math.max(...(rq.rivais || []).map((b) => b.pts || 0), 0);
+    const res = Ranque.aplicar(r.resultado, { dupla: rq.dupla, rivalI: rq.rivalI, coroas: r.coroas, coroasInimigo: r.coroasInimigo, rivalPts });
+    const ouro = Math.round((r.resultado === 'vitoria' ? 20 + r.coroas * 5 + (rq.dupla ? 10 : 0) : 5) * (res.epica ? 1.5 : 1));
     Estado.d.ouro += ouro;
-    const niveis = Estado.ganharXp(r.resultado === 'vitoria' ? 34 + r.coroas * 5 : r.resultado === 'empate' ? 16 : 12);
+    // XP turbinado na ranqueada (bem mais que na batalha normal)
+    const xpConta = Math.round((r.resultado === 'vitoria' ? 60 + r.coroas * 8 : r.resultado === 'empate' ? 28 : 20) * (res.epica ? 1.5 : 1));
+    const niveis = Estado.ganharXp(xpConta);
     const passe = Passe.ganharPontos(r.resultado, r.coroas);
     Ranque.registrar({ modo: rq.dupla ? 'ranq2v2' : 'ranq', res: r.resultado, cz: [r.coroas, r.coroasInimigo], deck: r.deck, deckRival: r.deckRival, deckParceiro: r.deckParceiro,
       rival: { nome: rq.rivais.map((b) => b.nome).join(' e '), pat: rq.rivalI }, parceiro: rq.parceiro ? rq.parceiro.nome : null, pts: res.delta, pat: res.depois.i, seq: res.seq, dur: r.duracao });
@@ -254,19 +260,20 @@ const RanqueUI = (() => {
     const larguraAntes = a.i === f.i && a.base === f.base ? Math.round(a.prog * 100) : r.resultado === 'vitoria' ? 0 : 100;
     UI.modal({
       titulo,
-      classe: `modal-resultado modal-ranq ${r.resultado}`,
-      html: `<div class="placar-final"><span class="coroa azul">${r.coroas}</span><small>x</small><span class="coroa vermelha">${r.coroasInimigo}</span></div>
+      classe: `modal-resultado modal-ranq ${r.resultado}${res.epica ? ' epica' : ''}`,
+      html: `${res.epica ? '<div class="rr-epica"><b>VITÓRIA ÉPICA</b><small>3 coroas sem perder nenhuma torre!</small></div>' : ''}<div class="placar-final"><span class="coroa azul">${r.coroas}</span><small>x</small><span class="coroa vermelha">${r.coroasInimigo}</span></div>
         <div class="rr-emblema" style="--cor:${f.p.cor}">${emblema(f.i, 120)}<b>${f.nome}</b></div>
         <div class="rr-pontos ${res.delta >= 0 ? 'mais' : 'menos'}"><span id="rr-num">${res.delta >= 0 ? '+' : ''}0</span> PR</div>
         <div class="rr-detalhes">${[
           res.bonusRival ? `<span>⬆ Patente alta +${res.bonusRival}</span>` : '',
           res.bonusSeq ? `<span>🔥 Sequência x${res.seq} +${res.bonusSeq}</span>` : '',
+          res.bonusEpica ? `<span class="rr-ep">💥 Vitória Épica +${res.bonusEpica}</span>` : '',
           res.bonus3 ? '<span>👑 3 coroas +4</span>' : '',
           res.escudoUsado ? '<span>🛡️ A proteção segurou sua patente!</span>' : '',
           rq.dupla ? '<span>🤝 2v2 vale mais</span>' : '',
         ].join('')}</div>
         ${f.prox ? `<div class="tr-barra rr-barra"><i id="rr-barra" style="width:${larguraAntes}%"></i><span>${fmt(Ranque.dados().pts - f.base)} / ${fmt(f.prox - f.base)}</span></div>` : ''}
-        <div class="ganhos"><span><img class="ic-img" data-asset="ui/moeda" alt="" /> +${ouro}</span><span>🎫 +${res.xp.ganho} passe da ranqueada</span></div>
+        <div class="ganhos"><span><img class="ic-img" data-asset="ui/moeda" alt="" /> +${ouro}</span><span>⚡ +${xpConta} XP</span><span>🎫 +${res.xp.ganho} passe da ranqueada</span></div>
         ${res.caiu ? `<p class="aviso">Você caiu para ${f.nome}. Bora recuperar! 💪</p>` : ''}`,
       botoes: [{ texto: 'Continuar', classe: 'principal', acao: () => {
         Batalha.fechar(); M.tudo(); M.irPara('batalha');
@@ -289,21 +296,45 @@ const RanqueUI = (() => {
   }
 
   // ---------- subiu de patente / divisão ----------
+  // Inspirada nas promoções de rank dos jogos de celular: o emblema antigo treme, racha e explode,
+  // o novo desce com impacto, raios e onda de choque, e a faixa com o nome entra deslizando.
   function promocao(res, depois) {
-    const f = res.depois;
+    const f = res.depois, a = res.antes, grande = res.subiuPatente;
     const el = document.createElement('div');
-    el.className = `promocao${res.subiuPatente ? ' grande' : ''}`;
+    el.className = `promocao nova${grande ? ' grande' : ''}`;
     el.style.setProperty('--cor', f.p.cor);
     el.style.setProperty('--escura', f.p.escura);
-    el.innerHTML = `<div class="pm-raios"></div><div class="pm-conteudo">
-        <small>${res.subiuPatente ? 'NOVA PATENTE!' : 'SUBIU DE DIVISÃO!'}</small>
-        ${emblema(f.i, res.subiuPatente ? 230 : 180)}
-        <b>${f.nome}</b>
-        ${res.subiuPatente ? '<p>🛡️ Você ganhou 3 derrotas de proteção nesta patente.</p>' : ''}
-        <button class="btn-modal principal">Incrível! ✨</button></div>
-      ${Array.from({ length: 26 }, (_, i) => `<i class="pm-confete" style="--x:${Math.random() * 100}%;--d:${(Math.random() * 1.6).toFixed(2)}s;--r:${Math.round(Math.random() * 360)}deg;--c:${i % 3 === 0 ? f.p.cor : i % 3 === 1 ? '#fff' : '#FFD25E'}"></i>`).join('')}`;
+    el.style.setProperty('--cor-velha', a.p.cor);
+    const cacos = Array.from({ length: 14 }, (_, k) => {
+      const ang = (k / 14) * Math.PI * 2 + Math.random() * 0.4, dist = 110 + Math.random() * 120;
+      return `<i class="pm-caco" style="--dx:${Math.round(Math.cos(ang) * dist)}px;--dy:${Math.round(Math.sin(ang) * dist)}px;--rot:${Math.round(Math.random() * 540 - 270)}deg;--tam:${14 + Math.round(Math.random() * 18)}px"></i>`;
+    }).join('');
+    const brilhos = Array.from({ length: 22 }, () => `<i class="pm-brilho" style="--x:${Math.round(Math.random() * 100)}%;--d:${(2.2 + Math.random() * 2.5).toFixed(2)}s;--a:${(Math.random() * 3).toFixed(2)}s;--s:${(0.5 + Math.random()).toFixed(2)}"></i>`).join('');
+    const letras = (grande ? 'NOVA PATENTE!' : 'NOVA DIVISÃO!').split('').map((c, k) => `<span style="--k:${k}">${c === ' ' ? '&nbsp;' : c}</span>`).join('');
+    el.innerHTML = `<div class="pm-fundo"></div><div class="pm-raios"></div><div class="pm-raios dois"></div>${brilhos}
+      <div class="pm-palco">
+        <div class="pm-velho">${emblema(a.i, grande ? 190 : 160, { raios: false })}<i class="pm-rachaduras"></i></div>
+        <div class="pm-cacos">${cacos}</div>
+        <i class="pm-flash"></i><i class="pm-onda"></i><i class="pm-onda dois"></i>
+        <div class="pm-novo">${emblema(f.i, grande ? 230 : 180)}</div>
+      </div>
+      <div class="pm-textos">
+        <small class="pm-titulo">${letras}</small>
+        <div class="pm-faixa"><b>${f.nome}</b></div>
+        ${grande ? `<p class="pm-de">${esc(a.nome)} ➜ ${esc(f.nome)}</p><p class="pm-premio">🛡️ +3 derrotas de proteção nesta patente</p>` : `<p class="pm-de">${esc(a.nome)} ➜ ${esc(f.nome)}</p>`}
+        <button class="btn-modal principal">Incrível! ✨</button>
+      </div>
+      ${Array.from({ length: grande ? 34 : 18 }, (_, k) => `<i class="pm-confete" style="--x:${Math.random() * 100}%;--d:${(2.4 + Math.random() * 1.6).toFixed(2)}s;--r:${Math.round(Math.random() * 360)}deg;--c:${k % 3 === 0 ? f.p.cor : k % 3 === 1 ? '#fff' : '#FFD25E'}"></i>`).join('')}`;
     $('app').appendChild(el);
-    try { navigator.vibrate && navigator.vibrate([60, 60, 120]); } catch (e) { /* nada */ }
+    const T = grande ? 1 : 0.75; // a de divisão é mais curtinha
+    el.style.setProperty('--t', T);
+    const som = (n) => { try { typeof Som !== 'undefined' && Som.tocar(n); } catch (e) { /* nada */ } };
+    som('carga');
+    setTimeout(() => { el.classList.add('explodiu'); som('explosao'); }, 1150 * T);
+    setTimeout(() => { el.classList.add('impacto'); som('patente'); try { navigator.vibrate && navigator.vibrate([90, 40, 160]); } catch (e) { /* nada */ } }, 1500 * T);
+    setTimeout(() => el.classList.add('textos'), 1900 * T);
+    // tocar na tela pula direto pro final
+    el.addEventListener('pointerdown', (ev) => { if (!el.classList.contains('textos') && !ev.target.closest('button')) { el.classList.add('explodiu', 'impacto', 'textos', 'pulou'); } });
     el.querySelector('button').onclick = () => { el.classList.add('sumir'); setTimeout(() => { el.remove(); depois && depois(); }, 300); };
   }
 

@@ -143,6 +143,8 @@ const Som = (() => {
       case 'vitoria': [72, 76, 79, 84].forEach((n, i) => { cowbell(t + i * 0.13, n, d, 2600, 0.35); }); kick(t + 0.52, d); break;
       case 'derrota': [64, 62, 58, 55].forEach((n, i) => osc('triangle', hz(n), t + i * 0.18, 0.25, d, 0.3)); break;
       case 'bau': barulho(t, 0.25, d, { f: 900, pico: 0.3 }); [76, 79, 83, 88].forEach((n, i) => osc('triangle', hz(n), t + 0.15 + i * 0.07, 0.25, d, 0.22)); break;
+      case 'carga': { const o = osc('sawtooth', 110, t, 1.1, d, 0.12, 0.6); o.frequency.exponentialRampToValueAtTime(880, t + 1.1); barulho(t + 0.2, 0.9, d, { f: 2400, q: 2, pico: 0.12 }); break; }
+      case 'patente': kick(t, d); osc('sine', 55, t, 0.6, d, 0.5); [72, 76, 79, 84, 88].forEach((n, i) => { cowbell(t + 0.12 + i * 0.09, n, d, 2600, 0.3); }); [84, 88, 91].forEach((n) => osc('triangle', hz(n), t + 0.6, 0.9, d, 0.16)); break;
       case 'coroa': [79, 84, 88].forEach((n, i) => osc('triangle', hz(n), t + i * 0.08, 0.3, d, 0.25)); break;
       case 'emote': osc('sine', 660, t, 0.08, d, 0.2); osc('sine', 990, t + 0.07, 0.1, d, 0.2); break;
       default: break;

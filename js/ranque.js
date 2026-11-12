@@ -10,10 +10,11 @@ const Ranque = (() => {
     { id: 'bronze', nome: 'Bronze', cor: '#EEA06A', escura: '#6B3A1E', dif: 2 },
     { id: 'prata', nome: 'Prata', cor: '#E4ECF8', escura: '#4E6188', dif: 3 },
     { id: 'ouro', nome: 'Ouro', cor: '#FFC94A', escura: '#8A4F06', dif: 3 },
-    { id: 'platina', nome: 'Platina', cor: '#7FF0F5', escura: '#14606B', dif: 4 },
-    { id: 'diamante', nome: 'Diamante', cor: '#A8DBFF', escura: '#2A3F9A', dif: 4 },
-    { id: 'mestre', nome: 'Mestre', cor: '#C99BFF', escura: '#43177C', dif: 5 },
-    { id: 'mestre_pro', nome: 'Mestre Pro', cor: '#FF7AC0', escura: '#7A1040', dif: 5 },
+    // do Platina pra cima a IA não alivia: 'difMin' é o mínimo de esperteza e 'super' a chance de vir a IA super inteligente
+    { id: 'platina', nome: 'Platina', cor: '#7FF0F5', escura: '#14606B', dif: 5, difMin: 4, super: 0.15 },
+    { id: 'diamante', nome: 'Diamante', cor: '#A8DBFF', escura: '#2A3F9A', dif: 5, difMin: 4, super: 0.22 },
+    { id: 'mestre', nome: 'Mestre', cor: '#C99BFF', escura: '#43177C', dif: 5, difMin: 5, super: 0.32 },
+    { id: 'mestre_pro', nome: 'Mestre Pro', cor: '#FF7AC0', escura: '#7A1040', dif: 5, difMin: 5, super: 0.45 },
   ];
   const DIV = 100, COM_DIV = 8;
   const INICIO_MESTRE = COM_DIV * 3 * DIV; // 2400
@@ -50,7 +51,7 @@ const Ranque = (() => {
       r.temporadasAnteriores = [{ t: r.temporada, melhor: r.melhor }, ...(r.temporadasAnteriores || [])].slice(0, 12);
       r.temporada = temporadaAtual();
       r.pts = Math.round(r.pts * 0.55);
-      r.melhor = r.pts; r.v = 0; r.d = 0; r.e = 0; r.seq = 0; r.escudo = 0;
+      r.melhor = r.pts; r.v = 0; r.d = 0; r.e = 0; r.seq = 0; r.escudo = 0; r.epicas = 0;
       r.pro = false; r.xp = 0; r.pegos = { free: [], pro: [] };
       Estado.salvar();
     }
@@ -95,29 +96,41 @@ const Ranque = (() => {
     // dificuldade e nível das cartas dos bots crescem com a patente deles
     const dif = PATENTES[rivalI].dif;
     // cartas dos bots: nunca acima das suas (1 abaixo se a patente dele for igual ou menor); a esperteza vem do 'dif'
-    const nivelDelta = rivalI > meuI ? -1 : -2;
-    return { dupla, rivais, parceiro, rivalI, meuI, dif, nivelDelta };
+    // do Platina pra cima as cartas dos rivais chegam no seu nível (no Mestre, sempre)
+    const P = PATENTES[rivalI];
+    const nivelDelta = rivalI >= 8 ? 0 : rivalI >= 6 ? (rivalI > meuI ? 0 : -1) : rivalI > meuI ? -1 : -2;
+    const rivalPts = Math.max(...rivais.map((b) => b.pts));
+    return { dupla, rivais, parceiro, rivalI, meuI, dif, nivelDelta, difMin: P.difMin || 0, chanceSuper: P.super || 0, rivalPts };
   }
 
   // ---------- Pontos ----------
-  function previsao(dupla, rivalI) {
+  // rivalPts: pontos do rival mais forte (cada divisão acima de você também vale mais)
+  function previsao(dupla, rivalI, rivalPts = null) {
     const r = dados(), meuI = info(r.pts).i, diff = rivalI - meuI;
     const seq = r.seq + 1;
-    const ganho = (dupla ? 36 : 26) + Math.max(0, diff) * 7 + Math.min(16, Math.max(0, seq - 1) * 4);
-    let perda = (dupla ? 14 : 18) - Math.max(0, diff) * 4 + Math.max(0, -diff) * 3;
+    const divAcima = rivalPts == null ? 0 : Math.max(0, Math.floor((rivalPts - r.pts) / DIV));
+    const bonusRival = Math.min(60, Math.max(0, diff) * 12 + divAcima * 3);
+    const bonusSeq = Math.min(16, Math.max(0, seq - 1) * 4);
+    const ganho = (dupla ? 36 : 26) + bonusRival + bonusSeq;
+    let perda = (dupla ? 14 : 18) - Math.max(0, diff) * 5 + Math.max(0, -diff) * 3;
     if (meuI <= 1) perda = Math.round(perda * 0.5);
-    return { ganho, perda: Math.max(4, perda), bonusRival: Math.max(0, diff) * 7, bonusSeq: Math.min(16, Math.max(0, seq - 1) * 4) };
+    return { ganho, perda: Math.max(4, perda), bonusRival, bonusSeq, bonusEpica: BONUS_EPICA + (diff > 0 ? 5 : 0) };
   }
+  // Vitória Épica: 3 coroas sem perder nenhuma torre
+  const BONUS_EPICA = 15;
+  const ehEpica = (resultado, coroas, coroasInimigo) => resultado === 'vitoria' && coroas >= 3 && !coroasInimigo;
 
-  function aplicar(resultado, { dupla, rivalI, coroas = 0 }) {
+  function aplicar(resultado, { dupla, rivalI, coroas = 0, coroasInimigo = 0, rivalPts = null }) {
     const r = dados();
     const antes = info(r.pts);
-    const pv = previsao(dupla, rivalI);
-    let delta = 0, bonusSeq = 0, bonusRival = 0, bonus3 = 0, escudoUsado = false;
+    const pv = previsao(dupla, rivalI, rivalPts);
+    const epica = ehEpica(resultado, coroas, coroasInimigo);
+    let delta = 0, bonusSeq = 0, bonusRival = 0, bonus3 = 0, bonusEpica = 0, escudoUsado = false;
     if (resultado === 'vitoria') {
       r.seq++; r.maiorSeq = Math.max(r.maiorSeq || 0, r.seq); r.v++;
-      bonusSeq = pv.bonusSeq; bonusRival = pv.bonusRival; bonus3 = coroas === 3 ? 4 : 0;
-      delta = pv.ganho + bonus3;
+      bonusSeq = pv.bonusSeq; bonusRival = pv.bonusRival;
+      if (epica) { bonusEpica = pv.bonusEpica; r.epicas = (r.epicas || 0) + 1; r.epicasSempre = (r.epicasSempre || 0) + 1; } else bonus3 = coroas === 3 ? 4 : 0;
+      delta = pv.ganho + bonus3 + bonusEpica;
     } else if (resultado === 'derrota') {
       r.seq = 0; r.d++;
       delta = -Math.min(pv.perda, r.pts);
@@ -129,18 +142,18 @@ const Ranque = (() => {
     if (depois.i > antes.i) r.escudo = 3;
     r.melhor = Math.max(r.melhor || 0, r.pts);
     r.melhorSempre = Math.max(r.melhorSempre || 0, r.pts);
-    const xp = ganharXp(resultado, dupla, r.seq);
+    const xp = ganharXp(resultado, dupla, r.seq, epica);
     Estado.salvar();
-    return { antes, depois, delta, bonusSeq, bonusRival, bonus3, seq: r.seq, escudoUsado, escudo: r.escudo, xp,
+    return { antes, depois, delta, bonusSeq, bonusRival, bonus3, bonusEpica, epica, seq: r.seq, escudoUsado, escudo: r.escudo, xp,
       subiuPatente: depois.i > antes.i, subiuDivisao: depois.i === antes.i && depois.base > antes.base, caiu: depois.base < antes.base };
   }
 
   // ---------- Pro Pass da ranqueada ----------
   const PASSE_NIVEIS = 30, PASSE_XP = 100, PRECO_PRO = 900;
-  function ganharXp(resultado, dupla, seq) {
+  function ganharXp(resultado, dupla, seq, epica = false) {
     const r = dados();
     const antes = nivelPasse();
-    const g = (resultado === 'vitoria' ? 60 + Math.min(20, seq * 4) : resultado === 'empate' ? 35 : 25) + (dupla ? 10 : 0);
+    const g = (resultado === 'vitoria' ? 85 + Math.min(25, seq * 5) + (epica ? 30 : 0) : resultado === 'empate' ? 45 : 30) + (dupla ? 12 : 0);
     r.xp = Math.min(PASSE_NIVEIS * PASSE_XP, (r.xp || 0) + g);
     return { ganho: g, subiu: nivelPasse() > antes };
   }
@@ -227,7 +240,7 @@ const Ranque = (() => {
   // dados que vão para o perfil público
   const publico = () => { const r = dados(); return { pts: r.pts, melhor: r.melhorSempre || r.pts, v: r.v, d: r.d, temporada: r.temporada }; };
 
-  return {
+  return { ehEpica, BONUS_EPICA,
     PATENTES, info, img, temporadaAtual, nomeTemporada, diasRestantes, dados, pegarPremioTemporada, partida, previsao, aplicar,
     PASSE_NIVEIS, PASSE_XP, PRECO_PRO, nivelPasse, recompensa, icone, texto, temTrilha, podePegar, pendentes, pegar, comprarPro,
     sequenciaNormal, registrar, historico, publico, INICIO_MESTRE, INICIO_PRO, darEvolucao, CARTA_EVOLUCAO,
