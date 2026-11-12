@@ -24,9 +24,9 @@ const Ataques = (() => {
 
   const CLASSE_DA_CARTA = {
     tanque: ['itsuki', 'shizuku', 'gogeta_ssj4', 'goku_ssj3', 'goku_ssj4', 'goku_blue_lb', 'gogeta_ultra'],
-    assassino: ['bra', 'teto', 'pan_dbh', 'akame', 'mbappe', 'kashimo', 'goku_pressagio', 'diavolo'],
+    assassino: ['bra', 'teto', 'pan_dbh', 'akame', 'mbappe', 'kashimo', 'goku_pressagio', 'diavolo', 'mita_malvada'],
     atirador: ['mai', 'miku_nakano', 'pan_gt', 'riruka', 'rukia_remake', 'nino_nakano', 'gyro', 'johnny'],
-    mago: ['rukia', 'nami_last', 'hatsune_miku', 'bambietta', 'bulma', 'gojo', 'robin', 'pucci'],
+    mago: ['rukia', 'nami_last', 'hatsune_miku', 'bambietta', 'bulma', 'gojo', 'robin', 'pucci', 'mita_gentil'],
     enxame: ['mini'],
   };
   const classeDe = (c) => {
@@ -95,6 +95,8 @@ const Ataques = (() => {
     pucci: { v: { p: 'disco', vel: 230, tam: 20, giro: 720, rastro: '#D9B8FF' }, m: { disco: 3 }, d: 'Discos. A cada 3, rouba o disco do alvo (trava a habilidade e enfraquece).' },
     gyro: { v: { p: 'bola_aco', vel: 240, tam: 18, giro: 900, rastro: '#C9D3DE' }, m: { ricochete: 0.6, lentidao: [0.3, 1.5] }, d: 'Bola de Aço que quica em outro inimigo e deixa todos lentos.' },
     johnny: { v: { p: 'unha', vel: 330, tam: 15, giro: 1080, rastro: '#8FD3FF' }, m: { tusk: 0.15 }, d: 'Unhas giratórias de longe. +15% de dano por tiro seguido no mesmo alvo (até +60%).' },
+    mita_gentil: { v: { p: 'coracao_mita', vel: 220, tam: 17, rastro: '#FF8FC0' }, m: { mitaGentil: true }, d: 'Joga corações. Lembra de você e fica mais forte a cada partida juntos. Protege sua torre do rei uma vez.' },
+    mita_malvada: { v: { g: 'corte', s: 'tesoura', cor: '#E0204A' }, m: { mitaMalvada: true }, d: 'Corta com a tesoura. Volta da morte uma vez e deixa o bot rival confuso.' },
     goku_ui: { v: { g: 'impacto', cor: '#E8F4FF', s: 'ki_prata' }, m: { imune: true }, d: 'Imune a lentidão e atordoamento.' },
   };
   const padrao = (c) => (c && c.alcance > 40 ? { v: { p: 'ki_amarelo', vel: 300, tam: 14 } } : { v: { g: 'soco', cor: '#ffffff' } });

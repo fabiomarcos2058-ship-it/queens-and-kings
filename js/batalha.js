@@ -94,6 +94,7 @@ const Batalha = (() => {
       if (evento.turbo) s.turbo = true;
       if (evento.subita) { s.prorrogacao = true; s.t = DURACAO - 60; } // 2 minutos e a primeira torre decide
       if (evento.niveisV) s.niveisV = evento.niveisV;
+      if (evento.cartaIA && !s.vermelho.fila.slice(0, 4).includes(evento.cartaIA)) { s.vermelho.fila[Math.floor(Math.random() * 4)] = evento.cartaIA; s.vermelho.deck = [...s.vermelho.fila]; }
       if (evento.elixirInicial) { s.azul.elixir = s.vermelho.elixir = evento.elixirInicial; }
     }
     if (tutorial) { s.tutorial = tutorial; s.difIA = 1; s.nivelFixo = 1; s.iaTimer = 1e9; }
@@ -414,7 +415,7 @@ const Batalha = (() => {
       : s.niveis && s.niveis[quem] ? (s.niveis[quem][id] || 1)
       : quem === 'azul2' && s.niveisAzul2 ? (s.niveisAzul2[id] || 1)
       : s.niveisV ? (s.niveisV[id] || 1) : nivelCartaIA(id);
-    const f = Math.pow(1.1, nivel - 1) * (quem === 'azul' && Mod.flag('danoX5') ? 5 : 1);
+    const f = Math.pow(1.1, nivel - 1) * (quem === 'azul' && Mod.flag('danoX5') ? 5 : 1) * (quem === 'azul' && id === 'mita_gentil' && !s.convidado ? 1 + Estado.mitaAfeto() / 400 : 1);
     if (c.feitico) {
       lancarFeitico(time, c, x, y, Math.round(c.dano * f));
     } else if (c.barril) {
@@ -629,6 +630,16 @@ const Batalha = (() => {
     }
     e.vida -= dano;
     numero(e, dano, opc.crit ? 'critico' : opc.tipo);
+    // Mita Malvada: "Você achou que ia se livrar de mim?"
+    if (e.vida <= 0 && !e.torre && !e.reviveu && e.atk && e.atk.m && e.atk.m.mitaMalvada) {
+      e.reviveu = true;
+      e.vida = Math.round(e.max * 0.5); e.atord = 0; e.intocavel = 0.8;
+      atualizarHp(e);
+      fxEl('fx-glitch', e.x, e.y, 700); fxJ(8, e.x, e.y);
+      falar(e, 'Você achou que ia se livrar de mim?', 'fala-mita-m');
+      tremer(true);
+      return dano;
+    }
     if (!e.torre && e.atk && e.atk.m && e.atk.m.marmita && fonte) ninoBaka(e, dano);
     atualizarHp(e);
     piscar(e.el, 'levou');
@@ -797,6 +808,8 @@ const Batalha = (() => {
     if (h.tipo === 'congelar') congelar(t, h);
     if (h.tipo === 'quintuplas') quintuplas(t);
     if (h.tipo === 'starWorld') starWorld(t);
+    if (h.tipo === 'mitaJoga') mitaJoga(t);
+    if (h.tipo === 'deletar') deletar(t, h);
     if (h.tipo === 'zaWarudo') zaWarudo(t, h);
     if (h.tipo === 'kingCrimson') kingCrimson(t);
     if (h.tipo === 'madeInHeaven') madeInHeaven(t);
@@ -1162,7 +1175,7 @@ const Batalha = (() => {
 
   // =================== JoJo: Stands ===================
   const fxJ = (i, x, y) => { if (s.rede || s.aoVivo) s.eventos.push(['j', i, Math.round(x), Math.round(y)]); };
-  const FX_J = [['fx-ora', 650], ['fx-facas', 2600], ['fx-rolo', 1100], ['fx-kc', 800], ['fx-disco', 700], ['fx-tusk', 900]];
+  const FX_J = [['fx-ora', 650], ['fx-facas', 2600], ['fx-rolo', 1100], ['fx-kc', 800], ['fx-disco', 700], ['fx-tusk', 900], ['fx-coracao', 1200], ['fx-arquivo', 1400], ['fx-glitch', 700]];
   // Tempo parado: o outro time congela (tropas e torres). Quem tem moveNoTempo (Jotaro, Dio) continua andando.
   function pararTempo(t, seg, raio, nome) {
     typeof Som !== 'undefined' && Som.tocar('tempoParado');
@@ -1299,6 +1312,85 @@ const Batalha = (() => {
     if (r.tick <= 0) { r.tick = 0.5; ferir(t, Math.round(r.dps * 0.5 * (t.torre ? 0.4 : 1)), r.fonte.time, r.fonte, { atravessa: true, semEsquiva: true }); }
     if (t.rotInf && t.rotInf.resta <= 0) { t.rotInf = null; t.el.classList.remove('rotacao-infinita'); }
   }
+
+  // =================== MITAS (MiSide): elas sabem que estão num jogo ===================
+  const nomeJogador = () => String((Estado.d && Estado.d.nome) || 'você').slice(0, 16);
+  const minhaTropa = (t) => t.dono === 'azul' && !s.convidado; // tropa do jogador deste celular
+  const FALAS_MALVADA = ['{n}... por que você está fugindo de mim?', 'Eu tô te vendo, {n}.', 'Esse jogo é nosso agora, {n}.', 'Não fecha o jogo, tá? 🖤', '{n}, olha pra mim.', 'Você não vai me deixar, né?', 'Eu sei onde você joga, {n}.'];
+  // Mita Gentil: fala com você e protege a sua torre do rei uma vez
+  function mitaGentilPassiva(t) {
+    if (!t.cumprimentou) {
+      t.cumprimentou = true;
+      if (minhaTropa(t)) { const af = Estado.mitaAfeto(); falar(t, af >= 60 ? `${nomeJogador()}! Senti sua falta 💕` : `Oi, ${nomeJogador()}! Vamos ganhar juntos? 💕`, 'fala-mita'); }
+      else falar(t, 'Oi! Eu sou a Mita 💕', 'fala-mita');
+    }
+    if (t.protegeu) return;
+    const rei = s.ent.find((e) => e.torre && e.tipo === 'rei' && e.time === t.time && e.vida > 0);
+    if (rei && rei.vida < rei.max * 0.4) {
+      t.protegeu = true;
+      rei.escudo = (rei.escudo || 0) + Math.round(rei.max * 0.25);
+      rei.el.classList.add('escudo-mita');
+      fxEl('fx-coracao', rei.x, rei.y, 1200); fxJ(6, rei.x, rei.y);
+      falar(rei, minhaTropa(t) ? `Eu te protejo, ${nomeJogador()}!` : 'Deixa comigo!', 'fala-mita');
+    }
+  }
+  // "Deixa que eu jogo!": joga a carta mais forte da mão do dono dela, de graça
+  function mitaJoga(t) {
+    const quem = t.dono || t.time, L = s[quem];
+    if (!L) return;
+    const mao = L.fila.slice(0, 4).map((id, i) => ({ i, c: Estado.carta(id) })).filter((m) => !m.c.feitico && !m.c.barril && m.c.id !== 'mita_gentil');
+    if (!mao.length) { falar(t, 'Hmm... sua mão só tem feitiço 😅', 'fala-mita'); return; }
+    const m = mao.sort((a, b) => b.c.custo - a.c.custo)[0];
+    const frente = t.time === 'azul' ? -26 : 26;
+    let x = Math.max(28, Math.min(W - 28, t.x)), y = t.y + frente;
+    for (let k = 0; k < 10 && !podeColocar(t.time, x, y); k++) y += t.time === 'azul' ? 14 : -14;
+    if (!podeColocar(t.time, x, y)) { x = t.x; y = t.y; }
+    falar(t, minhaTropa(t) ? `Deixa que eu jogo essa pra você, ${nomeJogador()}!` : 'Deixa que eu jogo!', 'fala-mita');
+    fxEl('fx-coracao', x, y, 1200); fxJ(6, x, y);
+    L.elixir += m.c.custo; // de graça
+    jogar(quem, m.i, x, y);
+  }
+  // Mita Malvada: "Excluir arquivo"
+  function deletar(t, h) {
+    const alvos = s.ent.filter((e) => !e.torre && e.time !== t.time && e.vida > 0 && dist(e, t) < 230).sort((a, b) => b.vida - a.vida);
+    const alvo = alvos[0];
+    if (!alvo) { falar(t, 'Ninguém pra apagar... ainda.', 'fala-mita-m'); return; }
+    const jan = document.querySelector('.arena-grande-janela');
+    if (jan) {
+      const caixa = document.createElement('div');
+      caixa.className = 'mita-dialogo';
+      caixa.innerHTML = `<div class="md-titulo">🗑️ Excluir arquivo</div><div class="md-corpo">Tem certeza de que deseja excluir permanentemente<br><b>"${alvo.carta.id}.carta"</b>?</div><div class="md-botoes"><span class="md-sim">Sim</span><span>Não</span></div><i class="md-cursor"></i>`;
+      jan.appendChild(caixa);
+      setTimeout(() => caixa.remove(), 1500);
+    }
+    if (s.rede || s.aoVivo) s.eventos.push(['j', 7, Math.round(alvo.x), Math.round(alvo.y)]);
+    falar(t, 'Isso aqui não devia existir.', 'fala-mita-m');
+    agendar(1.0, () => {
+      if (alvo.vida <= 0 || t.vida <= 0) return;
+      fxEl('fx-glitch', alvo.x, alvo.y, 700); fxJ(8, alvo.x, alvo.y);
+      sacudir();
+      if (alvo.vida <= 2500 && !(alvo.atk && alvo.atk.m && alvo.atk.m.mitaMalvada)) { falar(alvo, 'ARQUIVO EXCLUÍDO', 'fala-mita-m'); ferir(alvo, alvo.vida + (alvo.escudo || 0) + 1, t.time, t, { atravessa: true, semEsquiva: true }); }
+      else ferir(alvo, Math.round((h.dano || 1600) * (t.f || 1)), t.time, t, { atravessa: true, semEsquiva: true });
+    });
+  }
+  // a Malvada CONTRA você: ela olha pra você (efeitos na sua tela)
+  function mitaOlhando(dt) {
+    if (s.convidado || !s.ent.some((e) => !e.torre && e.vida > 0 && e.time === 'vermelho' && e.atk && e.atk.m && e.atk.m.mitaMalvada)) return;
+    if ((s.mitaOlhar = (s.mitaOlhar ?? 3) - dt) > 0) return;
+    s.mitaOlhar = 7 + Math.random() * 4;
+    const b = $('batalha');
+    b.classList.add('mita-glitch');
+    setTimeout(() => b.classList.remove('mita-glitch'), 650);
+    const fala = FALAS_MALVADA[Math.floor(Math.random() * FALAS_MALVADA.length)].replace('{n}', nomeJogador());
+    const el = document.createElement('div');
+    el.className = 'mita-sussurro';
+    el.innerHTML = `<video src="assets/cartas/videos/mita_malvada_rosto.mp4" autoplay muted loop playsinline></video><span>${fala.replace(/</g, '&lt;')}</span>`;
+    (document.querySelector('.arena-grande-janela') || b).appendChild(el);
+    setTimeout(() => el.remove(), 2600);
+    if (typeof Som !== 'undefined') Som.tocar('esquiva');
+  }
+  // tem Mita Malvada viva do outro lado do bot? (ela confunde a IA)
+  const mitaConfundeIA = (timeIA) => s.ent.some((e) => !e.torre && e.vida > 0 && e.time !== timeIA && e.atk && e.atk.m && e.atk.m.mitaMalvada);
 
   // Evolução: Expansão de Domínio — Vazio Infinito
   function expansaoDominio(t) {
@@ -1948,6 +2040,8 @@ const Batalha = (() => {
         || ((h.tipo === 'golpes' || h.tipo === 'furia') && perto && (t.alvo.torre || t.alvo.vida > t.dano))
         || ((h.tipo === 'kamehameha' || h.tipo === 'vazioPurpura') && t.alvo && dist(t, t.alvo) < 240)
         || (h.tipo === 'esquiva' && perto && t.vida < t.max * 0.8)
+        || (h.tipo === 'mitaJoga' && L.fila.slice(0, 4).some((id) => { const c = Estado.carta(id); return !c.feitico && !c.barril && c.custo >= 4; }))
+        || (h.tipo === 'deletar' && s.ent.some((e) => !e.torre && e.time !== t.time && e.vida > 600 && dist(e, t) < 230))
         || (h.tipo === 'starWorld' && s.ent.filter((e) => e.time !== t.time && e.vida > 0 && dist(e, t) < 170).length >= 2)
         || (h.tipo === 'zaWarudo' && (s.ent.filter((e) => !e.torre && e.time !== t.time && e.vida > 0).length >= 3 || (perto && t.alvo.torre)))
         || (h.tipo === 'kingCrimson' && perto && (t.vida < t.max * 0.6 || t.alvo.vida > t.dano * 3))
@@ -1965,8 +2059,9 @@ const Batalha = (() => {
     const nivel = Math.pow(1.1, s.nivelIA - 1);
 
     // Em dificuldades baixas a IA "erra" e joga de forma aleatória/burra
-    if (dif <= 2 && pode.length) {
-      const chanceBurra = dif === 1 ? 0.72 : 0.38;
+    const confusa = mitaConfundeIA(meuT);
+    if ((dif <= 2 || confusa) && pode.length) {
+      const chanceBurra = dif === 1 ? 0.72 : dif === 2 ? 0.38 : 0.3; // a Mita Malvada bagunça a cabeça do bot
       if (Math.random() < chanceBurra) {
         const m = pode[Math.floor(Math.random() * pode.length)];
         const x = PONTES[Math.random() < 0.5 ? 0 : 1] + (Math.random() * 40 - 20);
@@ -2290,7 +2385,7 @@ const Batalha = (() => {
         marcarTempo();
       } else if (ev[0] === 'j') {
         const [cl, ms] = FX_J[ev[1]] || FX_J[0];
-        fxEl(cl, mx(ev[2]), my(ev[3]), ms);
+        if (cl !== 'fx-arquivo') fxEl(cl, mx(ev[2]), my(ev[3]), ms);
       } else if (ev[0] === 'v') {
         fxEl(ev[1] ? 'fx-mano' : 'fx-bracos', mx(ev[2]), my(ev[3]), ev[1] ? 1150 : 620);
       } else if (ev[0] === 'n') {
@@ -2433,6 +2528,7 @@ const Batalha = (() => {
     }
 
     if (s.adaptativa && !s.superIA && (s.adaptaTimer = (s.adaptaTimer ?? 12) - dt) <= 0) { s.adaptaTimer = 12; adaptarIA(); }
+    mitaOlhando(dt);
     for (const quem of s.ias) ia(dt, quem);
 
     // habilidades: recarga e duração dos efeitos
@@ -2464,6 +2560,7 @@ const Batalha = (() => {
       if (mm && (mm.furiaNamek || mm.pulosKame || mm.atravessar)) checarFuria(t, dt);
       if (t.rotInf) rodarRotacao(t, dt);
       if (s.aceleraTempo && s.t < s.aceleraTempo.ate && t.time === s.aceleraTempo.time && !(t.acelerado > 0)) { t.acelerado = s.aceleraTempo.ate - s.t; t.el.classList.add('acelerada'); }
+      if (mm && mm.mitaGentil) mitaGentilPassiva(t);
       if (mm && mm.marmita) ninoPassiva(t, dt);
       if (mm && mm.hana) robinDefesa(t, dt);
       if (t.vida <= 0) continue;

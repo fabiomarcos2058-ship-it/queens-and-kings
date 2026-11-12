@@ -403,6 +403,10 @@ const Estado = (() => {
   // nível que a carta usa de verdade na batalha
   const nivelEfetivo = (id) => Math.max(1, ((d.colecao[id] && d.colecao[id].nivel) || 1) - cansaco(id) * 2);
 
+  // ---------- Afeto da Mita Gentil (ela lembra de você entre as partidas) ----------
+  const mitaAfeto = () => Math.max(0, Math.min(100, d.mitaAfeto || 0));
+  function ganharAfeto(q) { d.mitaAfeto = Math.min(100, mitaAfeto() + q); salvar(); }
+
   // ---------- Habilidade do jogador (a IA se adapta a ela) ----------
   // 1 = começando, 5 = joga muito. Começa pelos troféus e muda a cada partida contra a IA.
   function habilidade() {
@@ -487,7 +491,7 @@ const Estado = (() => {
 
   return {
     get d() { return d; }, carregar, salvar, apagar, importar, recarregarCatalogo, aoSalvar, carta, stats, catalogo: () => catalogo, tem, liberada, disponiveis, proximaLiberacao, baisAteLendaria,
-    habilidade, ajustarHabilidade, registrarUsoVigiado, cansaco, nivelEfetivo, COPIAS, COPIAS_RAR, copiasNivel, OURO, OURO_RAR, ouroNivel, NIVEL_MAX, BAUS, XP_NIVEL, CORINGAS, darCoringa, usarCoringa, maxada, faltaParaMax,
+    mitaAfeto, ganharAfeto, habilidade, ajustarHabilidade, registrarUsoVigiado, cansaco, nivelEfetivo, COPIAS, COPIAS_RAR, copiasNivel, OURO, OURO_RAR, ouroNivel, NIVEL_MAX, BAUS, XP_NIVEL, CORINGAS, darCoringa, usarCoringa, maxada, faltaParaMax,
     contarUsos, usosRestantes, todasCartas: () => todas.filter((c) => !c.token),
     TORRE_OURO, TROPAS_TORRE, nivelRei, minhasTorres, statsTorre, podeEvoluirTorre, evoluirTorre, escolherTropaTorre,
     ganharXp, podeEvoluir, evoluir, abrirBau, tempoRestante, sortearCopias, ofertasDoDia, presenteDiario, sorteio,

@@ -137,6 +137,102 @@ const Eventos = (() => {
     }));
   }
 
+  // ---------- Mundo das Mitas (dois desafios) ----------
+  const FIM_MITAS = new Date(2026, 10, 30, 23, 59, 59);
+  const MITAS = {
+    mitaGentil: { carta: 'mita_gentil', nome: 'Um dia com a Mita Gentil', vitorias: 4, vidas: 3, preco: 10, cor: 'gentil',
+      dif: (v) => 2 + Math.min(2, v), premios: [{ ouro: 300 }, { gemas: 20 }, { bau: 'prata' }, { carta: 'mita_gentil' }],
+      fala: '"Oi, {n}! Eu vou lembrar de cada partida que a gente jogar junto, tá? 💕"' },
+    mitaMalvada: { carta: 'mita_malvada', nome: 'Fuja da Mita Malvada', vitorias: 6, vidas: 2, preco: 25, cor: 'malvada', requer: 'mita_gentil', cartaIA: 'mita_malvada',
+      dif: (v) => (v >= 5 ? 6 : 3 + Math.min(2, Math.floor(v / 2))), premios: [{ ouro: 500 }, { gemas: 30 }, { bau: 'ouro' }, { gemas: 60 }, { bau: 'ouro' }, { carta: 'mita_malvada' }],
+      fala: '"Você ganhou, {n}... então agora você é meu. Pra sempre. 🖤"' },
+  };
+  const mitasAbertas = () => Date.now() < FIM_MITAS.getTime();
+  const diasMitas = () => Math.max(0, Math.ceil((FIM_MITAS.getTime() - Date.now()) / 86400000));
+  function dadosMita(k) {
+    const d = Estado.d;
+    if (!d.desafiosMita) d.desafiosMita = {};
+    return d.desafiosMita[k] || (d.desafiosMita[k] = { v: 0, l: 0, tentativas: 0, ativo: false });
+  }
+  const nomeJ = () => String(Estado.d.nome || 'você');
+  function jogarMita(k, iniciar) {
+    const D = MITAS[k], f = dadosMita(k);
+    if (!mitasAbertas()) { UI.toast('O evento das Mitas acabou 😢'); return; }
+    if (D.requer && !Estado.tem(D.requer)) { UI.toast('Ganhe a Mita Gentil primeiro… ela vai te proteger 💕'); return; }
+    if (!f.ativo) {
+      if (f.tentativas > 0) {
+        if (Estado.d.gemas < D.preco) { UI.toast(`Precisa de ${D.preco} gemas para tentar de novo`); return; }
+        Estado.d.gemas -= D.preco;
+      }
+      Object.assign(f, { ativo: true, v: 0, l: 0, tentativas: f.tentativas + 1 });
+    }
+    if (f.l >= D.vidas) { f.ativo = false; Estado.salvar(); UI.toast('Suas vidas acabaram 💔'); return; }
+    f.l++; f.emJogo = true; // sair no meio conta como derrota (a vida volta se vencer/empatar)
+    Estado.salvar();
+    iniciar({ id: k, nome: `${D.nome} · ${f.v + 1}ª batalha`, dif: D.dif(f.v), mita: k, cartaIA: D.cartaIA });
+  }
+  function fimMita(r, { mostrarBau, tudo }) {
+    const k = r.evento.mita, D = MITAS[k], f = dadosMita(k);
+    const ganhou = r.resultado === 'vitoria';
+    const contava = f.emJogo;
+    f.emJogo = false;
+    if (contava && r.resultado !== 'derrota') f.l = Math.max(0, f.l - 1);
+    if (!contava && r.resultado === 'derrota') f.l++;
+    if (ganhou) {
+      const premio = D.premios[Math.min(f.v, D.premios.length - 1)];
+      f.v++;
+      if (f.v >= D.vitorias) { f.ativo = false; f.completo = true; }
+      Estado.salvar();
+      UI.modal({ titulo: k === 'mitaMalvada' ? '🖤 Venceu!' : '💕 Venceu!', html: `<p class="ev-res">${f.v >= D.vitorias ? 'Desafio completo!' : `Vitória ${f.v}/${D.vitorias}! Você ganhou <b>${txtPremio(premio)}</b>`}</p>`, botoes: [{ texto: 'Oba!', classe: 'principal' }] });
+      setTimeout(() => {
+        if (premio.carta) {
+          if (Estado.tem(premio.carta)) { Estado.d.gemas += 150; Estado.salvar(); UI.toast('Você já tinha ela: +150 💎'); }
+          else revelarNino(Ranque.darEvolucao(premio.carta), 'LENDÁRIA EXCLUSIVA DE EVENTO', D.fala.replace('{n}', nomeJ()));
+        } else darPremio(premio, mostrarBau);
+        tudo();
+      }, 120);
+      return;
+    }
+    const acabou = f.l >= D.vidas;
+    if (acabou) f.ativo = false;
+    Estado.salvar();
+    UI.modal({
+      titulo: acabou ? (k === 'mitaMalvada' ? '🖤 Ela te pegou' : '💔 Fim do desafio') : r.resultado === 'empate' ? 'Empate!' : 'Derrota',
+      html: `<p class="ev-res">${acabou ? (k === 'mitaMalvada' ? `"Volta logo, ${nomeJ()}... eu vou estar te esperando." Tente de novo por ${D.preco} 💎.` : `Você chegou a <b>${f.v}</b> vitória${f.v === 1 ? '' : 's'}. Tente de novo por ${D.preco} 💎!`) : r.resultado === 'empate' ? 'Empate não conta. Bora de novo!' : `Ainda restam <b>${D.vidas - f.l}</b> vida${D.vidas - f.l === 1 ? '' : 's'}.`}</p>`,
+      botoes: [{ texto: 'OK', classe: 'principal', acao: () => tudo() }],
+    });
+  }
+  function htmlMitas() {
+    const caixa = (k) => {
+      const D = MITAS[k], f = dadosMita(k), tem = Estado.tem(D.carta), trava = D.requer && !Estado.tem(D.requer);
+      const pips = Array.from({ length: D.vitorias }, (_, i) => `<span class="fn-pip${i < f.v ? ' ok' : ''}${i === D.vitorias - 1 ? ' final' : ''}">${i === D.vitorias - 1 ? `<img src="assets/cartas/${D.carta}_medalhao.png" alt="" />` : i + 1}</span>`).join('');
+      const vidas = Array.from({ length: D.vidas }, (_, i) => `<i class="${i < D.vidas - f.l ? '' : 'perdida'}">${k === 'mitaMalvada' ? '🖤' : '💗'}</i>`).join('');
+      const botao = !mitasAbertas() ? '<div class="selo">Encerrado</div>' : trava ? '<div class="selo mita-trava">🔒 Ganhe a Gentil primeiro</div>'
+        : `<button class="selo botao mita-jogar" data-mita="${k}">${f.ativo ? `Jogar ${f.v + 1}ª batalha` : f.tentativas ? `De novo · ${D.preco} 💎` : 'Começar (grátis)'}</button>`;
+      return `<div class="mita-caixa ${D.cor}${trava ? ' travada' : ''}"><video src="assets/cartas/videos/${D.carta}.mp4" autoplay muted loop playsinline></video>
+        <div class="mc-conteudo"><b>${D.nome}</b><span>${tem ? 'Ela já é sua! Jogue pelos prêmios.' : `Vença <b>${D.vitorias}</b> antes de perder ${D.vidas}${k === 'mitaMalvada' ? '. Ela joga contra você… e a última batalha é contra a IA super inteligente' : ''}.`}</span>
+        <div class="fn-pips">${pips}</div><div class="fn-linha"><div class="fn-vidas">${vidas}</div>${botao}</div><button class="fn-ver" data-ver="${D.carta}">Ver a carta</button></div></div>`;
+    };
+    return `<div class="mitas-evento"><div class="mitas-cab"><small>EVENTO ESPECIAL · ${diasMitas()} dias</small><b>🎮 Mundo das Mitas</b><span>Duas lendárias que sabem que estão dentro de um jogo.</span></div>${caixa('mitaGentil')}${caixa('mitaMalvada')}</div>`;
+  }
+  // a Mita Malvada aparece no menu às vezes (ela sabe que você está aí)
+  let espiou = false;
+  function mitaEspia() {
+    if (espiou || !Estado.tem('mita_malvada') || document.body.classList.contains('em-batalha') || Math.random() > 0.35) return;
+    espiou = true;
+    setTimeout(() => {
+      if (document.body.classList.contains('em-batalha')) return;
+      const falas = ['{n}... você voltou. Eu sabia. 🖤', 'Você vai jogar comigo hoje, né, {n}?', 'Eu fiquei aqui te esperando, {n}.', 'Não me deixa fora do deck, tá? 🖤'];
+      const el = document.createElement('div');
+      el.className = 'mita-espia';
+      el.innerHTML = `<video src="assets/cartas/videos/mita_malvada_rosto.mp4" autoplay muted loop playsinline></video><span>${falas[Math.floor(Math.random() * falas.length)].replace('{n}', esc(nomeJ()))}</span>`;
+      document.body.appendChild(el);
+      el.onclick = () => el.remove();
+      setTimeout(() => el.classList.add('saindo'), 4200);
+      setTimeout(() => el.remove(), 4800);
+    }, 2500 + Math.random() * 4000);
+  }
+
   // ---------- tela (dentro da aba Eventos) ----------
   function html() {
     const f = nino();
@@ -165,12 +261,14 @@ const Eventos = (() => {
         <div class="ev-barra"><i style="width:${(h.qtd / LIMITE_TOKENS_DIA) * 100}%"></i><small>${h.qtd}/${LIMITE_TOKENS_DIA} hoje</small></div>
         <small class="modo-tempo">Você tem <b>${UI.fmt(Estado.d.tokens || 0)}</b> tokens</small></div>
         <div class="ev-tk-botoes"><button class="selo botao" id="tk-jogar">Jogar</button><button class="selo botao tk-trocar" id="tk-trocar">Trocar</button></div></div>`;
-    return `${festival}${tokens}<div class="eventos-cab">🎪 Modos de hoje</div>${modos}`;
+    return `${htmlMitas()}${festival}${tokens}<div class="eventos-cab">🎪 Modos de hoje</div>${modos}`;
   }
   function ligar(raiz, { iniciar, verCarta }) {
     raiz.querySelectorAll('[data-modo]').forEach((b) => (b.onclick = () => jogarModo(b.dataset.modo, iniciar)));
     const j = raiz.querySelector('#fn-jogar');
     if (j) j.onclick = () => jogarFestival(iniciar);
+    raiz.querySelectorAll('[data-mita]').forEach((b) => (b.onclick = () => jogarMita(b.dataset.mita, iniciar)));
+    raiz.querySelectorAll('[data-ver]').forEach((b) => (b.onclick = () => verCarta(Estado.carta(b.dataset.ver))));
     const tj = raiz.querySelector('#tk-jogar');
     if (tj) tj.onclick = () => jogarTokens(iniciar);
     const tt = raiz.querySelector('#tk-trocar');
@@ -189,7 +287,7 @@ const Eventos = (() => {
         <div class="rn-palco">${Cartas.html(c, { mini: true })}</div>
         <b>${esc(c.nome)}</b>
         <p>${fala}</p>
-        <button class="btn-modal principal">Bem-vinda, Nino! 🎀</button></div>`;
+        <button class="btn-modal principal">Bem-vinda, ${esc(c.nome.split(' ')[0])}! ${c.id === 'mita_malvada' ? '🖤' : '🎀'}</button></div>`;
     $('app').appendChild(el);
     try { navigator.vibrate && navigator.vibrate([80, 50, 160]); } catch (e) { /* nada */ }
     el.querySelector('button').onclick = () => { el.classList.add('sumir'); setTimeout(() => el.remove(), 300); };
@@ -207,6 +305,7 @@ const Eventos = (() => {
   }
   function fim(r, { mostrarBau, tudo }) {
     const ev = r.evento || {};
+    if (ev.mita) { fimMita(r, { mostrarBau, tudo }); return; }
     const ganhou = r.resultado === 'vitoria';
     const d = Estado.d;
     if (ev.festival) {
@@ -267,6 +366,13 @@ const Eventos = (() => {
         Estado.salvar();
         UI.toast('Você saiu no meio de uma batalha do Festival: contou como derrota 💔');
       }
+      // desafios das Mitas: saiu no meio = derrota; completou sem receber = recebe
+      for (const k of Object.keys(MITAS)) {
+        const fm = dadosMita(k);
+        if (fm.emJogo) { fm.emJogo = false; if (fm.l >= MITAS[k].vidas) fm.ativo = false; Estado.salvar(); }
+        if (fm.completo && !Estado.tem(MITAS[k].carta)) setTimeout(() => { if (!Estado.tem(MITAS[k].carta)) revelarNino(Ranque.darEvolucao(MITAS[k].carta), 'LENDÁRIA EXCLUSIVA DE EVENTO', MITAS[k].fala.replace('{n}', nomeJ())); }, 900);
+      }
+      mitaEspia();
       // completou o festival mas a Nino não veio (bug antigo do botão "Pegar")
       if ((f.completo || f.v >= VITORIAS) && !Estado.tem(NINO)) {
         f.completo = true; f.ativo = false;

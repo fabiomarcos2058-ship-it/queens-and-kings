@@ -34,3 +34,6 @@
 
 ## Personagens de JoJo (Jotaro, Dio, Diavolo, Pucci, Gyro, Johnny)
 - As imagens das cartas e das telas de habilidade foram enviadas pela criadora; aqui só foram recortadas. Os desenhos do disco, da bola de aço, da unha e da faca foram feitos à mão para o jogo, em SVG simples.
+
+## Mita Gentil e Mita Malvada
+- Os vídeos das cartas foram enviados pela criadora; aqui só foram recortados e viraram loops. A tesoura e o coração dos ataques são desenhos simples feitos à mão para o jogo.

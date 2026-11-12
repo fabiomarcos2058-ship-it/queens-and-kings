@@ -904,6 +904,8 @@
 
   function fimDeBatalha(r) {
     if (!(r.evento && r.evento.deck) && !r.tutorial) esgotadas = esgotadas.concat(Estado.contarUsos());
+    // Mita Gentil lembra de cada partida com você
+    if (!r.tutorial && (r.deck || []).includes('mita_gentil')) Estado.ganharAfeto(r.resultado === 'vitoria' ? 5 : 2);
     // 🤖 Fiscal do Goku
     if (!r.tutorial && !(r.evento && r.evento.deck)) {
       const antes = Estado.cansaco('goku_ui');

@@ -1868,6 +1868,95 @@
         "dano": 900,
         "descricao": "Rotação Infinita no alvo: 900 de dano em 6s que atravessa esquiva e escudos, deixa ele 40% mais lento e, se ele morrer, a rotação pula pro inimigo mais perto."
       }
+    },
+    {
+      "id": "mita_gentil",
+      "nome": "Mita Gentil",
+      "raridade": "lendaria",
+      "custo": 4,
+      "tipo": "Suporte · Evento",
+      "trofeus": 0,
+      "exclusivo": [],
+      "nivelInicial": 5,
+      "evento": true,
+      "video": "videos/mita_gentil.mp4",
+      "videoRosto": "videos/mita_gentil_rosto.mp4",
+      "rosto": [
+        368,
+        440,
+        260
+      ],
+      "arte": [
+        0,
+        40,
+        720
+      ],
+      "descricao": "Ela lembra de você. Fala com você pelo nome, fica mais forte a cada partida que vocês jogam juntos e até joga cartas por você.",
+      "vida": 1000,
+      "dano": 160,
+      "velocidade": 50,
+      "alcance": 80,
+      "cadencia": 1.1,
+      "alvo": "tudo",
+      "arena": 1,
+      "danoTorre": 0.6,
+      "passiva": {
+        "nome": "Ela lembra de você",
+        "tipo": "mitaGentil",
+        "descricao": "Ganha afeto a cada partida com você no deck (até +25% de vida e dano, pra sempre). Uma vez por partida, se a sua torre do rei ficar fraca, ela protege com um escudo de coração."
+      },
+      "habilidade": {
+        "nome": "Deixa que eu jogo!",
+        "tipo": "mitaJoga",
+        "custo": 2,
+        "recarga": 20,
+        "descricao": "Ela pega uma carta da SUA mão (a mais forte) e joga por você, de graça, do lado dela."
+      }
+    },
+    {
+      "id": "mita_malvada",
+      "nome": "Mita Malvada",
+      "raridade": "lendaria",
+      "custo": 5,
+      "tipo": "Assassina · Evento",
+      "trofeus": 0,
+      "exclusivo": [],
+      "nivelInicial": 5,
+      "evento": true,
+      "video": "videos/mita_malvada.mp4",
+      "videoRosto": "videos/mita_malvada_rosto.mp4",
+      "rosto": [
+        260,
+        600,
+        230
+      ],
+      "arte": [
+        0,
+        216,
+        576
+      ],
+      "descricao": "Ela sabe que é um jogo. Volta da morte uma vez, bagunça a cabeça do bot e consegue apagar cartas da existência.",
+      "vida": 1330,
+      "dano": 295,
+      "velocidade": 54,
+      "alcance": 18,
+      "cadencia": 0.95,
+      "alvo": "tudo",
+      "arena": 1,
+      "danoTorre": 0.55,
+      "passiva": {
+        "nome": "Você não vai se livrar de mim",
+        "tipo": "mitaMalvada",
+        "descricao": "Na primeira vez que morrer, ela volta com metade da vida. Enquanto está viva, o bot rival fica confuso e erra jogadas. Se ela estiver CONTRA você… ela olha pra você."
+      },
+      "habilidade": {
+        "nome": "Excluir arquivo",
+        "tipo": "deletar",
+        "custo": 4,
+        "recarga": 22,
+        "dano": 1600,
+        "descricao": "Abre uma janela de 'Excluir arquivo' e apaga a carta inimiga mais forte perto dela. Se for grande demais pra apagar, causa 1600 de dano."
+      }
     }
   ]
 }
