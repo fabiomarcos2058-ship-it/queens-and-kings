@@ -32,3 +32,8 @@ clay_roof_tiles
 marble_tiles
 coast_sand_rocks_02
 burned_ground_01
+rust_coarse_01
+rusty_metal_04
+velour_velvet
+crepe_satin
+marble_cliff_04

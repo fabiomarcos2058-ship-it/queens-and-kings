@@ -8,6 +8,7 @@ on:
     paths:
       - 'tools/baixar_recursos.sh'
       - 'tools/recursos/texturas.txt'
+      - 'tools/recursos/ambientcg.txt'
 
 permissions:
   contents: write
