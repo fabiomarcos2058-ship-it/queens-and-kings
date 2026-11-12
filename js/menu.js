@@ -914,7 +914,8 @@
     if (r.tutorial) { Tutorial.fim(r); return; }
     if (r.evento) {
       Ranque.registrar({ modo: 'evento', res: r.resultado, cz: [r.coroas, r.coroasInimigo], deck: r.deck, deckRival: r.deckRival, rival: { nome: r.evento.nome }, dur: r.duracao });
-      Eventos.fim(r, { mostrarBau, tudo }); return;
+      // fecha a tela da batalha (antes ela ficava aberta atrás do resultado)
+      Eventos.fim(r, { mostrarBau, tudo: () => { Batalha.fechar(); tudo(); irPara('eventos'); } }); return;
     }
     if (r.ranque) { RanqueUI.fim(r); return; }
     if (r.modo === '2v2') { fimDupla(r); return; }

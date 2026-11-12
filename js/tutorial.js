@@ -70,7 +70,7 @@ const Tutorial = (() => {
       html: `<p class="ev-res">${ganhou ? 'Você venceu sua primeira batalha guiada! 🎉' : 'Não foi dessa vez, mas agora você já sabe jogar!'}</p>
         ${primeira ? `<p class="ev-res">Presente de boas-vindas:<br><b>${PREMIO.gemas} 💎 e ${PREMIO.ouro} 🪙</b></p>` : ''}
         <p class="aviso">Dica: complete as 📜 Missões todo dia e jogue os 🎪 Eventos para ganhar prêmios!</p>`,
-      botoes: [{ texto: 'Bora jogar!', classe: 'principal', acao: () => { if (window.MenuAPI) window.MenuAPI.tudo(); } }],
+      botoes: [{ texto: 'Bora jogar!', classe: 'principal', acao: () => { Batalha.fechar(); if (window.MenuAPI) { window.MenuAPI.tudo(); window.MenuAPI.irPara('batalha'); } } }],
     });
   }
 
