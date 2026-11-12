@@ -494,6 +494,8 @@ const Batalha = (() => {
         return 0;
       }
     }
+    // pulando / atravessando (Goku Presságio e MUI): nada acerta
+    if (!e.torre && e.intocavel > 0) { esquivou(e); return 0; }
     // Infinito (Gojo): o golpe para no ar e não encosta nele
     if (!e.torre && e.infinito > 0 && !opc.atravessa) {
       e.infinito--;
@@ -758,8 +760,12 @@ const Batalha = (() => {
     t.furiaOlhar = 0.3;
     const n = s.ent.filter((e) => !e.torre && e.vida > 0 && e.time !== t.time && e.surgir <= 0 && (e.alvo === t || dist(e, t) < e.raio + t.raio + 26)).length;
     if (n < 2) return;
+    const mm = t.atk.m;
+    if (mm.pulosKame) return pulosEKame(t, Math.min(3, n));
+    if (mm.atravessar) return atravessarGrupo(t);
     t.furiaN = Math.min(3, n);
     t.furiaCd = 16;
+    sacudir();
     t.canal = 1.75; // o corte de cena some antes do raio sair
     t.el.classList.add('carregando-kame');
     if (t.furiaN >= 3) t.el.classList.add('forte');
@@ -780,6 +786,68 @@ const Batalha = (() => {
     if (forte) explosaoArea(t, t, Math.round(t.dano * 1.5), 46, { visual: 'impacto', cor: '#FFE45C', empurrar: 16 });
     kamehameha(t, Math.round(t.dano * (forte ? 6 : 3)), { tipo: 1, comp: forte ? 380 : 330, larg: forte ? 58 : 42, torreMult: 0.4, atraso: 0.2, ang });
     particulas(t.x, t.y, '#FFE45C', forte ? 18 : 10, forte ? 40 : 26);
+  }
+
+  // tela treme (e avisa quem está assistindo online)
+  function sacudir() { tremer(true); if (s.rede) s.eventos.push(['q']); }
+  const centroInimigos = (t, raio = 80) => {
+    const perto = s.ent.filter((e) => !e.torre && e.vida > 0 && e.time !== t.time && dist(e, t) < raio);
+    if (!perto.length) return null;
+    return { x: perto.reduce((a, e) => a + e.x, 0) / perto.length, y: perto.reduce((a, e) => a + e.y, 0) / perto.length };
+  };
+  // pulinho rápido: anda "dist" numa direção em poucos passos (desviando do rio e das torres)
+  function pular(t, ux, uy, d0) {
+    for (let k = 0; k < 5; k++) agendar(k * 0.035, () => {
+      if (!s || t.vida <= 0) return;
+      const nx = Math.max(14, Math.min(W - 14, t.x + ux * d0 / 5)), ny = Math.max(14, Math.min(H - 14, t.y + uy * d0 / 5));
+      if (!t.voo && ny > RIO_TOPO - 2 && ny < RIO_BASE + 2 && !PONTES.some((b) => Math.abs(nx - b) < 26)) return;
+      t.x = nx; t.y = ny; evitarTorres(t);
+    });
+    piscar(t.el, 'pulando');
+    fxEl('fx-pulo', t.x, t.y + 6, 380);
+  }
+
+  // Goku (Presságio): dois pulos pra trás e Kamehameha no grupo
+  function pulosEKame(t, n) {
+    t.furiaCd = 14; t.canal = 1.0; t.intocavel = 0.75;
+    t.el.classList.add('carregando-kame', 'prata');
+    sacudir();
+    const c = centroInimigos(t) || t.alvo || t;
+    let ux = t.x - c.x, uy = t.y - c.y; const d0 = Math.hypot(ux, uy);
+    if (d0 < 1) { ux = 0; uy = t.time === 'azul' ? 1 : -1; } else { ux /= d0; uy /= d0; }
+    pular(t, ux, uy, 26);
+    agendar(0.3, () => pular(t, ux, uy, 26));
+    agendar(0.75, () => {
+      if (!s || t.vida <= 0) return;
+      t.el.classList.remove('carregando-kame', 'prata');
+      const alvo = centroInimigos(t, 130) || c;
+      const ang = Math.atan2(alvo.y - t.y, alvo.x - t.x);
+      kamehameha(t, Math.round(t.dano * (n >= 3 ? 4.5 : 2.5)), { tipo: 1, comp: 360, larg: n >= 3 ? 52 : 40, torreMult: 0.4, atraso: 0.18, ang });
+      sacudir();
+    });
+  }
+
+  // Goku (MUI): desvia, passa no meio deles e daí pra frente só quer saber das torres (+15% de velocidade)
+  function atravessarGrupo(t) {
+    t.furiaCd = 1e9; t.canal = 0.4; t.intocavel = 0.5;
+    sacudir();
+    const torre = s.ent.filter((e) => e.torre && e.time !== t.time && e.vida > 0).sort((a, b) => dist(a, t) - dist(b, t))[0];
+    efeito(`teleporte ${t.time}`, t.x, t.y, 450);
+    for (let k = 1; k <= 3; k++) agendar(k * 0.07, () => fxEl('fx-rastro-mui', t.x, t.y, 420));
+    if (torre) {
+      // anda ~95 de uma vez pelo caminho certo (pontes) em direção à torre
+      for (let k = 0; k < 4; k++) agendar(k * 0.06, () => { if (s && t.vida > 0) moverPara(t, torre, 0.42); });
+    }
+    agendar(0.3, () => {
+      if (!s || t.vida <= 0) return;
+      efeito(`teleporte ${t.time}`, t.x, t.y, 450);
+      if (s.rede) s.eventos.push(['t', Math.round(t.x), Math.round(t.y)]);
+      t.alvoTipo = 'construcoes';
+      t.vel *= 1.15; t.velBase *= 1.15;
+      t.alvo = escolherAlvo(t);
+      t.el.classList.add('foco-torre');
+      if (t.dono === 'azul') UI.toast('⚡ Instinto Superior: rumo à torre!');
+    });
   }
 
   // corte de cena por cima da arena (aparece pra todo mundo da partida)
@@ -882,16 +950,36 @@ const Batalha = (() => {
   // ---------- Inteligência das tropas ----------
   function escolherAlvo(t) {
     const inimigos = s.ent.filter((e) => e.time !== t.time && e.vida > 0 && (t.alvoTipo === 'tudo' || e.torre));
+    // atiradores enxergam mais longe (param pra atirar em vez de ir andando até o inimigo)
+    const visaoTropa = Math.max(140, t.alcance + 55);
     let melhor = null, md = Infinity;
     for (const e of inimigos) {
       const d0 = dist(t, e);
-      const visao = e.torre ? Infinity : 140;
-      if (d0 > visao) continue;
-      // tropas próximas têm prioridade sobre torres distantes
-      const peso = e.torre ? d0 + 60 : d0;
+      if (!e.torre && d0 > visaoTropa) continue;
+      // tropas próximas têm prioridade sobre torres; quem está me batendo tem prioridade ainda maior
+      const peso = e.torre ? d0 + 60 : d0 - (e.alvo === t ? 30 : 0);
       if (peso < md) { md = peso; melhor = e; }
     }
     return melhor;
+  }
+
+  // atirador recua um pouquinho de quem é corpo a corpo e está colado nele (enquanto recarrega o tiro)
+  function recuar(t, dt) {
+    if (t.cd < 0.12 || t.alcance <= 40) return;
+    let perigo = null, pd = Infinity;
+    for (const e of s.ent) {
+      if (e.torre || e.time === t.time || e.vida <= 0 || e.alcance > 40 || e.surgir > 0 || e.atord > 0 || e.congelado > 0) continue;
+      const d0 = dist(e, t);
+      if (d0 < e.alcance + e.raio + t.raio + 14 && d0 < pd) { pd = d0; perigo = e; }
+    }
+    if (!perigo) return;
+    const ux = (t.x - perigo.x) / (pd || 1), uy = (t.y - perigo.y) / (pd || 1);
+    const passo = t.vel * 0.8 * dt * (t.lento > 0 ? 1 - t.lentoPct : 1);
+    const nx = Math.max(14, Math.min(W - 14, t.x + ux * passo)), ny = Math.max(14, Math.min(H - 14, t.y + uy * passo));
+    if (!t.voo && ny > RIO_TOPO - 2 && ny < RIO_BASE + 2 && !PONTES.some((b) => Math.abs(nx - b) < 26)) return; // não entra no rio
+    if (t.alvo && Math.hypot(nx - t.alvo.x, ny - t.alvo.y) > t.alcance + t.alvo.raio + t.raio) return; // não sai do alcance
+    t.x = nx; t.y = ny;
+    evitarTorres(t);
   }
 
   // empurra a tropa para fora das torres (ela desliza em volta)
@@ -1682,6 +1770,8 @@ const Batalha = (() => {
         const x = mx(ev[1]), y = my(ev[2]), ang = ev[3] + (V ? Math.PI : 0), tipo = ev[4] || 0;
         desenharRaio(x, y, ang, tipo, [320, 360, 420][tipo] || 320, tipo ? ev[5] : 0);
         setTimeout(() => tremer(true), 300);
+      } else if (ev[0] === 'q') {
+        tremer(true);
       } else if (ev[0] === 'c') {
         cutin(CUTINS[ev[1]] || 'goku_furia');
       } else if (ev[0] === 'd') {
@@ -1846,9 +1936,22 @@ const Batalha = (() => {
       if (t.atord > 0) { if ((t.atord -= dt) <= 0) t.el.classList.remove('atordoada'); continue; }
       const mm = t.atk && t.atk.m;
       if (mm && mm.gojo && t.infinito < t.infMax && (t.infTimer += dt) >= 6) { t.infTimer = 0; t.infinito++; t.el.classList.add('com-infinito'); }
-      if (mm && mm.furiaNamek) checarFuria(t, dt);
-      if (t.canal > 0) { if ((t.canal -= dt) <= 0) soltarFuria(t); continue; } // carregando o Super Kamehameha
-      if (!t.alvo || t.alvo.vida <= 0 || !s.ent.includes(t.alvo) || Math.random() < 0.02) t.alvo = escolherAlvo(t);
+      if (mm && (mm.furiaNamek || mm.pulosKame || mm.atravessar)) checarFuria(t, dt);
+      if (t.intocavel > 0) t.intocavel -= dt;
+      if (t.canal > 0) { if ((t.canal -= dt) <= 0 && mm && mm.furiaNamek) soltarFuria(t); continue; } // carregando / pulando / atravessando
+      // olha em volta 4x por segundo: troca de alvo se o atual está fora do alcance
+      // ou se alguém está batendo nela enquanto ela bate numa torre
+      t.olhar = (t.olhar || Math.random() * 0.25) - dt;
+      if (!t.alvo || t.alvo.vida <= 0 || !s.ent.includes(t.alvo)) { t.alvo = escolherAlvo(t); t.olhar = 0.25; }
+      else if (t.olhar <= 0) {
+        t.olhar = 0.25;
+        const novo = escolherAlvo(t);
+        if (novo && novo !== t.alvo) {
+          const noAlcance = dist(t, t.alvo) <= t.alcance + t.alvo.raio + t.raio + 2;
+          const meBatendo = !novo.torre && novo.alvo === t && dist(t, novo) <= t.alcance + novo.raio + t.raio + 2;
+          if (!noAlcance || (t.alvo.torre && meBatendo)) t.alvo = novo;
+        }
+      }
       t.cd -= dt;
       if (t.teleCd > 0) t.teleCd -= dt;
       if (!t.alvo) continue;
@@ -1857,6 +1960,7 @@ const Batalha = (() => {
       if (d0 <= alcance) {
         if (t.correndo) { t.correndo = false; t.el.classList.remove('arrancada'); }
         if (t.cd <= 0) { atacar(t, t.alvo); t.cd = t.cadencia * cadenciaMult(t); }
+        else if (t.alcance > 40) recuar(t, dt);
       } else {
         // Goku: teletransporte quando o alvo está longe
         const mt = t.atk && t.atk.m;

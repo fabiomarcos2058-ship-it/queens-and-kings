@@ -1640,3 +1640,14 @@ body.em-batalha .telas * { animation-play-state: paused !important; }
 .kamehameha.vazio-purpura { background: linear-gradient(transparent 0%, #4b189066 8%, #7B2FFF 22%, #C77DFF 36%, #F3DCFF 46%, #fff 50%, #F3DCFF 54%, #C77DFF 64%, #7B2FFF 78%, #4b189066 92%, transparent 100%); border-radius: 0 999px 999px 0; box-shadow: 0 0 30px 8px #A64DFF88, 0 0 70px 20px #FF4FD833; }
 .kamehameha.vazio-purpura::after, .kamehameha.super::after { content: ''; position: absolute; left: -12px; top: 50%; width: 46px; aspect-ratio: 1; transform: translateY(-50%); border-radius: 50%; background: radial-gradient(circle, #fff 0 25%, #C77DFF 50%, transparent 70%); }
 .kamehameha.super::after { background: radial-gradient(circle, #fff 0 25%, #FFE45C 50%, transparent 70%); }
+
+/* Presságio / MUI */
+.tropa.carregando-kame.prata .tropa-medalhao { box-shadow: 0 0 0 3px #fff, 0 0 20px 7px #E8F4FF, 0 0 38px 12px #8FB8FF; }
+.tropa.pulando .tropa-corpo { animation: pulinho 0.3s ease-out; }
+@keyframes pulinho { 40% { transform: translateY(-14px) scale(1.08); } }
+.fx-pulo, .fx-rastro-mui { position: absolute; pointer-events: none; z-index: 1600; transform: translate(-50%, -50%); }
+.fx-pulo { width: 12%; aspect-ratio: 2 / 1; border-radius: 50%; border: 2px solid #E8F4FFcc; animation: fxPulo 0.38s ease-out forwards; }
+@keyframes fxPulo { to { transform: translate(-50%, -50%) scale(1.8); opacity: 0; } }
+.fx-rastro-mui { width: 9%; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle, #fff 0 20%, #C9DDFF 45%, transparent 70%); animation: fxPulo 0.42s ease-out forwards; }
+.tropa.foco-torre .tropa-medalhao { box-shadow: 0 0 0 2px #E8F4FF, 0 0 12px 4px #9FC3FF; }
+.tropa.foco-torre::after { content: '🏰'; position: absolute; right: -6px; top: -4px; font-size: 11px; filter: drop-shadow(0 1px 0 #000); }

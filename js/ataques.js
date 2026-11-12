@@ -85,8 +85,8 @@ const Ataques = (() => {
     goku_blue: { v: { g: 'esferas', cor: '#3FC4FF', s: 'ki_azul', n: 3 }, m: { rajada: 3 }, d: 'Rajada de 3 esferas de ki azul.' },
     goku_blue_kaioken: { v: { g: 'soco', cor: '#FF2E2E' }, m: { kaioken: [0.02, 0.45] }, d: 'Kaioken: +45% de dano, mas perde 2% da vida a cada golpe.' },
     goku_blue_lb: { v: { g: 'impacto', cor: '#3FC4FF', s: 'ki_azul' }, m: { surgirImpacto: [1.5, 55] }, d: 'Chega quebrando tudo: uma explosão quando entra na arena.' },
-    goku_pressagio: { v: { g: 'corte', cor: '#E8F4FF', s: 'ki_prata' }, m: { contraEsquiva: true }, d: 'Quando desvia de um ataque, revida na hora.' },
-    goku_isc: { v: { g: 'impacto', cor: '#E8F4FF', s: 'ki_prata' }, m: { marcar: [0.2, 3], imune: true }, d: 'Imune a lentidão e atordoamento. Marca o alvo: +20% de dano de todos.' },
+    goku_pressagio: { v: { g: 'corte', cor: '#E8F4FF', s: 'ki_prata' }, m: { contraEsquiva: true, pulosKame: true }, d: 'Quando desvia de um ataque, revida na hora. Passiva: se 2 ou 3 inimigos o cercarem, dá dois pulos pra trás e solta um Kamehameha no grupo.' },
+    goku_isc: { v: { g: 'impacto', cor: '#E8F4FF', s: 'ki_prata' }, m: { marcar: [0.2, 3], imune: true, atravessar: true }, d: 'Imune a lentidão e atordoamento. Marca o alvo: +20% de dano de todos. Passiva: se 2 ou 3 inimigos o cercarem, desvia, passa no meio deles e vai só atrás das torres, 15% mais rápido.' },
     goku_ui: { v: { g: 'impacto', cor: '#E8F4FF', s: 'ki_prata' }, m: { imune: true }, d: 'Imune a lentidão e atordoamento.' },
   };
   const padrao = (c) => (c && c.alcance > 40 ? { v: { p: 'ki_amarelo', vel: 300, tam: 14 } } : { v: { g: 'soco', cor: '#ffffff' } });
