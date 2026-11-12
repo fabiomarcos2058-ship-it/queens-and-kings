@@ -96,6 +96,8 @@ const Batalha = (() => {
       if (evento.niveisV) s.niveisV = evento.niveisV;
       if (evento.cartaIA && !s.vermelho.fila.slice(0, 4).includes(evento.cartaIA)) { s.vermelho.fila[Math.floor(Math.random() * 4)] = evento.cartaIA; s.vermelho.deck = [...s.vermelho.fila]; }
       if (evento.elixirInicial) { s.azul.elixir = s.vermelho.elixir = evento.elixirInicial; }
+      if (evento.nivelIAMais) s.nivelIA = Math.max(1, Math.min(9, s.nivelIA + evento.nivelIAMais));
+      if (evento.cartasViradas) s.viradas = true;
     }
     if (tutorial) { s.tutorial = tutorial; s.difIA = 1; s.nivelFixo = 1; s.iaTimer = 1e9; }
     if (ranque) {
@@ -264,6 +266,8 @@ const Batalha = (() => {
       const c = Estado.carta(id);
       const caro = c.custo > a.elixir ? ' caro' : '';
       const sel = s.selecionada === i ? ' selecionada' : '';
+      // Duelo do Faraó: cartas viradas para baixo (só dá pra ver o custo)
+      if (s.viradas) return `<div class="slot-mao virada${caro}${sel}" data-i="${i}"><div class="carta-costas"><b>${c.custo}</b></div></div>`;
       // evolução: mostra se a próxima vez que jogar ela vem evoluída
       let evo = '';
       if (c.evolucao) {
@@ -275,7 +279,7 @@ const Batalha = (() => {
       return `<div class="slot-mao${caro}${sel}" data-i="${i}">${Cartas.html(c, { mini: true })}</div>`;
     }).join('');
     const prox = a.fila[4] ? Estado.carta(a.fila[4]) : null;
-    document.querySelector('.proxima').innerHTML = `<small>Próxima</small>${prox ? `<div class="mini-prox">${Cartas.html(prox, { mini: true })}</div>` : '<div class="carta-vazia mini">?</div>'}`;
+    document.querySelector('.proxima').innerHTML = `<small>Próxima</small>${prox && !s.viradas ? `<div class="mini-prox">${Cartas.html(prox, { mini: true })}</div>` : '<div class="carta-vazia mini">?</div>'}`;
     $('mao').querySelectorAll('.slot-mao').forEach((el) => {
       el.onpointerdown = (ev) => comecarArrastar(ev, +el.dataset.i, el);
     });
@@ -519,6 +523,11 @@ const Batalha = (() => {
     posicionar(t);
     efeito(`onda-surgir ${time}`, x, y, 700);
     setTimeout(() => { if (s && !s.acabou) { efeito(`onda-pouso ${time}`, t.x, t.y, 500); particulas(t.x, t.y + 4, '#ffffffcc', 6, 18); } }, 650);
+    if (m0.superForma) { t.aneis = m0.superForma; t.aneisMax = m0.superForma; t.el.classList.add('super-forma'); }
+    if (m0.aneis) t.aneis = 0;
+    if (m0.esmeraldas) { t.esmeraldas = m0.esmeraldas; t.el.classList.add('com-esmeraldas'); t.el.style.setProperty('--esm', m0.esmeraldas); }
+    if (m0.hyperFlash) t.flashTimer = m0.hyperFlash[0];
+    if (m0.duelista) t.cartaTimer = 2.2;
     if (m0.sombras) { t.intocavel = m0.sombras; t.sombra = m0.sombras; t.el.classList.add('sombra'); }
     if (m0.surgirImpacto) agendar(1, () => { if (t.vida > 0) explosaoArea(t, t, Math.round(t.dano * m0.surgirImpacto[0]), m0.surgirImpacto[1], { visual: 'impacto', cor: t.atk.v.cor, empurrar: 14 }); });
     return t;
@@ -614,6 +623,40 @@ const Batalha = (() => {
       if (e.infinito <= 0) e.el.classList.remove('com-infinito');
       return 0;
     }
+    const ms = !e.torre && e.atk && e.atk.m;
+    if (ms && !opc.refletido) {
+      // Yugi: Armadilha Espelho devolve o golpe
+      if (e.espelho > 0 && fonte && fonte.vida > 0 && opc.tipo !== 'queimadura') {
+        e.espelho--; if (e.espelho <= 0) e.el.classList.remove('com-espelho');
+        numero(e, 0, 'escudo'); fxEl('fx-espelho', e.x, e.y, 500);
+        ferir(fonte, dano, e.time, e, { refletido: true, semContra: true, semEsquiva: true, atravessa: true });
+        return 0;
+      }
+      // Super Sonic: enquanto tiver anéis, nada machuca (mas cada golpe gasta anéis)
+      if (ms.superForma && e.aneis > 0) {
+        e.aneis -= Math.max(1, Math.ceil(dano / 70));
+        numero(e, 0, 'escudo');
+        if (e.aneis <= 0) destransformar(e);
+        return 0;
+      }
+      // Hyper Sonic: cada Esmeralda do Caos segura um golpe inteiro
+      // (cada esmeralda segura até 110 de dano; golpe maior passa o resto)
+      if (ms.esmeraldas && e.esmeraldas > 0 && !opc.atravessa && opc.tipo !== 'queimadura' && dano >= 20) {
+        e.esmeraldas--; e.el.style.setProperty('--esm', e.esmeraldas);
+        if (e.esmeraldas <= 0) e.el.classList.remove('com-esmeraldas');
+        particulas(e.x, e.y - 6, ['#4ADE80', '#60A5FA', '#F472B6', '#FACC15', '#F87171', '#E5E7EB', '#22D3EE'][e.esmeraldas % 7], 6, 18);
+        dano -= 110;
+        if (dano <= 0) { numero(e, 0, 'escudo'); return 0; }
+      }
+      // Sonic Excalibur: apara um golpe de perto e contra-ataca (a cada alguns segundos)
+      if (ms.aparar && fonte && !fonte.torre && fonte.vida > 0 && dist(e, fonte) < 60 && !(e.apararAte > s.t) && e.atord <= 0) {
+        e.apararAte = s.t + ms.aparar;
+        numero(e, 0, 'escudo'); falar(e, 'Aparei!', 'fala-sonic');
+        golpeVisual(e, fonte, e.atk.v);
+        agendar(0.08, () => { if (fonte.vida > 0 && e.vida > 0) ferir(fonte, Math.round(e.dano * 1.3 * multClasse(e, fonte)), e.time, e, { semContra: true }); });
+        return 0;
+      }
+    }
     if (e.adaptacao && e.carta && e.carta.passiva && e.carta.passiva.tipo === 'adaptar') dano = Math.round(dano * (1 - e.carta.passiva.defesa * e.adaptacao));
     if (e.marcado > 0) dano = Math.round(dano * (1 + e.marcaPct));
     // escudo absorve primeiro
@@ -628,6 +671,13 @@ const Batalha = (() => {
     if (mc && mc.contra && fonte && fonte.vida > 0 && !opc.semContra && dist(e, fonte) < 60 && Math.random() < mc.contra[0]) {
       golpeVisual(e, fonte, e.atk.v);
       agendar(0.05, () => ferir(fonte, Math.round(e.dano * mc.contra[1]), e.time, null, { semContra: true }));
+    }
+    if (ms && ms.aneis && e.aneis >= 5 && e.vida - dano <= 0) {
+      e.aneis = 0; e.vida = Math.round(e.max * 0.25); e.intocavel = 1; e.atord = 0;
+      atualizarHp(e);
+      fxEl('fx-aneis', e.x, e.y, 800); fxJ(13, e.x, e.y);
+      falar(e, 'Meus anéis!', 'fala-sonic');
+      return 0;
     }
     e.vida -= dano;
     numero(e, dano, opc.crit ? 'critico' : opc.tipo);
@@ -659,6 +709,7 @@ const Batalha = (() => {
       particulas(e.x, e.y, '#FAC775', 14, 34);
     } else if (e.vida <= 0) {
       if (e.isca) borboletas(e);
+      for (const o of s.ent) if (o !== e && !o.torre && o.time === e.time && o.vida > 0 && o.atk && o.atk.m && o.atk.m.raivaSombria && dist(o, e) < 170) enfurecer(o);
       if (e.rotInf && e.rotInf.resta > 0.6) {
         const r = e.rotInf, f = r.fonte;
         const prox = s.ent.filter((o) => !o.torre && o !== e && o.time === e.time && o.vida > 0 && dist(o, e) < 170).sort((a, b) => dist(a, e) - dist(b, e))[0];
@@ -812,6 +863,12 @@ const Batalha = (() => {
     if (h.tipo === 'mitaJoga') mitaJoga(t);
     if (h.tipo === 'deletar') deletar(t, h);
     if (h.tipo === 'trunfoMurasame') trunfoMurasame(t, h);
+    if (h.tipo === 'chaosControl') chaosControl(t, h);
+    if (h.tipo === 'superBoost') superBoost(t, h);
+    if (h.tipo === 'explosaoSombria') explosaoSombria(t, h);
+    if (h.tipo === 'soulSurge') soulSurge(t, h);
+    if (h.tipo === 'hiperRajada') hiperRajada(t, h);
+    if (h.tipo === 'reinoSombras') reinoSombras(t, h);
     if (h.tipo === 'zaWarudo') zaWarudo(t, h);
     if (h.tipo === 'kingCrimson') kingCrimson(t);
     if (h.tipo === 'madeInHeaven') madeInHeaven(t);
@@ -871,7 +928,7 @@ const Batalha = (() => {
   }
 
   // tipo: 0 = Kamehameha, 1 = Super Kamehameha (fúria do Goku), 2 = Vazio Púrpura (Gojo)
-  const CLASSE_RAIO = ['kamehameha', 'kamehameha super', 'kamehameha vazio-purpura', 'kamehameha bola-aco'];
+  const CLASSE_RAIO = ['kamehameha', 'kamehameha super', 'kamehameha vazio-purpura', 'kamehameha bola-aco', 'kamehameha boost-dourado', 'kamehameha soul-surge'];
   function desenharRaio(x, y, ang, tipo, comp, larg) {
     const raio = document.createElement('div');
     raio.className = CLASSE_RAIO[tipo] || 'kamehameha';
@@ -1007,8 +1064,9 @@ const Batalha = (() => {
   }
 
   // corte de cena por cima da arena (aparece pra todo mundo da partida)
-  const CUTINS = ['goku_furia', 'jojo_jotaro', 'jojo_dio', 'jojo_diavolo', 'jojo_pucci', 'jojo_gyro', 'jojo_johnny'];
-  const TEXTO_CUTIN = { goku_furia: "You're going to pay for this!", jojo_jotaro: 'Star Platinum: The World!', jojo_dio: 'ZA WARUDO! Toki yo tomare!', jojo_diavolo: 'King Crimson!', jojo_pucci: 'Made in Heaven!', jojo_gyro: 'Ball Breaker!', jojo_johnny: 'Tusk Act 4!' };
+  const CUTINS = ['goku_furia', 'jojo_jotaro', 'jojo_dio', 'jojo_diavolo', 'jojo_pucci', 'jojo_gyro', 'jojo_johnny', 'sonic_shadow', 'sonic_super', 'sonic_dark', 'sonic_excalibur', 'sonic_hyper', 'yugi_reino'];
+  const TEXTO_CUTIN_2 = { sonic_shadow: 'Chaos Control!', sonic_super: 'Super Boost!', sonic_dark: 'Explosão Sombria!', sonic_excalibur: 'Soul Surge!', sonic_hyper: 'Hiper Velocidade!', yugi_reino: 'Reino das Sombras!' };
+  const TEXTO_CUTIN = { ...TEXTO_CUTIN_2, goku_furia: "You're going to pay for this!", jojo_jotaro: 'Star Platinum: The World!', jojo_dio: 'ZA WARUDO! Toki yo tomare!', jojo_diavolo: 'King Crimson!', jojo_pucci: 'Made in Heaven!', jojo_gyro: 'Ball Breaker!', jojo_johnny: 'Tusk Act 4!' };
   const cutinRede = (qual) => { cutin(qual); if (s.rede || s.aoVivo) s.eventos.push(['c', CUTINS.indexOf(qual)]); };
   function cutin(qual) {
     const jan = document.querySelector('.arena-grande-janela');
@@ -1175,6 +1233,174 @@ const Batalha = (() => {
     for (const e of s.ent) if (e.alvo === t) e.alvo = null;
   }
 
+  // =================== Família Sonic + Yugi ===================
+  const inimigosPerto = (t, r) => s.ent.filter((e) => !e.torre && e.time !== t.time && e.vida > 0 && !(e.banido > 0) && dist(e, t) < r + e.raio);
+  function passivasSonic(t, dt) {
+    const m = t.atk.m;
+    // Super Sonic: os anéis vão acabando com o tempo
+    if (m.superForma && t.aneis > 0 && (t.aneisT = (t.aneisT || 0) + dt) >= 1) { t.aneisT = 0; t.aneis--; if (t.aneis <= 0) destransformar(t); }
+    // Shadow: sem os limitadores quando a vida fica baixa (mais forte, mas a vida vai sumindo)
+    if (m.inibidores && !t.semLimite && t.vida < t.max * m.inibidores) {
+      t.semLimite = true; t.el.classList.add('sem-limite');
+      falar(t, 'Sem limitadores!', 'fala-sonic'); fxEl('fx-chaos', t.x, t.y, 900); fxJ(14, t.x, t.y);
+    }
+    if (t.semLimite && (t.drenoT = (t.drenoT || 0) + dt) >= 0.5) { t.drenoT = 0; t.vida = Math.max(1, t.vida - t.max * 0.012); atualizarHp(t); }
+    // Dark Sonic: a raiva passa
+    if (t.raiva > 0 && (t.raiva -= dt) <= 0) { t.raivaN = 0; t.el.classList.remove('enfurecida'); }
+    // Sonic: Spin Dash até o alvo que está longe
+    if (m.spinDash && t.alvo && t.alvo.vida > 0 && !t.alvo.torre && !(t.spinCd > s.t) && t.atord <= 0 && t.canal <= 0) {
+      const d0 = dist(t, t.alvo);
+      if (d0 > t.alcance + t.raio + t.alvo.raio + 25 && d0 < 190) spinDash(t, t.alvo, m.spinDash);
+    }
+    // Hyper Sonic: Hiper Flash
+    if (m.hyperFlash && (t.flashTimer -= dt) <= 0) {
+      const [cad, raio, mult] = m.hyperFlash;
+      const alvos = inimigosPerto(t, raio);
+      if (alvos.length) {
+        t.flashTimer = cad;
+        fxEl('fx-hyper-flash', t.x, t.y, 600); fxJ(15, t.x, t.y);
+        for (const e of alvos) { ferir(e, Math.round(t.dano * mult * multClasse(t, e)), t.time, t); if (!imuneA(e)) { e.atord = Math.max(e.atord, 0.5); e.el.classList.add('atordoada'); } }
+      } else t.flashTimer = 0.5;
+    }
+    // Yugi: compra uma carta de tempos em tempos
+    if (m.duelista && (t.cartaTimer -= dt) <= 0) { t.cartaTimer = m.duelista; comprarCarta(t); }
+  }
+  function spinDash(t, alvo, [cd, mult]) {
+    t.spinCd = s.t + cd;
+    t.intocavel = Math.max(t.intocavel || 0, 0.3);
+    fxEl('fx-spin', t.x, t.y, 450); fxJ(17, t.x, t.y);
+    teleportar(t, alvo);
+    agendar(0.08, () => {
+      if (t.vida <= 0 || alvo.vida <= 0) return;
+      const { dano } = danoDe(t, alvo);
+      ferir(alvo, Math.round(dano * mult), t.time, t, { crit: true });
+      aplicarGolpe(t, alvo, dano);
+      empurrar(alvo, t, 14);
+      t.cd = Math.max(t.cd, 0.3);
+    });
+  }
+  function destransformar(t) {
+    t.aneis = 0; t.el.classList.remove('super-forma');
+    t.dano = t.danoBase = Math.round(t.danoBase * 0.5);
+    t.vel = t.velBase = Math.round(t.velBase * 0.8);
+    falar(t, 'Os anéis acabaram…', 'fala-sonic');
+    particulas(t.x, t.y, '#FFD25E', 10, 24);
+  }
+  function chaosSpear(a, alvo, dano) {
+    const outros = inimigosPerto(a, 150).filter((e) => e !== alvo).sort((x, y) => dist(x, a) - dist(y, a)).slice(0, 3);
+    for (const e of outros) criarProjetil(a, e, Math.round(dano * 0.6), { p: 'raio', vel: 360, tam: 18, rastro: '#F5E663' });
+    if (outros.length) falar(a, 'Chaos Spear!', 'fala-sonic', false);
+  }
+  function enfurecer(o) {
+    o.raivaN = Math.min(3, (o.raivaN || 0) + 1); o.raiva = 6;
+    o.vida = Math.min(o.max, o.vida + o.max * 0.08); atualizarHp(o);
+    o.el.classList.add('enfurecida');
+    fxEl('fx-sombria', o.x, o.y, 900); fxJ(16, o.x, o.y);
+    if (o.raivaN === 1) falar(o, 'Vocês vão pagar…', 'fala-dark');
+  }
+  function chaosControl(t, h) {
+    cutinRede('sonic_shadow');
+    pararTempo(t, h.duracao || 2.5, 160, 'Chaos Control!');
+    fxEl('fx-chaos', t.x, t.y, 900); fxJ(14, t.x, t.y);
+    const alvo = inimigosPerto(t, 220).sort((a, b) => b.vida - a.vida)[0];
+    if (alvo) agendar(0.25, () => {
+      if (t.vida <= 0 || alvo.vida <= 0) return;
+      teleportar(t, alvo); t.alvo = alvo;
+      for (let i = 0; i < 3; i++) agendar(0.12 + i * 0.12, () => { if (alvo.vida > 0 && t.vida > 0) { golpeVisual(t, alvo, t.atk.v); ferir(alvo, Math.round(t.dano * 0.8 * multClasse(t, alvo)), t.time, t, { crit: i === 2 }); } });
+    });
+  }
+  function superBoost(t, h) {
+    cutinRede('sonic_super');
+    t.aneis = Math.min(30, (t.aneis || 0) + (h.aneis || 10)); t.aneisMax = t.aneisMax || 22;
+    t.el.classList.add('super-forma');
+    kamehameha(t, Math.round(t.dano * (h.mult || 2.2)), { tipo: 4, comp: 200, larg: 30, torreMult: 0.4, atraso: 0.05 });
+    const alvo = t.alvo && t.alvo.vida > 0 && dist(t, t.alvo) < 220 ? t.alvo : null;
+    if (alvo) agendar(0.15, () => { if (t.vida > 0 && alvo.vida > 0) teleportar(t, alvo); });
+  }
+  function explosaoSombria(t, h) {
+    cutinRede('sonic_dark');
+    const raio = h.raio || 130;
+    for (const e of inimigosPerto(t, raio)) { empurrar(e, t, -Math.max(0, Math.min(30, dist(e, t) - t.raio - e.raio))); if (!imuneA(e)) { e.lento = 2; e.lentoPct = 0.4; e.el.classList.add('lenta'); } }
+    fxEl('fx-sombria', t.x, t.y, 900); fxJ(16, t.x, t.y);
+    falar(t, 'Explosão Sombria!', 'fala-dark');
+    agendar(0.7, () => { if (t.vida > 0) explosaoArea(t, t, Math.round(t.dano * (h.mult || 2.4)), 70, { visual: 'impacto', cor: '#A855F7', empurrar: 22 }); });
+  }
+  function soulSurge(t, h) {
+    cutinRede('sonic_excalibur');
+    fxEl('fx-soul', t.x, t.y, 900); fxJ(19, t.x, t.y);
+    t.escudo = t.escudoMax; if (t.escudo) t.el.classList.add('com-escudo');
+    kamehameha(t, Math.round((h.dano || 1100) * (t.f || 1)), { tipo: 5, comp: 260, larg: 40, torreMult: 0.35, atraso: 0.35 });
+  }
+  function hiperRajada(t, h) {
+    cutinRede('sonic_hyper');
+    const ja = new Set();
+    for (let i = 0; i < (h.golpes || 7); i++) agendar(0.05 + i * 0.16, () => {
+      if (t.vida <= 0) return;
+      const prox = inimigosPerto(t, 170).filter((e) => !ja.has(e)).sort((a, b) => dist(a, t) - dist(b, t))[0];
+      if (!prox) return;
+      ja.add(prox);
+      teleportar(t, prox);
+      golpeVisual(t, prox, t.atk.v);
+      ferir(prox, Math.round(t.dano * (h.mult || 1.4) * multClasse(t, prox)), t.time, t, { crit: true });
+      if (t.esmeraldas < (t.atk.m.esmeraldas || 7)) { t.esmeraldas++; t.el.classList.add('com-esmeraldas'); t.el.style.setProperty('--esm', t.esmeraldas); }
+    });
+    fxEl('fx-hyper-flash', t.x, t.y, 600); fxJ(15, t.x, t.y);
+  }
+  // ---- Yugi: Hora do Duelo ----
+  const CARTAS_YUGI = {
+    raio: 'Carta Mágica: Raio Dourado!', espelho: 'Armadilha: Espelho!', coracao: 'Coração das Cartas!', selo: 'Selo do Faraó!', invocar: 'Invocação!',
+  };
+  function comprarCarta(t, forcar) {
+    const perto = inimigosPerto(t, 140), aliadosFeridos = s.ent.filter((e) => !e.torre && e.time === t.time && e.vida > 0 && e.vida < e.max * 0.6 && dist(e, t) < 120);
+    const meBatendo = s.ent.some((e) => !e.torre && e.time !== t.time && e.vida > 0 && e.alvo === t);
+    // a carta "certa" aparece mais, mas o deck é imprevisível
+    const pesos = { raio: 1 + perto.length, espelho: meBatendo ? 3 : 0.3, coracao: aliadosFeridos.length ? 1 + aliadosFeridos.length : t.vida < t.max * 0.6 ? 2 : 0.2, selo: perto.length >= 2 ? 3 : perto.length ? 1 : 0.1, invocar: 1.6 };
+    let qual = forcar;
+    if (!qual) { let r = Math.random() * Object.values(pesos).reduce((a, b) => a + b, 0); for (const [k, w] of Object.entries(pesos)) { if ((r -= w) <= 0) { qual = k; break; } } qual = qual || 'invocar'; }
+    falar(t, CARTAS_YUGI[qual], 'fala-yugi');
+    fxEl('fx-carta-yugi', t.x, t.y - 18, 900); fxJ(11, t.x, t.y - 18);
+    if (qual === 'raio') {
+      const alvos = s.ent.filter((e) => e.time !== t.time && e.vida > 0 && !(e.banido > 0) && dist(e, t) < 190).sort((a, b) => dist(a, t) - dist(b, t)).slice(0, 3);
+      alvos.forEach((e, i) => agendar(i * 0.12, () => { if (e.vida > 0) { efeitoGolpe('raio', t, e, { cor: '#FFD25E' }); ferir(e, Math.round(t.dano * (e.torre ? 0.7 : 1.4) * multClasse(t, e)), t.time, t); } }));
+    } else if (qual === 'espelho') { t.espelho = 3; t.el.classList.add('com-espelho'); }
+    else if (qual === 'coracao') {
+      for (const e of s.ent) if (!e.torre && e.time === t.time && e.vida > 0 && dist(e, t) < 120) { e.vida = Math.min(e.max, e.vida + e.max * 0.2); atualizarHp(e); particulas(e.x, e.y, '#FFD25E', 6, 18); }
+    } else if (qual === 'selo') {
+      for (const e of inimigosPerto(t, 100)) if (!imuneA(e)) { e.atord = Math.max(e.atord, 1.6); e.el.classList.add('atordoada'); }
+      explosaoArea(t, t, Math.round(t.dano * 0.5), 100, { visual: 'impacto', cor: '#FFD25E' });
+    } else if (qual === 'invocar') invocarMonstro(t);
+  }
+  function invocarMonstro(t) {
+    const lado = jogadorDe(t);
+    const ids = ((lado && lado.deck) || []).filter((id) => { const c = Estado.carta(id); return c && !c.feitico && !c.barril && !c.token && id !== t.carta.id && !c.exclusivo && !c.evento; });
+    const pool = ids.length ? ids : Estado.catalogo().filter((c) => !c.feitico && !c.barril && !c.token && !c.exclusivo && !c.evento && c.raridade !== 'lendaria').map((c) => c.id);
+    const c = Estado.carta(pool[Math.floor(Math.random() * pool.length)]);
+    if (!c) return;
+    const m = criarTropa(t.time, c, t.x + (Math.random() * 30 - 15), t.y + (t.time === 'azul' ? -18 : 18), t.f * 0.75, t.nivel);
+    donoDe(m, t.dono);
+    m.surgir = 0.4; m.habilidade = null; m.temporario = 10; m.invocado = true;
+    m.el.classList.add('invocada');
+  }
+  function reinoSombras(t, h) {
+    cutinRede('yugi_reino');
+    fxEl('fx-reino', t.x, t.y, 1300); fxJ(12, t.x, t.y);
+    const seg = h.duracao || 3;
+    const presos = inimigosPerto(t, h.raio || 150).filter((e) => !imuneA(e));
+    for (const e of presos) {
+      e.banido = seg; e.intocavel = Math.max(e.intocavel || 0, seg); e.atord = Math.max(e.atord, seg);
+      e.el.classList.add('banida');
+      for (const o of s.ent) if (o.alvo === e) o.alvo = null;
+    }
+    agendar(seg, () => {
+      for (const e of presos) {
+        if (!s.ent.includes(e)) continue;
+        e.banido = 0; e.intocavel = 0; e.el.classList.remove('banida', 'atordoada');
+        if (e.vida > 0) ferir(e, Math.round(e.max * (h.pct || 0.35)), t.time, null, { atravessa: true, semEsquiva: true, semContra: true });
+      }
+    });
+    agendar(0.4, () => { if (t.vida > 0) comprarCarta(t); });
+  }
+
   // =================== Akame (Murasame) ===================
   function amaldicoar(e, a) {
     if (e.torre || e.vida <= 0) return;
@@ -1218,7 +1444,7 @@ const Batalha = (() => {
 
   // =================== JoJo: Stands ===================
   const fxJ = (i, x, y) => { if (s.rede || s.aoVivo) s.eventos.push(['j', i, Math.round(x), Math.round(y)]); };
-  const FX_J = [['fx-ora', 650], ['fx-facas', 2600], ['fx-rolo', 1100], ['fx-kc', 800], ['fx-disco', 700], ['fx-tusk', 900], ['fx-coracao', 1200], ['fx-arquivo', 1400], ['fx-glitch', 700], ['fx-murasame', 750], ['fx-trunfo', 900]];
+  const FX_J = [['fx-ora', 650], ['fx-facas', 2600], ['fx-rolo', 1100], ['fx-kc', 800], ['fx-disco', 700], ['fx-tusk', 900], ['fx-coracao', 1200], ['fx-arquivo', 1400], ['fx-glitch', 700], ['fx-murasame', 750], ['fx-trunfo', 900], ['fx-carta-yugi', 900], ['fx-reino', 1300], ['fx-aneis', 800], ['fx-chaos', 900], ['fx-hyper-flash', 600], ['fx-sombria', 900], ['fx-spin', 450], ['fx-espelho', 500], ['fx-soul', 900]];
   // Tempo parado: o outro time congela (tropas e torres). Quem tem moveNoTempo (Jotaro, Dio) continua andando.
   function pararTempo(t, seg, raio, nome) {
     typeof Som !== 'undefined' && Som.tocar('tempoParado');
@@ -1492,7 +1718,7 @@ const Batalha = (() => {
 
   // ---------- Inteligência das tropas ----------
   function escolherAlvo(t) {
-    const inimigos = s.ent.filter((e) => e.time !== t.time && e.vida > 0 && (t.alvoTipo === 'tudo' || e.torre));
+    const inimigos = s.ent.filter((e) => e.time !== t.time && e.vida > 0 && !(e.banido > 0) && (t.alvoTipo === 'tudo' || e.torre));
     // atiradores enxergam mais longe (param pra atirar em vez de ir andando até o inimigo)
     const visaoTropa = Math.max(140, t.alcance + 55);
     let melhor = null, md = Infinity;
@@ -1553,7 +1779,7 @@ const Batalha = (() => {
     }
     const dx = px - t.x, dy = py - t.y, d0 = Math.hypot(dx, dy) || 1;
     const arrancada = t.atk && t.atk.m && t.atk.m.investida && !t.investiu && dist(t, alvo) < 130 ? 2.6 : 1;
-    const passo = Math.min(d0, t.vel * (t.furia > 0 ? 1.25 : 1) * (t.lento > 0 ? 1 - t.lentoPct : 1) * arrancada * (s.turbo && !t.torre ? 1.4 : 1) * (t.acelerado > 0 ? 1.5 : 1) * (t.trunfo > 0 ? 1.4 : 1) * dt);
+    const passo = Math.min(d0, t.vel * (t.furia > 0 ? 1.25 : 1) * (t.lento > 0 ? 1 - t.lentoPct : 1) * arrancada * (s.turbo && !t.torre ? 1.4 : 1) * (t.acelerado > 0 ? 1.5 : 1) * (t.trunfo > 0 ? 1.4 : 1) * (t.semLimite ? 1.2 : 1) * dt);
     if (arrancada > 1 && !t.correndo) { t.correndo = true; t.el.classList.add('arrancada'); }
     let vx = dx / d0, vy = dy / d0;
     // se tem uma torre no caminho (que não é o alvo), desvia pelo lado mais curto
@@ -1594,6 +1820,8 @@ const Batalha = (() => {
     let d0 = a.dano;
     if (a.furia > 0) d0 *= 1.3;
     if (a.buffDano > 0) d0 *= 1.2;
+    if (a.semLimite) d0 *= 1.35;
+    if (a.raiva > 0) d0 *= 1 + 0.2 * (a.raivaN || 1);
     if (a.golpesFortes > 0) { d0 *= a.multGolpes || 2.5; a.golpesFortes--; if (!a.golpesFortes) a.el.classList.remove('aura-golpes'); }
     if (alvo) d0 *= multClasse(a, alvo);
     a.golpes++;
@@ -1639,6 +1867,7 @@ const Batalha = (() => {
       }
       checarExecucao(a, alvo);
     }
+    if (m.aneis && a.vida > 0) a.aneis = Math.min(30, (a.aneis || 0) + 1);
     if (m.roubo && Math.random() < m.roubo[0]) {
       const vit = alvo.torre ? s[alvo.time] : jogadorDe(alvo), meu = jogadorDe(a);
       const q = Math.min(m.roubo[1], vit.elixir);
@@ -1882,6 +2111,7 @@ const Batalha = (() => {
     piscar(atacante.el, 'atacando');
     golpeVisual(atacante, alvo, v);
     if (m.ora && atacante.golpes % m.ora === 0) { oraOra(atacante, alvo, dano, crit); return; }
+    if (m.chaosSpear && atacante.golpes % m.chaosSpear === 0) chaosSpear(atacante, alvo, dano);
     const n = m.rajada || 1;
     const bater = (dd, efeitos) => {
       if (alvo.vida <= 0) return;
@@ -2093,6 +2323,12 @@ const Batalha = (() => {
         || ((h.tipo === 'kamehameha' || h.tipo === 'vazioPurpura') && t.alvo && dist(t, t.alvo) < 240)
         || (h.tipo === 'esquiva' && perto && t.vida < t.max * 0.8)
         || (h.tipo === 'mitaJoga' && L.fila.slice(0, 4).some((id) => { const c = Estado.carta(id); return !c.feitico && !c.barril && c.custo >= 4; }))
+        || (h.tipo === 'chaosControl' && s.ent.filter((e) => !e.torre && e.time !== t.time && e.vida > 0 && dist(e, t) < 160).length >= 2)
+        || (h.tipo === 'superBoost' && t.alvo && dist(t, t.alvo) < 200 && (t.aneis || 0) < 12)
+        || (h.tipo === 'explosaoSombria' && s.ent.filter((e) => !e.torre && e.time !== t.time && e.vida > 0 && dist(e, t) < 130).length >= 2)
+        || (h.tipo === 'soulSurge' && t.alvo && dist(t, t.alvo) < 230 && (t.alvo.torre || s.ent.filter((e) => !e.torre && e.time !== t.time && e.vida > 0 && dist(e, t) < 230).length >= 2))
+        || (h.tipo === 'hiperRajada' && s.ent.filter((e) => !e.torre && e.time !== t.time && e.vida > 0 && dist(e, t) < 170).length >= 2)
+        || (h.tipo === 'reinoSombras' && s.ent.filter((e) => !e.torre && e.time !== t.time && e.vida > 0 && dist(e, t) < 150).length >= 2)
         || (h.tipo === 'trunfoMurasame' && perto && t.vida > t.max * 0.3 && (t.alvo.torre || s.ent.filter((e) => !e.torre && e.time !== t.time && e.vida > 0 && dist(e, t) < 120).length >= 2 || t.alvo.vida > t.dano * 2))
         || (h.tipo === 'deletar' && s.ent.some((e) => !e.torre && e.time !== t.time && e.vida > 600 && dist(e, t) < 230))
         || (h.tipo === 'starWorld' && s.ent.filter((e) => e.time !== t.time && e.vida > 0 && dist(e, t) < 170).length >= 2)
@@ -2239,7 +2475,7 @@ const Batalha = (() => {
       tm: Object.fromEntries(s.ent.filter((e) => e.torre).map((e) => [e.id, e.max])),
       tw: Object.fromEntries(s.ent.filter((e) => e.torre).map((e) => [e.id, Math.round(e.vida)])),
       tr: s.ent.filter((e) => !e.torre).map((e) => [e.id, e.carta.id, e.time === 'azul' ? 0 : 1, Math.round(e.x * 10) / 10, Math.round(e.y * 10) / 10,
-        Math.round(e.vida), e.max, e.nivel, (e.surgir > 0 ? 1 : 0) | (e.furia > 0 ? 2 : 0) | (e.golpesFortes > 0 ? 4 : 0) | (e.fenix > 0 ? 8 : 0) | (e.congelado > 0 ? 16 : 0) | (e.esquiva > 0 ? 32 : 0) | (e.atord > 0 ? 64 : 0) | (e.lento > 0 ? 128 : 0) | (e.queima > 0 ? 256 : 0) | (e.escudo > 0 ? 512 : 0) | (e.fraco > 0 ? 1024 : 0) | ((e.adaptacao || 0) << 11) | (e.evo ? 131072 : 0) | (e.infinito > 0 ? 262144 : 0) | (e.canal > 0 ? 524288 : 0) | (e.trunfo > 0 ? 1048576 : 0) | (e.sombra > 0 ? 2097152 : 0) | (e.maldAte > s.t ? 4194304 : 0), e.recarga > 0 ? +e.recarga.toFixed(1) : 0, e.dono && e.dono.endsWith('2') ? 1 : 0]),
+        Math.round(e.vida), e.max, e.nivel, (e.surgir > 0 ? 1 : 0) | (e.furia > 0 ? 2 : 0) | (e.golpesFortes > 0 ? 4 : 0) | (e.fenix > 0 ? 8 : 0) | (e.congelado > 0 ? 16 : 0) | (e.esquiva > 0 ? 32 : 0) | (e.atord > 0 ? 64 : 0) | (e.lento > 0 ? 128 : 0) | (e.queima > 0 ? 256 : 0) | (e.escudo > 0 ? 512 : 0) | (e.fraco > 0 ? 1024 : 0) | ((e.adaptacao || 0) << 11) | (e.evo ? 131072 : 0) | (e.infinito > 0 ? 262144 : 0) | (e.canal > 0 ? 524288 : 0) | (e.trunfo > 0 ? 1048576 : 0) | (e.sombra > 0 ? 2097152 : 0) | (e.maldAte > s.t ? 4194304 : 0) | (e.aneis > 0 && e.aneisMax ? 8388608 : 0) | (e.semLimite ? 16777216 : 0) | (e.esmeraldas > 0 ? 33554432 : 0) | (e.banido > 0 ? 67108864 : 0) | (e.espelho > 0 ? 134217728 : 0) | (e.raiva > 0 ? 268435456 : 0), e.recarga > 0 ? +e.recarga.toFixed(1) : 0, e.dono && e.dono.endsWith('2') ? 1 : 0]),
       pj: s.proj.map((p) => [Math.round(p.x), Math.round(p.y - (p.alt || 0)), p.time === 'azul' ? 0 : 1, p.el.classList.contains('de-torre') ? 1 : 0, p.sprite || 0, Math.round(p.giro || 0)]),
       ev: s.eventos,
     };
@@ -2375,6 +2611,12 @@ const Batalha = (() => {
       t.el.classList.toggle('aura-trunfo', !!(flags & 1048576));
       t.el.classList.toggle('sombra', !!(flags & 2097152));
       t.el.classList.toggle('amaldicoada', !!(flags & 4194304));
+      t.el.classList.toggle('super-forma', !!(flags & 8388608));
+      t.el.classList.toggle('sem-limite', !!(flags & 16777216));
+      t.el.classList.toggle('com-esmeraldas', !!(flags & 33554432));
+      t.el.classList.toggle('banida', !!(flags & 67108864));
+      t.el.classList.toggle('com-espelho', !!(flags & 134217728));
+      t.el.classList.toggle('enfurecida', !!(flags & 268435456));
       const ad = (flags >> 11) & 63, selo = t.el.querySelector('.selo-adapt');
       if (selo && String(ad || '') !== selo.textContent) { selo.textContent = ad || ''; t.el.classList.toggle('adaptado', !!(t.carta.passiva && ad >= t.carta.passiva.max)); }
       t.recarga = recarga;
@@ -2620,6 +2862,8 @@ const Batalha = (() => {
       if (mm && mm.mitaGentil) mitaGentilPassiva(t);
       if (mm && mm.marmita) ninoPassiva(t, dt);
       if (mm && mm.murasame) murasamePassiva(t, dt);
+      if (mm && (mm.superForma || mm.spinDash || mm.inibidores || mm.hyperFlash || mm.duelista || mm.raivaSombria)) passivasSonic(t, dt);
+      if (t.temporario > 0 && (t.temporario -= dt) <= 0) { ferir(t, t.vida + 1, t.time === 'azul' ? 'vermelho' : 'azul', null, { atravessa: true, semEsquiva: true }); continue; }
       if (mm && mm.hana) robinDefesa(t, dt);
       if (t.vida <= 0) continue;
       if (t.intocavel > 0) t.intocavel -= dt;
@@ -2729,6 +2973,7 @@ const Batalha = (() => {
     if (s.turbo) k *= 0.7;
     if (t.acelerado > 0) k *= 0.67;
     if (t.trunfo > 0) k *= 0.6;
+    if (t.semLimite) k *= 0.8;
     if (t.lentoAtq > 0) k *= 1 + t.lentoAtqPct;
     const m = t.atk && t.atk.m;
     if (m && m.berserk) k *= 1 - m.berserk * (1 - t.vida / t.max);

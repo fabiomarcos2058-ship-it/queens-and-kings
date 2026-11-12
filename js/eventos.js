@@ -233,6 +233,167 @@ const Eventos = (() => {
     }, 2500 + Math.random() * 4000);
   }
 
+  // ---------- Desafios: Duelo do Faraó (Yugi) e Corrida do Sonic ----------
+  const YUGI = 'yugi_moto';
+  const FAMILIA_SONIC = ['sonic', 'shadow', 'super_sonic', 'dark_sonic', 'sonic_excalibur', 'hyper_sonic'];
+  const FIM_DESAFIOS = new Date(2026, 11, 14, 23, 59, 59); // 14/12/2026
+  const desafiosAbertos = () => Date.now() < FIM_DESAFIOS.getTime();
+  const diasDesafios = () => Math.max(0, Math.ceil((FIM_DESAFIOS.getTime() - Date.now()) / 86400000));
+  const lendariasRival = () => embaralhar(pool((c) => c.raridade === 'lendaria')).slice(0, 8).map((c) => c.id);
+  const DESAFIOS = {
+    yugi: {
+      nome: 'Duelo do Faraó', vidas: 2, preco: 30, carta: YUGI,
+      premios: [{ ouro: 500 }, { gemas: 30 }, { bau: 'ouro' }, { gemas: 60 }, { ouro: 1000 }, { carta: YUGI }],
+      fala: '"Você duelou com o coração das cartas, {n}. A partir de hoje, eu duelo do seu lado."',
+      etapas: [
+        { nome: 'Duelo Espelho', ic: '🪞', desc: 'O Faraó joga com o SEU deck, nos mesmos níveis que o seu. Quem joga melhor?',
+          montar: (ev) => { ev.deckIA = [...Estado.d.deck]; ev.niveisV = Object.fromEntries(Estado.d.deck.map((c) => [c, Estado.d.colecao[c].nivel])); ev.dif = 4; } },
+        { nome: 'Cartas Viradas', ic: '🂠', desc: 'Suas cartas ficam viradas pra baixo! Você só vê quanto de elixir cada uma custa. Lembre da ordem do seu deck.', cfg: { dif: 3, cartasViradas: true } },
+        { nome: 'Draft das Trevas', ic: '🎲', desc: 'Escolha 1 de 2 cartas, 8 vezes. A que você não pegar vai pro Faraó. Tudo no nível 8.', draft: true, cfg: { nivel: 8, dif: 4 } },
+        { nome: 'Elixir das Sombras', ic: '⚡', desc: 'Elixir 2,5x mais rápido e o Faraó só joga com lendárias.', montar: (ev) => { ev.deckIA = lendariasRival(); }, cfg: { elixirMult: 2.5, dif: 5 } },
+        { nome: 'Morte Súbita Turbo', ic: '💀', desc: 'Tropas muito mais rápidas, 2 minutos, e a primeira torre que cair decide tudo.', cfg: { subita: true, turbo: true, dif: 5 } },
+        { nome: 'O Faraó', ic: '👁️', desc: 'A IA super inteligente, com o próprio Yugi no deck e cartas 1 nível acima das suas. Boa sorte, duelista.', cfg: { dif: 6, cartaIA: YUGI, nivelIAMais: 3 } },
+      ],
+    },
+    sonic: {
+      nome: 'Corrida do Sonic', vidas: 3, preco: 15, escolha: true,
+      premios: [{ ouro: 300 }, { gemas: 20 }, { bau: 'prata' }, { gemas: 40 }, { escolha: true }],
+      etapas: [
+        { nome: 'Green Hill', ic: '🌴', desc: 'Todas as tropas andam e atacam muito mais rápido.', cfg: { turbo: true, dif: 2 } },
+        { nome: 'Chuva de Anéis', ic: '💍', desc: 'O elixir enche 2x mais rápido.', cfg: { elixirMult: 2, dif: 3 } },
+        { nome: 'Velocidade Máxima', ic: '💨', desc: 'Tropas rápidas E elixir em dobro. Não pisca!', cfg: { turbo: true, elixirMult: 2, dif: 3 } },
+        { nome: 'Contra o Relógio', ic: '⏱️', desc: '2 minutos e a primeira torre derrubada vence.', cfg: { subita: true, dif: 4 } },
+        { nome: 'Rival: Shadow', ic: '🌀', desc: 'O rival tem o Shadow no deck e joga sério. Vença e escolha QUALQUER Sonic!', cfg: { cartaIA: 'shadow', dif: 5 } },
+      ],
+    },
+  };
+  function dadosDesafio(k) {
+    const d = Estado.d;
+    if (!d.desafios) d.desafios = {};
+    return d.desafios[k] || (d.desafios[k] = { v: 0, l: 0, tentativas: 0, ativo: false });
+  }
+  function jogarDesafio(k, iniciar) {
+    const D = DESAFIOS[k], f = dadosDesafio(k);
+    if (!desafiosAbertos()) { UI.toast('Esse evento já acabou 😢'); return; }
+    if (!f.ativo) {
+      if (f.tentativas > 0) {
+        if (Estado.d.gemas < D.preco) { UI.toast(`Precisa de ${D.preco} gemas para tentar de novo`); return; }
+        Estado.d.gemas -= D.preco;
+      }
+      Object.assign(f, { ativo: true, v: 0, l: 0, tentativas: f.tentativas + 1 });
+      Estado.salvar();
+    }
+    if (f.l >= D.vidas) { f.ativo = false; Estado.salvar(); UI.toast('Suas vidas acabaram 💔'); return; }
+    const E = D.etapas[Math.min(f.v, D.etapas.length - 1)];
+    // mostra a regra da próxima batalha antes de começar
+    UI.modal({
+      titulo: `${E.ic} ${E.nome}`,
+      classe: `modal-desafio ${k}`,
+      html: `<p class="desafio-etapa">${D.nome} · batalha ${f.v + 1}/${D.etapas.length}</p><p>${E.desc}</p>`,
+      botoes: [{ texto: 'Voltar' }, { texto: 'Jogar!', classe: 'principal', acao: () => comecarDesafio(k, E, iniciar) }],
+    });
+  }
+  function comecarDesafio(k, E, iniciar) {
+    const D = DESAFIOS[k], f = dadosDesafio(k);
+    const ev = { id: `desafio-${k}`, nome: `${D.nome} · ${E.nome}`, desafio: k, ...(E.cfg || {}) };
+    if (E.montar) E.montar(ev);
+    const ir = () => {
+      // a vida já sai antes da batalha: sair no meio conta como derrota (volta se vencer/empatar)
+      f.l++; f.emJogo = true; Estado.salvar();
+      iniciar(ev);
+    };
+    if (E.draft) return draft((meu, rival) => { ev.deck = meu; ev.deckIA = rival; ir(); });
+    ir();
+  }
+  const nivelMedioDeck = () => { const dk = Estado.d.deck.filter((id) => Estado.d.colecao[id]); return dk.length ? Math.round(dk.reduce((a, id) => a + (Estado.d.colecao[id].nivel || 1), 0) / dk.length) : 5; };
+  function darSonic(id) {
+    const c = Ranque.darEvolucao(id);
+    const col = Estado.d.colecao[id];
+    if (col) col.nivel = Math.max(col.nivel || 1, Math.min(9, Math.max(5, nivelMedioDeck() - 1)));
+    Estado.salvar();
+    if (Conta.salvarAgora) Conta.salvarAgora().catch(() => {});
+    return c;
+  }
+  function escolherSonic(tudo) {
+    const f = dadosDesafio('sonic');
+    const faltam = FAMILIA_SONIC.filter((id) => !Estado.tem(id));
+    if (f.escolheu || !faltam.length) { Estado.d.gemas += 200; Estado.salvar(); UI.toast(f.escolheu ? 'Você já escolheu o seu Sonic: +200 💎' : 'Você já tem todos os Sonics: +200 💎'); tudo(); return; }
+    if (document.querySelector('.modal-escolha-sonic')) return;
+    const md = UI.modal({
+      titulo: '💨 Escolha o seu Sonic!',
+      classe: 'modal-escolha-sonic',
+      html: `<p>Você venceu a Corrida! Escolha <b>um</b> personagem. Os outros continuam no caminho de troféus.</p>
+        <div class="escolha-sonic">${FAMILIA_SONIC.map((id) => { const c = Estado.carta(id), tem = Estado.tem(id); return `<button class="es-op${tem ? ' ja-tem' : ''}" data-id="${id}" ${tem ? 'disabled' : ''}>${Cartas.html(c, { mini: true })}<b>${esc(c.nome)}</b>${tem ? '<small>já é seu</small>' : ''}</button>`; }).join('')}</div>`,
+      botoes: [],
+    });
+    md.el.querySelectorAll('.es-op:not(.ja-tem)').forEach((b) => (b.onclick = () => {
+      const id = b.dataset.id, c = Estado.carta(id);
+      UI.modal({
+        titulo: `Ficar com ${c.nome}?`,
+        html: `<div class="compra">${Cartas.html(c, { mini: true })}<div><p>${esc(c.descricao)}</p><p class="aviso">Só dá pra escolher <b>uma vez</b>.</p></div></div>`,
+        botoes: [{ texto: 'Voltar' }, { texto: 'É esse!', classe: 'principal', acao: () => {
+          f.escolheu = id; Estado.salvar();
+          md.fechar();
+          revelarNino(darSonic(id), 'ESCOLHA DA CORRIDA DO SONIC', `"Ei, ${esc(nomeJ())}! Tá esperando o quê? Bora correr!"`);
+          tudo();
+        } }],
+      });
+    }));
+  }
+  function fimDesafio(r, { mostrarBau, tudo }) {
+    const k = r.evento.desafio, D = DESAFIOS[k], f = dadosDesafio(k);
+    const ganhou = r.resultado === 'vitoria';
+    const contava = f.emJogo;
+    f.emJogo = false;
+    if (contava && r.resultado !== 'derrota') f.l = Math.max(0, f.l - 1);
+    if (!contava && r.resultado === 'derrota') f.l++;
+    const total = D.etapas.length;
+    if (ganhou) {
+      const premio = D.premios[Math.min(f.v, D.premios.length - 1)];
+      f.v++;
+      if (f.v >= total) { f.ativo = false; f.completo = true; }
+      Estado.salvar();
+      const txt = premio.escolha ? 'Escolha um Sonic!' : premio.carta ? 'Yugi Moto!' : txtPremio(premio);
+      UI.modal({ titulo: k === 'yugi' ? '🃏 Você venceu o duelo!' : '💨 Venceu!', html: `<p class="ev-res">${f.v >= total ? `${D.nome} completo!` : `Vitória ${f.v}/${total}! Você ganhou <b>${txt}</b>`}</p>`, botoes: [{ texto: 'Oba!', classe: 'principal' }] });
+      setTimeout(() => {
+        if (premio.escolha) escolherSonic(tudo);
+        else if (premio.carta) {
+          if (Estado.tem(premio.carta)) { Estado.d.gemas += 200; Estado.salvar(); UI.toast('Você já tinha o Yugi: +200 💎'); }
+          else revelarNino(Ranque.darEvolucao(premio.carta), 'LENDÁRIA EXCLUSIVA DE EVENTO', D.fala.replace('{n}', esc(nomeJ())));
+          tudo();
+        } else { darPremio(premio, mostrarBau); tudo(); }
+      }, 120);
+      return;
+    }
+    const acabou = f.l >= D.vidas;
+    if (acabou) f.ativo = false;
+    Estado.salvar();
+    UI.modal({
+      titulo: acabou ? '💔 Fim do desafio' : r.resultado === 'empate' ? 'Empate!' : 'Derrota',
+      html: `<p class="ev-res">${acabou ? `Você chegou a <b>${f.v}</b> vitória${f.v === 1 ? '' : 's'}. Dá pra tentar de novo por ${D.preco} 💎!` : r.resultado === 'empate' ? 'Empate não conta. Bora de novo!' : `Ainda resta${D.vidas - f.l === 1 ? '' : 'm'} <b>${D.vidas - f.l}</b> vida${D.vidas - f.l === 1 ? '' : 's'}.`}</p>`,
+      botoes: [{ texto: 'OK', classe: 'principal', acao: () => tudo() }],
+    });
+  }
+  function htmlDesafios() {
+    if (!desafiosAbertos()) return '';
+    const caixa = (k) => {
+      const D = DESAFIOS[k], f = dadosDesafio(k), total = D.etapas.length;
+      const pips = D.etapas.map((E, i) => `<span class="fn-pip${i < f.v ? ' ok' : ''}${i === total - 1 ? ' final' : ''}" title="${esc(E.nome)}">${i === total - 1 ? (k === 'yugi' ? `<img src="assets/cartas/${YUGI}_medalhao.png" alt="" />` : '<img src="assets/cartas/sonic_medalhao.png" alt="" />') : E.ic}</span>`).join('');
+      const vidas = Array.from({ length: D.vidas }, (_, i) => `<i class="${i < D.vidas - f.l ? '' : 'perdida'}">${k === 'yugi' ? '🃏' : '💍'}</i>`).join('');
+      const prox = D.etapas[Math.min(f.v, total - 1)];
+      const botao = `<button class="selo botao" data-desafio="${k}">${f.ativo ? `Jogar: ${prox.nome}` : f.tentativas ? `De novo · ${D.preco} 💎` : 'Começar (grátis)'}</button>`;
+      const texto = k === 'yugi'
+        ? (Estado.tem(YUGI) ? 'O Yugi já é seu! Jogue pelos prêmios.' : `${total} duelos com regras diferentes. Perdeu ${D.vidas}, acabou. Prêmio final: <b>Yugi Moto</b> (lendária só de evento, nível 6).`)
+        : (dadosDesafio('sonic').escolheu ? `Você escolheu o <b>${esc(Estado.carta(dadosDesafio('sonic').escolheu).nome)}</b>! Jogue pelos prêmios.` : `${total} corridas. Vença todas e escolha <b>qualquer Sonic</b>: Sonic, Shadow, Super, Dark, Excalibur ou Hyper!`);
+      const fundo = k === 'yugi' ? `<video src="assets/cartas/videos/${YUGI}.mp4" autoplay muted loop playsinline></video>`
+        : `<div class="sonic-fundo">${FAMILIA_SONIC.map((id) => `<img src="assets/cartas/${id}.jpg" alt="" />`).join('')}</div>`;
+      return `<div class="desafio-caixa ${k}">${fundo}<div class="mc-conteudo"><b>${k === 'yugi' ? '🃏' : '💨'} ${D.nome}</b><span>${texto}</span>
+        <div class="fn-pips">${pips}</div><div class="fn-linha"><div class="fn-vidas">${vidas}</div>${botao}</div>
+        ${k === 'yugi' ? `<button class="fn-ver" data-ver="${YUGI}">Ver a carta</button>` : '<button class="fn-ver" data-ver-sonic="1">Ver os Sonics</button>'}</div></div>`;
+    };
+    return `<div class="desafios-evento"><div class="mitas-cab"><small>EVENTOS NOVOS · ${diasDesafios()} dias</small><b>⚔️ Desafios Lendários</b></div>${caixa('yugi')}${caixa('sonic')}</div>`;
+  }
+
   // ---------- tela (dentro da aba Eventos) ----------
   function html() {
     const f = nino();
@@ -261,13 +422,22 @@ const Eventos = (() => {
         <div class="ev-barra"><i style="width:${(h.qtd / LIMITE_TOKENS_DIA) * 100}%"></i><small>${h.qtd}/${LIMITE_TOKENS_DIA} hoje</small></div>
         <small class="modo-tempo">Você tem <b>${UI.fmt(Estado.d.tokens || 0)}</b> tokens</small></div>
         <div class="ev-tk-botoes"><button class="selo botao" id="tk-jogar">Jogar</button><button class="selo botao tk-trocar" id="tk-trocar">Trocar</button></div></div>`;
-    return `${htmlMitas()}${festival}${tokens}<div class="eventos-cab">🎪 Modos de hoje</div>${modos}`;
+    return `${htmlDesafios()}${htmlMitas()}${festival}${tokens}<div class="eventos-cab">🎪 Modos de hoje</div>${modos}`;
   }
   function ligar(raiz, { iniciar, verCarta }) {
     raiz.querySelectorAll('[data-modo]').forEach((b) => (b.onclick = () => jogarModo(b.dataset.modo, iniciar)));
     const j = raiz.querySelector('#fn-jogar');
     if (j) j.onclick = () => jogarFestival(iniciar);
     raiz.querySelectorAll('[data-mita]').forEach((b) => (b.onclick = () => jogarMita(b.dataset.mita, iniciar)));
+    raiz.querySelectorAll('[data-desafio]').forEach((b) => (b.onclick = () => jogarDesafio(b.dataset.desafio, iniciar)));
+    raiz.querySelectorAll('[data-ver-sonic]').forEach((b) => (b.onclick = () => {
+      const md = UI.modal({
+        titulo: '💨 Família Sonic', classe: 'modal-escolha-sonic',
+        html: `<div class="escolha-sonic">${FAMILIA_SONIC.map((id) => `<button class="es-op" data-v="${id}">${Cartas.html(Estado.carta(id), { mini: true })}<b>${esc(Estado.carta(id).nome)}</b></button>`).join('')}</div>`,
+        botoes: [{ texto: 'Fechar' }],
+      });
+      md.el.querySelectorAll('[data-v]').forEach((x) => (x.onclick = () => verCarta(Estado.carta(x.dataset.v))));
+    }));
     raiz.querySelectorAll('[data-ver]').forEach((b) => (b.onclick = () => verCarta(Estado.carta(b.dataset.ver))));
     const tj = raiz.querySelector('#tk-jogar');
     if (tj) tj.onclick = () => jogarTokens(iniciar);
@@ -278,6 +448,8 @@ const Eventos = (() => {
   }
 
   // ---------- fim de uma batalha de evento ----------
+  const MASC = new Set([...FAMILIA_SONIC, YUGI]);
+  const EMOJI_REVELA = { mita_malvada: '🖤', akame_murasame: '🗡️', yugi_moto: '🃏', sonic: '💨', shadow: '🌀', super_sonic: '⭐', dark_sonic: '🟣', sonic_excalibur: '⚔️', hyper_sonic: '💎' };
   function revelarNino(c, tag = 'LENDÁRIA EXCLUSIVA DE EVENTO', fala = '"Hmph… n-não é como se eu quisesse entrar no seu deck… mas já que você venceu, eu vou."') {
     if (!c || document.querySelector('.revela-nino')) return;
     const el = document.createElement('div');
@@ -287,7 +459,7 @@ const Eventos = (() => {
         <div class="rn-palco">${Cartas.html(c, { mini: true })}</div>
         <b>${esc(c.nome)}</b>
         <p>${fala}</p>
-        <button class="btn-modal principal">Bem-vinda, ${esc(c.nome.split(' ')[0])}! ${c.id === 'mita_malvada' ? '🖤' : c.id === 'akame_murasame' ? '🗡️' : '🎀'}</button></div>`;
+        <button class="btn-modal principal">${MASC.has(c.id) ? 'Bem-vindo' : 'Bem-vinda'}, ${esc(FAMILIA_SONIC.includes(c.id) ? c.nome : c.nome.split(' ')[0])}! ${EMOJI_REVELA[c.id] || '🎀'}</button></div>`;
     $('app').appendChild(el);
     try { navigator.vibrate && navigator.vibrate([80, 50, 160]); } catch (e) { /* nada */ }
     el.querySelector('button').onclick = () => { el.classList.add('sumir'); setTimeout(() => el.remove(), 300); };
@@ -306,6 +478,7 @@ const Eventos = (() => {
   function fim(r, { mostrarBau, tudo }) {
     const ev = r.evento || {};
     if (ev.mita) { fimMita(r, { mostrarBau, tudo }); return; }
+    if (ev.desafio) { fimDesafio(r, { mostrarBau, tudo }); return; }
     const ganhou = r.resultado === 'vitoria';
     const d = Estado.d;
     if (ev.festival) {
@@ -431,6 +604,21 @@ const Eventos = (() => {
         Estado.salvar();
         if (Conta.salvarAgora) Conta.salvarAgora().catch(() => {});
         setTimeout(() => revelarNino(c, 'PRESENTE DA CRIADORA', 'Desculpa pelo bug do festival! Toma a Nino, já no nível 4 💜'), 900);
+      }
+      for (const k of Object.keys(DESAFIOS)) {
+        const fd = dadosDesafio(k);
+        if (fd.emJogo) { fd.emJogo = false; if (fd.l >= DESAFIOS[k].vidas) fd.ativo = false; Estado.salvar(); }
+        if (k === 'yugi' && fd.completo && !Estado.tem(YUGI)) setTimeout(() => { if (!Estado.tem(YUGI)) revelarNino(Ranque.darEvolucao(YUGI), 'LENDÁRIA EXCLUSIVA DE EVENTO', DESAFIOS.yugi.fala.replace('{n}', esc(nomeJ()))); }, 900);
+        if (k === 'sonic' && fd.completo && !fd.escolheu && !document.querySelector('.modal-escolha-sonic')) setTimeout(() => escolherSonic(() => { if (window.MenuAPI) window.MenuAPI.tudo(); }), 1000);
+      }
+      // Enzo perdeu a Mita Malvada quando a nuvem parou de salvar: devolve
+      if (uid === ENZO && !Estado.tem('mita_malvada') && !(d.presentesEspeciais || []).includes('mita-enzo')) {
+        d.presentesEspeciais = [...(d.presentesEspeciais || []), 'mita-enzo'];
+        const fm = dadosMita('mitaMalvada'); fm.completo = true; fm.ativo = false; fm.emJogo = false;
+        const c = Ranque.darEvolucao('mita_malvada');
+        Estado.salvar();
+        if (Conta.salvarAgora) Conta.salvarAgora().catch(() => {});
+        setTimeout(() => revelarNino(c, 'ELA VOLTOU', `"Você achou que ia se livrar de mim, ${esc(nomeJ())}? Um servidor caindo não vai me separar de você. 🖤"`), 900);
       }
       // Akame (Murasame): ficou mais forte e sobe pro nível 9 (o Arthur achou ela fraca)
       if (uid === ARTHUR && Estado.tem('akame_murasame') && !(d.presentesEspeciais || []).includes('akame-buff')) {

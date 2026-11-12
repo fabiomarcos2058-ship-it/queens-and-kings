@@ -39,36 +39,51 @@ const Conta = (() => {
     return snap.exists() ? JSON.parse(snap.data().dados) : null;
   }
 
+  // Cada gravação conta no limite diário do Firebase (20 mil no plano grátis).
+  // Por isso só grava o que mudou de verdade, e espera uns segundos juntando as mudanças.
+  let ultimo = {};
+  let avisouFalha = false;
+  const comPrazo = (p, ms = 12000) => Promise.race([p, new Promise((_, nao) => setTimeout(() => nao(new Error('demorou')), ms))]);
+  async function gravarSeMudou(chave, conteudo, gravar) {
+    if (ultimo[chave] === conteudo) return;
+    await comPrazo(gravar());
+    ultimo[chave] = conteudo;
+  }
   async function enviarParaNuvem() {
     if (!usuario) return;
+    clearTimeout(timerNuvem); timerNuvem = null;
+    const d = Estado.d, uid = usuario.uid;
     try {
-      await fb.setDoc(docJogador(), { dados: JSON.stringify(Estado.d), atualizado: fb.serverTimestamp(), nome: Estado.d.nome });
+      const dados = JSON.stringify(d);
+      await gravarSeMudou('jogador', dados, () => fb.setDoc(docJogador(), { dados, atualizado: fb.serverTimestamp(), nome: d.nome }));
+      avisouFalha = false;
       // top global (contas que usaram o mod menu ficam de fora, pra ser justo)
-      if (!Estado.d.modUsado) {
-        await fb.setDoc(fb.doc(fb.db, 'ranking', usuario.uid), {
-          nome: Estado.d.nome.slice(0, 16), trofeus: Math.max(0, Math.min(99999, Math.round(Estado.d.trofeus))),
-          avatar: Estado.d.avatar, estiloNome: Passe.estiloNome(), cla: Estado.d.cla ? Estado.d.cla.nome.slice(0, 20) : '', atualizado: fb.serverTimestamp(),
-        }).catch(() => {});
+      if (!d.modUsado) {
+        const r = { nome: d.nome.slice(0, 16), trofeus: Math.max(0, Math.min(99999, Math.round(d.trofeus))), avatar: d.avatar, estiloNome: Passe.estiloNome(), cla: d.cla ? d.cla.nome.slice(0, 20) : '' };
+        await gravarSeMudou('ranking', JSON.stringify(r), () => fb.setDoc(fb.doc(fb.db, 'ranking', uid), { ...r, atualizado: fb.serverTimestamp() })).catch(() => {});
       } else {
-        await fb.deleteDoc(fb.doc(fb.db, 'ranking', usuario.uid)).catch(() => {});
+        await gravarSeMudou('ranking', 'fora', () => fb.deleteDoc(fb.doc(fb.db, 'ranking', uid))).catch(() => {});
       }
       if (typeof Amigos !== 'undefined') await Amigos.publicar();
       // mantém nome e troféus atualizados no clã
-      if (Estado.d.cla && Estado.d.cla.id) {
-        await fb.updateDoc(fb.doc(fb.db, 'clas', Estado.d.cla.id), {
-          [`membros.${usuario.uid}.nome`]: Estado.d.nome,
-          [`membros.${usuario.uid}.trofeus`]: Estado.d.trofeus,
-          [`membros.${usuario.uid}.estiloNome`]: Passe.estiloNome(),
-        }).catch(() => {});
+      if (d.cla && d.cla.id) {
+        const m = { nome: d.nome, trofeus: d.trofeus, estiloNome: Passe.estiloNome() };
+        await gravarSeMudou(`cla:${d.cla.id}`, JSON.stringify(m), () => fb.updateDoc(fb.doc(fb.db, 'clas', d.cla.id), {
+          [`membros.${uid}.nome`]: m.nome, [`membros.${uid}.trofeus`]: m.trofeus, [`membros.${uid}.estiloNome`]: m.estiloNome,
+        })).catch(() => {});
       }
     } catch (e) {
       console.warn('Não salvou na nuvem:', e.code || e);
+      // avisa uma vez: o progresso continua guardado neste celular e sobe quando a nuvem voltar
+      if (!avisouFalha) { avisouFalha = true; UI.toast('⚠️ A nuvem não está salvando agora. Seu progresso fica guardado neste celular.'); }
+      clearTimeout(timerNuvem);
+      timerNuvem = setTimeout(enviarParaNuvem, 60000); // tenta de novo daqui a 1 minuto
     }
   }
 
   function agendarEnvio() {
     clearTimeout(timerNuvem);
-    timerNuvem = setTimeout(enviarParaNuvem, 1500);
+    timerNuvem = setTimeout(enviarParaNuvem, 6000);
   }
 
   // Ao entrar: se a conta já tem progresso, ele é carregado; se não, o progresso deste celular vai para a conta
@@ -89,20 +104,31 @@ const Conta = (() => {
   }
 
   // Proteção: se este celular (da MESMA conta) tem cartas que a nuvem não tem, elas não somem.
-  // Fica sempre a versão com mais progresso de cada carta.
-  function mesclarCartas(nuvem, local) {
+  // Fica sempre a versão com mais progresso de cada carta, e as cartas de evento/exclusivas ganhas também ficam.
+  const mesmaConta = (local) => !!(local && local.colecao && local.conta && local.conta.email === email());
+  // partidas + baús: só aumentam, então mostram qual cópia jogou mais
+  const progresso = (x) => (x.vitorias || 0) + (x.derrotas || 0) + ((x.conquistas && x.conquistas.baus) || 0) + ((x.x1 && ((x.x1.v || 0) + (x.x1.d || 0))) || 0);
+  function juntar(base, outro) {
     try {
-      if (!local || !local.colecao || !local.conta || local.conta.email !== email()) return nuvem;
-      const col = nuvem.colecao || (nuvem.colecao = {});
-      for (const [id, l] of Object.entries(local.colecao)) {
+      const col = base.colecao || (base.colecao = {});
+      for (const [id, l] of Object.entries(outro.colecao || {})) {
         if (!l || !l.tem) continue;
         const n = col[id];
         if (!n || !n.tem || (l.nivel || 1) > (n.nivel || 1) || ((l.nivel || 1) === (n.nivel || 1) && (l.copias || 0) > (n.copias || 0))) col[id] = { ...l };
       }
-      if ((!nuvem.deck || nuvem.deck.length < 8) && local.deck && local.deck.length > (nuvem.deck || []).length) nuvem.deck = [...local.deck];
-    } catch (e) { /* na dúvida, fica a nuvem */ }
-    return nuvem;
+      if ((!base.deck || base.deck.length < 8) && outro.deck && outro.deck.length > (base.deck || []).length) base.deck = [...outro.deck];
+      for (const k of ['cartasExtras', 'presentes', 'presentesEspeciais']) if (Array.isArray(outro[k])) base[k] = [...new Set([...(base[k] || []), ...outro[k]])];
+      // desafios de evento completos não voltam pra trás
+      for (const k of ['desafiosMita', 'desafios']) for (const [id, f] of Object.entries(outro[k] || {})) {
+        const b = (base[k] || (base[k] = {}))[id];
+        if (f && f.completo && !(b && b.completo)) base[k][id] = { ...f, ativo: false, emJogo: false };
+        else if (f && f.escolheu && b && !b.escolheu) b.escolheu = f.escolheu;
+      }
+      if (outro.festivalNino && outro.festivalNino.completo && !(base.festivalNino && base.festivalNino.completo)) base.festivalNino = { ...outro.festivalNino, ativo: false, emJogo: false };
+    } catch (e) { /* na dúvida, fica a base */ }
+    return base;
   }
+  function mesclarCartas(nuvem, local) { return mesmaConta(local) ? juntar(nuvem, local) : nuvem; }
 
   async function aoEntrar(u, { perguntar = false } = {}) {
     usuario = u;
@@ -110,14 +136,21 @@ const Conta = (() => {
     try { nuvem = await baixarDaNuvem(); } catch (e) { console.warn('Erro ao ler a nuvem:', e.code || e); }
     if (nuvem) {
       const local = JSON.parse(JSON.stringify(Estado.d));
-      const escolha = perguntar && temProgresso(local) && temProgresso(nuvem) ? await escolherProgresso(local, nuvem) : 'nuvem';
+      const mesma = mesmaConta(local);
+      let escolha = perguntar && !mesma && temProgresso(local) && temProgresso(nuvem) ? await escolherProgresso(local, nuvem) : 'nuvem';
+      // este celular jogou mais do que a nuvem tem (ex.: a nuvem ficou sem salvar): fica o do celular
+      if (mesma && progresso(local) > progresso(nuvem)) escolha = 'local';
       if (escolha === 'nuvem') Estado.importar(mesclarCartas(nuvem, local));
+      else if (mesma) Estado.importar(juntar(local, nuvem));
     }
     Estado.d.conta = { tipo: 'conta', email: email() };
     if (!nuvem && u.displayName && Estado.d.nome === 'Jogador') Estado.d.nome = u.displayName.slice(0, 16);
     Estado.aoSalvar(agendarEnvio);
     Estado.recarregarCatalogo(); // libera cartas exclusivas desta conta
-    await enviarParaNuvem();
+    ultimo = {};
+    enviarParaNuvem(); // sem esperar: se a nuvem estiver lenta, o jogo abre mesmo assim
+    // clã, mod menu e amigos dependem da conta: atualiza a tela se ela já estiver aberta
+    if (window.MenuAPI && window.MenuAPI.pronto) try { window.MenuAPI.tudo(); } catch (e) { /* nada */ }
   }
 
   document.addEventListener('visibilitychange', () => {

@@ -23,10 +23,10 @@ const Ataques = (() => {
   const NA_TORRE = { tanque: 1.1, lutador: 0.85, assassino: 0.8, atirador: 0.7, mago: 0.65, enxame: 1 };
 
   const CLASSE_DA_CARTA = {
-    tanque: ['itsuki', 'shizuku', 'gogeta_ssj4', 'goku_ssj3', 'goku_ssj4', 'goku_blue_lb', 'gogeta_ultra'],
-    assassino: ['bra', 'teto', 'pan_dbh', 'akame', 'mbappe', 'kashimo', 'goku_pressagio', 'diavolo', 'mita_malvada', 'akame_murasame'],
+    tanque: ['itsuki', 'shizuku', 'gogeta_ssj4', 'goku_ssj3', 'goku_ssj4', 'goku_blue_lb', 'gogeta_ultra', 'sonic_excalibur'],
+    assassino: ['bra', 'teto', 'pan_dbh', 'akame', 'mbappe', 'kashimo', 'goku_pressagio', 'diavolo', 'mita_malvada', 'akame_murasame', 'sonic', 'dark_sonic'],
     atirador: ['mai', 'miku_nakano', 'pan_gt', 'riruka', 'rukia_remake', 'nino_nakano', 'gyro', 'johnny'],
-    mago: ['rukia', 'nami_last', 'hatsune_miku', 'bambietta', 'bulma', 'gojo', 'robin', 'pucci', 'mita_gentil'],
+    mago: ['rukia', 'nami_last', 'hatsune_miku', 'bambietta', 'bulma', 'gojo', 'robin', 'pucci', 'mita_gentil', 'yugi_moto'],
     enxame: ['mini'],
   };
   const classeDe = (c) => {
@@ -57,6 +57,13 @@ const Ataques = (() => {
     trunks_base: { v: { g: 'corte', s: 'espada_trunks', cor: '#E6F0FF' }, m: { perfura: true }, d: 'Corte de espada que acerta também quem está atrás.' },
     pan_gt: { v: { p: 'ki_laranja', vel: 300, tam: 14, rastro: '#FF9A2E' }, m: { rajada: 2 }, d: 'Rajada dupla de esferas de ki.' },
     hatsune_miku: { v: { p: 'nota', vel: 200, tam: 22, giro: 220, rastro: '#39C5BB' }, m: { auraVel: [75, 0.2] }, d: 'Notas musicais. Aliados perto dela atacam 20% mais rápido.' },
+    sonic: { v: { g: 'giro', cor: '#3B82F6' }, m: { spinDash: [4, 1.8], aneis: 5 }, d: 'Spin Dash em quem está longe. Junta anéis e espalha eles em vez de cair.' },
+    shadow: { v: { g: 'chute', cor: '#E8463C' }, m: { chaosSpear: 3, inibidores: 0.4, moveNoTempo: true }, d: 'A cada 3 golpes, Chaos Spears em até 3 inimigos.' },
+    super_sonic: { v: { g: 'impacto', cor: '#FFD25E' }, m: { superForma: 16, voo: true }, d: 'Voa e é invencível enquanto tiver anéis.' },
+    dark_sonic: { v: { g: 'giro', cor: '#A855F7' }, m: { raivaSombria: true, berserk: 0.35 }, d: 'Fica furioso quando um aliado cai perto.' },
+    sonic_excalibur: { v: { g: 'corte', s: 'espada_trunks', cor: '#BFE8FF' }, m: { escudo: 0.2, aparar: 7 }, d: 'Corte em área, escudo e aparar com contra-ataque.' },
+    hyper_sonic: { v: { g: 'impacto', cor: '#F5F5FF' }, m: { esmeraldas: 7, hyperFlash: [5, 90, 0.45], voo: true }, d: '7 Esmeraldas do Caos seguram golpes. Hiper Flash atordoa em volta.' },
+    yugi_moto: { v: { p: 'coringa', vel: 300, tam: 18, giro: 540, rastro: '#FFD25E' }, m: { duelista: 8 }, d: 'Joga cartas de longe e compra uma carta especial a cada 8s.' },
     akame_murasame: { v: { g: 'corte', s: 'katana', cor: '#E0102F' }, m: { queimar: [0.06, 3, '#B0123A', 'veneno'], murasame: 0.2, sombras: 1.5 }, d: 'Murasame: o corte amaldiçoa com veneno e elimina na hora quem fica fraco demais.' },
     akame: { v: { g: 'corte', s: 'katana', cor: '#FF3B3B' }, m: { queimar: [0.05, 3, '#7BE04A', 'veneno'] }, d: 'Murasame: o corte envenena o alvo.' },
     trunks_ssj: { v: { g: 'corte', s: 'espada_trunks', cor: '#FFD25E' }, m: { especial: [4, 2.2, 32, 'fogo'] }, d: 'A cada 4 golpes, um Burning Attack em área.' },

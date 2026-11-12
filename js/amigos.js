@@ -6,7 +6,7 @@
 const Amigos = (() => {
   const fb = () => Conta.fb();
   const uid = () => Conta.uid();
-  const ONLINE_MS = 3 * 60 * 1000;
+  const ONLINE_MS = 5 * 60 * 1000;
   let pararPedidos = null, pararConvites = null, batimento = null;
   const convitesVistos = new Set();
 
@@ -37,9 +37,15 @@ const Amigos = (() => {
     };
   }
 
+  let ultimoPub = '', ultimoPubEm = 0;
   async function publicar() {
     if (!fb() || !uid()) return;
-    try { await fb().setDoc(ref(uid()), dadosPublicos()); } catch (e) { console.warn('Perfil público não salvou:', e.code || e); }
+    const dados = dadosPublicos();
+    const { visto, ...resto } = dados;
+    const chave = JSON.stringify(resto);
+    // o "visto por último" já é atualizado pelo batimento; só regrava o perfil quando algo muda
+    if (chave === ultimoPub && Date.now() - ultimoPubEm < 10 * 60 * 1000) return;
+    try { await fb().setDoc(ref(uid()), dados); ultimoPub = chave; ultimoPubEm = Date.now(); } catch (e) { console.warn('Perfil público não salvou:', e.code || e); }
   }
 
   async function ver(id) {
@@ -130,7 +136,7 @@ const Amigos = (() => {
       });
     }, () => {});
     publicar();
-    batimento = setInterval(() => { if (uid() && document.visibilityState === 'visible') f.updateDoc(ref(uid()), { visto: f.serverTimestamp() }).catch(() => {}); }, 60 * 1000);
+    batimento = setInterval(() => { if (uid() && document.visibilityState === 'visible') f.updateDoc(ref(uid()), { visto: f.serverTimestamp() }).catch(() => {}); }, 2 * 60 * 1000); // a cada 2 min (cada batida é uma gravação no Firebase)
   }
 
   function parar() {

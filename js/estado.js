@@ -160,6 +160,8 @@ const Estado = (() => {
     // (só volta pra conta dona da carta; em quem ganhou de presente ela continua acabada)
     const uidAgora = meuUid();
     if (Array.isArray(d.esgotadas) && uidAgora) d.esgotadas = d.esgotadas.filter((id) => { const c = todas.find((x) => x.id === id); return !c || c.usos || !(c.exclusivo && c.exclusivo.includes(uidAgora)); });
+    // carta de evento que está na coleção mas sumiu da lista de extras (ex.: save da nuvem atrasado) volta a aparecer
+    for (const c of todas) if (c.evento && Array.isArray(c.exclusivo) && !c.exclusivo.length && d.colecao && d.colecao[c.id] && d.colecao[c.id].tem && !(d.cartasExtras || []).includes(c.id)) d.cartasExtras = [...(d.cartasExtras || []), c.id];
     // carta intransferível (Goku UI do Samuel) nunca fica em outra conta
     if (uidAgora) for (const c of todas.filter((x) => x.intransferivel && x.exclusivo && !x.exclusivo.includes(uidAgora))) {
       const tinha = (d.cartasExtras || []).includes(c.id) || (d.deck || []).includes(c.id) || !!(d.colecao && d.colecao[c.id] && d.colecao[c.id].tem);

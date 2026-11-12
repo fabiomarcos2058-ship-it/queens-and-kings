@@ -1939,6 +1939,7 @@
   if (await sessao) UI.toast(`Bem-vindo(a) de volta, ${d().nome}! ☁️`);
   await Conta.tela();
   tudo();
+  window.MenuAPI.pronto = true;
   if (d().presenteNovo) {
     const c = Estado.carta(d().presenteNovo);
     d().presenteNovo = null; Estado.salvar();

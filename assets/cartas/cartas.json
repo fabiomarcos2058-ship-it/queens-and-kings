@@ -2005,6 +2005,288 @@
         "dano": 1600,
         "descricao": "Abre uma janela de 'Excluir arquivo' e apaga a carta inimiga mais forte perto dela. Se for grande demais pra apagar, causa 1600 de dano."
       }
+    },
+    {
+      "id": "sonic",
+      "nome": "Sonic",
+      "raridade": "epica",
+      "custo": 3,
+      "tipo": "Velocista",
+      "trofeus": 400,
+      "arena": 2,
+      "descricao": "O mais rápido do jogo. Dá Spin Dash em quem está longe e junta anéis a cada golpe.",
+      "rosto": [
+        300,
+        130,
+        105
+      ],
+      "arte": [
+        0,
+        0,
+        597
+      ],
+      "vida": 680,
+      "dano": 135,
+      "velocidade": 95,
+      "alcance": 18,
+      "cadencia": 0.7,
+      "alvo": "tudo",
+      "danoTorre": 0.6,
+      "passiva": {
+        "nome": "Anéis",
+        "tipo": "aneis",
+        "descricao": "Cada golpe dá 1 anel. Se for cair com 5 anéis ou mais, ele espalha os anéis e continua de pé com 25% da vida. Quando o alvo está longe, dá um Spin Dash até ele."
+      }
+    },
+    {
+      "id": "shadow",
+      "nome": "Shadow",
+      "raridade": "lendaria",
+      "custo": 5,
+      "tipo": "Forma de Vida Suprema",
+      "trofeus": 1000,
+      "arena": 3,
+      "descricao": "A cada 3 golpes atira Chaos Spears em até 3 inimigos. Com pouca vida, tira os limitadores e fica muito mais forte.",
+      "rosto": [
+        225,
+        250,
+        120
+      ],
+      "arte": [
+        0,
+        0,
+        600
+      ],
+      "vida": 1200,
+      "dano": 250,
+      "velocidade": 70,
+      "alcance": 18,
+      "cadencia": 1.0,
+      "alvo": "tudo",
+      "danoTorre": 0.55,
+      "passiva": {
+        "nome": "Sem limitadores",
+        "tipo": "inibidores",
+        "descricao": "Com menos de 40% da vida: +35% de dano, ataca e anda mais rápido, mas vai perdendo vida aos poucos. Se mexe no tempo parado."
+      },
+      "habilidade": {
+        "nome": "Chaos Control",
+        "tipo": "chaosControl",
+        "custo": 3,
+        "recarga": 20,
+        "duracao": 2.5,
+        "descricao": "Para o tempo em volta dele por 2,5s, aparece colado no inimigo mais forte e dá 3 golpes seguidos."
+      }
+    },
+    {
+      "id": "super_sonic",
+      "nome": "Super Sonic",
+      "raridade": "lendaria",
+      "custo": 6,
+      "tipo": "Forma Super",
+      "trofeus": 1000,
+      "arena": 3,
+      "descricao": "Voa e é INVENCÍVEL enquanto tiver anéis. Os anéis acabam com o tempo e com os golpes que ele leva. Sem anéis, volta a ser o Sonic normal.",
+      "rosto": [
+        240,
+        200,
+        110
+      ],
+      "arte": [
+        0,
+        40,
+        592
+      ],
+      "vida": 950,
+      "dano": 290,
+      "velocidade": 85,
+      "alcance": 18,
+      "cadencia": 0.85,
+      "alvo": "tudo",
+      "danoTorre": 0.5,
+      "passiva": {
+        "nome": "Forma Super",
+        "tipo": "superForma",
+        "descricao": "Começa com 16 anéis. Perde 1 por segundo, e cada golpe que levaria gasta anéis em vez de vida. Quando acabam, ele perde metade do dano."
+      },
+      "habilidade": {
+        "nome": "Super Boost",
+        "tipo": "superBoost",
+        "custo": 2,
+        "recarga": 14,
+        "mult": 2.2,
+        "aneis": 10,
+        "descricao": "Ganha +10 anéis e atravessa a linha em frente num rastro dourado, machucando todo mundo no caminho."
+      }
+    },
+    {
+      "id": "dark_sonic",
+      "nome": "Dark Sonic",
+      "raridade": "lendaria",
+      "custo": 5,
+      "tipo": "Fúria Sombria",
+      "trofeus": 1800,
+      "arena": 4,
+      "descricao": "Quanto mais machucado, mais rápido ataca. Fica furioso quando um aliado cai perto dele.",
+      "rosto": [
+        240,
+        300,
+        140
+      ],
+      "arte": [
+        0,
+        80,
+        736
+      ],
+      "vida": 1150,
+      "dano": 280,
+      "velocidade": 80,
+      "alcance": 18,
+      "cadencia": 0.9,
+      "alvo": "tudo",
+      "danoTorre": 0.55,
+      "passiva": {
+        "nome": "Raiva Sombria",
+        "tipo": "raivaSombria",
+        "descricao": "Quando um aliado cai perto, ganha +20% de dano por 6s (acumula até 3x) e recupera 8% da vida. Ataca mais rápido quanto menos vida tiver."
+      },
+      "habilidade": {
+        "nome": "Explosão Sombria",
+        "tipo": "explosaoSombria",
+        "custo": 3,
+        "recarga": 16,
+        "mult": 2.4,
+        "descricao": "Puxa os inimigos em volta, deixa eles lentos e explode em energia sombria."
+      }
+    },
+    {
+      "id": "sonic_excalibur",
+      "nome": "Sonic Excalibur",
+      "raridade": "lendaria",
+      "custo": 6,
+      "tipo": "Cavaleiro do Vento",
+      "trofeus": 1800,
+      "arena": 4,
+      "descricao": "Cavaleiro com armadura: tem escudo, corta em área e apara golpes de perto com contra-ataque.",
+      "rosto": [
+        235,
+        180,
+        120
+      ],
+      "arte": [
+        0,
+        0,
+        599
+      ],
+      "vida": 1400,
+      "dano": 235,
+      "velocidade": 52,
+      "alcance": 22,
+      "cadencia": 1.15,
+      "area": 26,
+      "alvo": "tudo",
+      "danoTorre": 0.6,
+      "passiva": {
+        "nome": "Aparar",
+        "tipo": "aparar",
+        "descricao": "Escudo de 20% da vida. A cada 7s, apara o próximo golpe de perto (não leva dano) e contra-ataca."
+      },
+      "habilidade": {
+        "nome": "Soul Surge",
+        "tipo": "soulSurge",
+        "custo": 4,
+        "recarga": 20,
+        "dano": 1100,
+        "descricao": "A Excalibur solta um corte de luz gigante que atravessa a linha inteira. O escudo volta cheio."
+      }
+    },
+    {
+      "id": "hyper_sonic",
+      "nome": "Hyper Sonic",
+      "raridade": "lendaria",
+      "custo": 7,
+      "tipo": "Forma Hiper",
+      "trofeus": 1800,
+      "arena": 4,
+      "descricao": "O Sonic mais forte. 7 Esmeraldas do Caos amortecem golpes por ele, e o Hiper Flash atordoa tudo em volta.",
+      "rosto": [
+        330,
+        300,
+        150
+      ],
+      "arte": [
+        0,
+        80,
+        657
+      ],
+      "vida": 1100,
+      "dano": 280,
+      "velocidade": 95,
+      "alcance": 18,
+      "cadencia": 0.8,
+      "alvo": "tudo",
+      "danoTorre": 0.5,
+      "passiva": {
+        "nome": "Esmeraldas do Caos",
+        "tipo": "esmeraldas",
+        "descricao": "Cada uma das 7 esmeraldas segura até 110 de dano de um golpe. A cada 5s solta um Hiper Flash que machuca e atordoa quem está perto."
+      },
+      "habilidade": {
+        "nome": "Hiper Velocidade",
+        "tipo": "hiperRajada",
+        "custo": 4,
+        "recarga": 22,
+        "golpes": 7,
+        "mult": 1.4,
+        "descricao": "Pula de inimigo em inimigo (até 7) batendo em cada um. Cada golpe recupera 1 esmeralda."
+      }
+    },
+    {
+      "id": "yugi_moto",
+      "nome": "Yugi Moto",
+      "raridade": "lendaria",
+      "custo": 6,
+      "tipo": "Rei dos Jogos · Evento",
+      "trofeus": 0,
+      "exclusivo": [],
+      "evento": true,
+      "nivelInicial": 6,
+      "video": "videos/yugi_moto.mp4",
+      "videoRosto": "videos/yugi_moto_rosto.mp4",
+      "descricao": "Duela de longe jogando cartas. A cada 8s compra uma carta do deck dele, e cada uma faz uma coisa diferente.",
+      "rosto": [
+        290,
+        300,
+        120
+      ],
+      "arte": [
+        0,
+        120,
+        576
+      ],
+      "vida": 1550,
+      "dano": 240,
+      "velocidade": 50,
+      "alcance": 85,
+      "cadencia": 1.1,
+      "alvo": "tudo",
+      "arena": 1,
+      "danoTorre": 0.6,
+      "passiva": {
+        "nome": "Hora do Duelo",
+        "tipo": "duelista",
+        "descricao": "A cada 8s compra uma carta: Raio Dourado (atinge 3), Armadilha Espelho (devolve 3 golpes), Coração das Cartas (cura), Selo do Faraó (atordoa em volta) ou Invocação (chama uma tropa do seu deck por 10s)."
+      },
+      "habilidade": {
+        "nome": "Reino das Sombras",
+        "tipo": "reinoSombras",
+        "custo": 4,
+        "recarga": 24,
+        "duracao": 3,
+        "raio": 150,
+        "pct": 0.35,
+        "descricao": "O Enigma do Milênio manda os inimigos em volta para o Reino das Sombras por 3s. Quando voltam, perdem 35% da vida. Ele ainda compra uma carta."
+      }
     }
   ]
 }
