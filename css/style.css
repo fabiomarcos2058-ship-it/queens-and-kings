@@ -1989,3 +1989,51 @@ body.arrastando-carta #deck .slot-carta { animation: tremerSlot 0.9s ease-in-out
 /* botão Batalhar com brilho de ouro de verdade */
 .btn-jogar { background: linear-gradient(#ffe7a0dd, #f2b23ecc), url(../assets/ui/menu/ouro.jpg) 0 0 / 140px; border-bottom-color: #8a5a10; text-shadow: 0 1px 0 #fff8; }
 .evento { border: 2px solid #ffffff26; }
+
+/* =================== JoJo: Stands =================== */
+.dano-num.fala-jojo { font: 14px 'Lilita One', 'Fredoka', sans-serif; color: #FFE45C; letter-spacing: 0.5px; transform-origin: center; text-shadow: 2px 2px 0 #6a1fc0, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 0 0 10px #B15CFF; }
+/* tempo parado: tudo fica sem cor e com tom invertido, menos quem anda no tempo */
+.arena-grande-janela.tempo-parado .arena { filter: grayscale(0.85) contrast(1.15) brightness(0.85); transition: filter 0.25s; }
+.arena-grande-janela.tempo-parado::before { content: ''; position: absolute; inset: 0; z-index: 1600; pointer-events: none; background: radial-gradient(circle, transparent 35%, #3a1a6a66 100%); box-shadow: inset 0 0 60px #6a2fd0aa; animation: tempoPulsa 1.2s ease-in-out infinite; }
+@keyframes tempoPulsa { 50% { opacity: 0.6; } }
+.tropa.parada-tempo { filter: grayscale(1) brightness(0.7) sepia(0.4) hue-rotate(200deg); }
+.tropa.parada-tempo .tropa-corpo { animation-play-state: paused !important; }
+.fx-tempo-parado { position: absolute; pointer-events: none; z-index: 1750; width: 10%; aspect-ratio: 1; transform: translate(-50%, -50%); border-radius: 50%; mix-blend-mode: difference; background: radial-gradient(circle, #ffffff 0 55%, #b9a2ff 70%, transparent 72%); animation: esferaTempo 1s ease-out forwards; }
+@keyframes esferaTempo { 0% { transform: translate(-50%, -50%) scale(0.2); opacity: 1; } 60% { transform: translate(-50%, -50%) scale(9); opacity: 1; } 100% { transform: translate(-50%, -50%) scale(12); opacity: 0; } }
+/* tempo acelerado (Made in Heaven) */
+.arena-grande-janela.tempo-acelerado::after { content: ''; position: absolute; inset: 0; z-index: 1600; pointer-events: none; background: repeating-linear-gradient(100deg, transparent 0 22px, #ffffff14 22px 24px), radial-gradient(circle, transparent 50%, #7FE0D455 100%); animation: tempoCorre 0.35s linear infinite; }
+@keyframes tempoCorre { to { background-position: 60px 0, 0 0; } }
+.tropa.acelerada .tropa-medalhao { box-shadow: 0 0 0 2px #7FE0D4, 0 0 12px #7FE0D4, 0 0 22px #ffffff66; }
+/* King Crimson: tempo apagado */
+.tropa.tempo-apagado { opacity: 0.18; filter: drop-shadow(0 0 6px #FF3D7F) saturate(2); transition: opacity 0.15s; }
+.fx-kc { position: absolute; pointer-events: none; z-index: 1750; width: 18%; aspect-ratio: 1; transform: translate(-50%, -50%); border-radius: 50%; background: conic-gradient(from 0deg, #FF3D7F, #6a0a2a, #FF3D7F, #000, #FF3D7F); mix-blend-mode: screen; animation: kcGlitch 0.8s steps(6) forwards; }
+@keyframes kcGlitch { 0% { transform: translate(-50%, -50%) scale(0.3) skewX(0); opacity: 1; } 50% { transform: translate(-46%, -54%) scale(1.3) skewX(25deg); } 100% { transform: translate(-50%, -50%) scale(1.6) skewX(-15deg); opacity: 0; } }
+/* rajada de socos */
+.fx-ora { position: absolute; pointer-events: none; z-index: 1750; width: 16%; aspect-ratio: 1; transform: translate(-50%, -60%);
+  background: radial-gradient(circle at 30% 30%, #fff 0 6%, transparent 7%), radial-gradient(circle at 70% 40%, #fff 0 6%, transparent 7%), radial-gradient(circle at 45% 70%, #fff 0 6%, transparent 7%), radial-gradient(circle at 60% 20%, #fff 0 5%, transparent 6%), radial-gradient(circle at 25% 60%, #fff 0 5%, transparent 6%), radial-gradient(circle, #8E6CFFaa 0 35%, transparent 60%);
+  filter: drop-shadow(0 0 6px #8E6CFF); animation: oraBate 0.65s steps(5) forwards; }
+@keyframes oraBate { 0% { transform: translate(-50%, -60%) scale(0.6) rotate(0); } 100% { transform: translate(-50%, -60%) scale(1.25) rotate(40deg); opacity: 0.2; } }
+/* facas paradas no ar */
+.fx-facas { position: absolute; pointer-events: none; z-index: 1760; width: 14%; aspect-ratio: 1; transform: translate(-50%, -50%);
+  background: url(../assets/ataques/faca.svg) 10% 15% / 32% no-repeat, url(../assets/ataques/faca.svg) 75% 5% / 30% no-repeat, url(../assets/ataques/faca.svg) 85% 70% / 32% no-repeat, url(../assets/ataques/faca.svg) 15% 85% / 30% no-repeat;
+  filter: drop-shadow(0 0 4px #FFD25E); animation: facasParadas 2.6s linear forwards; }
+@keyframes facasParadas { 0% { transform: translate(-50%, -50%) scale(1.8); opacity: 0; } 10% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; } 90% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; } 100% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; } }
+/* rolo compressor (genérico) caindo */
+.fx-rolo { position: absolute; pointer-events: none; z-index: 1770; width: 30%; aspect-ratio: 1.4; transform: translate(-50%, -50%); border-radius: 12px;
+  background: linear-gradient(#ffe45c 0 18%, #c9a23a 18% 24%, #6b7480 24% 70%, #2f3640 70%), repeating-linear-gradient(90deg, #0000 0 18%, #0003 18% 20%);
+  box-shadow: inset 0 -8px 0 #1d2228, 0 10px 24px #000c; border: 3px solid #1d2228; animation: roloCai 1.1s cubic-bezier(0.5, 0, 0.8, 0.4) forwards; }
+@keyframes roloCai { 0% { transform: translate(-50%, -260%) scale(1.3) rotate(-12deg); opacity: 0; } 45% { transform: translate(-50%, -50%) scale(1) rotate(4deg); opacity: 1; } 55% { transform: translate(-50%, -46%) scale(1.05, 0.9); } 85% { opacity: 1; } 100% { transform: translate(-50%, -50%); opacity: 0; } }
+/* disco roubado */
+.fx-disco { position: absolute; pointer-events: none; z-index: 1750; width: 9%; aspect-ratio: 1; transform: translate(-50%, -80%); background: url(../assets/ataques/disco.svg) center / contain no-repeat; animation: discoSai 0.7s ease-out forwards; filter: drop-shadow(0 0 6px #D9B8FF); }
+@keyframes discoSai { 0% { transform: translate(-50%, -40%) scale(0.3) rotateY(0); } 100% { transform: translate(-50%, -180%) scale(1.2) rotateY(720deg); opacity: 0; } }
+/* rotação infinita */
+.tropa.rotacao-infinita .tropa-corpo::before { content: ''; position: absolute; left: 50%; top: 50%; width: 150%; aspect-ratio: 1; transform: translate(-50%, -50%); border-radius: 50%; pointer-events: none; z-index: 3;
+  background: conic-gradient(from 0deg, transparent 0 20%, #8FD3FFcc 25%, transparent 30% 45%, #FFE45Ccc 50%, transparent 55% 70%, #8FD3FFcc 75%, transparent 80%); -webkit-mask: radial-gradient(circle, transparent 52%, #000 54% 64%, transparent 66%); mask: radial-gradient(circle, transparent 52%, #000 54% 64%, transparent 66%); animation: girarRot 0.5s linear infinite; }
+@keyframes girarRot { to { transform: translate(-50%, -50%) rotate(360deg); } }
+.fx-tusk { position: absolute; pointer-events: none; z-index: 1750; width: 22%; aspect-ratio: 1; transform: translate(-50%, -50%); border-radius: 50%; background: conic-gradient(#8FD3FF, #FFE45C, #FF8FB1, #8FD3FF); -webkit-mask: radial-gradient(circle, transparent 40%, #000 42% 50%, transparent 52%); mask: radial-gradient(circle, transparent 40%, #000 42% 50%, transparent 52%); animation: tuskAbre 0.9s ease-out forwards; }
+@keyframes tuskAbre { 0% { transform: translate(-50%, -50%) scale(2) rotate(0); opacity: 0; } 30% { opacity: 1; } 100% { transform: translate(-50%, -50%) scale(0.4) rotate(900deg); opacity: 0; } }
+/* Ball Breaker: bola de aço gigante rolando */
+.kamehameha.bola-aco { background: url(../assets/ataques/bola_aco.svg) right center / auto 100% no-repeat, linear-gradient(90deg, transparent, #c9d3de55 40%, #ffffff88); filter: drop-shadow(0 0 8px #E8F4FF); }
+.cutin.jojo_jotaro .cutin-faixa, .cutin.jojo_dio .cutin-faixa, .cutin.jojo_diavolo .cutin-faixa, .cutin.jojo_pucci .cutin-faixa, .cutin.jojo_gyro .cutin-faixa, .cutin.jojo_johnny .cutin-faixa { border-color: #B15CFF; box-shadow: 0 0 22px #B15CFF; }
+.cutin[class*="jojo_"] .cutin-legenda { color: #FFE45C; text-shadow: 3px 3px 0 #6a1fc0, -1px -1px 0 #000, 1px 1px 0 #000; }
+.kamehameha.bola-aco { box-shadow: none; height: 46px; border-radius: 0 30px 30px 0; }

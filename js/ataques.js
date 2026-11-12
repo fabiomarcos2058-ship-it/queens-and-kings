@@ -24,9 +24,9 @@ const Ataques = (() => {
 
   const CLASSE_DA_CARTA = {
     tanque: ['itsuki', 'shizuku', 'gogeta_ssj4', 'goku_ssj3', 'goku_ssj4', 'goku_blue_lb', 'gogeta_ultra'],
-    assassino: ['bra', 'teto', 'pan_dbh', 'akame', 'mbappe', 'kashimo', 'goku_pressagio'],
-    atirador: ['mai', 'miku_nakano', 'pan_gt', 'riruka', 'rukia_remake', 'nino_nakano'],
-    mago: ['rukia', 'nami_last', 'hatsune_miku', 'bambietta', 'bulma', 'gojo', 'robin'],
+    assassino: ['bra', 'teto', 'pan_dbh', 'akame', 'mbappe', 'kashimo', 'goku_pressagio', 'diavolo'],
+    atirador: ['mai', 'miku_nakano', 'pan_gt', 'riruka', 'rukia_remake', 'nino_nakano', 'gyro', 'johnny'],
+    mago: ['rukia', 'nami_last', 'hatsune_miku', 'bambietta', 'bulma', 'gojo', 'robin', 'pucci'],
     enxame: ['mini'],
   };
   const classeDe = (c) => {
@@ -89,6 +89,12 @@ const Ataques = (() => {
     goku_isc: { v: { g: 'impacto', cor: '#E8F4FF', s: 'ki_prata' }, m: { marcar: [0.2, 3], imune: true, atravessar: true }, d: 'Imune a lentidão e atordoamento. Marca o alvo: +20% de dano de todos. Passiva: se 2 ou 3 inimigos o cercarem, desvia, passa no meio deles e vai só atrás das torres, 15% mais rápido.' },
     nino_nakano: { v: { p: 'borboleta', vel: 220, tam: 16, rastro: '#FF8FB1' }, m: { marmita: true }, d: 'Joga borboletas. Passiva: a cada 6s uma marmita cura a aliada mais ferida (+22% de vida e +20% de dano por 5s). Levou um golpe forte? "Baka!" e empurra quem está colado.' },
     robin: { v: { g: 'bracos', cor: '#F2C4A0' }, m: { hana: true }, d: 'Hana Hana: braços brotam do chão embaixo do alvo (não dá pra desviar do projétil, não tem projétil!). A cada 3 golpes prende o alvo. Quem encosta nela é empurrado pelos braços.' },
+    jotaro: { v: { g: 'soco', cor: '#8E6CFF' }, m: { ora: 4, moveNoTempo: true }, d: 'Socos do Stand. A cada 4 golpes, uma rajada de 5 socos. Anda no tempo parado.' },
+    dio: { v: { g: 'soco', cor: '#FFD25E', pesado: true }, m: { vampiro: 0.25, moveNoTempo: true }, d: 'Golpes que roubam vida (25%). Anda no tempo parado.' },
+    diavolo: { v: { g: 'corte', cor: '#FF3D7F' }, m: { epitafio: 7 }, d: 'Corte do Stand. Epitáfio: desvia de um golpe a cada 7s.' },
+    pucci: { v: { p: 'disco', vel: 230, tam: 20, giro: 720, rastro: '#D9B8FF' }, m: { disco: 3 }, d: 'Discos. A cada 3, rouba o disco do alvo (trava a habilidade e enfraquece).' },
+    gyro: { v: { p: 'bola_aco', vel: 240, tam: 18, giro: 900, rastro: '#C9D3DE' }, m: { ricochete: 0.6, lentidao: [0.3, 1.5] }, d: 'Bola de Aço que quica em outro inimigo e deixa todos lentos.' },
+    johnny: { v: { p: 'unha', vel: 330, tam: 15, giro: 1080, rastro: '#8FD3FF' }, m: { tusk: 0.15 }, d: 'Unhas giratórias de longe. +15% de dano por tiro seguido no mesmo alvo (até +60%).' },
     goku_ui: { v: { g: 'impacto', cor: '#E8F4FF', s: 'ki_prata' }, m: { imune: true }, d: 'Imune a lentidão e atordoamento.' },
   };
   const padrao = (c) => (c && c.alcance > 40 ? { v: { p: 'ki_amarelo', vel: 300, tam: 14 } } : { v: { g: 'soco', cor: '#ffffff' } });

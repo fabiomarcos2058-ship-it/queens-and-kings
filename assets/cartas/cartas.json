@@ -1631,6 +1631,243 @@
         "dano": 650,
         "descricao": "Duas mãos gigantes brotam do chão em volta do alvo: dano em área e prendem todo mundo por 2s. Torres levam 35%."
       }
+    },
+    {
+      "id": "jotaro",
+      "nome": "Jotaro Kujo",
+      "raridade": "lendaria",
+      "custo": 5,
+      "tipo": "Lutador · Stand",
+      "trofeus": 1800,
+      "arena": 4,
+      "rosto": [
+        340,
+        135,
+        85
+      ],
+      "arte": [
+        0,
+        0,
+        538
+      ],
+      "descricao": "Seu Stand bate mais rápido que os olhos. A cada 4 golpes, solta uma rajada de socos. Ele consegue se mexer no tempo parado.",
+      "vida": 1230,
+      "dano": 245,
+      "velocidade": 50,
+      "alcance": 20,
+      "cadencia": 1.0,
+      "alvo": "tudo",
+      "danoTorre": 0.55,
+      "passiva": {
+        "nome": "Rajada de Socos",
+        "tipo": "ora",
+        "descricao": "A cada 4 golpes, uma rajada de 5 socos rápidos (2,25x de dano). Não é congelado quando alguém para o tempo."
+      },
+      "habilidade": {
+        "nome": "Star Platinum: The World",
+        "tipo": "starWorld",
+        "custo": 3,
+        "recarga": 18,
+        "descricao": "Para o tempo por 2s para os inimigos perto dele e já solta uma rajada de socos."
+      }
+    },
+    {
+      "id": "dio",
+      "nome": "Dio Brando",
+      "raridade": "lendaria",
+      "custo": 6,
+      "tipo": "Vampiro · Stand",
+      "trofeus": 1800,
+      "arena": 4,
+      "rosto": [
+        235,
+        150,
+        125
+      ],
+      "arte": [
+        0,
+        0,
+        369
+      ],
+      "descricao": "Vampiro imortal: recupera vida a cada golpe. Também se mexe no tempo parado.",
+      "vida": 1380,
+      "dano": 280,
+      "velocidade": 48,
+      "alcance": 20,
+      "cadencia": 1.1,
+      "alvo": "tudo",
+      "danoTorre": 0.45,
+      "passiva": {
+        "nome": "Vampiro",
+        "tipo": "vampiro",
+        "descricao": "Recupera 25% do dano que causa. Não é congelado quando alguém para o tempo."
+      },
+      "habilidade": {
+        "nome": "ZA WARUDO",
+        "tipo": "zaWarudo",
+        "custo": 4,
+        "recarga": 24,
+        "dano": 220,
+        "descricao": "Para o tempo da arena INTEIRA por 3s. Ele joga facas que ficam paradas no ar e acertam quando o tempo volta, e no fim cai um rolo compressor no alvo."
+      }
+    },
+    {
+      "id": "diavolo",
+      "nome": "Diavolo",
+      "raridade": "lendaria",
+      "custo": 5,
+      "tipo": "Assassino · Stand",
+      "trofeus": 1000,
+      "arena": 3,
+      "rosto": [
+        470,
+        470,
+        230
+      ],
+      "arte": [
+        0,
+        0,
+        735
+      ],
+      "descricao": "Vê o futuro e apaga o tempo. A cada 7s, desvia de um golpe sozinho.",
+      "vida": 1020,
+      "dano": 290,
+      "velocidade": 56,
+      "alcance": 18,
+      "cadencia": 1.0,
+      "alvo": "tudo",
+      "danoTorre": 0.5,
+      "passiva": {
+        "nome": "Epitáfio",
+        "tipo": "epitafio",
+        "descricao": "Vê o próximo golpe: a cada 7s, desvia de um ataque automaticamente."
+      },
+      "habilidade": {
+        "nome": "King Crimson",
+        "tipo": "kingCrimson",
+        "custo": 3,
+        "recarga": 16,
+        "descricao": "Apaga o tempo: some por 1,8s (ninguém consegue acertar nem mirar nele), reaparece atrás do alvo e dá um golpe de 4x de dano."
+      }
+    },
+    {
+      "id": "pucci",
+      "nome": "Enrico Pucci",
+      "raridade": "lendaria",
+      "custo": 5,
+      "tipo": "Suporte · Stand",
+      "trofeus": 1000,
+      "arena": 3,
+      "rosto": [
+        178,
+        150,
+        85
+      ],
+      "arte": [
+        0,
+        0,
+        704
+      ],
+      "descricao": "Atira discos de longe. A cada 3 discos, rouba o disco do alvo: a habilidade dele trava e ele fica mais fraco.",
+      "vida": 980,
+      "dano": 190,
+      "velocidade": 46,
+      "alcance": 95,
+      "cadencia": 1.2,
+      "alvo": "tudo",
+      "danoTorre": 0.6,
+      "passiva": {
+        "nome": "Whitesnake",
+        "tipo": "disco",
+        "descricao": "A cada 3 ataques, rouba o disco do alvo: habilidade dele +8s de recarga e −25% de dano por 6s."
+      },
+      "habilidade": {
+        "nome": "Made in Heaven",
+        "tipo": "madeInHeaven",
+        "custo": 4,
+        "recarga": 24,
+        "descricao": "Acelera o tempo por 7s: suas tropas andam e atacam 50% mais rápido e o seu elixir enche 70% mais rápido."
+      }
+    },
+    {
+      "id": "gyro",
+      "nome": "Gyro Zeppeli",
+      "raridade": "epica",
+      "custo": 4,
+      "tipo": "Atirador · Rotação",
+      "trofeus": 400,
+      "arena": 2,
+      "rosto": [
+        390,
+        430,
+        210
+      ],
+      "arte": [
+        0,
+        0,
+        720
+      ],
+      "descricao": "Lança Bolas de Aço que giram: quicam para outro inimigo e deixam todo mundo mais lento.",
+      "vida": 740,
+      "dano": 185,
+      "velocidade": 50,
+      "alcance": 95,
+      "cadencia": 1.2,
+      "alvo": "tudo",
+      "danoTorre": 0.6,
+      "passiva": {
+        "nome": "Rotação",
+        "tipo": "rotacao",
+        "descricao": "A bola quica em mais um inimigo (60% do dano) e deixa os atingidos 30% mais lentos."
+      },
+      "habilidade": {
+        "nome": "Ball Breaker",
+        "tipo": "ballBreaker",
+        "custo": 3,
+        "recarga": 16,
+        "dano": 620,
+        "descricao": "Uma bola de aço gigante rola em linha reta atropelando todo mundo: dano e os atingidos 'envelhecem' (−30% de dano e −40% de velocidade)."
+      }
+    },
+    {
+      "id": "johnny",
+      "nome": "Johnny Joestar",
+      "raridade": "epica",
+      "custo": 4,
+      "tipo": "Atirador · Stand",
+      "trofeus": 400,
+      "arena": 2,
+      "rosto": [
+        420,
+        650,
+        220
+      ],
+      "arte": [
+        0,
+        260,
+        720
+      ],
+      "descricao": "Atira unhas que giram de muito longe. Quanto mais acerta o mesmo alvo, mais forte fica.",
+      "vida": 705,
+      "dano": 182,
+      "velocidade": 46,
+      "alcance": 120,
+      "cadencia": 1.1,
+      "alvo": "tudo",
+      "danoTorre": 0.55,
+      "passiva": {
+        "nome": "Tusk",
+        "tipo": "tusk",
+        "descricao": "Cada tiro seguido no mesmo alvo dá +15% de dano (até +60%)."
+      },
+      "habilidade": {
+        "nome": "Tusk Act 4",
+        "tipo": "tuskAct4",
+        "custo": 4,
+        "recarga": 20,
+        "dano": 900,
+        "descricao": "Rotação Infinita no alvo: 900 de dano em 6s que atravessa esquiva e escudos, deixa ele 40% mais lento e, se ele morrer, a rotação pula pro inimigo mais perto."
+      }
     }
   ]
 }

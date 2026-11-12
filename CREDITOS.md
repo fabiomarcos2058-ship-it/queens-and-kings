@@ -31,3 +31,6 @@
 
 ## Texturas do menu
 - `assets/ui/menu/*.jpg`: recortes pequenos e recoloridos de texturas CC0 (Poly Haven: large_sandstone_blocks_01, velour_velvet, oak_wood_planks, marble_01; ambientCG: Metal048A).
+
+## Personagens de JoJo (Jotaro, Dio, Diavolo, Pucci, Gyro, Johnny)
+- As imagens das cartas e das telas de habilidade foram enviadas pela criadora; aqui só foram recortadas. Os desenhos do disco, da bola de aço, da unha e da faca foram feitos à mão para o jogo, em SVG simples.
