@@ -455,9 +455,10 @@ const Eventos = (() => {
         <div class="ev-barra"><i style="width:${(h.qtd / LIMITE_TOKENS_DIA) * 100}%"></i><small>${h.qtd}/${LIMITE_TOKENS_DIA} hoje</small></div>
         <small class="modo-tempo">Você tem <b>${UI.fmt(Estado.d.tokens || 0)}</b> tokens</small></div>
         <div class="ev-tk-botoes"><button class="selo botao" id="tk-jogar">Jogar</button><button class="selo botao tk-trocar" id="tk-trocar">Trocar</button></div></div>`;
-    return `${htmlDesafios()}${htmlMitas()}${festival}${tokens}<div class="eventos-cab">🎪 Modos de hoje</div>${modos}`;
+    return `${typeof TD !== 'undefined' ? TD.htmlEvento() : ''}${htmlDesafios()}${htmlMitas()}${festival}${tokens}<div class="eventos-cab">🎪 Modos de hoje</div>${modos}`;
   }
   function ligar(raiz, { iniciar, verCarta }) {
+    if (typeof TD !== 'undefined') TD.ligar(raiz);
     raiz.querySelectorAll('[data-modo]').forEach((b) => (b.onclick = () => jogarModo(b.dataset.modo, iniciar)));
     const j = raiz.querySelector('#fn-jogar');
     if (j) j.onclick = () => jogarFestival(iniciar);

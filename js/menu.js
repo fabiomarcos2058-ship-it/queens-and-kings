@@ -440,7 +440,8 @@
 
   function conviteX1(c) {
     // já está numa batalha: avisa quem chamou
-    if (!$('batalha').classList.contains('oculto')) { Amigos.apagarConvite(c.de); X1.responder(c.codigo, 'ocupado'); return; }
+    if (!$('batalha').classList.contains('oculto') || (typeof TD !== 'undefined' && TD.ativo())) { Amigos.apagarConvite(c.de); X1.responder(c.codigo, 'ocupado'); return; }
+    const ehTD = c.modo === 'td';
     document.querySelectorAll('.convite-x1').forEach((x) => x.remove());
     const TEMPO = 30;
     const el = document.createElement('div');
@@ -449,11 +450,11 @@
     const ehDupla = c.modo === '2v2' || ehRanq;
     if (ehDupla) el.classList.add('convite-2v2');
     el.innerHTML = `<div class="convite-caixa">
-        <div class="convite-titulo">${ehRanq ? '🏅 Ranqueada 2v2!' : ehDupla ? '🤝 Bora de 2v2?' : '⚔️ Desafio de x1!'}</div>
+        <div class="convite-titulo">${ehTD ? '🏰 Defesa do Reino!' : ehRanq ? '🏅 Ranqueada 2v2!' : ehDupla ? '🤝 Bora de 2v2?' : '⚔️ Desafio de x1!'}</div>
         <img class="convite-avatar" src="${avatarDe(c.avatar)}" alt="" />
-        <p><b>${Passe.nomeHtml(c.nome || 'Um amigo', c.estiloNome)}</b> ${ehRanq ? 'quer jogar a Ranqueada 2v2 com você na dupla!' : ehDupla ? 'te chamou pra uma sala de 2v2!' : 'está te chamando pra um x1!'}</p>
+        <p><b>${Passe.nomeHtml(c.nome || 'Um amigo', c.estiloNome)}</b> ${ehTD ? 'te chamou pra defender o castelo junto no evento!' : ehRanq ? 'quer jogar a Ranqueada 2v2 com você na dupla!' : ehDupla ? 'te chamou pra uma sala de 2v2!' : 'está te chamando pra um x1!'}</p>
         <div class="convite-tempo"><i style="animation-duration:${TEMPO}s"></i></div>
-        <div class="convite-botoes"><button class="btn-modal secundario" data-r="nao">Recusar</button><button class="btn-modal principal" data-r="sim">${ehDupla ? 'Entrar na sala 🤝' : 'Aceitar ⚔️'}</button></div>
+        <div class="convite-botoes"><button class="btn-modal secundario" data-r="nao">Recusar</button><button class="btn-modal principal" data-r="sim">${ehTD ? 'Bora! 🏰' : ehDupla ? 'Entrar na sala 🤝' : 'Aceitar ⚔️'}</button></div>
       </div>`;
     document.getElementById('app').appendChild(el);
     try { navigator.vibrate && navigator.vibrate([200, 100, 200]); } catch (e) { /* nada */ }
@@ -465,6 +466,7 @@
       clearTimeout(tempo); fechar();
       if (d().deck.length < 8) { UI.toast(`Você precisa de 8 cartas no deck para o ${ehDupla ? '2v2' : 'x1'}.`); X1.responder(c.codigo, 'recusou'); return; }
       document.querySelectorAll('.modal-fundo').forEach((m) => m.remove());
+      if (ehTD) { TD.entrar(c.codigo); return; }
       x1Entrar(c.codigo);
     };
   }

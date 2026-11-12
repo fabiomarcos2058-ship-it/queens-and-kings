@@ -19,6 +19,8 @@ const Titulos = (() => {
   const ESPECIAIS = {
     criadora: { nome: 'Criadora do Reino', ic: '👑', raro: 'mitico', como: 'Só a criadora do jogo tem', tem: () => uid() === ADMIN },
     cacador_bugs: { nome: 'Caçador de Bugs', ic: '🐛', raro: 'mitico', como: 'Presente da criadora pra quem caça bugs', tem: () => (D().titulosGanhos || []).includes('cacador_bugs') },
+    defensor: { nome: 'Defensor do Reino', ic: '🏰', raro: 'lendario', como: 'Vença as 20 ondas da Defesa do Reino sozinho', tem: () => (D().titulosGanhos || []).includes('defensor') },
+    dupla_defesa: { nome: 'Dupla Imbatível', ic: '🤝', raro: 'lendario', como: 'Vença as 20 ondas da Defesa do Reino em dupla', tem: () => (D().titulosGanhos || []).includes('dupla_defesa') },
     novato: { nome: 'Novato do Reino', ic: '🌱', como: 'Todo mundo começa aqui', tem: () => true },
     colecionador: { nome: 'Colecionador', ic: '📚', como: 'Tenha 50 cartas', prog: () => [Object.values(D().colecao || {}).filter((c) => c.tem).length, 50] },
     abre_baus: { nome: 'Abridor de Baús', ic: '🎁', como: 'Abra 200 baús', prog: () => [(D().conquistas && D().conquistas.baus) || 0, 200] },
