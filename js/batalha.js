@@ -826,6 +826,7 @@ const Batalha = (() => {
 
   // missões: o que EU joguei
   function contarCarta(c) {
+    if (!s.tutorial && typeof Titulos !== 'undefined') try { Titulos.usou(c.id); } catch (e) { /* nada */ }
     if (typeof Missoes === 'undefined' || s.tutorial) return;
     Missoes.contar('cartas', 1);
     if (c.id.startsWith('goku')) Missoes.contar('gokus', 1);
@@ -2195,6 +2196,11 @@ const Batalha = (() => {
     golpeVisual(atacante, alvo, v);
     if (m.ora && atacante.golpes % m.ora === 0) { oraOra(atacante, alvo, dano, crit); return; }
     if (m.chaosSpear && atacante.golpes % m.chaosSpear === 0) chaosSpear(atacante, alvo, dano);
+    if (m.tabelinha && atacante.golpes % m.tabelinha === 0) {
+      const amigo = s.ent.filter((e) => e !== atacante && !e.torre && e.time === atacante.time && e.vida > 0 && dist(e, atacante) < 130).sort((x, y) => dist(x, atacante) - dist(y, atacante))[0];
+      if (amigo) agendar(0.12, () => { if (alvo.vida > 0 && amigo.vida > 0) { efeitoGolpe('chute', amigo, alvo, { cor: '#FF4F8B' }); ferir(alvo, Math.round(amigo.dano * 0.6 * multClasse(amigo, alvo)), amigo.time, amigo, { crit: true }); } });
+      else agendar(0.05, () => { if (alvo.vida > 0) ferir(alvo, Math.round(dano * 0.4), atacante.time, atacante); });
+    }
     const n = m.rajada || 1;
     const bater = (dd, efeitos) => {
       if (alvo.vida <= 0) return;

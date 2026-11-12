@@ -92,13 +92,14 @@ const RanqueUI = (() => {
   // tela de VS (serve pra quem procura e pro amigo que está na dupla)
   function telaVS(el, pt) {
     const d = Estado.d, f = Ranque.info(Ranque.dados().pts);
-    const lado = (nome, av, info, eu = false) => `<div class="vs-jogador${eu ? ' eu' : ''}">${emblema(info.i, 92, { raios: false })}<img class="vs-av" src="${avatar(av)}" alt="" /><b>${esc(nome)}</b><small>${info.nome}</small></div>`;
-    const time = [lado(d.nome || 'Você', d.avatar, f, true)].concat(pt.parceiro ? [lado(pt.parceiro.nome, pt.parceiro.avatar, Ranque.info(pt.parceiro.pts))] : []);
-    const rivais = pt.rivais.map((b) => lado(b.nome, b.avatar, Ranque.info(b.pts)));
+    // cartões de batalha: o seu contra o do rival (no 2v2, os dois de cada lado ficam menores)
+    const tam = pt.dupla ? 'mini' : 'medio';
+    const time = [Titulos.meuCartao({ tam, lado: 'eu' })].concat(pt.parceiro ? [pt.parceiro.humano ? Titulos.cartao({ nome: pt.parceiro.nome, avatar: pt.parceiro.avatar, pts: pt.parceiro.pts, favorita: null }, { tam }) : Titulos.cartaoBot(pt.parceiro, { tam })] : []);
+    const rivais = pt.rivais.map((b) => Titulos.cartaoBot(b, { tam, lado: 'rival' }));
     const meuI = f.i;
     const pv = Ranque.previsao(pt.dupla, pt.rivalI, pt.rivalPts);
     el.classList.add('achou');
-    el.innerHTML = `<div class="pr-raios"></div><div class="vs-tela">
+    el.innerHTML = `<div class="pr-raios"></div><div class="vs-tela vs-cartoes${pt.dupla ? ' dupla' : ''}">
         <div class="vs-time rival">${rivais.join('')}</div>
         <div class="vs-meio"><span>VS</span>${pt.rivalI > meuI ? `<em class="vs-alta">⬆ Rival mais forte! Vitória vale +${pv.ganho} PR</em>` : pv.bonusRival ? `<em class="vs-alta">⬆ Rival acima de você: +${pv.ganho} PR</em>` : `<em>Vitória +${pv.ganho} PR · derrota -${pv.perda}</em>`}</div>
         <div class="vs-time meu">${time.join('')}</div></div>`;
@@ -139,7 +140,7 @@ const RanqueUI = (() => {
     await new Promise((ok) => setTimeout(ok, 1600 + Math.random() * 1600));
     if (cancelou) return;
     telaVS(el, pt);
-    await new Promise((ok) => setTimeout(ok, 2300));
+    await new Promise((ok) => setTimeout(ok, 3300)); // tempo pra ver os cartões de batalha
     el.classList.add('sumir');
     setTimeout(() => el.remove(), 300);
     fechar();

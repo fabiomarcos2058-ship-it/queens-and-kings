@@ -624,6 +624,19 @@ const Eventos = (() => {
           botoes: [{ texto: 'Depois' }, { texto: 'Ir pro Summon! 🌀', classe: 'principal', acao: () => Summon.abrir(() => { if (window.MenuAPI) window.MenuAPI.tudo(); }) }],
         }), 1500);
       }
+      // título Caçador de Bugs pro Arthur
+      if (uid === ARTHUR && !(d.titulosGanhos || []).includes('cacador_bugs')) {
+        Titulos.dar('cacador_bugs');
+        d.titulo = 'e:cacador_bugs';
+        Estado.salvar();
+        if (Conta.salvarAgora) Conta.salvarAgora().catch(() => {});
+        setTimeout(() => UI.modal({
+          titulo: '🐛 Título novo!',
+          classe: 'modal-titulo-novo',
+          html: `<p class="tn-titulo r-mitico">🐛 Caçador de Bugs</p><p>Presente da criadora por achar os bugs que deixaram o jogo melhor. Ele já está no seu perfil e no seu cartão de batalha!</p>`,
+          botoes: [{ texto: 'Ver meu cartão', classe: 'principal', acao: () => { const b = document.getElementById('perfil'); if (b) b.click(); } }],
+        }), 2800);
+      }
       // Arthur pediu mais 500 pelo "xingamento" da Claude kkkk
       if (uid === ARTHUR && !(d.presentesEspeciais || []).includes('desculpa-arthur')) {
         d.presentesEspeciais = [...(d.presentesEspeciais || []), 'desculpa-arthur'];

@@ -2454,6 +2454,40 @@
         "recarga": 18,
         "descricao": "Doces: cura 25% dos aliados em volta e deixa eles mais fortes por 5s. Travessuras: transforma os inimigos perto em abóboras por 2,5s (não andam nem atacam). Ela escolhe o que for melhor na hora."
       }
+    },
+    {
+      "id": "kurona",
+      "nome": "Kurona Ranze",
+      "raridade": "epica",
+      "custo": 3,
+      "tipo": "Épica · O Tubarão",
+      "trofeus": 0,
+      "exclusivo": [],
+      "summon": true,
+      "descricao": "Rápido como um tubarão e mestre da tabelinha: a cada 2 golpes, chama um aliado pra bater junto no mesmo alvo.",
+      "rosto": [
+        415,
+        330,
+        125
+      ],
+      "arte": [
+        0,
+        40,
+        736
+      ],
+      "vida": 720,
+      "dano": 140,
+      "velocidade": 85,
+      "alcance": 18,
+      "cadencia": 0.8,
+      "alvo": "tudo",
+      "arena": 1,
+      "danoTorre": 0.6,
+      "passiva": {
+        "nome": "Tabelinha",
+        "tipo": "tabelinha",
+        "descricao": "A cada 2 golpes, o aliado mais perto também acerta o alvo dele na hora (60% do dano do aliado). Sem aliado perto, o golpe sai 40% mais forte."
+      }
     }
   ]
 }

@@ -2582,3 +2582,94 @@ body.em-batalha #spotify-player:not(.aberto) .sp-alca { opacity: 0.6; }
 .smr-grade { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-top: 8px; }
 .smr-item { display: flex; flex-direction: column; align-items: center; gap: 1px; text-align: center; }
 .smr-item .carta { width: 100%; } .smr-item b { font-size: 9.5px; line-height: 1.1; } .smr-item small { font-size: 9px; color: #FFD25E; }
+
+/* =====================================================================
+   Cartão de Batalha + Títulos
+   ===================================================================== */
+.carta.ultra .ultra-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 7px; z-index: 1; pointer-events: none; mix-blend-mode: screen; opacity: 0.85;
+  -webkit-mask: radial-gradient(ellipse at 50% 45%, #0005 35%, #000 78%); mask: radial-gradient(ellipse at 50% 45%, #0005 35%, #000 78%); }
+
+.cartao-batalha { --w: 210px; position: relative; width: var(--w); aspect-ratio: 3 / 4.25; flex: none; color: #fff; text-align: left; isolation: isolate; filter: drop-shadow(0 6px 10px #000a); }
+.cartao-batalha.medio { --w: 150px; } .cartao-batalha.mini { --w: 112px; }
+.cb-moldura { position: absolute; inset: 0; border-radius: calc(var(--w) * 0.08); z-index: 0;
+  background: linear-gradient(150deg, #ffffffcc 0%, var(--cor) 14%, color-mix(in srgb, var(--cor) 55%, var(--escura)) 38%, var(--escura) 58%, var(--cor) 82%, #ffffffaa 100%);
+  box-shadow: inset 0 0 0 1.5px #ffffff88, inset 0 -3px 0 #0005, 0 0 14px color-mix(in srgb, var(--cor) 60%, transparent); }
+.cb-moldura::after { content: ''; position: absolute; inset: 0; border-radius: inherit; background: linear-gradient(115deg, transparent 35%, #ffffff66 48%, transparent 60%); background-size: 260% 100%; animation: espelhoBrilha 3.4s linear infinite; }
+.cartao-batalha.t8 .cb-moldura, .cartao-batalha.t9 .cb-moldura { background: conic-gradient(from var(--ang), var(--cor), #fff, var(--escura), var(--cor), #FFD25E, var(--escura), var(--cor)); animation: girarAng 4s linear infinite; box-shadow: inset 0 0 0 1.5px #fff, 0 0 22px var(--cor); }
+.cb-dentro { position: absolute; inset: calc(var(--w) * 0.035); border-radius: calc(var(--w) * 0.06); overflow: hidden; background: radial-gradient(circle at 50% 30%, color-mix(in srgb, var(--cor) 35%, #10142e), #070918); box-shadow: inset 0 0 0 1.5px #0008; }
+.cb-arte { position: absolute; inset: 0; }
+.cb-arte img, .cb-arte video { width: 100%; height: 100%; object-fit: cover; object-position: 50% 20%; display: block; }
+.cb-arte::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, #0008 0%, transparent 22%, transparent 48%, #070918cc 72%, #070918 92%); }
+.cb-arte video.cb-ultra { position: absolute; inset: 0; mix-blend-mode: screen; opacity: 0.8; }
+.cb-reflexo { position: absolute; inset: 0; z-index: 1; background: linear-gradient(120deg, transparent 30%, #ffffff22 45%, transparent 60%); background-size: 260% 100%; animation: espelhoBrilha 4s linear infinite; }
+.cb-vazio { width: 100%; height: 100%; display: grid; place-items: center; font: calc(var(--w) * 0.4) 'Lilita One', sans-serif; color: #ffffff33; }
+.cb-topo { position: absolute; left: 0; right: 0; top: 0; z-index: 2; display: flex; justify-content: space-between; align-items: flex-start; padding: calc(var(--w) * 0.04); }
+.cb-av { position: relative; width: calc(var(--w) * 0.24); aspect-ratio: 1; border-radius: 22%; overflow: visible; background: #0d1130; border: 2px solid var(--cor); box-shadow: 0 2px 6px #0009; }
+.cb-av img { width: 100%; height: 100%; object-fit: cover; border-radius: 18%; }
+.cb-av em { position: absolute; right: -6px; bottom: -6px; min-width: calc(var(--w) * 0.11); padding: 0 3px; text-align: center; font: calc(var(--w) * 0.065) 'Lilita One', sans-serif; font-style: normal; color: #fff;
+  background: linear-gradient(#6a74d0, #3b4596); border: 1.5px solid #fff; border-radius: 6px; line-height: 1.35; }
+.cb-emb img { width: calc(var(--w) * 0.24); filter: drop-shadow(0 2px 4px #000a); }
+.cb-fav { position: absolute; right: calc(var(--w) * 0.04); top: 45%; z-index: 2; font: calc(var(--w) * 0.05) 'Lilita One', sans-serif; padding: 1px 6px; border-radius: 6px; background: #000a; border: 1px solid #ffffff44; max-width: 60%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cb-fav.ultra { background: linear-gradient(90deg, #FF5CF4, #5CE1FF); color: #1a0630; border: none; } .cb-fav.lendaria { border-color: #5DCAA5; color: #9FF0D2; } .cb-fav.epica { border-color: #AFA9EC; color: #d9d4ff; }
+.cb-base { position: absolute; left: 0; right: 0; bottom: 0; z-index: 2; display: flex; flex-direction: column; align-items: center; text-align: center; padding: 0 calc(var(--w) * 0.04) calc(var(--w) * 0.045); gap: 1px; }
+.cb-titulo { max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font: calc(var(--w) * 0.058) 'Lilita One', sans-serif; padding: 1px calc(var(--w) * 0.05); border-radius: 999px;
+  background: #ffffff22; border: 1px solid #ffffff44; text-shadow: 0 1px 2px #000; }
+.cb-nome { max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font: calc(var(--w) * 0.115) 'Lilita One', sans-serif; line-height: 1.05; text-shadow: 0 2px 0 #000, 0 0 8px #0008; }
+.cb-stats { display: flex; gap: 6px; font: calc(var(--w) * 0.055) 'Lilita One', sans-serif; opacity: 0.95; }
+.cb-stats span { padding: 0 5px; border-radius: 6px; background: #0007; }
+.cb-pat { color: var(--cor); }
+.cb-cla { font-size: calc(var(--w) * 0.05); opacity: 0.8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.cartao-batalha.mini .cb-cla, .cartao-batalha.mini .cb-fav { display: none; }
+
+/* raridade dos títulos */
+.r-comum.cb-titulo, .perfil-titulo.r-comum, .tn-titulo.r-comum { background: #ffffff1f; }
+.r-carta.cb-titulo, .perfil-titulo.r-carta { background: linear-gradient(90deg, #2a4fd0, #6a2fd0); border-color: #9fb6ff88; }
+.r-epico.cb-titulo, .perfil-titulo.r-epico { background: linear-gradient(90deg, #6a1fd0, #b54dff); border-color: #e0c2ff88; }
+.r-lendario.cb-titulo, .perfil-titulo.r-lendario { background: linear-gradient(90deg, #b8860b, #ffcf4a); color: #3a2400; text-shadow: none; border-color: #fff8; }
+.r-mitico.cb-titulo, .perfil-titulo.r-mitico, .tn-titulo.r-mitico { background: linear-gradient(90deg, #ff3d6e, #ff9a3c, #ffd25e, #7cff8a, #5ce1ff, #ff5cf4); background-size: 300% 100%; animation: epicaFundo 3s linear infinite; color: #fff; text-shadow: 0 1px 2px #000a; border-color: #fff; }
+
+/* perfil */
+.perfil-titulo { display: inline-flex; align-items: center; gap: 4px; margin-top: 4px; max-width: 100%; padding: 3px 10px; border-radius: 999px; border: 1px solid #ffffff44; color: #fff; font: 12.5px 'Lilita One', sans-serif; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.perfil-titulo span { font-size: 10px; opacity: 0.8; }
+.perfil-cartao { display: flex; gap: 12px; align-items: center; margin: 10px 0; padding: 10px; border-radius: 16px; background: #0005; border: 1px solid #ffffff1c; }
+.perfil-cartao.so { justify-content: center; }
+.perfil-cartao .cartao-batalha { --w: 150px; }
+.pc-botoes { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.pc-botoes b { font: 16px 'Lilita One', sans-serif; } .pc-botoes small { font-size: 11px; opacity: 0.8; }
+.pc-botoes .btn-modal { padding: 7px 10px; font-size: 13px; }
+
+/* modal de títulos */
+.tt-txt { font-size: 12.5px; opacity: 0.9; margin: 0 0 6px; }
+.tt-sec { font: 14px 'Lilita One', sans-serif; margin: 10px 0 4px; opacity: 0.9; }
+.tt-lista { display: flex; flex-direction: column; gap: 6px; }
+.tt-op { position: relative; display: grid; grid-template-columns: auto 1fr; column-gap: 8px; align-items: center; text-align: left; padding: 8px 10px; border-radius: 12px; color: #fff; background: #ffffff10; border: 2px solid #ffffff22; }
+.tt-op img { grid-row: span 3; width: 34px; height: 46px; object-fit: cover; border-radius: 6px; }
+.tt-op b { font: 14px 'Lilita One', sans-serif; } .tt-op small { font-size: 11px; opacity: 0.8; }
+.tt-op.usando { border-color: #7BE04A; box-shadow: 0 0 10px #7BE04A88; }
+.tt-op.usando::after { content: '✓ usando'; position: absolute; right: 8px; top: 6px; font-size: 10px; font-weight: 700; color: #7BE04A; }
+.tt-op.bloq { opacity: 0.55; }
+.tt-op.r-mitico:not(.bloq) { border-color: #ff9a3c; background: linear-gradient(90deg, #ff3d6e33, #5ce1ff33); }
+.tt-op.r-lendario:not(.bloq) { border-color: #ffcf4a88; } .tt-op.r-epico:not(.bloq) { border-color: #b54dff88; }
+.tt-barra { display: block; height: 6px; border-radius: 6px; background: #ffffff1a; overflow: hidden; margin-top: 3px; }
+.tt-barra > i { display: block; height: 100%; background: linear-gradient(90deg, #4a7dff, #7BE04A); }
+.tt-op em { font-size: 10px; font-style: normal; opacity: 0.8; }
+.fav-grade { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.fav-op { padding: 3px; border-radius: 10px; border: 2px solid transparent; background: #ffffff0c; }
+.fav-op .carta { width: 100%; }
+.fav-op.usando { border-color: #FFD25E; box-shadow: 0 0 10px #FFD25E88; }
+.tn-titulo { margin: 4px auto 8px; padding: 8px 14px; border-radius: 999px; text-align: center; font: 22px 'Lilita One', sans-serif; width: fit-content; }
+
+/* VS da ranqueada com cartões */
+.vs-tela.vs-cartoes { justify-content: center; gap: 10px; padding: 18px 8px; }
+.vs-cartoes .vs-time { gap: 10px; }
+.vs-cartoes .vs-time.rival .cartao-batalha { animation: cbEntraRival 0.6s cubic-bezier(0.2, 1.4, 0.5, 1) both; }
+.vs-cartoes .vs-time.meu .cartao-batalha { animation: cbEntraEu 0.6s 0.15s cubic-bezier(0.2, 1.4, 0.5, 1) both; }
+.vs-cartoes .vs-time .cartao-batalha:nth-child(2) { animation-delay: 0.25s; }
+@keyframes cbEntraRival { from { opacity: 0; transform: translateX(60vw) rotate(12deg) scale(0.8); } to { opacity: 1; transform: rotate(2deg); } }
+@keyframes cbEntraEu { from { opacity: 0; transform: translateX(-60vw) rotate(-12deg) scale(0.8); } to { opacity: 1; transform: rotate(-2deg); } }
+.vs-cartoes .vs-meio span { font-size: 52px; }
+.tt-op { display: flex; flex-direction: column; align-items: flex-start; gap: 1px; }
+.tt-op.com-img { display: grid; grid-template-columns: auto 1fr; }
+.tt-op.com-img > *:not(img) { grid-column: 2; }
+.tt-op .tt-barra { width: 100%; }
+.cartao-batalha.medio { --w: 168px; }

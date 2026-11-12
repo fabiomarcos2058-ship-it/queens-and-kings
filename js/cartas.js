@@ -28,7 +28,7 @@ const Cartas = (() => {
       ${mini ? '' : `<span class="nome-3d">${c.nome}</span>`}
       ${c.habilidade ? '<span class="selo-hab" title="Tem habilidade especial">⚡</span>' : ''}
       ${c.passiva ? `<span class="selo-hab passiva" title="Tem habilidade passiva">${c.passiva.tipo === 'esquiva' ? '✨' : '🧩'}</span>` : ''}
-      ${evo ? '<i class="evo-borda"></i><span class="evo-selo">EVO</span>' : ''}${c.evento ? '<span class="selo-evento">EVENTO</span>' : ''}${c.raridade === 'ultra' ? '<i class="ultra-holo"></i><i class="ultra-borda"></i><span class="selo-evento selo-ultra">ULTRA</span>' : c.summon ? '<span class="selo-evento selo-summon">SUMMON</span>' : ''}
+      ${evo ? '<i class="evo-borda"></i><span class="evo-selo">EVO</span>' : ''}${c.evento ? '<span class="selo-evento">EVENTO</span>' : ''}${c.raridade === 'ultra' ? '<video class="ultra-video" src="assets/ui/moldura_ultra.mp4" autoplay muted loop playsinline preload="auto" disablepictureinpicture></video><i class="ultra-holo"></i><i class="ultra-borda"></i><span class="selo-evento selo-ultra">ULTRA</span>' : c.summon ? '<span class="selo-evento selo-summon">SUMMON</span>' : ''}
       ${extra}
     </div>`;
     // cartas de evolução: moldura especial + aura roxa animada em volta

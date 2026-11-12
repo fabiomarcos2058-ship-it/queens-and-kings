@@ -24,7 +24,7 @@ const Ataques = (() => {
 
   const CLASSE_DA_CARTA = {
     tanque: ['itsuki', 'shizuku', 'gogeta_ssj4', 'goku_ssj3', 'goku_ssj4', 'goku_blue_lb', 'gogeta_ultra', 'sonic_excalibur'],
-    assassino: ['bra', 'teto', 'pan_dbh', 'akame', 'mbappe', 'kashimo', 'goku_pressagio', 'diavolo', 'mita_malvada', 'akame_murasame', 'sonic', 'dark_sonic'],
+    assassino: ['bra', 'teto', 'pan_dbh', 'akame', 'mbappe', 'kashimo', 'goku_pressagio', 'diavolo', 'mita_malvada', 'akame_murasame', 'sonic', 'dark_sonic', 'kurona'],
     atirador: ['mai', 'miku_nakano', 'pan_gt', 'riruka', 'rukia_remake', 'nino_nakano', 'gyro', 'johnny'],
     mago: ['rukia', 'nami_last', 'hatsune_miku', 'bambietta', 'bulma', 'gojo', 'robin', 'pucci', 'mita_gentil', 'yugi_moto', 'anri_halloween'],
     enxame: ['mini'],
@@ -64,6 +64,7 @@ const Ataques = (() => {
     sonic_excalibur: { v: { g: 'corte', s: 'espada_trunks', cor: '#BFE8FF' }, m: { escudo: 0.2, aparar: 7 }, d: 'Corte em área, escudo e aparar com contra-ataque.' },
     hyper_sonic: { v: { g: 'impacto', cor: '#F5F5FF' }, m: { esmeraldas: 7, hyperFlash: [5, 90, 0.45], voo: true }, d: '7 Esmeraldas do Caos seguram golpes. Hiper Flash atordoa em volta.' },
     yugi_moto: { v: { p: 'coringa', vel: 300, tam: 18, giro: 540, rastro: '#FFD25E' }, m: { duelista: 8 }, d: 'Joga cartas de longe e compra uma carta especial a cada 8s.' },
+    kurona: { v: { g: 'chute', cor: '#FF4F8B', s: 'bola' }, m: { tabelinha: 2 }, d: 'Tabelinha: a cada 2 golpes um aliado bate junto.' },
     itoshi_sae: { v: { g: 'chute', cor: '#E8E4D8', s: 'bola' }, m: { passePerfeito: 3 }, d: 'Passa a bola pro aliado mais forte, que bate na hora e fica mais forte.' },
     itoshi_rin: { v: { g: 'chute', cor: '#4FD1C5', s: 'bola' }, m: { chuteFantasma: 4 }, d: 'Chute Fantasma: curva, não dá pra esquivar e ricocheteia.' },
     isagi_ultra: { v: { g: 'chute', cor: '#5EC8FF', s: 'bola' }, m: { devorar: 10 }, d: 'Metavisão: desvia de golpes e fica mais forte a cada inimigo que cai perto.' },

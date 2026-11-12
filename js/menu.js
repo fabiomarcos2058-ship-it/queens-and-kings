@@ -100,8 +100,12 @@
             <div class="perfil-nivel"><div class="nivel" data-n="${d().nivel}"></div>
               <div class="perfil-xp"><i style="width:${(d().xp / xpMax) * 100}%"></i><small>${d().xp}/${xpMax} XP</small></div></div>
             ${d().cla && d().cla.id ? `<div class="perfil-cla">🛡️ ${esc(d().cla.nome)}</div>` : ''}
+            <button class="perfil-titulo r-${Titulos.raroDe(Titulos.atual())}" id="perfil-titulo">${esc(Titulos.textoAtual())} <span>✏️</span></button>
           </div>
         </div>
+        <div class="perfil-cartao"><div id="perfil-cartao-box">${Titulos.meuCartao()}</div>
+          <div class="pc-botoes"><b>Cartão de Batalha</b><small>Aparece no pareamento da ranqueada, contra o cartão do rival.</small>
+            <button class="btn-modal secundario" id="perfil-fav">⭐ Carta favorita</button><button class="btn-modal secundario" id="perfil-tit">🏷️ Título</button></div></div>
         <div class="seletor oculto" id="seletor-avatar">
           <div class="seletor-titulo">Escolha seu avatar</div>
           <div class="grade-avatares">${opcoesAvatar.map((a) => `<button data-av="${a}" class="${a === d().avatar ? 'escolhido' : ''}"><img src="${avatarUrl(a)}" alt="" /></button>`).join('')}</div>
@@ -163,6 +167,13 @@
       botoes: [{ texto: 'Ficar', classe: 'secundario' }, { texto: 'Sair', classe: 'perigo', acao: () => { Conta.sair(); } }],
     });
     el.querySelector('#trocar-avatar').onclick = () => el.querySelector('#seletor-avatar').classList.toggle('oculto');
+    const refazCartao = () => {
+      const box = el.querySelector('#perfil-cartao-box'); if (box) box.innerHTML = Titulos.meuCartao();
+      const bt = el.querySelector('#perfil-titulo'); if (bt) { bt.className = `perfil-titulo r-${Titulos.raroDe(Titulos.atual())}`; bt.innerHTML = `${esc(Titulos.textoAtual())} <span>✏️</span>`; }
+    };
+    el.querySelector('#perfil-titulo').onclick = () => Titulos.escolher(refazCartao);
+    el.querySelector('#perfil-tit').onclick = () => Titulos.escolher(refazCartao);
+    el.querySelector('#perfil-fav').onclick = () => Titulos.escolherFavorita(refazCartao);
     el.querySelector('#perfil-ranque').onclick = () => { m.fechar(); RanqueUI.abrir(); };
     el.querySelector('#perfil-historico').onclick = () => RanqueUI.historico();
     el.querySelectorAll('[data-av]').forEach((b) => (b.onclick = () => {
@@ -170,6 +181,7 @@
       el.querySelectorAll('[data-av]').forEach((x) => x.classList.toggle('escolhido', x === b));
       el.querySelector('.perfil-avatar img').src = avatarUrl(d().avatar);
       Estado.salvar(); topo();
+      const box = el.querySelector('#perfil-cartao-box'); if (box) box.innerHTML = Titulos.meuCartao();
     }));
     el.querySelectorAll('[data-cor]').forEach((b) => (b.onclick = () => {
       d().cor = b.dataset.cor;
@@ -677,8 +689,10 @@
             <div class="perfil-nome-outro">${Passe.nomeHtml(p.nome || 'Jogador', p.estiloNome)}</div>
             <div class="perfil-nivel"><div class="nivel" data-n="${p.nivel || 1}"></div><small class="status-online">${Amigos.online(p) ? '🟢 Online agora' : p.visto && p.visto.toMillis ? `Visto ${quandoFoi(p.visto.toMillis())}` : ''}</small></div>
             ${p.cla ? `<div class="perfil-cla">🛡️ ${esc(p.cla)}</div>` : ''}
+            ${p.titulo ? `<div class="perfil-titulo r-${esc(p.raroTitulo || 'comum')}">${esc(p.titulo)}</div>` : ''}
           </div>
         </div>
+        ${p.favorita ? `<div class="perfil-cartao so">${Titulos.cartao({ nome: p.nome, estilo: p.estiloNome, avatar: p.avatar, titulo: p.titulo, raroTitulo: p.raroTitulo, favorita: p.favorita, pts: (p.ranque && p.ranque.pts) || 0, trofeus: p.trofeus, nivel: p.nivel, cla: p.cla })}</div>` : ''}
         <div class="estatisticas">
           <div><b>${fmt(p.trofeus || 0)}</b><span>Troféus</span></div>
           <div><b>${fmt(p.recorde || 0)}</b><span>Recorde</span></div>
