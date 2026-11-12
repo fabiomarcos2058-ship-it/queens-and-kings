@@ -2799,3 +2799,9 @@ body.em-batalha #spotify-player:not(.aberto) .sp-alca { opacity: 0.6; }
 .cutin[class*="inv_"] .cutin-faixa { border-color: #FFC21A; box-shadow: 0 0 22px #FFC21A, 0 0 40px #3B9BFF88; }
 .cutin[class*="inv_"] .cutin-legenda { color: #FFE45C; text-shadow: 3px 3px 0 #1E3A9A, -1px -1px 0 #000, 1px 1px 0 #000; }
 .cutin.inv_eve .cutin-faixa { border-color: #FF5CC8; box-shadow: 0 0 22px #FF5CC8; }
+/* nome das cartas Ultra: legível por cima da moldura animada */
+.carta.ultra .nome-3d { z-index: 4; color: transparent; background: linear-gradient(90deg, #FFD6FB, #fff 45%, #C8F6FF); -webkit-background-clip: text; background-clip: text; -webkit-text-stroke: 0; text-shadow: none;
+  filter: drop-shadow(1.5px 0 0 #1a0630) drop-shadow(-1.5px 0 0 #1a0630) drop-shadow(0 1.5px 0 #1a0630) drop-shadow(0 -1.5px 0 #1a0630) drop-shadow(0 3px 0 #1a0630) drop-shadow(0 0 6px #FF5CF4aa); }
+.carta.ultra .ultra-holo { opacity: 0.2; }
+.carta.ultra .ultra-video { opacity: 0.6; }
+.carta.ultra .custo, .carta.ultra .selo-hab, .carta.ultra .selo-evento { z-index: 4; }
