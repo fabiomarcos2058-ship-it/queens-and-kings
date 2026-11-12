@@ -61,7 +61,7 @@ const RanqueUI = (() => {
         <button class="tr-passe${r.pro ? ' pro' : ''}" id="tr-passe">
           <div class="trp-topo"><b>${r.pro ? '💠 Pro Pass' : '🎫 Passe da Ranqueada'}</b><small>${nv}/${Ranque.PASSE_NIVEIS}</small></div>
           <div class="trp-barra"><i style="width:${nv >= Ranque.PASSE_NIVEIS ? 100 : ((r.xp % Ranque.PASSE_XP) / Ranque.PASSE_XP) * 100}%"></i></div>
-          <div class="trp-final"><span class="trp-evo">🧬</span><span>Nível ${Ranque.PASSE_NIVEIS} do <b>Pro Pass</b>: <b>Carta de Evolução exclusiva</b></span></div>
+          <div class="trp-final"><span class="trp-evo">🧬</span><span>Nível ${Ranque.PASSE_NIVEIS} do <b>Pro Pass</b>: <b>Gojo Satoru</b>, carta de Evolução exclusiva</span></div>
           ${Ranque.pendentes() ? `<span class="trp-pend">${Ranque.pendentes()} prêmio${Ranque.pendentes() > 1 ? 's' : ''} para pegar!</span>` : ''}
         </button>
         <div class="tr-linha"><button class="tr-mini" id="tr-patentes">🏅 Patentes</button><button class="tr-mini" id="tr-historico">📜 Histórico</button></div>
@@ -335,7 +335,7 @@ const RanqueUI = (() => {
       titulo: '💠 Pro Pass da Ranqueada',
       classe: 'modal-passe modal-propass',
       html: `<div class="pp-destaque"><div class="pp-carta"><div class="pp-carta-verso">🧬</div></div>
-          <div><b>Carta de Evolução exclusiva</b><small>Prêmio final do Pro Pass desta temporada. É uma carta nova que ainda está sendo criada: quem pegar recebe ela na atualização em que ela chegar!</small></div></div>
+          <div><b>🧬 Gojo Satoru · Evolução</b><small>Prêmio final do Pro Pass desta temporada. Infinito, Azul, Vermelho, Vazio Púrpura e, evoluído, a Expansão de Domínio: Vazio Infinito. Só dá pra ganhar aqui!</small></div></div>
         <p class="aviso">Ganhe XP do passe jogando ranqueadas: vitória 60 (+sequência), derrota 25, 2v2 +10. Termina em ${Ranque.diasRestantes()} dias.</p>
         <button class="comprar-passe pro${r.pro ? ' tem' : ''}" id="pp-comprar"><b>PRO PASS</b><small>${r.pro ? 'Ativo ✔' : `💎 ${Ranque.PRECO_PRO}`}</small></button>
         <div class="passe-cab rp-cab"><span>Nv</span><span>Grátis</span><span>Pro</span></div>
@@ -354,7 +354,7 @@ const RanqueUI = (() => {
       b.classList.add('pego'); b.classList.remove('pode'); b.querySelector('.premio-ic').textContent = '✔';
       M.topo();
       if (res.extra && res.extra.bau) M.mostrarBau(res.extra.bau, res.extra.abertura);
-      else if (res.extra && res.extra.evolucao) UI.modal({ titulo: '🧬 Carta de Evolução garantida!', html: '<p>Você garantiu a <b>Carta de Evolução exclusiva</b> desta temporada! Ela ainda está sendo criada e vai aparecer na sua coleção na atualização em que chegar. 💜</p>' });
+      else if (res.extra && res.extra.evolucao) revelarEvolucao(res.extra.carta);
       else if (res.extra && res.extra.carta) UI.toast(`🃏 +${res.extra.qtd} ${res.extra.carta.nome}!`);
       else UI.toast(`+ ${Ranque.texto(res.r)}!`);
     }));
@@ -362,7 +362,7 @@ const RanqueUI = (() => {
       if (Ranque.dados().pro) return UI.toast('Você já tem o Pro Pass');
       UI.modal({
         titulo: 'Comprar o Pro Pass?',
-        html: `<p>Libera a trilha <b>Pro</b> da ranqueada desta temporada: muito ouro, gemas, baús de ouro, cartas épicas e lendárias e, no nível ${Ranque.PASSE_NIVEIS}, a <b>Carta de Evolução exclusiva</b> 🧬.</p><p><b>💎 ${Ranque.PRECO_PRO} gemas</b></p>`,
+        html: `<p>Libera a trilha <b>Pro</b> da ranqueada desta temporada: muito ouro, gemas, baús de ouro, cartas épicas e lendárias e, no nível ${Ranque.PASSE_NIVEIS}, o <b>Gojo Satoru</b>, carta de Evolução exclusiva 🧬.</p><p><b>💎 ${Ranque.PRECO_PRO} gemas</b></p>`,
         botoes: [{ texto: 'Agora não', classe: 'secundario' }, { texto: 'Comprar', classe: 'principal', desativado: Estado.d.gemas < Ranque.PRECO_PRO, motivo: `Faltam ${Ranque.PRECO_PRO - Estado.d.gemas} gemas`,
           acao: () => { const c = Ranque.comprarPro(); if (c.ok) { UI.toast('Pro Pass ativado! 💠'); m.fechar(); M.topo(); setTimeout(passe, 250); } } }],
       });
@@ -416,12 +416,32 @@ const RanqueUI = (() => {
     });
   }
 
+  // tela de "Evolução desbloqueada"
+  function revelarEvolucao(c) {
+    if (!c) return;
+    if (M.tudo) M.tudo();
+    const el = document.createElement('div');
+    el.className = 'revela-evo';
+    el.innerHTML = `<div class="re-raios"></div><div class="re-conteudo">
+        <small>CARTA DE EVOLUÇÃO EXCLUSIVA</small>
+        <div class="evo-palco grande"><video class="evo-video" src="assets/evolucao/raios.mp4" autoplay muted loop playsinline></video>${Cartas.html(c, { mini: true })}</div>
+        <b>${esc(c.nome)}</b>
+        <p>${esc(c.evolucao ? c.evolucao.descricao : '')}</p>
+        <button class="btn-modal principal">Incrível! 🧬</button></div>`;
+    $('app').appendChild(el);
+    try { navigator.vibrate && navigator.vibrate([80, 50, 160]); } catch (e) { /* nada */ }
+    el.querySelector('button').onclick = () => { el.classList.add('sumir'); setTimeout(() => el.remove(), 300); };
+  }
+
   function init(ganchos) {
     M = ganchos;
+    // quem pegou o prêmio do Pro Pass antes da carta existir recebe ela agora
+    const dd = Estado.d;
+    if ((dd.evolucoesGuardadas || []).length && !Estado.tem(Ranque.CARTA_EVOLUCAO)) setTimeout(() => revelarEvolucao(Ranque.darEvolucao(Ranque.CARTA_EVOLUCAO)), 1200);
     const b = $('btn-ranq');
     if (b) b.onclick = abrir;
     atualizarBotao();
   }
 
-  return { init, abrir, fechar, fim, atualizarBotao, historico, patentes, passe, emblema, promocao, procurandoConvidado };
+  return { init, abrir, fechar, fim, atualizarBotao, historico, patentes, passe, emblema, promocao, procurandoConvidado, revelarEvolucao };
 })();

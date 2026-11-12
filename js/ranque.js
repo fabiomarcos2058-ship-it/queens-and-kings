@@ -164,7 +164,7 @@ const Ranque = (() => {
     if (r.tipo === 'ouro') return `${UI.fmt(r.qtd)} ouro`;
     if (r.tipo === 'gemas') return `${r.qtd} gemas`;
     if (r.tipo === 'bau') return `Baú de ${r.bau}`;
-    if (r.tipo === 'evolucao') return 'Carta de Evolução exclusiva';
+    if (r.tipo === 'evolucao') return 'Gojo Satoru (Evolução)';
     return `${r.qtd}x ${r.raridade === 'lendaria' ? 'lendária' : 'épica'}`;
   }
   const temTrilha = (t) => t === 'free' || (t === 'pro' && dados().pro);
@@ -179,9 +179,8 @@ const Ranque = (() => {
     else if (r.tipo === 'gemas') d.gemas += r.qtd;
     else if (r.tipo === 'bau') extra = { bau: r.bau, abertura: Estado.abrirBau(r.bau) };
     else if (r.tipo === 'evolucao') {
-      // a carta ainda vai ser criada: fica guardada e chega numa atualização
       d.evolucoesGuardadas = [...new Set([...(d.evolucoesGuardadas || []), `ranq-${dados().temporada}`])];
-      extra = { evolucao: true };
+      extra = { evolucao: true, carta: darEvolucao(CARTA_EVOLUCAO) };
     } else {
       const pool = Estado.disponiveis().filter((c) => c.raridade === r.raridade && Estado.tem(c.id));
       if (!pool.length) extra = { bau: 'ouro', abertura: Estado.abrirBau('ouro') };
@@ -190,6 +189,23 @@ const Ranque = (() => {
     Estado.salvar();
     return { r, extra };
   }
+  // a carta de evolução exclusiva desta temporada do Pro Pass
+  const CARTA_EVOLUCAO = 'gojo';
+  function darEvolucao(id) {
+    const d = Estado.d, c0 = Estado.carta(id);
+    if (!c0) return null;
+    d.cartasExtras = [...new Set([...(d.cartasExtras || []), id])];
+    if (!d.presentes) d.presentes = [];
+    if (!d.presentes.includes(id)) d.presentes.push(id); // sem o aviso genérico de "presente exclusivo"
+    Estado.recarregarCatalogo();
+    const col = d.colecao[id] || (d.colecao[id] = { nivel: 1, copias: 0, tem: false });
+    col.tem = true;
+    col.nivel = Math.max(col.nivel || 1, c0.nivelInicial || 5);
+    if (d.deck.length < 8 && !d.deck.includes(id)) d.deck.push(id);
+    Estado.salvar();
+    return c0;
+  }
+
   function comprarPro() {
     const d = Estado.d;
     if (dados().pro) return { ok: false, motivo: 'Você já tem o Pro Pass' };
@@ -222,6 +238,6 @@ const Ranque = (() => {
   return {
     PATENTES, info, img, temporadaAtual, nomeTemporada, diasRestantes, dados, pegarPremioTemporada, partida, previsao, aplicar,
     PASSE_NIVEIS, PASSE_XP, PRECO_PRO, nivelPasse, recompensa, icone, texto, temTrilha, podePegar, pendentes, pegar, comprarPro,
-    sequenciaNormal, registrar, historico, publico, INICIO_MESTRE, INICIO_PRO,
+    sequenciaNormal, registrar, historico, publico, INICIO_MESTRE, INICIO_PRO, darEvolucao, CARTA_EVOLUCAO,
   };
 })();

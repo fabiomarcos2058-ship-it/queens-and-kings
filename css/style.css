@@ -1522,3 +1522,121 @@ body.em-batalha .telas * { animation-play-state: paused !important; }
 .aj-linha input { width: 100%; text-align: center; font-size: 16px; font-weight: 700; padding: 6px; border-radius: 8px; border: 2px solid #ffffff33; background: #0d1030; color: #fff; }
 .aj-rapidos { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 12px; }
 #aj-salvar { width: 100%; }
+
+/* =================== CARTAS DE EVOLUÇÃO =================== */
+.evo-moldura { position: relative; }
+.evo-aura { position: absolute; left: -18.3%; top: -14.3%; width: 134.4%; height: 131%; z-index: 6; pointer-events: none; user-select: none; -webkit-user-drag: none; }
+.carta.evo { border-color: #C77DFF; background: #160828; box-shadow: 0 3px 0 #0d1130, 0 0 16px #A64DFFcc, 0 0 30px #FF4FD855; }
+.carta.evo::before { display: none; }
+.carta.evo .evo-borda { position: absolute; inset: 0; z-index: 2; border-radius: 7px; pointer-events: none;
+  box-shadow: inset 0 0 0 1.5px #F3DCFF88, inset 0 0 14px #A64DFFbb;
+  background:
+    radial-gradient(circle at 0 0, #E9C6FF 0 3px, #A64DFF 3.5px 6px, transparent 6.5px),
+    radial-gradient(circle at 100% 0, #E9C6FF 0 3px, #A64DFF 3.5px 6px, transparent 6.5px),
+    radial-gradient(circle at 0 100%, #E9C6FF 0 3px, #A64DFF 3.5px 6px, transparent 6.5px),
+    radial-gradient(circle at 100% 100%, #E9C6FF 0 3px, #A64DFF 3.5px 6px, transparent 6.5px),
+    linear-gradient(transparent 62%, #2a0a4ecc 100%); }
+.carta.evo .evo-selo { position: absolute; top: 2px; right: 2px; z-index: 5; font-family: 'Lilita One', 'Fredoka', sans-serif; font-size: 9px; letter-spacing: 0.5px; line-height: 1;
+  padding: 2px 4px 1px; border-radius: 5px; color: #fff; background: linear-gradient(90deg, #00D9FF, #A64DFF 50%, #FF4FD8); box-shadow: 0 1px 0 #3a0a5c, 0 0 6px #C77DFF; }
+.carta.evo .nome-3d { background: linear-gradient(#ffffff, #E2B8FF 60%, #FF9BEA); -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-stroke: 0; text-shadow: none;
+  filter: drop-shadow(1.5px 0 0 #2a0a4e) drop-shadow(-1.5px 0 0 #2a0a4e) drop-shadow(0 1.5px 0 #2a0a4e) drop-shadow(0 -1.5px 0 #2a0a4e) drop-shadow(0 3px 0 #2a0a4e); }
+.raridade-tag.evo { background: linear-gradient(90deg, #00B4D8, #8E3BFF 50%, #E23FB8); color: #fff; }
+.hab-detalhe.evo-detalhe { background: linear-gradient(120deg, #2a0a4e, #4b1890 60%, #6a1a6a); border: 1.5px solid #C77DFF; }
+/* ficha: raios elétricos animados (vídeo da Ally) atrás da carta */
+.evo-palco { position: relative; }
+.evo-palco .evo-video { position: absolute; left: -9%; top: -7%; width: 118%; height: 114%; object-fit: fill; mix-blend-mode: screen; z-index: 7; pointer-events: none; }
+.modal-evo .modal-caixa, .modal-evo .modal { box-shadow: 0 0 0 2px #A64DFF, 0 0 40px #A64DFF88; }
+/* mão: evolução carregando / pronta */
+.slot-mao { position: relative; }
+.evo-pips { position: absolute; left: 50%; bottom: -6px; transform: translateX(-50%); display: flex; gap: 3px; z-index: 8; pointer-events: none; }
+.evo-pips i { width: 9px; height: 9px; transform: rotate(45deg); border: 1.5px solid #C77DFF; background: #160828; }
+.evo-pips i.cheio { background: linear-gradient(135deg, #00D9FF, #A64DFF, #FF4FD8); }
+.evo-pips b { font-family: 'Lilita One', 'Fredoka', sans-serif; font-size: 11px; padding: 1px 6px; border-radius: 6px; color: #fff; background: linear-gradient(90deg, #00B4D8, #8E3BFF, #E23FB8); box-shadow: 0 0 8px #C77DFF; animation: pulsa 0.9s infinite; }
+.slot-mao.evo-pronta .carta { box-shadow: 0 0 0 2px #fff, 0 0 18px #C77DFF, 0 0 30px #FF4FD8; }
+/* tela de carta de evolução desbloqueada */
+.revela-evo { position: absolute; inset: 0; z-index: 720; display: grid; place-items: center; color: #fff; overflow: hidden; animation: fade 0.3s;
+  background: radial-gradient(circle at 50% 42%, #4b1890 0%, #1a0630 55%, #07020f 100%); }
+.revela-evo.sumir { opacity: 0; transition: opacity 0.3s; }
+.re-raios { position: absolute; left: 50%; top: 42%; width: 200vmax; height: 200vmax; margin: -100vmax 0 0 -100vmax; background: repeating-conic-gradient(#C77DFF33 0deg 6deg, transparent 6deg 16deg); animation: girar 20s linear infinite; }
+.re-conteudo { position: relative; display: flex; flex-direction: column; align-items: center; text-align: center; padding: 20px 26px; }
+.re-conteudo small { font-family: 'Lilita One', 'Fredoka', sans-serif; letter-spacing: 2px; color: #F6B8FF; text-shadow: 0 0 10px #A64DFF; }
+.re-conteudo .evo-palco.grande { width: 170px; margin: 34px 0 26px; animation: pmEmblema 0.9s 0.1s cubic-bezier(0.2, 1.6, 0.4, 1) both; }
+.re-conteudo > b { font-family: 'Lilita One', 'Fredoka', sans-serif; font-size: 36px; background: linear-gradient(#fff, #E2B8FF 60%, #FF9BEA); -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 3px 0 #2a0a4e); }
+.re-conteudo p { font-size: 13px; opacity: 0.9; max-width: 320px; }
+.re-conteudo button { margin-top: 12px; min-width: 190px; }
+
+/* =================== GOJO NA ARENA =================== */
+.tropa.carta-evo .tropa-corpo { isolation: isolate; }
+.aura-evo { position: absolute; left: 50%; top: 50%; width: 175%; aspect-ratio: 1; transform: translate(-50%, -50%); border-radius: 50%; z-index: -1; pointer-events: none;
+  background: conic-gradient(from 0deg, #A64DFF00, #A64DFF 20%, #FF4FD8 35%, #A64DFF00 50%, #7B2FFF 70%, #00D9FF 82%, #A64DFF00);
+  -webkit-mask: radial-gradient(circle, transparent 40%, #000 46%, #000 58%, transparent 70%); mask: radial-gradient(circle, transparent 40%, #000 46%, #000 58%, transparent 70%);
+  filter: blur(2px); opacity: 0.8; animation: girar 2.4s linear infinite; }
+.aura-evo.dois { width: 150%; animation-duration: 3.6s; animation-direction: reverse; opacity: 0.6; filter: blur(3px); }
+.tropa.evoluida .aura-evo { width: 210%; opacity: 1; }
+.tropa.evoluida .aura-evo.dois { width: 180%; }
+.tropa.evoluida .tropa-medalhao { border-color: #E2B8FF !important; box-shadow: 0 0 0 2px #A64DFF, 0 0 14px #C77DFF; }
+.selo-evo { position: absolute; left: 50%; top: -12px; transform: translateX(-50%); z-index: 4; font-family: 'Lilita One', 'Fredoka', sans-serif; font-size: 8px; padding: 1px 4px; border-radius: 4px; color: #fff;
+  background: linear-gradient(90deg, #00B4D8, #8E3BFF, #E23FB8); box-shadow: 0 0 6px #C77DFF; }
+/* Infinito: anel azul-claro tremendo em volta */
+.tropa.com-infinito .tropa-medalhao { outline: 2px dashed #9FE7FFcc; outline-offset: 3px; animation: infinito 1.6s linear infinite; }
+@keyframes infinito { 50% { outline-offset: 5px; outline-color: #E2F8FF; } }
+.dano-num.infinito { color: #BFF3FF; font-size: 18px; text-shadow: 0 0 8px #4FB4FF, 0 2px 0 #0a2a4a; }
+.fx-infinito { width: 11%; aspect-ratio: 1; border-radius: 50%; border: 2px solid #BFF3FF; box-shadow: 0 0 10px #4FB4FF, inset 0 0 10px #4FB4FF; animation: fxInfinito 0.42s ease-out forwards; }
+@keyframes fxInfinito { from { transform: translate(-50%, -50%) scale(0.6); opacity: 1; } to { transform: translate(-50%, -50%) scale(1.5); opacity: 0; } }
+.fx-gojo-azul { width: 22%; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle, #fff 0 8%, #4FB4FF 20%, #1a4aff88 45%, transparent 70%); animation: gojoAzul 0.52s ease-in forwards; }
+@keyframes gojoAzul { from { transform: translate(-50%, -50%) scale(1.6) rotate(0); opacity: 0.4; } 60% { opacity: 1; } to { transform: translate(-50%, -50%) scale(0.2) rotate(240deg); opacity: 0; } }
+.fx-gojo-vermelho { width: 24%; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle, #fff 0 10%, #FF4F5E 28%, #b0102088 50%, transparent 70%); animation: gojoVerm 0.52s ease-out forwards; }
+@keyframes gojoVerm { from { transform: translate(-50%, -50%) scale(0.3); opacity: 1; } to { transform: translate(-50%, -50%) scale(1.6); opacity: 0; } }
+.fx-gojo-carga { width: 20%; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle, #fff 0 10%, #C77DFF 30%, #FF4F5E55 50%, #4FB4FF33 60%, transparent 72%); animation: carregar 0.65s ease-in forwards; }
+.tropa.no-vazio .tropa-medalhao { filter: grayscale(0.6) brightness(0.8) drop-shadow(0 0 6px #A64DFF); }
+
+/* =================== RAIOS: Super Kamehameha e Vazio Púrpura =================== */
+.kamehameha.super { height: 44px; background: linear-gradient(#fffbe0, #fff 30%, #FFE45C 60%, #6CC8FF); box-shadow: 0 0 30px 10px #FFE45C, 0 0 60px 20px #6CC8FF99; animation-duration: 1.1s; }
+.kamehameha.vazio-purpura { height: 52px; border-radius: 0 40px 40px 0; background: linear-gradient(#ffe8ff, #fff 25%, #C77DFF 55%, #4b1890); box-shadow: 0 0 34px 12px #A64DFF, 0 0 70px 26px #FF4FD877; animation-duration: 1.15s; }
+.tropa.carregando-kame .tropa-medalhao { box-shadow: 0 0 0 3px #fff, 0 0 18px 6px #6CC8FF, 0 0 34px 10px #378ADD; animation: tremerLeve 0.12s infinite; }
+.tropa.carregando-kame.forte .tropa-medalhao { box-shadow: 0 0 0 3px #fff, 0 0 22px 8px #FFE45C, 0 0 44px 16px #FF9A1A; }
+@keyframes tremerLeve { 50% { transform: translate(1px, -1px); } }
+
+/* =================== CORTE DE CENA DO GOKU =================== */
+.cutin { position: absolute; inset: 0; z-index: 3000; pointer-events: none; overflow: hidden; display: grid; place-items: center; animation: fade 0.15s; }
+.cutin.saindo { opacity: 0; transition: opacity 0.35s; }
+.cutin::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 50% 45%, #ff7a0055, #2a0000cc 75%); }
+.cutin-linhas { position: absolute; left: 50%; top: 45%; width: 220%; aspect-ratio: 1; transform: translate(-50%, -50%);
+  background: repeating-conic-gradient(#ffffff40 0deg 1.2deg, transparent 1.2deg 7deg); -webkit-mask: radial-gradient(circle, transparent 22%, #000 40%); mask: radial-gradient(circle, transparent 22%, #000 40%); animation: girar 6s linear infinite; }
+.cutin-faixa { position: relative; width: 112%; height: 46%; margin-top: -8%; transform: rotate(-7deg); clip-path: polygon(0 10%, 100% 0, 100% 90%, 0 100%);
+  background: #000; box-shadow: 0 0 0 4px #fff; animation: cutinEntra 0.38s cubic-bezier(0.2, 1.3, 0.4, 1) both; }
+.cutin-faixa::after { content: ''; position: absolute; inset: 0; border-top: 5px solid #FFE45C; border-bottom: 5px solid #FFE45C; }
+.cutin-faixa img { width: 100%; height: 100%; object-fit: cover; object-position: 55% 22%; transform: rotate(7deg) scale(1.18); animation: cutinZoom 1.9s ease-out both; }
+@keyframes cutinEntra { from { transform: translateX(120%) rotate(-7deg); } }
+@keyframes cutinZoom { from { transform: rotate(7deg) scale(1.35); } to { transform: rotate(7deg) scale(1.15); } }
+.cutin-legenda { position: absolute; left: 6%; right: 6%; bottom: 13%; text-align: center; font-family: 'Fredoka', sans-serif; font-weight: 700; font-size: 21px; line-height: 1.15; color: #fff;
+  text-shadow: 2px 2px 0 #000, -2px 2px 0 #000, 2px -2px 0 #000, -2px -2px 0 #000, 0 3px 6px #000; animation: pop 0.35s 0.3s both; }
+.cutin.goku_furia::after { content: ''; position: absolute; inset: 0; background: #fff; animation: flashCutin 0.35s ease-out forwards; }
+@keyframes flashCutin { from { opacity: 0.85; } to { opacity: 0; } }
+
+/* =================== EXPANSÃO DE DOMÍNIO: VAZIO INFINITO =================== */
+.dominio { position: absolute; inset: 0; z-index: 2900; pointer-events: none; overflow: hidden; }
+.dominio.saindo { opacity: 0; transition: opacity 0.45s; }
+.dom-vazio { position: absolute; inset: 0; background: radial-gradient(circle at var(--x) var(--y), #fff 0 1%, #C77DFF 4%, #2a0a4e 18%, #07020fee 45%, #000000dd 80%);
+  clip-path: circle(0% at var(--x) var(--y)); animation: domAbre 0.6s cubic-bezier(0.3, 0.8, 0.3, 1) forwards; }
+@keyframes domAbre { to { clip-path: circle(150% at var(--x) var(--y)); } }
+.dom-estrelas { position: absolute; inset: 0; opacity: 0; animation: fade 0.5s 0.3s forwards;
+  background-image: radial-gradient(#fff 1px, transparent 1.5px), radial-gradient(#E2B8FF 1px, transparent 1.6px); background-size: 31px 37px, 53px 47px; background-position: 0 0, 13px 21px; }
+.dom-aneis { position: absolute; left: var(--x); top: var(--y); width: 10%; aspect-ratio: 1; transform: translate(-50%, -50%); border-radius: 50%;
+  box-shadow: 0 0 0 3px #E2B8FFaa, 0 0 0 30px #A64DFF22, 0 0 0 60px #A64DFF14, 0 0 0 90px #A64DFF0c; animation: domAneis 1.4s ease-out forwards; }
+@keyframes domAneis { from { transform: translate(-50%, -50%) scale(0.2); } to { transform: translate(-50%, -50%) scale(3.2); opacity: 0.2; } }
+.dom-texto { position: absolute; left: 0; right: 0; top: 40%; text-align: center; opacity: 0; animation: pop 0.45s 0.35s forwards; }
+.dom-texto small { display: block; font-family: 'Lilita One', 'Fredoka', sans-serif; font-size: 14px; letter-spacing: 3px; color: #E2B8FF; text-shadow: 0 0 10px #A64DFF; }
+.dom-texto b { font-family: 'Lilita One', 'Fredoka', sans-serif; font-size: 38px; color: #fff; text-shadow: 0 0 14px #C77DFF, 0 0 30px #A64DFF, 0 3px 0 #2a0a4e; }
+.fx-infinito, .fx-gojo-azul, .fx-gojo-vermelho, .fx-gojo-carga { position: absolute; pointer-events: none; z-index: 1700; transform: translate(-50%, -50%); }
+@keyframes popIn { from { transform: scale(0.6); opacity: 0; } to { opacity: 1; } }
+.dom-texto { animation: popIn 0.45s 0.35s forwards; }
+.cutin-legenda { animation: popIn 0.35s 0.3s both; }
+/* a animação de entrada fica na carta (no palco ela isolava o vídeo e o preto aparecia) */
+.re-conteudo .evo-palco.grande { animation: none; }
+.re-conteudo .evo-palco.grande .evo-moldura { animation: pmEmblema 0.9s 0.1s cubic-bezier(0.2, 1.6, 0.4, 1) both; }
+/* raios com núcleo branco e bordas suaves */
+.kamehameha.super { background: linear-gradient(transparent 0%, #6CC8FF66 10%, #6CC8FF 22%, #FFE45C 36%, #fff 50%, #FFE45C 64%, #6CC8FF 78%, #6CC8FF66 90%, transparent 100%); border-radius: 0 999px 999px 0; box-shadow: 0 0 26px 6px #FFE45C88; }
+.kamehameha.vazio-purpura { background: linear-gradient(transparent 0%, #4b189066 8%, #7B2FFF 22%, #C77DFF 36%, #F3DCFF 46%, #fff 50%, #F3DCFF 54%, #C77DFF 64%, #7B2FFF 78%, #4b189066 92%, transparent 100%); border-radius: 0 999px 999px 0; box-shadow: 0 0 30px 8px #A64DFF88, 0 0 70px 20px #FF4FD833; }
+.kamehameha.vazio-purpura::after, .kamehameha.super::after { content: ''; position: absolute; left: -12px; top: 50%; width: 46px; aspect-ratio: 1; transform: translateY(-50%); border-radius: 50%; background: radial-gradient(circle, #fff 0 25%, #C77DFF 50%, transparent 70%); }
+.kamehameha.super::after { background: radial-gradient(circle, #fff 0 25%, #FFE45C 50%, transparent 70%); }

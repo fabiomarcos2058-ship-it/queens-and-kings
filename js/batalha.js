@@ -163,6 +163,14 @@ const Batalha = (() => {
       const c = Estado.carta(id);
       const caro = c.custo > a.elixir ? ' caro' : '';
       const sel = s.selecionada === i ? ' selecionada' : '';
+      // evolução: mostra se a próxima vez que jogar ela vem evoluída
+      let evo = '';
+      if (c.evolucao) {
+        const carga = (s.evoCarga && s.evoCarga[`azul:${id}`]) || 0, pronta = carga >= c.evolucao.ciclos;
+        evo = pronta ? ' evo-pronta' : '';
+        const pips = Array.from({ length: c.evolucao.ciclos }, (_, k) => `<i class="${k < carga ? 'cheio' : ''}"></i>`).join('');
+        return `<div class="slot-mao${caro}${sel}${evo}" data-i="${i}">${Cartas.html(c, { mini: true })}<div class="evo-pips">${pronta ? '<b>EVO!</b>' : pips}</div></div>`;
+      }
       return `<div class="slot-mao${caro}${sel}" data-i="${i}">${Cartas.html(c, { mini: true })}</div>`;
     }).join('');
     const prox = a.fila[4] ? Estado.carta(a.fila[4]) : null;
@@ -279,6 +287,7 @@ const Batalha = (() => {
     if (s.convidado) {
       s.rede.enviarComando({ tipo: 'carta', i: s.selecionada, x: Math.round(x), y: Math.round(y), lado: s.dupla ? s.meuLado : undefined }); // o host espelha
       efeito('onda-surgir azul', x, y, 700); // retorno imediato enquanto o host confirma
+      if (c.evolucao) { if (!s.evoCarga) s.evoCarga = {}; const k = `azul:${c.id}`; s.evoCarga[k] = (s.evoCarga[k] || 0) >= c.evolucao.ciclos ? 0 : (s.evoCarga[k] || 0) + 1; }
       s.azul.elixir -= c.custo;
       s.selecionada = null; s.zona.classList.remove('ativa'); desenharMao();
       return;
@@ -307,7 +316,16 @@ const Batalha = (() => {
     } else if (c.barril) {
       lancarBarril(time, c, x, y, f, nivel, quem);
     } else {
-      donoDe(criarTropa(time, c, x, y, f, nivel), quem);
+      // evolução: depois de jogar a carta X vezes, a próxima vem evoluída
+      let evo = false;
+      if (c.evolucao) {
+        if (!s.evoCarga) s.evoCarga = {};
+        const k = `${quem}:${id}`;
+        evo = (s.evoCarga[k] || 0) >= c.evolucao.ciclos;
+        s.evoCarga[k] = evo ? 0 : (s.evoCarga[k] || 0) + 1;
+      }
+      const t = donoDe(criarTropa(time, c, x, y, evo ? f * 1.2 : f, nivel, { evo }), quem);
+      if (evo) agendar(1.05, () => { if (t.vida > 0) expansaoDominio(t); });
     }
   }
   // marca de quem é a tropa (no 2v2 as do parceiro ganham um selo)
@@ -368,7 +386,7 @@ const Batalha = (() => {
   }
 
   // ---------- Entidades ----------
-  function criarTropa(time, c, x, y, f, nivel) {
+  function criarTropa(time, c, x, y, f, nivel, opc = {}) {
     const t = {
       id: ++s.id, time, dono: time, carta: c, x, y, raio: 13,
       vida: Math.round(c.vida * f), max: Math.round(c.vida * f), dano: Math.round(c.dano * f),
@@ -382,12 +400,14 @@ const Batalha = (() => {
     };
     const m0 = t.atk.m || {};
     if (m0.escudo) { t.escudo = t.escudoMax = Math.round(t.max * m0.escudo); }
+    t.evo = !!opc.evo;
+    if (m0.gojo) { t.infinito = t.evo ? 4 : 2; t.infMax = t.infinito; t.infTimer = 0; }
     t.voo = !!m0.voo;
     if (c.token) t.raio = 8;
     t.el = document.createElement('div');
-    t.el.className = `tropa ${time} surgindo${c.token ? ' mini' : ''}${c.habilidade ? ' campea' : ''}${t.escudo ? ' com-escudo' : ''}${t.voo ? ' voando' : ''}`;
+    t.el.className = `tropa ${time} surgindo${c.token ? ' mini' : ''}${c.habilidade ? ' campea' : ''}${t.escudo ? ' com-escudo' : ''}${t.voo ? ' voando' : ''}${c.evolucao ? ' carta-evo' : ''}${t.evo ? ' evoluida' : ''}${t.infinito ? ' com-infinito' : ''}`;
     t.el.innerHTML = `${barraHp()}
-      <div class="tropa-corpo"><div class="tropa-medalhao"><img src="assets/cartas/${c.id}_medalhao.png" alt="" /><b>${nivel}</b>${c.passiva && c.passiva.tipo === 'adaptar' ? '<i class="selo-adapt"></i>' : ''}</div></div><div class="tropa-sombra"></div>`;
+      <div class="tropa-corpo">${c.evolucao ? '<i class="aura-evo"></i><i class="aura-evo dois"></i>' : ''}${t.evo ? '<span class="selo-evo">EVO</span>' : ''}<div class="tropa-medalhao"><img src="assets/cartas/${c.id}_medalhao.png" alt="" /><b>${nivel}</b>${c.passiva && c.passiva.tipo === 'adaptar' ? '<i class="selo-adapt"></i>' : ''}</div></div><div class="tropa-sombra"></div>`;
     s.arena.appendChild(t.el);
     s.ent.push(t);
     posicionar(t);
@@ -474,6 +494,14 @@ const Batalha = (() => {
         return 0;
       }
     }
+    // Infinito (Gojo): o golpe para no ar e não encosta nele
+    if (!e.torre && e.infinito > 0 && !opc.atravessa) {
+      e.infinito--;
+      numero(e, 0, 'infinito');
+      fxEl('fx-infinito', e.x, e.y - 4, 420);
+      if (e.infinito <= 0) e.el.classList.remove('com-infinito');
+      return 0;
+    }
     if (e.adaptacao && e.carta && e.carta.passiva && e.carta.passiva.tipo === 'adaptar') dano = Math.round(dano * (1 - e.carta.passiva.defesa * e.adaptacao));
     if (e.marcado > 0) dano = Math.round(dano * (1 + e.marcaPct));
     // escudo absorve primeiro
@@ -528,7 +556,7 @@ const Batalha = (() => {
     setTimeout(() => vivos.numero--, 650);
     const n = document.createElement('div');
     n.className = `dano-num${dano >= 250 ? ' grande' : ''}${tipo ? ` ${tipo}` : ''}`;
-    n.textContent = tipo === 'critico' ? `${dano}!` : tipo === 'escudo' ? '🛡️' : dano;
+    n.textContent = tipo === 'critico' ? `${dano}!` : tipo === 'escudo' ? '🛡️' : tipo === 'infinito' ? '∞' : dano;
     Object.assign(n.style, pct(e.x + (Math.random() * 16 - 8), e.y - 22));
     s.arena.appendChild(n);
     setTimeout(() => n.remove(), 650);
@@ -629,6 +657,10 @@ const Batalha = (() => {
       efeito('cura', t.x, t.y, 800);
     }
     if (h.tipo === 'kamehameha') kamehameha(t, Math.round((h.dano || 1500) * (t.f || 1)));
+    if (h.tipo === 'vazioPurpura') {
+      fxEl('fx-gojo-carga', t.x, t.y - 6, 650);
+      kamehameha(t, Math.round((h.dano || 1100) * (t.f || 1)), { tipo: 2, comp: 420, larg: t.evo ? 56 : 44, torreMult: 0.35, atraso: 0.55 });
+    }
     if (h.tipo === 'congelar') congelar(t, h);
     if (h.tipo === 'esquiva') {
       t.esquiva = h.duracao || 5; t.esquivaChance = h.chance || 0.8;
@@ -681,20 +713,29 @@ const Batalha = (() => {
     t.el.classList.toggle('adaptado', t.adaptacao >= p.max);
   }
 
-  function kamehameha(t, dano) {
-    // mira no alvo atual ou na torre inimiga mais próxima
-    const alvo = (t.alvo && t.alvo.vida > 0 && t.alvo) || s.ent.filter((e) => e.time !== t.time && e.vida > 0).sort((a, b) => dist(a, t) - dist(b, t))[0];
-    if (!alvo) return;
-    const ang = Math.atan2(alvo.y - t.y, alvo.x - t.x);
-    if (s.rede) s.eventos.push(['k', Math.round(t.x), Math.round(t.y), +ang.toFixed(3)]);
-    const comp = 320, larg = 34;
-    const fx = Math.cos(ang), fy = Math.sin(ang);
+  // tipo: 0 = Kamehameha, 1 = Super Kamehameha (fúria do Goku), 2 = Vazio Púrpura (Gojo)
+  const CLASSE_RAIO = ['kamehameha', 'kamehameha super', 'kamehameha vazio-purpura'];
+  function desenharRaio(x, y, ang, tipo, comp, larg) {
     const raio = document.createElement('div');
-    raio.className = 'kamehameha';
-    Object.assign(raio.style, pct(t.x, t.y), { width: `${(comp / W) * 100}%`, transform: `translate(0, -50%) rotate(${ang}rad)` });
+    raio.className = CLASSE_RAIO[tipo] || 'kamehameha';
+    Object.assign(raio.style, pct(x, y), { width: `${(comp / W) * 100}%`, transform: `translate(0, -50%) rotate(${ang}rad)` });
+    if (larg) raio.style.height = `${larg * escala}px`;
     s.arena.appendChild(raio);
-    efeito('kame-carga', t.x, t.y, 600);
-    setTimeout(() => raio.remove(), 900);
+    setTimeout(() => raio.remove(), tipo ? 1150 : 900);
+  }
+  // mira onde tem mais inimigos (o alvo atual pesa mais)
+  function melhorDirecao(t) {
+    const alvo = (t.alvo && t.alvo.vida > 0 && t.alvo) || s.ent.filter((e) => e.time !== t.time && e.vida > 0).sort((a, b) => dist(a, t) - dist(b, t))[0];
+    return alvo ? Math.atan2(alvo.y - t.y, alvo.x - t.x) : null;
+  }
+  function kamehameha(t, dano, opc = {}) {
+    const ang = opc.ang != null ? opc.ang : melhorDirecao(t);
+    if (ang == null) return;
+    const tipo = opc.tipo || 0, comp = opc.comp || 320, larg = opc.larg || 34;
+    if (s.rede) s.eventos.push(['k', Math.round(t.x), Math.round(t.y), +ang.toFixed(3), tipo, larg]);
+    const fx = Math.cos(ang), fy = Math.sin(ang);
+    desenharRaio(t.x, t.y, ang, tipo, comp, opc.larg);
+    if (!tipo) efeito('kame-carga', t.x, t.y, 600);
     setTimeout(() => {
       if (!s || s.acabou) return;
       tremer(true);
@@ -703,9 +744,114 @@ const Batalha = (() => {
         const rx = e.x - t.x, ry = e.y - t.y;
         const ao = rx * fx + ry * fy;            // distância ao longo do raio
         const lado = Math.abs(rx * fy - ry * fx); // distância para o lado
-        if (ao >= -10 && ao <= comp && lado <= larg / 2 + e.raio) ferir(e, e.torre ? Math.round(dano * 0.5) : dano, t.time);
+        if (ao >= -10 && ao <= comp && lado <= larg / 2 + e.raio) ferir(e, e.torre ? Math.round(dano * (opc.torreMult || 0.5)) : dano, t.time, t, { atravessa: tipo === 2 });
       }
-    }, 300);
+    }, (opc.atraso || 0.3) * 1000);
+  }
+
+  // ---------- Goku SSJ: "You're going to pay for this!" ----------
+  // se 2 ou 3 inimigos o pressionarem, ele fica furioso e carrega um Super Kamehameha
+  function checarFuria(t, dt) {
+    t.furiaCd = (t.furiaCd || 0) - dt;
+    t.furiaOlhar = (t.furiaOlhar || 0) - dt;
+    if (t.furiaCd > 0 || t.furiaOlhar > 0 || t.canal > 0) return;
+    t.furiaOlhar = 0.3;
+    const n = s.ent.filter((e) => !e.torre && e.vida > 0 && e.time !== t.time && e.surgir <= 0 && (e.alvo === t || dist(e, t) < e.raio + t.raio + 26)).length;
+    if (n < 2) return;
+    t.furiaN = Math.min(3, n);
+    t.furiaCd = 16;
+    t.canal = 1.75; // o corte de cena some antes do raio sair
+    t.el.classList.add('carregando-kame');
+    if (t.furiaN >= 3) t.el.classList.add('forte');
+    cutin('goku_furia');
+    if (s.rede) s.eventos.push(['c', 0]);
+  }
+  function soltarFuria(t) {
+    t.el.classList.remove('carregando-kame', 'forte');
+    const forte = t.furiaN >= 3;
+    // mira no meio do grupo que está apertando ele
+    const perto = s.ent.filter((e) => !e.torre && e.vida > 0 && e.time !== t.time && dist(e, t) < 80);
+    let ang = null;
+    if (perto.length) {
+      const cx = perto.reduce((a, e) => a + e.x, 0) / perto.length, cy = perto.reduce((a, e) => a + e.y, 0) / perto.length;
+      if (Math.hypot(cx - t.x, cy - t.y) > 2) ang = Math.atan2(cy - t.y, cx - t.x);
+    }
+    // com 3, antes solta uma explosão de ki em volta
+    if (forte) explosaoArea(t, t, Math.round(t.dano * 1.5), 46, { visual: 'impacto', cor: '#FFE45C', empurrar: 16 });
+    kamehameha(t, Math.round(t.dano * (forte ? 6 : 3)), { tipo: 1, comp: forte ? 380 : 330, larg: forte ? 58 : 42, torreMult: 0.4, atraso: 0.2, ang });
+    particulas(t.x, t.y, '#FFE45C', forte ? 18 : 10, forte ? 40 : 26);
+  }
+
+  // corte de cena por cima da arena (aparece pra todo mundo da partida)
+  const CUTINS = ['goku_furia'];
+  const TEXTO_CUTIN = { goku_furia: "You're going to pay for this!" };
+  function cutin(qual) {
+    const jan = document.querySelector('.arena-grande-janela');
+    if (!jan || jan.querySelector('.cutin')) return;
+    const el = document.createElement('div');
+    el.className = `cutin ${qual}`;
+    el.innerHTML = `<div class="cutin-linhas"></div><div class="cutin-faixa"><img src="assets/cutins/${qual}.jpg" alt="" /></div><div class="cutin-legenda">${TEXTO_CUTIN[qual]}</div>`;
+    jan.appendChild(el);
+    try { navigator.vibrate && navigator.vibrate([40, 40, 90]); } catch (e) { /* nada */ }
+    setTimeout(() => el.classList.add('saindo'), 1300);
+    setTimeout(() => el.remove(), 1650);
+  }
+
+  // ---------- Gojo ----------
+  function gojoAtaque(a, alvo, dano, crit) {
+    a.gojoAlt = !a.gojoAlt;
+    const azul = a.gojoAlt;
+    const pj = criarProjetil(a, alvo, dano, { p: azul ? 'ki_azul' : 'ki_vermelho', vel: 250, tam: a.evo ? 24 : 20, rastro: azul ? '#4FB4FF' : '#FF4F5E' }, { crit, area: 0, semEfeitos: true });
+    pj.gojo = azul ? 'azul' : 'vermelho';
+  }
+  function gojoImpacto(p, alvo) {
+    const a = p.fonte;
+    if (!a) return;
+    const centro = { x: alvo.x, y: alvo.y };
+    if (p.gojo === 'azul') {
+      // Azul: puxa todo mundo em volta pro ponto do impacto
+      for (const e of s.ent) {
+        if (e.torre || e.time === a.time || e.vida <= 0 || e === alvo || dist(e, centro) > 62) continue;
+        if (!(e.atk && e.atk.m && e.atk.m.imune)) empurrar(e, centro, -Math.min(16, dist(e, centro) - 6));
+        ferir(e, Math.round(p.dano * 0.3), a.time, a);
+      }
+      fxEl('fx-gojo-azul', centro.x, centro.y, 520);
+      if (s.rede) s.eventos.push(['x', Math.round(centro.x), Math.round(centro.y), 30, '#4FB4FF']);
+    } else {
+      // Vermelho: explode e empurra
+      explosaoArea(a, centro, Math.round(p.dano * 0.45), a.evo ? 44 : 36, { visual: 'impacto', cor: '#FF4F5E', empurrar: 18 });
+      fxEl('fx-gojo-vermelho', centro.x, centro.y, 520);
+    }
+  }
+
+  // Evolução: Expansão de Domínio — Vazio Infinito
+  function expansaoDominio(t) {
+    const raio = 175;
+    dominioVisual(t.x, t.y, t.time);
+    if (s.rede) s.eventos.push(['d', Math.round(t.x), Math.round(t.y), t.time === 'azul' ? 0 : 1]);
+    agendar(0.55, () => {
+      if (!s || s.acabou) return;
+      tremer(true);
+      for (const e of [...s.ent]) {
+        if (e.time === t.time || e.vida <= 0 || dist(e, t) > raio + e.raio) continue;
+        if (e.torre) { e.cd = Math.max(e.cd || 0, 3); continue; } // torres ficam paradas um tempo
+        ferir(e, Math.round(t.dano * 1.6), t.time, t, { atravessa: true });
+        if (!(e.atk && e.atk.m && e.atk.m.imune)) { e.atord = Math.max(e.atord, 3.5); e.el.classList.add('atordoada', 'no-vazio'); setTimeout(() => e.el && e.el.classList.remove('no-vazio'), 3500); }
+      }
+    });
+  }
+  function dominioVisual(x, y, time) {
+    const jan = document.querySelector('.arena-grande-janela');
+    if (!jan) return;
+    const el = document.createElement('div');
+    el.className = `dominio ${time}`;
+    el.style.setProperty('--x', `${(x / W) * 100}%`);
+    el.style.setProperty('--y', `${(y / H) * 100}%`);
+    el.innerHTML = `<div class="dom-vazio"></div><div class="dom-aneis"></div><div class="dom-estrelas"></div>
+      <div class="dom-texto"><small>Expansão de Domínio</small><b>Vazio Infinito</b></div>`;
+    jan.appendChild(el);
+    setTimeout(() => el.classList.add('saindo'), 1500);
+    setTimeout(() => el.remove(), 1950);
   }
 
   function desenharHabilidades() {
@@ -1050,6 +1196,7 @@ const Batalha = (() => {
       ferir(alvo, p.dano, p.time, a, { crit: p.crit });
       if (a && !a.torre && !p.semEfeitos) aplicarGolpe(a, alvo, p.dano);
     }
+    if (p.gojo) gojoImpacto(p, alvo);
     // ricochete (Bulma): quica para outro alvo perto
     if (p.ricochete && a) {
       const prox = s.ent.filter((e) => e !== alvo && e.time !== p.time && e.vida > 0 && dist(e, alvo) < 90).sort((x, y) => dist(x, alvo) - dist(y, alvo))[0];
@@ -1071,6 +1218,7 @@ const Batalha = (() => {
 
     if (atacante.alcance > 40) {
       piscar(atacante.el, 'atirando');
+      if (m.gojo) { gojoAtaque(atacante, alvo, dano, crit); return; }
       if (v.ceu) { raioDoCeu(atacante, alvo, dano, crit); return; }
       const n = m.rajada || 1;
       for (let i = 0; i < n; i++) {
@@ -1406,7 +1554,7 @@ const Batalha = (() => {
       tm: s.t < 3 ? Object.fromEntries(s.ent.filter((e) => e.torre).map((e) => [e.id, e.max])) : undefined,
       tw: Object.fromEntries(s.ent.filter((e) => e.torre).map((e) => [e.id, Math.round(e.vida)])),
       tr: s.ent.filter((e) => !e.torre).map((e) => [e.id, e.carta.id, e.time === 'azul' ? 0 : 1, Math.round(e.x * 10) / 10, Math.round(e.y * 10) / 10,
-        Math.round(e.vida), e.max, e.nivel, (e.surgir > 0 ? 1 : 0) | (e.furia > 0 ? 2 : 0) | (e.golpesFortes > 0 ? 4 : 0) | (e.fenix > 0 ? 8 : 0) | (e.congelado > 0 ? 16 : 0) | (e.esquiva > 0 ? 32 : 0) | (e.atord > 0 ? 64 : 0) | (e.lento > 0 ? 128 : 0) | (e.queima > 0 ? 256 : 0) | (e.escudo > 0 ? 512 : 0) | (e.fraco > 0 ? 1024 : 0) | ((e.adaptacao || 0) << 11), e.recarga > 0 ? +e.recarga.toFixed(1) : 0, e.dono && e.dono.endsWith('2') ? 1 : 0]),
+        Math.round(e.vida), e.max, e.nivel, (e.surgir > 0 ? 1 : 0) | (e.furia > 0 ? 2 : 0) | (e.golpesFortes > 0 ? 4 : 0) | (e.fenix > 0 ? 8 : 0) | (e.congelado > 0 ? 16 : 0) | (e.esquiva > 0 ? 32 : 0) | (e.atord > 0 ? 64 : 0) | (e.lento > 0 ? 128 : 0) | (e.queima > 0 ? 256 : 0) | (e.escudo > 0 ? 512 : 0) | (e.fraco > 0 ? 1024 : 0) | ((e.adaptacao || 0) << 11) | (e.evo ? 131072 : 0) | (e.infinito > 0 ? 262144 : 0) | (e.canal > 0 ? 524288 : 0), e.recarga > 0 ? +e.recarga.toFixed(1) : 0, e.dono && e.dono.endsWith('2') ? 1 : 0]),
       pj: s.proj.map((p) => [Math.round(p.x), Math.round(p.y - (p.alt || 0)), p.time === 'azul' ? 0 : 1, p.el.classList.contains('de-torre') ? 1 : 0, p.sprite || 0, Math.round(p.giro || 0)]),
       ev: s.eventos,
     };
@@ -1471,7 +1619,7 @@ const Batalha = (() => {
       const x = mx(hx), y = my(hy);
       if (!t) {
         const time = mt(timeN);
-        t = criarTropa(time, Estado.carta(cartaId), x, y, 1, nivel);
+        t = criarTropa(time, Estado.carta(cartaId), x, y, 1, nivel, { evo: !!(flags & 131072) });
         // 2v2: descobre de quem é a tropa (eu, meu parceiro ou um rival)
         if (D) { t.dono = paraMim((timeN === 0 ? 'azul' : 'vermelho') + (segundo ? '2' : '')); if (t.dono === 'azul2') t.el.classList.add('parceiro'); }
         t.hid = hid; t.max = max; t.vida = vida;
@@ -1493,7 +1641,9 @@ const Batalha = (() => {
       t.el.classList.toggle('queimando', !!(flags & 256));
       t.el.classList.toggle('com-escudo', !!(flags & 512));
       t.el.classList.toggle('enfraquecida', !!(flags & 1024));
-      const ad = flags >> 11, selo = t.el.querySelector('.selo-adapt');
+      t.el.classList.toggle('com-infinito', !!(flags & 262144));
+      t.el.classList.toggle('carregando-kame', !!(flags & 524288));
+      const ad = (flags >> 11) & 63, selo = t.el.querySelector('.selo-adapt');
       if (selo && String(ad || '') !== selo.textContent) { selo.textContent = ad || ''; t.el.classList.toggle('adaptado', !!(t.carta.passiva && ad >= t.carta.passiva.max)); }
       t.recarga = recarga;
     }
@@ -1529,13 +1679,13 @@ const Batalha = (() => {
       } else if (ev[0] === 'b') {
         efeito('barril-quebra', mx(ev[1]), my(ev[2]), 500);
       } else if (ev[0] === 'k') {
-        const x = mx(ev[1]), y = my(ev[2]), ang = ev[3] + (V ? Math.PI : 0);
-        const raio = document.createElement('div');
-        raio.className = 'kamehameha';
-        Object.assign(raio.style, pct(x, y), { width: `${(320 / W) * 100}%`, transform: `translate(0, -50%) rotate(${ang}rad)` });
-        s.arena.appendChild(raio);
-        setTimeout(() => raio.remove(), 900);
+        const x = mx(ev[1]), y = my(ev[2]), ang = ev[3] + (V ? Math.PI : 0), tipo = ev[4] || 0;
+        desenharRaio(x, y, ang, tipo, [320, 360, 420][tipo] || 320, tipo ? ev[5] : 0);
         setTimeout(() => tremer(true), 300);
+      } else if (ev[0] === 'c') {
+        cutin(CUTINS[ev[1]] || 'goku_furia');
+      } else if (ev[0] === 'd') {
+        dominioVisual(mx(ev[1]), my(ev[2]), mt(ev[3]));
       } else if (ev[0] === 'a') {
         efeito(`ativou ${mt(ev[3])}`, mx(ev[1]), my(ev[2]), 700);      } else if (ev[0] === 'g') {
         efeito('gelo', mx(ev[1]), my(ev[2]), 1000);
@@ -1694,6 +1844,10 @@ const Batalha = (() => {
       if (t.vida <= 0) continue;
       if (t.congelado > 0) { if ((t.congelado -= dt) <= 0) t.el.classList.remove('congelada'); continue; }
       if (t.atord > 0) { if ((t.atord -= dt) <= 0) t.el.classList.remove('atordoada'); continue; }
+      const mm = t.atk && t.atk.m;
+      if (mm && mm.gojo && t.infinito < t.infMax && (t.infTimer += dt) >= 6) { t.infTimer = 0; t.infinito++; t.el.classList.add('com-infinito'); }
+      if (mm && mm.furiaNamek) checarFuria(t, dt);
+      if (t.canal > 0) { if ((t.canal -= dt) <= 0) soltarFuria(t); continue; } // carregando o Super Kamehameha
       if (!t.alvo || t.alvo.vida <= 0 || !s.ent.includes(t.alvo) || Math.random() < 0.02) t.alvo = escolherAlvo(t);
       t.cd -= dt;
       if (t.teleCd > 0) t.teleCd -= dt;

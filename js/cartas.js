@@ -13,14 +13,18 @@ const Cartas = (() => {
 
   // mini = só a carta (mão e loja) | nivel = texto embaixo | extra = html dentro da carta
   function html(c, { mini = false, nivel = null, extra = '' } = {}) {
-    const carta = `<div class="carta ${c.raridade}${mini ? ' mini' : ''}">
+    const evo = !!c.evolucao;
+    const carta0 = `<div class="carta ${c.raridade}${evo ? ' evo' : ''}${mini ? ' mini' : ''}">
       <img src="${arte(c)}" alt="${c.nome}" draggable="false" />
       <span class="custo">${c.custo}</span>
       ${mini ? '' : `<span class="nome-3d">${c.nome}</span>`}
       ${c.habilidade ? '<span class="selo-hab" title="Tem habilidade especial">⚡</span>' : ''}
       ${c.passiva ? `<span class="selo-hab passiva" title="Tem habilidade passiva">${c.passiva.tipo === 'esquiva' ? '✨' : '🧩'}</span>` : ''}
+      ${evo ? '<i class="evo-borda"></i><span class="evo-selo">EVO</span>' : ''}
       ${extra}
     </div>`;
+    // cartas de evolução: moldura especial + aura roxa animada em volta
+    const carta = evo ? `<div class="evo-moldura${mini ? ' mini' : ''}"><img class="evo-aura" src="assets/evolucao/aura.webp" alt="" draggable="false" />${carta0}</div>` : carta0;
     return mini ? carta : `<div class="slot-carta" data-id="${c.id}">${carta}<div class="carta-nivel">${nivel ?? '&nbsp;'}</div></div>`;
   }
 

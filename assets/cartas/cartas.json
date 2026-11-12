@@ -1506,6 +1506,48 @@
         "descricao": "Dispara um Kamehameha gigante que atravessa tudo em linha reta."
       },
       "arena": 1
+    },
+    {
+      "id": "gojo",
+      "nome": "Gojo Satoru",
+      "raridade": "lendaria",
+      "custo": 6,
+      "tipo": "O mais forte · Evolução",
+      "descricao": "Infinito: os primeiros golpes nem encostam nele. Ataca alternando o Azul (puxa) e o Vermelho (explode e empurra).",
+      "trofeus": 0,
+      "exclusivo": [],
+      "nivelInicial": 5,
+      "evolucao": {
+        "ciclos": 1,
+        "nome": "Gojo (Evolução)",
+        "descricao": "Depois de jogar o Gojo uma vez, o próximo vem EVOLUÍDO: mais forte, com mais Infinito e abre a Expansão de Domínio: Vazio Infinito, que paralisa os inimigos em volta."
+      },
+      "rosto": [
+        412,
+        598,
+        128
+      ],
+      "arte": [
+        0,
+        60,
+        736
+      ],
+      "vida": 1150,
+      "dano": 230,
+      "velocidade": 48,
+      "alcance": 85,
+      "cadencia": 1.25,
+      "alvo": "tudo",
+      "habilidade": {
+        "nome": "Vazio Púrpura",
+        "tipo": "vazioPurpura",
+        "custo": 4,
+        "recarga": 16,
+        "dano": 1100,
+        "descricao": "Junta o Azul e o Vermelho e dispara um raio roxo gigante que atravessa tudo em linha reta (até torres)."
+      },
+      "arena": 1,
+      "danoTorre": 0.5
     }
   ]
 }

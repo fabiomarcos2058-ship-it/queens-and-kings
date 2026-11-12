@@ -26,7 +26,7 @@ const Ataques = (() => {
     tanque: ['itsuki', 'shizuku', 'gogeta_ssj4', 'goku_ssj3', 'goku_ssj4', 'goku_blue_lb', 'gogeta_ultra'],
     assassino: ['bra', 'teto', 'pan_dbh', 'akame', 'mbappe', 'kashimo', 'goku_pressagio'],
     atirador: ['mai', 'miku_nakano', 'pan_gt', 'riruka', 'rukia_remake'],
-    mago: ['rukia', 'nami_last', 'hatsune_miku', 'bambietta', 'bulma'],
+    mago: ['rukia', 'nami_last', 'hatsune_miku', 'bambietta', 'bulma', 'gojo'],
     enxame: ['mini'],
   };
   const classeDe = (c) => {
@@ -76,7 +76,8 @@ const Ataques = (() => {
     vegito_ex: { v: { g: 'corte', s: 'espada_vegito', cor: '#C38BFF' }, m: { teleCadeia: true }, d: 'Espada Espiritual. Ao derrotar alguém, se teletransporta para o próximo.' },
     gogeta_ultra: { v: { g: 'impacto', cor: '#FFD25E', s: 'explosao' }, m: { especial: [4, 1.5, 40, 'explosao', 0.7] }, d: 'A cada 4 golpes, uma onda que atordoa todos em volta.' },
     goku_base: { v: { g: 'esferas', cor: '#FFC21A', s: 'ki_amarelo', n: 2 }, m: { rajada: 2 }, d: 'Lança duas esferas de ki amarelas.' },
-    goku_ssj: { v: { g: 'soco', cor: '#FFD25E' }, m: { teleporte: 6 }, d: 'Teletransporte: aparece do lado do alvo (a cada 6s).' },
+    goku_ssj: { v: { g: 'soco', cor: '#FFD25E' }, m: { teleporte: 6, furiaNamek: true }, d: 'Teletransporte: aparece do lado do alvo (a cada 6s). Passiva: se 2 ou 3 inimigos o pressionarem, ele fica furioso e solta um Super Kamehameha (bem mais forte com 3).' },
+    gojo: { v: { p: 'ki_azul', vel: 250, tam: 20, rastro: '#4FB4FF', cor: '#A64DFF' }, m: { gojo: true }, d: 'Alterna o Azul (puxa os inimigos pro impacto) e o Vermelho (explode e empurra). Infinito: os primeiros golpes nem encostam nele.' },
     goku_ssj2: { v: { g: 'raio', cor: '#FFE45C' }, m: { atordoar: [0.15, 0.45] }, d: 'Socos eletrizados que podem atordoar.' },
     goku_ssj3: { v: { g: 'impacto', cor: '#FFC21A', s: 'punho', pesado: true }, m: { especial: [4, 2.5, 36, 'punho'] }, d: 'A cada 4 golpes, o Punho do Dragão em área.' },
     goku_deus: { v: { g: 'palma', cor: '#FF4B3A', s: 'ki_vermelho' }, m: { regen: 0.03 }, d: 'Ki divino: recupera 3% da vida a cada golpe.' },
