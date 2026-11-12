@@ -68,6 +68,7 @@ const Summon = (() => {
     logo: 'db',
     fim: new Date(2026, 10, 16, 23, 59, 59), // 16/11/2026
     arte: 'assets/summon/saiyajins.jpg',
+    titulo: 'assets/titulo/saiyajins.jpg', // arte grande da tela de título enquanto o banner estiver aberto
     mini: 'assets/summon/saiyajins_mini.jpg',
     centro: 'goku_vegeta',
     destaque: ['vegetto_gogeta', 'gogeta_vegetto_blue', 'goku_vegeta', 'vegeta_ultra_ego', 'goku_black_rose'],
@@ -493,5 +494,11 @@ const Summon = (() => {
       <span class="bsm-txt"><b>🌀 Summon</b><small>${esc(b.sub)} · ${tempo(b)}</small></span><em class="bsm-novo">ULTRA</em>`;
   }
 
-  return { abrir, fechar, invocar, info, htmlBotao, dados, chances, pool, sortear, banner, PRECO1, PRECO10, PITY };
+  // banner principal pra tela de título (o mais novo que tem arte grande)
+  function tituloAtual() {
+    const b = ativos().filter((x) => x.titulo).pop();
+    return b ? { arte: b.titulo, nome: b.nome, sub: b.sub, tempo: tempo(b) } : null;
+  }
+
+  return { abrir, fechar, invocar, info, htmlBotao, tituloAtual, dados, chances, pool, sortear, banner, PRECO1, PRECO10, PITY };
 })();
