@@ -2975,3 +2975,55 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 .cyber-fundo img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 15%; }
 .modal-ver-cyber .es-op { cursor: default; }
 .modal-ver-cyber .es-op small { display: block; font-size: 10px; opacity: 0.85; }
+
+/* ===== Summon estilo vitrine (Legends) ===== */
+.sm-abas { gap: 8px; padding: 2px 2px 6px; scroll-snap-type: x mandatory; }
+.sm-aba { position: relative; flex: 0 0 31%; flex-direction: column; align-items: stretch; gap: 0; padding: 0; border-radius: 10px; overflow: hidden; background: #0b0820; border: 2px solid #ffffff2a; scroll-snap-align: start; transform: skewX(-6deg); transition: transform 0.15s, border-color 0.15s; }
+.sm-aba > * { transform: skewX(6deg); }
+.sm-aba img { width: 100%; height: 48px; object-fit: cover; object-position: 50% 25%; border-radius: 0; filter: brightness(0.75) saturate(0.85); }
+.sm-aba span { font: 11px 'Lilita One', sans-serif; padding: 3px 6px 0; text-align: left; }
+.sm-aba small { font-size: 9.5px; padding: 0 6px 4px; opacity: 0.8; text-align: left; white-space: nowrap; }
+.sm-aba em { position: absolute; top: 3px; right: 4px; font: 9px 'Lilita One', sans-serif; font-style: normal; padding: 1px 5px; border-radius: 5px; color: #2a0a00; background: linear-gradient(90deg, #FFE45C, #FF8A00); box-shadow: 0 0 6px #FF8A00; }
+.sm-aba.ativa { border-color: #FFE45C; transform: skewX(-6deg) translateY(-2px); box-shadow: 0 0 12px #FFC21A88, inset 0 0 0 1px #fff3; }
+.sm-aba.ativa img { filter: none; }
+.sm-aba.ativa span { color: #FFE45C; }
+.sm-moldura { position: relative; width: 100%; max-width: 420px; padding: 4px; border-radius: 22px; background: linear-gradient(135deg, #FFF6C8, #C9A24A 25%, #6b4c12 50%, #E8C770 75%, #FFF6C8); box-shadow: 0 10px 30px #000c, 0 0 24px #FFC21A44; }
+.sm-moldura.t-db { background: linear-gradient(135deg, #FFF6C8, #FF8A00 22%, #6a1aa0 55%, #C04BFF 78%, #FFE45C); box-shadow: 0 10px 30px #000c, 0 0 26px #FF8A0066, 0 0 30px #C04BFF44; }
+.sm-moldura.t-invencivel { background: linear-gradient(135deg, #FFE45C, #1E6BFF 40%, #0b1f5c 60%, #FFB100); }
+.sm-moldura .sm-banner { max-width: none; border-radius: 18px; }
+.sm-banner.com-arte { aspect-ratio: 6 / 5; }
+.smb-arte { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; animation: arteBanner 9s ease-in-out infinite alternate; }
+@keyframes arteBanner { from { transform: scale(1.02); } to { transform: scale(1.08) translate(-1%, -1%); } }
+.sm-banner.com-arte::after { content: ''; position: absolute; inset: 0; z-index: 2; pointer-events: none; background: linear-gradient(115deg, transparent 30%, #ffffff30 45%, transparent 55%) no-repeat; background-size: 250% 100%; animation: brilhoBanner 4.5s ease-in-out infinite; }
+@keyframes brilhoBanner { 0%, 55% { background-position: 150% 0; } 100% { background-position: -60% 0; } }
+.smb-tempo { position: absolute; top: 10px; left: 10px; z-index: 4; font-size: 11px; padding: 4px 9px; border-radius: 9px; background: #000b; border: 1px solid #ffffff33; text-shadow: 0 1px 2px #000; }
+.smb-tempo b { color: #FFE45C; font: 12px 'Lilita One', sans-serif; }
+.sm-destaques { width: 100%; max-width: 420px; text-align: center; }
+.sm-destaques > small { font: 11px 'Lilita One', sans-serif; letter-spacing: 1.5px; color: #FFE45C; text-shadow: 0 0 8px #FF8A00; }
+.sm-destaques > div { display: flex; gap: 6px; justify-content: center; margin-top: 5px; overflow-x: auto; }
+.smd-un { position: relative; flex: 0 0 auto; width: 66px; display: flex; flex-direction: column; align-items: center; gap: 3px; color: #fff; background: none; border: 0; padding: 0; }
+.smd-un i { width: 54px; height: 54px; border-radius: 50%; padding: 3px; background: conic-gradient(from 0deg, #FF5CF4, #5CE1FF, #7CFF8A, #FFE45C, #FF5CF4); box-shadow: 0 0 10px #FF5CF488; }
+.smd-un.r-lendaria i { background: linear-gradient(135deg, #FFE45C, #FF8A00); box-shadow: 0 0 8px #FFC21A88; }
+.smd-un.r-epica i { background: linear-gradient(135deg, #D58CFF, #7C3AED); box-shadow: none; }
+.smd-un i img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: block; background: #000; }
+.smd-un b { font: 9.5px 'Lilita One', sans-serif; line-height: 1.05; text-align: center; text-shadow: 0 1px 2px #000; }
+.smd-un em { position: absolute; top: -4px; font: 8px 'Lilita One', sans-serif; font-style: normal; padding: 1px 5px; border-radius: 5px; color: #2a0a00; background: linear-gradient(90deg, #FFE45C, #FF8A00); }
+.smd-un.centro i { animation: girarDestaque 3s linear infinite; }
+@keyframes girarDestaque { to { filter: hue-rotate(360deg); } }
+/* botões de invocação */
+.sm-btn { min-height: 82px; border-radius: 14px; clip-path: polygon(6% 0, 100% 0, 94% 100%, 0 100%); padding: 6px 4px; gap: 0; border: 0; }
+.sm-btn small { font: 10px 'Lilita One', sans-serif; letter-spacing: 2px; opacity: 0.9; }
+.sm-btn b { font: 30px 'Lilita One', sans-serif; line-height: 1; }
+.sm-btn span { margin-top: 3px; }
+.sm-btn.um { background: linear-gradient(180deg, #8FD8FF, #2B6BD8 55%, #173f8f); box-shadow: inset 0 3px 0 #ffffff66, inset 0 -4px 0 #0005; }
+.sm-btn.dez { flex: 1.25; background: linear-gradient(180deg, #FFF0A8, #FFB100 45%, #D25A00); color: #3a1600; box-shadow: inset 0 3px 0 #ffffffaa, inset 0 -4px 0 #0004; }
+.sm-btn.dez b { color: #fff; text-shadow: 0 3px 0 #8a3a00, 0 0 10px #FF8A00; }
+.sm-btn.dez span { background: #3a160066; color: #fff; }
+.sm-btn em { top: 3px; right: 12%; left: auto; font-size: 8.5px; background: #fff; color: #D25A00; }
+.sm-btn.dez::after { content: ''; position: absolute; inset: 0; background: linear-gradient(115deg, transparent 35%, #ffffff88 48%, transparent 60%) no-repeat; background-size: 250% 100%; animation: brilhoBanner 2.8s ease-in-out infinite; pointer-events: none; }
+.bsm-arte .bsm-unica { width: 64px; height: 46px; transform: rotate(-4deg); margin-right: 0; }
+.leve .smb-arte, .leve .sm-banner.com-arte::after, .leve .sm-btn.dez::after, .leve .smd-un.centro i { animation: none; }
+.sm-rolagem > * { flex-shrink: 0; }
+.sm-btn em { position: static; display: block; margin: 0 0 1px; font-size: 8.5px; padding: 1px 6px; border-radius: 6px; }
+.sm-btn.dez small { display: none; }
+.smb-tempo { top: auto; bottom: auto; top: 10px; }

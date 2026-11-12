@@ -31,7 +31,7 @@ const Summon = (() => {
     id: 'ultras-blue-lock',
     nome: 'Fenda do Multiverso',
     sub: 'Ultras: Prodígios do Campo',
-    fim: new Date(2026, 11, 31, 23, 59, 59), // 31/12/2026
+    fim: new Date(2026, 10, 15, 23, 59, 59), // 15/11/2026
     destaque: ['itoshi_sae', 'itoshi_rin', 'isagi_ultra'],
     pool: {
       ultra: ['itoshi_sae', 'itoshi_rin', 'isagi_ultra'],
@@ -46,7 +46,7 @@ const Summon = (() => {
     sub: 'A Guerra dos Marks',
     tema: 'invencivel',
     logo: true,
-    fim: new Date(2027, 0, 15, 23, 59, 59), // 15/01/2027
+    fim: new Date(2026, 10, 15, 23, 59, 59), // 15/11/2026
     centro: 'mark_eve',
     destaque: ['omni_man', 'invencivel', 'mark_eve', 'eve_atomica', 'conquest'],
     lados: ['conquest'],
@@ -66,7 +66,9 @@ const Summon = (() => {
     sub: 'Rivais Eternos',
     tema: 'db',
     logo: 'db',
-    fim: new Date(2027, 0, 31, 23, 59, 59), // 31/01/2027
+    fim: new Date(2026, 10, 16, 23, 59, 59), // 16/11/2026
+    arte: 'assets/summon/saiyajins.jpg',
+    mini: 'assets/summon/saiyajins_mini.jpg',
     centro: 'goku_vegeta',
     destaque: ['vegetto_gogeta', 'gogeta_vegetto_blue', 'goku_vegeta', 'vegeta_ultra_ego', 'goku_black_rose'],
     pool: {
@@ -80,9 +82,18 @@ const Summon = (() => {
     // garantia do destaque: Goku & Vegeta vem com certeza na 200ª invocação sem ele neste banner
     pityDestaque: 200,
   }];
-  let atualI = BANNERS.length - 1; // abre no banner mais novo
-  const banner = () => BANNERS[Math.min(atualI, BANNERS.length - 1)];
+  // só os banners que ainda não acabaram
+  const ativos = () => BANNERS.filter((b) => b.fim.getTime() > Date.now());
+  let atualI = 99; // abre no banner mais novo
+  const banner = () => { const a = ativos(); return a[Math.max(0, Math.min(atualI, a.length - 1))] || BANNERS[BANNERS.length - 1]; };
   const diasRestantes = (b = banner()) => Math.max(0, Math.ceil((b.fim.getTime() - Date.now()) / 86400000));
+  // tempo que falta, estilo "3d 4h" / "5h 20m"
+  function tempo(b = banner()) {
+    const ms = b.fim.getTime() - Date.now();
+    if (ms <= 0) return 'Encerrado';
+    const h = Math.floor(ms / 3600000), d = Math.floor(h / 24);
+    return d ? `${d}d ${h % 24}h` : `${h}h ${Math.floor(ms / 60000) % 60}m`;
+  }
   // só entra no sorteio quem existe na lista de cartas
   function pool(b = banner()) {
     const p = {};
@@ -186,31 +197,45 @@ const Summon = (() => {
     const el = document.createElement('div');
     el.className = 'summon-tela';
     el.id = 'summon-tela';
-    const paineis = b.destaque.filter((id) => Estado.carta(id)).map((id, i) => {
+    const lista = ativos();
+    if (!lista.length) { el.remove(); UI.toast('Nenhum banner aberto agora. Logo vem outro! ✨'); aoFechar(); return; }
+    const iAtual = Math.max(0, Math.min(atualI, lista.length - 1));
+    const paineis = b.arte ? `<img class="smb-arte" src="${b.arte}" alt="" draggable="false" />` : `<div class="smb-paineis">${b.destaque.filter((id) => Estado.carta(id)).map((id, i) => {
       const c = Estado.carta(id);
       return `<div class="smb-painel${id === b.centro ? ' centro' : ''}" style="--i:${i}"><img src="${Cartas.arte(c)}" alt="" draggable="false" /><span>${esc(c.nome)}</span></div>`;
-    }).join('');
+    }).join('')}</div>`;
     const pct = Math.round(((PITY - faltaPity()) / PITY) * 100);
-    const abas = BANNERS.map((x, i) => `<button class="sm-aba${i === atualI ? ' ativa' : ''}${x.tema ? ` t-${x.tema}` : ''}" data-b="${i}"><img src="${Cartas.arte(Estado.carta(x.centro || x.destaque[0]) || {})}" alt="" /><span>${esc(x.nome)}</span></button>`).join('');
+    // seletor de banners (cartõezinhos com o tempo que falta)
+    const abas = lista.map((x, i) => `<button class="sm-aba${i === iAtual ? ' ativa' : ''}${x.tema ? ` t-${x.tema}` : ''}" data-b="${i}">
+        <img src="${x.mini || Cartas.arte(Estado.carta(x.centro || x.destaque[0]) || {})}" alt="" />${i === lista.length - 1 ? '<em>NOVO</em>' : ''}
+        <span>${esc(x.nome)}</span><small>⏳ ${tempo(x)}</small></button>`).join('');
     const titulo = b.logo === 'db' ? logoSaiyajin(b) : b.logo ? logoInvencivel(b) : `<div class="smb-titulo"><em>NOVA RARIDADE</em><b>${esc(b.nome)}</b><small>${esc(b.sub)}</small></div>`;
+    // personagens em destaque (estilo vitrine)
+    const destaques = b.destaque.filter((id) => Estado.carta(id)).map((id) => {
+      const c = Estado.carta(id);
+      return `<button class="smd-un r-${c.raridade}${id === b.centro ? ' centro' : ''}"><i><img src="assets/cartas/${id}_medalhao.png" alt="" /></i><b>${esc(c.nome)}</b>${id === b.centro ? '<em>DESTAQUE</em>' : ''}</button>`;
+    }).join('');
     el.innerHTML = `${fundoMultiverso()}
-      <div class="sm-topo"><button class="tr-voltar" id="sm-voltar">‹</button><div><b>Summon</b><small>Termina em ${diasRestantes()} dia${diasRestantes() === 1 ? '' : 's'}</small></div>
+      <div class="sm-topo"><button class="tr-voltar" id="sm-voltar">‹</button><div><b>Summon</b><small>${lista.length} banner${lista.length > 1 ? 's' : ''} aberto${lista.length > 1 ? 's' : ''}</small></div>
         <span class="sm-gemas">💎 ${fmt(Estado.d.gemas)}</span></div>
       <div class="sm-rolagem">
         <div class="sm-abas">${abas}</div>
-        <div class="sm-banner${b.tema ? ` t-${b.tema}` : ''}">
-          <div class="smb-paineis">${paineis}</div>
-          ${titulo}
-          <div class="smb-chip">🌀 ULTRA</div>
+        <div class="sm-moldura${b.tema ? ` t-${b.tema}` : ''}">
+          <div class="sm-banner${b.tema ? ` t-${b.tema}` : ''}${b.arte ? ' com-arte' : ''}">
+            ${paineis}
+            ${titulo}
+            <div class="smb-chip">🌀 ULTRA</div>
+            <div class="smb-tempo">⏳ <b>${tempo(b)}</b></div>
+          </div>
         </div>
+        <div class="sm-destaques"><small>✦ PERSONAGENS EM DESTAQUE ✦</small><div>${destaques}</div></div>
         <div class="sm-pity"><div><b>Ultra garantido em ${faltaPity()}</b><small>A chance sobe a partir da invocação ${SUAVE}</small></div><i><i style="width:${pct}%"></i></i></div>
         ${b.centro && Estado.carta(b.centro) ? `<div class="sm-pity destaque"><div><b>${esc(Estado.carta(b.centro).nome)} garantido em ${faltaDestaque()}</b><small>Super raro: só ${(chances().ultra * 100 * (b.pesos[b.centro] / Object.values(b.pesos).reduce((a, v) => a + v, 0))).toFixed(2).replace('.', ',')}% por invocação</small></div><i><i style="width:${Math.round(((b.pityDestaque - faltaDestaque()) / b.pityDestaque) * 100)}%"></i></i></div>` : ''}
-        <p class="sm-regra">✨ Toda invocação de 10x tem <b>pelo menos 1 Lendária ou melhor</b>.</p>
-        <button class="sm-info" id="sm-info">📜 Personagens e chances</button>
         <div class="sm-botoes">
-          <button class="sm-btn um" id="sm-1"><b>Invocar 1x</b><span>💎 ${PRECO1}</span></button>
-          <button class="sm-btn dez" id="sm-10"><em>1 Lendária+ garantida</em><b>Invocar 10x</b><span>💎 ${PRECO10}</span></button>
+          <button class="sm-btn um" id="sm-1"><small>INVOCAÇÃO</small><b>1x</b><span>💎 ${PRECO1}</span></button>
+          <button class="sm-btn dez" id="sm-10"><em>1 Lendária+ garantida</em><small>INVOCAÇÃO</small><b>10x</b><span>💎 ${PRECO10}</span></button>
         </div>
+        <button class="sm-info" id="sm-info">📜 Personagens e chances</button>
         <p class="sm-total">Você já invocou ${fmt(ds.total || 0)} vez${ds.total === 1 ? '' : 'es'}${ds.ultras ? ` · ${ds.ultras} Ultra${ds.ultras > 1 ? 's' : ''}` : ''}</p>
       </div>`;
     $('app').appendChild(el);
@@ -218,6 +243,7 @@ const Summon = (() => {
     el.querySelector('#sm-voltar').onclick = () => fechar();
     el.querySelectorAll('.sm-aba').forEach((x) => (x.onclick = () => { atualI = +x.dataset.b; abrir(); }));
     el.querySelector('#sm-info').onclick = () => info();
+    el.querySelectorAll('.smd-un').forEach((x) => (x.onclick = () => info()));
     el.querySelector('#sm-1').onclick = () => invocar(1);
     el.querySelector('#sm-10').onclick = () => invocar(10);
   }
@@ -459,9 +485,12 @@ const Summon = (() => {
 
   // ---------- botão do menu ----------
   function htmlBotao() {
-    const b = BANNERS[BANNERS.length - 1];
-    return `<span class="bsm-arte">${b.destaque.filter((id) => Estado.carta(id)).map((id) => `<img src="${Cartas.arte(Estado.carta(id))}" alt="" />`).join('')}</span>
-      <span class="bsm-txt"><b>🌀 Summon</b><small>${esc(b.sub)} · ${diasRestantes()}d</small></span><em class="bsm-novo">ULTRA</em>`;
+    const a = ativos();
+    if (!a.length) return `<span class="bsm-txt"><b>🌀 Summon</b><small>Novo banner em breve</small></span>`;
+    const b = a[a.length - 1];
+    const arte = b.mini ? `<img class="bsm-unica" src="${b.mini}" alt="" />` : b.destaque.filter((id) => Estado.carta(id)).map((id) => `<img src="${Cartas.arte(Estado.carta(id))}" alt="" />`).join('');
+    return `<span class="bsm-arte">${arte}</span>
+      <span class="bsm-txt"><b>🌀 Summon</b><small>${esc(b.sub)} · ${tempo(b)}</small></span><em class="bsm-novo">ULTRA</em>`;
   }
 
   return { abrir, fechar, invocar, info, htmlBotao, dados, chances, pool, sortear, banner, PRECO1, PRECO10, PITY };
