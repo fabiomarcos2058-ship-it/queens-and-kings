@@ -88,6 +88,22 @@ const Conta = (() => {
     }));
   }
 
+  // Proteção: se este celular (da MESMA conta) tem cartas que a nuvem não tem, elas não somem.
+  // Fica sempre a versão com mais progresso de cada carta.
+  function mesclarCartas(nuvem, local) {
+    try {
+      if (!local || !local.colecao || !local.conta || local.conta.email !== email()) return nuvem;
+      const col = nuvem.colecao || (nuvem.colecao = {});
+      for (const [id, l] of Object.entries(local.colecao)) {
+        if (!l || !l.tem) continue;
+        const n = col[id];
+        if (!n || !n.tem || (l.nivel || 1) > (n.nivel || 1) || ((l.nivel || 1) === (n.nivel || 1) && (l.copias || 0) > (n.copias || 0))) col[id] = { ...l };
+      }
+      if ((!nuvem.deck || nuvem.deck.length < 8) && local.deck && local.deck.length > (nuvem.deck || []).length) nuvem.deck = [...local.deck];
+    } catch (e) { /* na dúvida, fica a nuvem */ }
+    return nuvem;
+  }
+
   async function aoEntrar(u, { perguntar = false } = {}) {
     usuario = u;
     let nuvem = null;
@@ -95,7 +111,7 @@ const Conta = (() => {
     if (nuvem) {
       const local = JSON.parse(JSON.stringify(Estado.d));
       const escolha = perguntar && temProgresso(local) && temProgresso(nuvem) ? await escolherProgresso(local, nuvem) : 'nuvem';
-      if (escolha === 'nuvem') Estado.importar(nuvem);
+      if (escolha === 'nuvem') Estado.importar(mesclarCartas(nuvem, local));
     }
     Estado.d.conta = { tipo: 'conta', email: email() };
     if (!nuvem && u.displayName && Estado.d.nome === 'Jogador') Estado.d.nome = u.displayName.slice(0, 16);

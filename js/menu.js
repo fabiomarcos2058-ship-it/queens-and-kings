@@ -1901,7 +1901,12 @@
   }
 
   // ---------- Início ----------
-  const lista = await Cartas.carregar();
+  let lista = await Cartas.carregar();
+  while (!lista) {
+    // sem internet: avisa e espera, sem mexer no progresso salvo
+    await new Promise((ok) => UI.modal({ titulo: 'Sem conexão 📶', html: '<p>Não consegui baixar as cartas do jogo. Seu progresso está guardado, fica tranquilo(a)!</p><p class="aviso">Confira a internet e toque em tentar de novo.</p>', botoes: [{ texto: 'Tentar de novo', classe: 'principal', acao: ok }] }));
+    lista = await Cartas.carregar();
+  }
   Estado.carregar(lista);
   document.getElementById('barra-elixir').innerHTML = Array.from({ length: 10 }, () => '<span></span>').join('');
   Assets.fill();

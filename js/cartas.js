@@ -3,12 +3,20 @@ const Cartas = (() => {
   const NOMES_RARIDADE = { comum: 'Comum', rara: 'Rara', epica: 'Épica', lendaria: 'Lendária' };
   const arte = (c) => `assets/cartas/${c.imagem || c.id + '.jpg'}`;
 
+  // Tenta várias vezes. Se não der (sem internet), devolve null: o jogo NÃO pode seguir com a lista vazia,
+  // senão ele achava que as cartas não existiam mais e apagava da coleção (bug que pegou o Enzo).
   async function carregar() {
-    try {
-      return (await (await fetch('assets/cartas/cartas.json', { cache: 'no-store' })).json()).cartas;
-    } catch (e) {
-      return [];
+    for (let i = 0; i < 4; i++) {
+      try {
+        const r = await fetch('assets/cartas/cartas.json', { cache: i ? 'reload' : 'no-store' });
+        if (r.ok) {
+          const lista = (await r.json()).cartas;
+          if (Array.isArray(lista) && lista.length >= 20) return lista;
+        }
+      } catch (e) { /* tenta de novo */ }
+      await new Promise((ok) => setTimeout(ok, 700 * (i + 1)));
     }
+    return null;
   }
 
   // mini = só a carta (mão e loja) | nivel = texto embaixo | extra = html dentro da carta

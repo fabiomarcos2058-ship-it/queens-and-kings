@@ -251,6 +251,7 @@ const Eventos = (() => {
 
   // ---------- conferências (rodam sempre que o menu atualiza) ----------
   const SAMUEL = 'twJXL5kpGtUVwrx7Br3xCq26ZDG3';
+  const ENZO = 'EwnFPrCPFUMawnc6dttsQQ98yII2';
   let conferindo = false;
   function conferir() {
     if (conferindo || !Estado.d) return;
@@ -270,6 +271,25 @@ const Eventos = (() => {
       if ((f.completo || f.v >= VITORIAS) && !Estado.tem(NINO)) {
         f.completo = true; f.ativo = false;
         setTimeout(() => { if (!Estado.tem(NINO)) revelarNino(Ranque.darEvolucao(NINO)); }, 900);
+      }
+      // reparo do Enzo: o bug do carregamento apagou cartas dele. Volta tudo (nível 5 no mínimo) + compensação.
+      if ((Conta.uid && Conta.uid()) === ENZO && !(d.presentesEspeciais || []).includes('reparo-enzo')) {
+        d.presentesEspeciais = [...(d.presentesEspeciais || []), 'reparo-enzo'];
+        let voltaram = 0;
+        for (const c of Estado.catalogo()) {
+          if (c.token) continue;
+          const col = d.colecao[c.id] || (d.colecao[c.id] = { nivel: 1, copias: 0, tem: false });
+          if (!col.tem) { col.tem = true; col.nivel = Math.max(col.nivel || 1, 5); voltaram++; }
+        }
+        for (const c of Estado.catalogo()) if (d.deck.length < 8 && !d.deck.includes(c.id) && Estado.tem(c.id) && !c.token) d.deck.push(c.id);
+        d.ouro += 15000; d.gemas += 800; Estado.darCoringa('universal', 60);
+        Estado.salvar();
+        if (Conta.salvarAgora) Conta.salvarAgora().catch(() => {});
+        setTimeout(() => UI.modal({
+          titulo: '🛠️ Suas cartas voltaram!',
+          html: `<p>Um bug no carregamento do jogo apagou cartas da sua conta. Desculpa! 💜</p><p><b>${voltaram} cartas</b> voltaram (no nível 5 ou mais) e você ganhou de compensação:<br><b>15.000 🪙 · 800 💎 · 60 Coringas Universais</b></p><p class="aviso">Já arrumei o bug pra isso não acontecer de novo.</p>`,
+          botoes: [{ texto: 'Valeu! 🎉', classe: 'principal', acao: () => { if (window.MenuAPI) window.MenuAPI.tudo(); } }],
+        }), 1100);
       }
       // presente da criadora pro Samuel (foi prejudicado pelo bug do festival)
       const uid = Conta.uid && Conta.uid();

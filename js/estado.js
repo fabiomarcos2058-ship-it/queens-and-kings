@@ -142,6 +142,7 @@ const Estado = (() => {
 
   // Coloca um progresso (do navegador ou da nuvem) no formato atual do jogo
   function normalizar(obj) {
+    if (!todas || todas.length < 20) throw new Error('Lista de cartas não carregou'); // nunca mexe no progresso sem a lista
     d = obj || novo();
     const base = novo();
     for (const k in base) if (d[k] === undefined) d[k] = base[k];
@@ -179,8 +180,9 @@ const Estado = (() => {
       const escolhidas = embaralhar([feitico, ...basicas.filter((c) => c !== feitico).slice(0, 7)].filter(Boolean)).map((c) => c.id);
       d.baus = [0, 1, 2, 3].map((i) => ({ tipo: 'inicial', inicio: 1, cartas: escolhidas.slice(i * 2, i * 2 + 2) }));
     }
-    d.deck = d.deck.filter((id) => catalogo.some((c) => c.id === id) && d.colecao[id].tem);
-    for (const id of Object.keys(d.colecao)) if (!todas.some((c) => c.id === id)) delete d.colecao[id]; // cartas removidas do jogo
+    d.deck = d.deck.filter((id) => catalogo.some((c) => c.id === id) && d.colecao[id] && d.colecao[id].tem);
+    // (antes: cartas fora da lista eram APAGADAS da coleção. Se a lista viesse incompleta, a pessoa perdia as cartas.
+    // Agora elas só ficam guardadas; se a carta voltar pro jogo, volta com o mesmo nível.)
     salvar();
     return d;
   }
