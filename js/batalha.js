@@ -784,7 +784,7 @@ const Batalha = (() => {
     }
     // com 3, antes solta uma explosão de ki em volta
     if (forte) explosaoArea(t, t, Math.round(t.dano * 1.5), 46, { visual: 'impacto', cor: '#FFE45C', empurrar: 16 });
-    kamehameha(t, Math.round(t.dano * (forte ? 6 : 3)), { tipo: 1, comp: forte ? 380 : 330, larg: forte ? 58 : 42, torreMult: 0.4, atraso: 0.2, ang });
+    kamehameha(t, Math.round(t.dano * (forte ? 5 : 3)), { tipo: 1, comp: forte ? 380 : 330, larg: forte ? 58 : 42, torreMult: 0.4, atraso: 0.2, ang });
     particulas(t.x, t.y, '#FFE45C', forte ? 18 : 10, forte ? 40 : 26);
   }
 
@@ -822,7 +822,7 @@ const Batalha = (() => {
       t.el.classList.remove('carregando-kame', 'prata');
       const alvo = centroInimigos(t, 130) || c;
       const ang = Math.atan2(alvo.y - t.y, alvo.x - t.x);
-      kamehameha(t, Math.round(t.dano * (n >= 3 ? 4.5 : 2.5)), { tipo: 1, comp: 360, larg: n >= 3 ? 52 : 40, torreMult: 0.4, atraso: 0.18, ang });
+      kamehameha(t, Math.round(t.dano * (n >= 3 ? 4 : 2.2)), { tipo: 1, comp: 360, larg: n >= 3 ? 52 : 40, torreMult: 0.4, atraso: 0.18, ang });
       sacudir();
     });
   }
@@ -1516,7 +1516,7 @@ const Batalha = (() => {
       const usar = (h.tipo === 'cura' && t.vida < t.max * 0.45)
         || (h.tipo === 'fenix' && t.vida < t.max * 0.4)
         || ((h.tipo === 'golpes' || h.tipo === 'furia') && perto && (t.alvo.torre || t.alvo.vida > t.dano))
-        || (h.tipo === 'kamehameha' && t.alvo && dist(t, t.alvo) < 240)
+        || ((h.tipo === 'kamehameha' || h.tipo === 'vazioPurpura') && t.alvo && dist(t, t.alvo) < 240)
         || (h.tipo === 'esquiva' && perto && t.vida < t.max * 0.8)
         || (h.tipo === 'congelar' && s.ent.filter((e) => !e.torre && e.time !== t.time && e.vida > 0 && dist(e, t) < (h.raio || 95) + 40).length >= 2);
       if (usar && ativarHabilidade(t)) return;
