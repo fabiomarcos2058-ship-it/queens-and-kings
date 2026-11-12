@@ -1223,8 +1223,8 @@
     const C = Ataques.CLASSES, a = Ataques.de(c);
     const nomes = (l) => l.map((x) => `${C[x].ic} ${C[x].nome}`).join(', ') || '—';
     return `<div class="info-classe">
-      <div class="ic-classe"><span>${C[k].ic}</span><b>${C[k].nome}</b><small>${C[k].desc}</small></div>
-      <div class="contra"><span class="forte">💪 Forte contra: ${nomes(Ataques.fortes(k))}</span><span class="fraco">⚠️ Fraco contra: ${nomes(Ataques.fracos(k))}</span></div>
+      <div class="info-cl-topo"><span>${C[k].ic}</span><b>${C[k].nome}</b><small>${C[k].desc}</small></div>
+      <div class="contra"><span class="forte">💪 Forte contra: ${k === 'tanque' && !Ataques.fortes(k).length ? '🏰 Torres' : nomes(Ataques.fortes(k))}</span><span class="fraco">⚠️ Fraco contra: ${nomes(Ataques.fracos(k))}</span></div>
       ${a.d ? `<div class="ataque-unico">🎯 <b>Ataque:</b> ${a.d}</div>` : ''}
     </div>`;
   }

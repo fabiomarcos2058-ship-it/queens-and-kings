@@ -4,7 +4,7 @@ const Estado = (() => {
   const NIVEL_MAX = 9;
   // Para evoluir do nível N para N+1: cópias e ouro (índice = nível atual)
   const COPIAS = [0, 2, 4, 10, 20, 50, 100, 200, 400];
-  const OURO = [0, 5, 20, 50, 150, 400, 1000, 2000, 4000];
+  const OURO = [0, 25, 80, 200, 500, 1200, 3000, 6000, 12000]; // OURO[n] = preço para evoluir uma carta do nível n ao n+1
   const XP_NIVEL = (n) => 30 + n * 20; // nível 2 com ~2 vitórias; nível 9 com ~40 batalhas
 
   // ---------- Torres (igual Clash Royale) ----------

@@ -1175,10 +1175,10 @@ button.item-loja:active, button.slot-bau:active, .slot-carta:active { transform:
 .tropa.voando .tropa-corpo { transform: translateY(-5px); }
 .tropa.arrancada .tropa-medalhao { box-shadow: -6px 0 0 -1px #ffffff66, -12px 0 0 -2px #ffffff33; }
 .info-classe { background: #1d2350; border-radius: 12px; padding: 8px 10px; margin: 8px 0; text-align: left; font-size: 13px; display: flex; flex-direction: column; gap: 6px; }
-.ic-classe { display: grid; grid-template-columns: auto 1fr; column-gap: 8px; align-items: center; }
-.ic-classe span { grid-row: 1 / 3; font-size: 24px; }
-.ic-classe b { font-size: 15px; }
-.ic-classe small { opacity: 0.8; font-size: 11px; }
+.info-cl-topo { display: grid; grid-template-columns: auto 1fr; column-gap: 8px; align-items: center; }
+.info-cl-topo span { grid-row: 1 / 3; font-size: 24px; }
+.info-cl-topo b { font-size: 15px; }
+.info-cl-topo small { opacity: 0.8; font-size: 11px; }
 .contra { display: flex; flex-direction: column; gap: 2px; font-size: 12px; }
 .contra .forte { color: #7BE07B; } .contra .fraco { color: #FF9A8A; }
 .ataque-unico { background: #2b3270; border-radius: 8px; padding: 6px 8px; }
