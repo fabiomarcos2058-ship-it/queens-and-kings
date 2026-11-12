@@ -26,6 +26,7 @@ const Amigos = (() => {
       tresCoroas: (d.conquistas && d.conquistas.tresCoroas) || 0,
       baus: (d.conquistas && d.conquistas.baus) || 0,
       x1v: (d.x1 && d.x1.v) || 0, x1d: (d.x1 && d.x1.d) || 0,
+      ranque: typeof Ranque !== 'undefined' ? Ranque.publico() : null,
       cartas: colecao.length, totalCartas: Estado.catalogo().length,
       deck: (d.deck || []).slice(0, 8).map((id) => ({ id, nivel: (d.colecao[id] && d.colecao[id].nivel) || 1 })),
       torres: Estado.minhasTorres(),

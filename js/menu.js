@@ -111,6 +111,8 @@
           : `<div class="salvar-conta"><span>📱 Seu progresso está salvo <b>só neste celular</b>. Salve numa conta pra não perder e jogar em qualquer lugar!</span>
               <button class="btn-modal btn-google" id="btn-salvar-google"><b>G</b> Salvar na conta Google</button>
               <button class="btn-modal secundario" id="btn-entrar-conta">Criar conta ou entrar com e-mail</button></div>`}</div>
+        ${(() => { const rq = Ranque.dados(), f = Ranque.info(rq.pts); return `<button class="perfil-ranque" id="perfil-ranque" style="--cor:${f.p.cor}">${RanqueUI.emblema(f.i, 64, { raios: false })}<div><b>${f.nome}</b><small>${UI.fmt(rq.pts)} PR · melhor: ${Ranque.info(rq.melhorSempre || rq.pts).nome}</small></div><span>›</span></button>`; })()}
+        <button class="btn-modal secundario btn-historico" id="perfil-historico">📜 Histórico de batalhas</button>
         <div class="estatisticas">
           <div><b>${UI.fmt(d().trofeus)}</b><span>Troféus</span></div>
           <div><b>${UI.fmt(d().recorde)}</b><span>Recorde</span></div>
@@ -159,6 +161,8 @@
       botoes: [{ texto: 'Ficar', classe: 'secundario' }, { texto: 'Sair', classe: 'perigo', acao: () => { Conta.sair(); } }],
     });
     el.querySelector('#trocar-avatar').onclick = () => el.querySelector('#seletor-avatar').classList.toggle('oculto');
+    el.querySelector('#perfil-ranque').onclick = () => { m.fechar(); RanqueUI.abrir(); };
+    el.querySelector('#perfil-historico').onclick = () => RanqueUI.historico();
     el.querySelectorAll('[data-av]').forEach((b) => (b.onclick = () => {
       d().avatar = b.dataset.av;
       el.querySelectorAll('[data-av]').forEach((x) => x.classList.toggle('escolhido', x === b));
@@ -384,9 +388,9 @@
     el.innerHTML = `<div class="convite-caixa">
         <div class="convite-titulo">${ehDupla ? '🤝 Bora de 2v2?' : '⚔️ Desafio de x1!'}</div>
         <img class="convite-avatar" src="${avatarDe(c.avatar)}" alt="" />
-        <p><b>${Passe.nomeHtml(c.nome || 'Um amigo', c.estiloNome)}</b> ${ehDupla ? 'quer você no time dele num 2v2!' : 'está te chamando pra um x1!'}</p>
+        <p><b>${Passe.nomeHtml(c.nome || 'Um amigo', c.estiloNome)}</b> ${ehDupla ? 'te chamou pra uma sala de 2v2!' : 'está te chamando pra um x1!'}</p>
         <div class="convite-tempo"><i style="animation-duration:${TEMPO}s"></i></div>
-        <div class="convite-botoes"><button class="btn-modal secundario" data-r="nao">Recusar</button><button class="btn-modal principal" data-r="sim">${ehDupla ? 'Entrar no time 🤝' : 'Aceitar ⚔️'}</button></div>
+        <div class="convite-botoes"><button class="btn-modal secundario" data-r="nao">Recusar</button><button class="btn-modal principal" data-r="sim">${ehDupla ? 'Entrar na sala 🤝' : 'Aceitar ⚔️'}</button></div>
       </div>`;
     document.getElementById('app').appendChild(el);
     try { navigator.vibrate && navigator.vibrate([200, 100, 200]); } catch (e) { /* nada */ }
@@ -481,7 +485,84 @@
   function chamarX1(p, modo = 'x1') {
     if (d().deck.length < 8) { UI.toast(`Você precisa de 8 cartas no deck para o ${modo === '2v2' ? '2v2' : 'x1'}.`); return; }
     document.querySelectorAll('.modal-amigos, .modal-perfil-outro, .modal-x1').forEach((m) => m.closest('.modal-fundo').remove());
-    x1Criar({ uid: p.uid, nome: p.nome || 'seu amigo', avatar: p.avatar }, modo);
+    if (modo === '2v2') sala2v2({ uid: p.uid, nome: p.nome || 'seu amigo', avatar: p.avatar });
+    else x1Criar({ uid: p.uid, nome: p.nome || 'seu amigo', avatar: p.avatar }, modo);
+  }
+
+  // ---------- Sala 2v2 online: até 4 pessoas (vaga vazia = IA) ----------
+  const timeVaga = (l) => (l.startsWith('azul') ? 'azul' : 'vermelho');
+  function htmlVagas(vagas, meuLado) {
+    const slot = (l) => {
+      const p = vagas[l];
+      return `<div class="vaga ${timeVaga(l)}${p ? '' : ' vazia'}${l === meuLado ? ' eu' : ''}">${p
+        ? `<img src="${avatarDe(p.avatar)}" alt="" /><div><b>${Passe.nomeHtml(p.nome || 'Jogador', p.estiloNome)}</b><small>${l === 'azul' ? '👑 Dono da sala' : l === meuLado ? 'Você' : 'Pronto!'}</small></div>`
+        : '<span class="vaga-ia">🤖</span><div><b>IA</b><small>Vaga livre</small></div>'}</div>`;
+    };
+    return `<div class="sala-vagas"><div class="sala-time azul"><small>Time azul</small>${slot('azul')}${slot('azul2')}</div>
+      <div class="sala-vs">VS</div><div class="sala-time vermelho"><small>Time vermelho</small>${slot('vermelho')}${slot('vermelho2')}</div></div>`;
+  }
+
+  async function sala2v2(amigo = null) {
+    if (!Conta.logado()) { UI.toast('Entre numa conta para jogar 2v2 com amigos!'); return; }
+    if (d().deck.length < 8) { UI.toast('Você precisa de 8 cartas no deck para o 2v2.'); return; }
+    if (!(await Atualizacao.podeJogar())) return;
+    document.querySelectorAll('.modal-amigos, .modal-perfil-outro, .modal-x1').forEach((x) => x.closest('.modal-fundo').remove());
+    let vagas = {}, m = null, fechada = false;
+    const chamados = new Set();
+    try {
+      m = UI.modal({ titulo: '🤝 Sala 2v2', classe: 'modal-x1 modal-sala2v2', html: '<div class="x1-carregando"></div>',
+        botoes: [{ texto: 'Fechar sala', classe: 'secundario', acao: () => { fechada = true; X1.cancelar(); } }] });
+      travarFundo(m);
+      const corpo = m.el.querySelector('.modal-corpo');
+      const desenhar = () => {
+        const caixa = corpo.querySelector('#sala-vagas');
+        if (!caixa) return;
+        caixa.innerHTML = htmlVagas(vagas, 'azul');
+        const n = Object.keys(vagas).length;
+        corpo.querySelector('#sala-comecar').textContent = n >= 4 ? 'Começar! ⚔️' : `Começar · ${4 - n} vaga${4 - n > 1 ? 's' : ''} com IA ⚔️`;
+      };
+      const cod = await X1.criarSala({
+        modo: '2v2',
+        aoMudarVagas: (v) => {
+          const antes = Object.keys(vagas).length;
+          vagas = v; desenhar();
+          if (Object.keys(v).length > antes && antes) UI.toast('Alguém entrou na sala! 🎉');
+        },
+        aoResposta: (r) => { if (r && r.nome) UI.toast(`${esc(r.nome)} ${r.r === 'ocupado' ? 'está numa batalha agora' : 'não pode agora'}.`); },
+      });
+      if (fechada) { X1.cancelar(); return; }
+      corpo.innerHTML = `<div class="sala-codigo"><small>Código da sala</small><b>${cod}</b><button class="btn-peq" id="sala-copiar">📋 Copiar</button></div>
+        <div id="sala-vagas"></div>
+        <p class="aviso">Chame até 3 amigos. Quem entrar pode trocar de time pra jogar contra você!</p>
+        <div class="titulo-conquistas">Chamar amigos</div>
+        <div id="sala-amigos" class="x1-amigos"><div class="x1-carregando"></div></div>
+        <button class="btn-modal principal sala-comecar" id="sala-comecar">Começar ⚔️</button>`;
+      desenhar();
+      corpo.querySelector('#sala-copiar').onclick = () => navigator.clipboard?.writeText(cod).then(() => UI.toast('Código copiado!'), () => {});
+      const chamar = async (p, btn) => {
+        if (chamados.has(p.uid)) return;
+        try { await Amigos.convidar(p.uid, cod, '2v2'); chamados.add(p.uid); if (btn) { btn.textContent = 'Chamado ✓'; btn.classList.add('desativado'); } UI.toast(`Convite enviado pra ${esc(p.nome || 'seu amigo')}!`); } catch (e) { UI.toast('Não deu pra mandar o convite.'); }
+      };
+      if (amigo) chamar(amigo);
+      Amigos.listar().then((lista) => {
+        const caixa = corpo.querySelector('#sala-amigos');
+        if (!caixa) return;
+        caixa.innerHTML = lista.length ? `<div class="lista-jogadores">${lista.map((p) => linhaJogador(p, `<button class="btn-modal principal btn-chamar${chamados.has(p.uid) ? ' desativado' : ''}" data-chamar="${p.uid}">${chamados.has(p.uid) ? 'Chamado ✓' : '🤝 Chamar'}</button>`)).join('')}</div>`
+          : '<p class="aviso">Adicione amigos em <b>👥 Amigos</b> ou mande o código da sala.</p>';
+        caixa.querySelectorAll('[data-chamar]').forEach((b) => (b.onclick = (e) => { e.stopPropagation(); chamar(lista.find((p) => p.uid === b.dataset.chamar), b); }));
+      }).catch(() => {});
+      corpo.querySelector('#sala-comecar').onclick = () => {
+        const velhos = Object.entries(vagas).filter(([l, p]) => l !== 'azul' && Atualizacao.versaoDoAmigo(p.versao) !== 'igual').map(([, p]) => p.nome);
+        if (velhos.length) { UI.toast(`${velhos.join(', ')} precisa${velhos.length > 1 ? 'm' : ''} atualizar o jogo antes!`); return; }
+        fechada = true; m.fechar();
+        X1.comecar2v2(fimDeBatalha);
+      };
+    } catch (e) {
+      if (m) m.fechar();
+      X1.cancelar();
+      UI.toast(e.code ? erroNuvem(e) : e.message || 'Não deu para criar a sala.');
+      console.error(e);
+    }
   }
 
   // ---------- 2v2 (você + parceiro contra uma dupla) ----------
@@ -496,10 +577,10 @@
         <p>Cada um tem o próprio elixir e as próprias cartas, e o time divide as torres (que aguentam mais). Não mexe nos troféus, mas vencer dá ouro!</p>
         <p class="x1-placar">2v2: <b>${st.v}</b> vitórias · <b>${st.d}</b> derrotas</p>
         <button class="btn-modal principal btn-dupla-ia" id="dupla-ia">🤖 Jogar com parceiro IA</button>
-        <div class="titulo-conquistas">Chamar um amigo pro seu time</div>
+        <div class="titulo-conquistas">Chamar um amigo (cria uma sala 2v2)</div>
         <div id="dupla-amigos" class="x1-amigos">${logado ? '<div class="x1-carregando"></div>' : '<p class="aviso">Entre numa conta para jogar 2v2 com amigos.</p>'}</div>
         ${logado ? '<div class="titulo-conquistas">Ou use um código</div><div class="x1-entrar"><input id="dupla-codigo" maxlength="4" placeholder="CÓDIGO" autocomplete="off" /><button class="btn-modal principal" id="dupla-btn-entrar">Entrar</button></div>' : ''}`,
-      botoes: logado ? [{ texto: 'Criar sala com código', classe: 'secundario', acao: () => { x1Criar(null, '2v2'); } }, { texto: 'Fechar', classe: 'secundario' }] : [{ texto: 'Fechar', classe: 'secundario' }],
+      botoes: logado ? [{ texto: '👥 Criar sala (até 4 pessoas)', classe: 'principal', acao: () => { sala2v2(); } }, { texto: 'Fechar', classe: 'secundario' }] : [{ texto: 'Fechar', classe: 'secundario' }],
     });
     m.el.querySelector('#dupla-ia').onclick = () => { m.fechar(); jogar('2v2'); };
     if (!logado) return;
@@ -524,6 +605,7 @@
     const st = d().dupla || (d().dupla = { v: 0, d: 0 });
     let ouro = 0;
     if (r.resultado === 'vitoria') { st.v++; ouro = 20 + (r.coroas || 0) * 5; d().ouro += ouro; } else if (r.resultado === 'derrota') st.d++;
+    Ranque.registrar({ modo: '2v2', res: r.resultado, cz: [r.coroas, r.coroasInimigo], deck: r.deck, deckRival: r.deckRival, deckParceiro: r.deckParceiro, parceiro: r.nomeParceiro, rival: { nome: 'Dupla rival' }, dur: r.duracao });
     Estado.salvar();
     const titulo = { vitoria: 'A dupla venceu! 🤝👑', derrota: 'Derrota em dupla', empate: 'Empate!' }[r.resultado] || 'Fim!';
     UI.modal({
@@ -567,6 +649,7 @@
           <div><b>${p.baus || 0}</b><span>Baús abertos</span></div>
           <div><b>${p.x1v || 0} x ${p.x1d || 0}</b><span>X1 (${totalX1 ? Math.round(((p.x1v || 0) / totalX1) * 100) : 0}%)</span></div>
         </div>
+        ${p.ranque ? (() => { const f = Ranque.info(p.ranque.pts), mf = Ranque.info(p.ranque.melhor || p.ranque.pts); return `<div class="perfil-ranque outro" style="--cor:${f.p.cor}">${RanqueUI.emblema(f.i, 64, { raios: false })}<div><b>${f.nome}</b><small>${UI.fmt(p.ranque.pts)} PR · melhor: ${mf.nome} · ${p.ranque.v || 0}V ${p.ranque.d || 0}D</small></div></div>`; })() : ''}
         ${p.torres ? `<div class="torres-outro"><span>👑 Rei <b>Nv. ${p.torres.rei}</b></span><span>🏰 Princesas <b>Nv. ${p.torres.princesa}</b></span><span>${(Estado.TROPAS_TORRE[p.torres.tropa] || Estado.TROPAS_TORRE.princesa).emoji} ${(Estado.TROPAS_TORRE[p.torres.tropa] || Estado.TROPAS_TORRE.princesa).nome}</span></div>` : ''}
         ${deck.length ? `<div class="titulo-conquistas">Deck de batalha</div><div class="deck-outro">${deck.map((x) => Cartas.html(x.c, { nivel: `Nv. ${x.nivel}` })).join('')}</div>` : ''}
         ${p.mod ? '<p class="aviso">Esta conta já usou o mod menu.</p>' : ''}
@@ -708,8 +791,23 @@
     try {
       espera = UI.modal({ titulo: 'Entrando...', classe: 'modal-x1', html: '<div class="x1-carregando"></div>', botoes: [{ texto: 'Cancelar', classe: 'secundario', acao: () => { X1.cancelar(); } }] });
       travarFundo(espera);
+      let vagasSala = {}, meuLadoSala = null;
+      const desenharSala = () => {
+        const caixa = espera && espera.el.querySelector('#sala-vagas');
+        if (caixa) caixa.innerHTML = htmlVagas(vagasSala, meuLadoSala);
+      };
       const host = await X1.entrarSala(codigo, {
-        aoComecar: (h) => { espera.fechar(); X1.assistir(h, fimDeBatalha); },
+        aoComecar: (h, info) => {
+          espera.fechar();
+          if (!info) { X1.assistir(h, fimDeBatalha); return; }
+          // 2v2: descobre quem é meu parceiro e quem são os rivais
+          const par = { azul: 'azul2', azul2: 'azul', vermelho: 'vermelho2', vermelho2: 'vermelho' }[info.meuLado];
+          const p = info.vagas[par];
+          const rivais = Object.entries(info.vagas).filter(([l]) => timeVaga(l) !== timeVaga(info.meuLado)).map(([, x]) => x.nome);
+          X1.assistir(h, fimDeBatalha, { meuLado: info.meuLado, nomeParceiro: p ? p.nome : 'Parceiro IA', deckParceiro: p ? p.deck : null,
+            titulo: rivais.length ? `vs ${rivais.join(' e ')}` : `com ${p ? p.nome : 'IA'}` });
+        },
+        aoMudarVagas: (v, eu) => { vagasSala = v; meuLadoSala = eu; desenharSala(); },
       });
       const vs = Atualizacao.versaoDoAmigo(host.versao);
       if (vs !== 'igual') {
@@ -718,6 +816,18 @@
         return;
       }
       espera.el.querySelector('.modal-titulo').textContent = `Sala de ${host.nome}`;
+      if (host.modo === '2v2') {
+        meuLadoSala = host.meuLado;
+        espera.el.querySelector('.modal-corpo').innerHTML = `<div id="sala-vagas"></div>
+          <button class="btn-modal secundario" id="sala-trocar">🔄 Trocar de time</button>
+          <p class="x1-esperando">Esperando ${esc(host.nome)} começar<span>...</span></p>`;
+        desenharSala();
+        espera.el.querySelector('#sala-trocar').onclick = async () => {
+          const novo = await X1.trocarTime().catch(() => false);
+          if (!novo) UI.toast('O outro time está cheio!'); else { meuLadoSala = novo; desenharSala(); UI.toast(`Agora você está no time ${timeVaga(novo)}!`); }
+        };
+        return;
+      }
       espera.el.querySelector('.modal-corpo').innerHTML = `<p class="x1-esperando">Esperando ${host.nome} começar<span>...</span></p>`;
     } catch (e) {
       if (espera) espera.fechar();
@@ -729,6 +839,7 @@
   function fimX1(r) {
     const st = d().x1 || (d().x1 = { v: 0, d: 0 });
     if (r.resultado === 'vitoria') st.v++; else if (r.resultado === 'derrota') st.d++;
+    Ranque.registrar({ modo: 'x1', res: r.resultado, cz: [r.coroas, r.coroasInimigo], deck: r.deck, deckRival: r.deckRival, rival: { nome: r.nomeRival || 'Amigo' }, dur: r.duracao });
     Estado.salvar();
     const titulo = { vitoria: 'Você venceu o x1! 👑', derrota: 'Derrota no x1', empate: 'Empate!' }[r.resultado];
     UI.modal({
@@ -743,6 +854,7 @@
 
   function fimDeBatalha(r) {
     esgotadas = esgotadas.concat(Estado.contarUsos());
+    if (r.ranque) { RanqueUI.fim(r); return; }
     if (r.modo === '2v2') { fimDupla(r); return; }
     if (r.modo === 'x1' || r.modo === 'x1c') { fimX1(r); return; }
     fimDeBatalhaNormal(r);
@@ -765,8 +877,9 @@
   function fimDeBatalhaNormal(r) {
     const vitoria = r.resultado === 'vitoria';
     let trofeus = 0, ouro = 0, bau = null;
+    const seqN = Ranque.sequenciaNormal(r.resultado);
     if (vitoria) {
-      trofeus = 30; ouro = 15 + r.coroas * 5; d().vitorias++;
+      trofeus = 30 + seqN.bonus; ouro = 15 + r.coroas * 5; d().vitorias++;
       const livre = d().baus.findIndex((b) => !b);
       if (livre >= 0) {
         const x = Math.random();
@@ -793,6 +906,7 @@
     ev.coroas += r.coroas;
     if (vitoria) ev.sequencia = Math.min(3, ev.sequencia + 1); else if (!ev.desafioPremio) ev.sequencia = 0;
     const passe = Passe.ganharPontos(r.resultado, r.coroas);
+    Ranque.registrar({ modo: r.modo || 'normal', res: r.resultado, cz: [r.coroas, r.coroasInimigo], deck: r.deck, deckRival: r.deckRival, rival: { nome: 'Bot' }, trof: trofeus, seq: seqN.seq, dur: r.duracao });
     Estado.salvar();
 
     const titulo = { vitoria: 'Vitória! 👑', derrota: 'Derrota', empate: 'Empate' }[r.resultado];
@@ -802,6 +916,7 @@
       html: `<div class="placar-final"><span class="coroa azul">${r.coroas}</span><small>x</small><span class="coroa vermelha">${r.coroasInimigo}</span></div>
         <div class="ganhos">
           <span><i class="ic-trofeu"></i> ${trofeus >= 0 ? '+' : ''}${trofeus}</span>
+          ${seqN.bonus ? `<span class="ganho-seq">🔥 Sequência x${seqN.seq} (+${seqN.bonus})</span>` : ''}
           ${ouro ? `<span><img class="ic-img" data-asset="ui/moeda" alt="" /> +${ouro}</span>` : ''}
         </div>
         ${bau ? `<p class="ganhou-bau"><img data-asset="ui/bau_${bau}" alt="" /> Você ganhou um ${Estado.BAUS[bau].nome.toLowerCase()}!</p>` : vitoria ? '<p class="aviso">Seus espaços de baú estão cheios.</p>' : ''}
@@ -1577,6 +1692,7 @@
     if (Conta.logado()) Amigos.ouvir({ aoMudarPedidos: mudouPedidos, aoConvite: conviteX1 });
     if (Conta.logado()) Presentes.ouvir(chegaramPresentes);
     topo(); telaBatalha(); loja(); cartas(); cla(); eventos();
+    RanqueUI.atualizarBotao();
   }
 
   // ---------- Início ----------
@@ -1584,6 +1700,7 @@
   Estado.carregar(lista);
   document.getElementById('barra-elixir').innerHTML = Array.from({ length: 10 }, () => '<span></span>').join('');
   Assets.fill();
+  RanqueUI.init({ tudo, topo, irPara, mostrarBau, fimDeBatalha, subiuNivel, cartasEsgotadas });
   tudo();
   irPara('batalha');
   setInterval(() => { if (abaAtual === 'batalha' && $('batalha').classList.contains('oculto') && d().baus.some((b) => b && b.inicio)) relogioBaus(); }, 1000);

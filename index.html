@@ -4,13 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
   <meta name="theme-color" content="#1d2350" />
-  <meta name="versao-pagina" content="1794444978" />
+  <meta name="versao-pagina" content="1794446815" />
   <meta http-equiv="Cache-Control" content="no-cache" />
   <title>Queens and Kings</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Lilita+One&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/style.css?v=1794444978" />
+  <link rel="stylesheet" href="css/style.css?v=1794446815" />
 </head>
 <body>
   <div id="app">
@@ -75,6 +75,7 @@
             <div class="arena-mini" id="arena-mini"></div>
           </div>
           <button class="btn-jogar" id="btn-jogar">Jogar</button>
+          <button class="btn-ranq" id="btn-ranq"></button>
           <div class="linha-modos"><button class="btn-x1" id="btn-x1">⚔️ X1 com amigo</button><button class="btn-x1 btn-2v2" id="btn-2v2">🤝 2v2</button></div>
           <p class="dica-inicio" id="dica-inicio"></p>
           <div class="baus" id="baus"></div>
@@ -143,7 +144,7 @@
       css.rel = 'stylesheet';
       css.href = 'css/style.css?v=' + v;
       document.head.appendChild(css);
-      for (const f of ['assets', 'estado', 'ui', 'arena', 'cartas', 'ataques', 'batalha', 'titulo', 'conta', 'cla', 'passe', 'mod', 'atualizacao', 'x1', 'amigos', 'presentes', 'menu']) {
+      for (const f of ['assets', 'estado', 'ui', 'arena', 'cartas', 'ataques', 'batalha', 'titulo', 'conta', 'cla', 'passe', 'ranque', 'ranqueui', 'mod', 'atualizacao', 'x1', 'amigos', 'presentes', 'menu']) {
         await new Promise((ok) => {
           const el = document.createElement('script');
           el.src = 'js/' + f + '.js?v=' + v;

@@ -1,0 +1,223 @@
+// Ranqueada: patentes, pontos (PR), temporadas mensais, bots com patente, sequência de vitórias,
+// Pro Pass da ranqueada e histórico de batalhas (de todos os modos).
+const Ranque = (() => {
+  // ---------- Patentes ----------
+  // As 8 primeiras têm divisões III, II e I (100 PR cada). Mestre começa em 2400 e Mestre Pro em 3000.
+  const PATENTES = [
+    { id: 'papelao', nome: 'Papelão', cor: '#E2AE6A', escura: '#6E4A25', dif: 1 },
+    { id: 'ferrugem', nome: 'Ferrugem', cor: '#E07A45', escura: '#5B2A14', dif: 1 },
+    { id: 'ferro', nome: 'Ferro', cor: '#C3CBD6', escura: '#424A55', dif: 2 },
+    { id: 'bronze', nome: 'Bronze', cor: '#EEA06A', escura: '#6B3A1E', dif: 2 },
+    { id: 'prata', nome: 'Prata', cor: '#E4ECF8', escura: '#4E6188', dif: 3 },
+    { id: 'ouro', nome: 'Ouro', cor: '#FFC94A', escura: '#8A4F06', dif: 3 },
+    { id: 'platina', nome: 'Platina', cor: '#7FF0F5', escura: '#14606B', dif: 4 },
+    { id: 'diamante', nome: 'Diamante', cor: '#A8DBFF', escura: '#2A3F9A', dif: 4 },
+    { id: 'mestre', nome: 'Mestre', cor: '#C99BFF', escura: '#43177C', dif: 5 },
+    { id: 'mestre_pro', nome: 'Mestre Pro', cor: '#FF7AC0', escura: '#7A1040', dif: 5 },
+  ];
+  const DIV = 100, COM_DIV = 8;
+  const INICIO_MESTRE = COM_DIV * 3 * DIV; // 2400
+  const INICIO_PRO = 3000;
+  const ROMANO = ['III', 'II', 'I'];
+
+  function info(pts) {
+    pts = Math.max(0, Math.floor(pts || 0));
+    if (pts >= INICIO_PRO) return { i: 9, p: PATENTES[9], div: '', nome: 'Mestre Pro', base: INICIO_PRO, prox: null, prog: 1, pts, baseTier: INICIO_PRO };
+    if (pts >= INICIO_MESTRE) return { i: 8, p: PATENTES[8], div: '', nome: 'Mestre', base: INICIO_MESTRE, prox: INICIO_PRO, prog: (pts - INICIO_MESTRE) / (INICIO_PRO - INICIO_MESTRE), pts, baseTier: INICIO_MESTRE };
+    const i = Math.floor(pts / (3 * DIV));
+    const d = Math.floor((pts - i * 3 * DIV) / DIV);
+    const base = i * 3 * DIV + d * DIV;
+    return { i, p: PATENTES[i], div: ROMANO[d], nome: `${PATENTES[i].nome} ${ROMANO[d]}`, base, prox: base + DIV, prog: (pts - base) / DIV, pts, baseTier: i * 3 * DIV };
+  }
+  const img = (i, mini = false) => `assets/patentes/${PATENTES[i].id}${mini ? '_mini' : ''}.png`;
+
+  // ---------- Temporada ----------
+  const temporadaAtual = () => new Date().toISOString().slice(0, 7);
+  const nomeTemporada = (t = temporadaAtual()) => {
+    const [a, m] = t.split('-');
+    return `${['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'][+m - 1]} ${a}`;
+  };
+  const diasRestantes = () => { const h = new Date(); return Math.ceil((new Date(h.getFullYear(), h.getMonth() + 1, 1) - h) / 86400000); };
+
+  function dados() {
+    const d = Estado.d;
+    if (!d.ranque) d.ranque = { temporada: temporadaAtual(), pts: 0, melhor: 0, melhorSempre: 0, v: 0, d: 0, e: 0, seq: 0, maiorSeq: 0, escudo: 0, pro: false, xp: 0, pegos: { free: [], pro: [] } };
+    const r = d.ranque;
+    if (r.temporada !== temporadaAtual()) {
+      // virada de temporada: prêmio pela melhor patente e "reset suave" dos pontos
+      const melhorI = info(r.melhor).i;
+      r.premioTemporada = { temporada: r.temporada, patente: melhorI, gemas: 15 + melhorI * 20, ouro: 300 + melhorI * 250 };
+      r.temporadasAnteriores = [{ t: r.temporada, melhor: r.melhor }, ...(r.temporadasAnteriores || [])].slice(0, 12);
+      r.temporada = temporadaAtual();
+      r.pts = Math.round(r.pts * 0.55);
+      r.melhor = r.pts; r.v = 0; r.d = 0; r.e = 0; r.seq = 0; r.escudo = 0;
+      r.pro = false; r.xp = 0; r.pegos = { free: [], pro: [] };
+      Estado.salvar();
+    }
+    return r;
+  }
+  function pegarPremioTemporada() {
+    const r = dados(), p = r.premioTemporada;
+    if (!p) return null;
+    Estado.d.gemas += p.gemas; Estado.d.ouro += p.ouro;
+    r.premioTemporada = null;
+    Estado.salvar();
+    return p;
+  }
+
+  // ---------- Bots com patente ----------
+  const NOMES = ['Sakura_99', 'ReiDoCaos', 'Kaio_Ken', 'NekoChan', 'MestreDoPão', 'Luna★', 'DarkHinata', 'Zeno_br', 'Tsundere_X', 'PudimBravo', 'Yuki07',
+    'GokuDoPrédio', 'Mitsuri♡', 'BrisaFatal', 'xX_Akame_Xx', 'Capivara_GG', 'Miku_Lover', 'TurboTeto', 'Ninja_Lindo', 'Biscoito', 'Kirito_PT', 'Lady_Kurama',
+    'ChefeFinal', 'MoranguinhoPvP', 'Ryuu', 'SaiyajinDaVila', 'Nami$', 'PrincesaBoss', 'Gatinho_Mau', 'KoalaNinja', 'Rukia_Fan', 'Hikari', 'Trovão', 'PãoDeQueijo',
+    'Shinobi_BR', 'Aurora', 'Kenji', 'Bolinha', 'Gojou_Sensei', 'Pandinha', 'Raio_Azul', 'Mochi', 'Senpai', 'Coxinha_Pro', 'Vegeta_Bravo', 'Fubuki'];
+  const AVATARES = ['coroa', 'estrela', 'coracao', 'espadas', 'lanterna', 'flor'];
+  const nomeBot = (usados = []) => { let n; do n = NOMES[Math.floor(Math.random() * NOMES.length)]; while (usados.includes(n)); return n; };
+
+  // sorteia um bot perto da sua patente; às vezes de patente mais alta (vale mais pontos)
+  function bot(pts, usados = [], subir = null) {
+    const x = Math.random();
+    const passo = subir !== null ? subir : x < 0.3 ? 1 : x < 0.38 ? 2 : x < 0.85 ? 0 : -1;
+    const alvo = Math.max(0, Math.min(3400, pts + passo * 300 + Math.round((Math.random() - 0.5) * 120)));
+    return { nome: nomeBot(usados), avatar: AVATARES[Math.floor(Math.random() * AVATARES.length)], pts: alvo, info: info(alvo) };
+  }
+  function partida(dupla) {
+    const r = dados();
+    const r1 = bot(r.pts);
+    const rivais = [r1];
+    if (dupla) rivais.push(bot(r.pts, [r1.nome], Math.max(0, info(r1.pts).i - info(r.pts).i) > 0 ? 1 : 0));
+    const parceiro = dupla ? bot(r.pts, rivais.map((b) => b.nome), 0) : null;
+    const rivalI = Math.max(...rivais.map((b) => b.info.i));
+    const meuI = info(r.pts).i;
+    // dificuldade e nível das cartas dos bots crescem com a patente deles
+    const dif = PATENTES[rivalI].dif;
+    const nivelDelta = (rivalI > meuI ? 1 : 0) + (rivalI >= 8 ? 1 : 0) - (rivalI < meuI ? 1 : 0);
+    return { dupla, rivais, parceiro, rivalI, meuI, dif, nivelDelta };
+  }
+
+  // ---------- Pontos ----------
+  function previsao(dupla, rivalI) {
+    const r = dados(), meuI = info(r.pts).i, diff = rivalI - meuI;
+    const seq = r.seq + 1;
+    const ganho = (dupla ? 36 : 26) + Math.max(0, diff) * 7 + Math.min(16, Math.max(0, seq - 1) * 4);
+    let perda = (dupla ? 14 : 18) - Math.max(0, diff) * 4 + Math.max(0, -diff) * 3;
+    if (meuI <= 1) perda = Math.round(perda * 0.5);
+    return { ganho, perda: Math.max(4, perda), bonusRival: Math.max(0, diff) * 7, bonusSeq: Math.min(16, Math.max(0, seq - 1) * 4) };
+  }
+
+  function aplicar(resultado, { dupla, rivalI, coroas = 0 }) {
+    const r = dados();
+    const antes = info(r.pts);
+    const pv = previsao(dupla, rivalI);
+    let delta = 0, bonusSeq = 0, bonusRival = 0, bonus3 = 0, escudoUsado = false;
+    if (resultado === 'vitoria') {
+      r.seq++; r.maiorSeq = Math.max(r.maiorSeq || 0, r.seq); r.v++;
+      bonusSeq = pv.bonusSeq; bonusRival = pv.bonusRival; bonus3 = coroas === 3 ? 4 : 0;
+      delta = pv.ganho + bonus3;
+    } else if (resultado === 'derrota') {
+      r.seq = 0; r.d++;
+      delta = -Math.min(pv.perda, r.pts);
+      // escudo: logo depois de subir de patente, as derrotas não te derrubam dela
+      if (r.pts + delta < antes.baseTier && r.escudo > 0) { r.escudo--; delta = antes.baseTier - r.pts; escudoUsado = true; }
+    } else { r.e = (r.e || 0) + 1; delta = 4; }
+    r.pts = Math.max(0, r.pts + delta);
+    const depois = info(r.pts);
+    if (depois.i > antes.i) r.escudo = 3;
+    r.melhor = Math.max(r.melhor || 0, r.pts);
+    r.melhorSempre = Math.max(r.melhorSempre || 0, r.pts);
+    const xp = ganharXp(resultado, dupla, r.seq);
+    Estado.salvar();
+    return { antes, depois, delta, bonusSeq, bonusRival, bonus3, seq: r.seq, escudoUsado, escudo: r.escudo, xp,
+      subiuPatente: depois.i > antes.i, subiuDivisao: depois.i === antes.i && depois.base > antes.base, caiu: depois.base < antes.base };
+  }
+
+  // ---------- Pro Pass da ranqueada ----------
+  const PASSE_NIVEIS = 30, PASSE_XP = 100, PRECO_PRO = 900;
+  function ganharXp(resultado, dupla, seq) {
+    const r = dados();
+    const antes = nivelPasse();
+    const g = (resultado === 'vitoria' ? 60 + Math.min(20, seq * 4) : resultado === 'empate' ? 35 : 25) + (dupla ? 10 : 0);
+    r.xp = Math.min(PASSE_NIVEIS * PASSE_XP, (r.xp || 0) + g);
+    return { ganho: g, subiu: nivelPasse() > antes };
+  }
+  const nivelPasse = () => Math.min(PASSE_NIVEIS, Math.floor((dados().xp || 0) / PASSE_XP));
+  function recompensa(trilha, n) {
+    if (trilha === 'free') {
+      if (n === PASSE_NIVEIS) return { tipo: 'bau', bau: 'ouro' };
+      if (n % 10 === 0) return { tipo: 'gemas', qtd: 30 };
+      if (n % 5 === 0) return { tipo: 'bau', bau: n >= 20 ? 'ouro' : 'prata' };
+      if (n % 3 === 0) return { tipo: 'gemas', qtd: 8 };
+      return { tipo: 'ouro', qtd: 60 + n * 6 };
+    }
+    if (n === PASSE_NIVEIS) return { tipo: 'evolucao' };
+    if (n % 10 === 0) return { tipo: 'carta', raridade: 'lendaria', qtd: 1 };
+    if (n % 5 === 0) return { tipo: 'bau', bau: 'ouro' };
+    if (n % 4 === 0) return { tipo: 'gemas', qtd: 40 };
+    if (n % 3 === 0) return { tipo: 'carta', raridade: 'epica', qtd: 2 };
+    return { tipo: 'ouro', qtd: 220 + n * 18 };
+  }
+  const icone = (r) => ({ ouro: '🪙', gemas: '💎', bau: '🎁', carta: '🃏', evolucao: '🧬' }[r.tipo]);
+  function texto(r) {
+    if (r.tipo === 'ouro') return `${UI.fmt(r.qtd)} ouro`;
+    if (r.tipo === 'gemas') return `${r.qtd} gemas`;
+    if (r.tipo === 'bau') return `Baú de ${r.bau}`;
+    if (r.tipo === 'evolucao') return 'Carta de Evolução exclusiva';
+    return `${r.qtd}x ${r.raridade === 'lendaria' ? 'lendária' : 'épica'}`;
+  }
+  const temTrilha = (t) => t === 'free' || (t === 'pro' && dados().pro);
+  const podePegar = (t, n) => temTrilha(t) && n <= nivelPasse() && !dados().pegos[t].includes(n);
+  const pendentes = () => ['free', 'pro'].reduce((s, t) => s + Array.from({ length: PASSE_NIVEIS }, (_, i) => i + 1).filter((n) => podePegar(t, n)).length, 0);
+  function pegar(t, n) {
+    if (!podePegar(t, n)) return null;
+    const r = recompensa(t, n), d = Estado.d;
+    dados().pegos[t].push(n);
+    let extra = null;
+    if (r.tipo === 'ouro') d.ouro += r.qtd;
+    else if (r.tipo === 'gemas') d.gemas += r.qtd;
+    else if (r.tipo === 'bau') extra = { bau: r.bau, abertura: Estado.abrirBau(r.bau) };
+    else if (r.tipo === 'evolucao') {
+      // a carta ainda vai ser criada: fica guardada e chega numa atualização
+      d.evolucoesGuardadas = [...new Set([...(d.evolucoesGuardadas || []), `ranq-${dados().temporada}`])];
+      extra = { evolucao: true };
+    } else {
+      const pool = Estado.disponiveis().filter((c) => c.raridade === r.raridade && Estado.tem(c.id));
+      if (!pool.length) extra = { bau: 'ouro', abertura: Estado.abrirBau('ouro') };
+      else { const c = pool[Math.floor(Math.random() * pool.length)]; d.colecao[c.id].copias += r.qtd; extra = { carta: c, qtd: r.qtd }; }
+    }
+    Estado.salvar();
+    return { r, extra };
+  }
+  function comprarPro() {
+    const d = Estado.d;
+    if (dados().pro) return { ok: false, motivo: 'Você já tem o Pro Pass' };
+    if (d.gemas < PRECO_PRO) return { ok: false, motivo: `Faltam ${PRECO_PRO - d.gemas} gemas` };
+    d.gemas -= PRECO_PRO; dados().pro = true; Estado.salvar();
+    return { ok: true };
+  }
+
+  // ---------- Sequência de vitórias (modo normal) ----------
+  // cada vitória seguida dá +3 troféus a mais (até +15)
+  function sequenciaNormal(resultado) {
+    const d = Estado.d;
+    if (resultado === 'vitoria') d.seqNormal = (d.seqNormal || 0) + 1;
+    else if (resultado === 'derrota') d.seqNormal = 0;
+    const seq = d.seqNormal || 0;
+    return { seq, bonus: resultado === 'vitoria' ? Math.min(15, Math.max(0, seq - 1) * 3) : 0 };
+  }
+
+  // ---------- Histórico ----------
+  function registrar(e) {
+    const d = Estado.d;
+    d.historico = [{ t: Date.now(), ...e }, ...(d.historico || [])].slice(0, 40);
+    Estado.salvar();
+  }
+  const historico = () => Estado.d.historico || [];
+
+  // dados que vão para o perfil público
+  const publico = () => { const r = dados(); return { pts: r.pts, melhor: r.melhorSempre || r.pts, v: r.v, d: r.d, temporada: r.temporada }; };
+
+  return {
+    PATENTES, info, img, temporadaAtual, nomeTemporada, diasRestantes, dados, pegarPremioTemporada, partida, previsao, aplicar,
+    PASSE_NIVEIS, PASSE_XP, PRECO_PRO, nivelPasse, recompensa, icone, texto, temTrilha, podePegar, pendentes, pegar, comprarPro,
+    sequenciaNormal, registrar, historico, publico, INICIO_MESTRE, INICIO_PRO,
+  };
+})();

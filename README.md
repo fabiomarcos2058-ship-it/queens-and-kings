@@ -64,6 +64,7 @@ O bot fica em `bot/`. Ele baixa pacotes 3D com licença CC0 da Kenney, tira "fot
 - Login com e-mail/senha ou Google, ou jogar sem conta.
 - Quem tem conta tem o progresso salvo no Firestore em `jogadores/{uid}` e pode jogar em qualquer celular.
 - As regras de segurança estão em `firestore.rules`. Cole esse texto em **Firestore → Regras → Publicar**.
+- As regras do Realtime Database (x1, 2v2 online e aviso de atualização) estão em `database.rules.json`. Cole em **Realtime Database → Regras → Publicar**.
 
 ## Top global, passe e mod menu
 

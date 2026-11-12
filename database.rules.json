@@ -1,0 +1,22 @@
+{
+  "rules": {
+    "config": {
+      "versao": {
+        ".read": true,
+        ".write": "auth != null && newData.isNumber() && (!data.exists() || newData.val() > data.val()) && newData.val() <= now / 1000 + 3600"
+      }
+    },
+    "salas": {
+      "$codigo": {
+        ".read": "auth != null",
+        ".write": "auth != null",
+        ".validate": "$codigo.length >= 4 && $codigo.length <= 6",
+        "vagas": {
+          "$vaga": {
+            ".validate": "$vaga === 'azul' || $vaga === 'azul2' || $vaga === 'vermelho' || $vaga === 'vermelho2'"
+          }
+        }
+      }
+    }
+  }
+}

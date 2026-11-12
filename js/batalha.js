@@ -59,19 +59,23 @@ const Batalha = (() => {
 
   function lado(deck) {
     const fila = embaralhar(deck);
-    return { elixir: 5, fila, coroas: 0 };
+    return { elixir: 5, fila, coroas: 0, deck: [...deck] };
   }
 
   // rede (x1): no celular de quem criou a sala, rede = { tipo: 'host', convidado, enviarEstado, fim }
-  function iniciar({ modo = 'normal', fim, rede = null } = {}) {
+  // ranque (ranqueada): { dupla, rivais, parceiro, dif, nivelDelta } vindo do Ranque.partida()
+  function iniciar({ modo = 'normal', fim, rede = null, ranque = null } = {}) {
     ao_fim = fim;
     const dupla = modo === '2v2';
     const x1 = rede && !dupla;
+    // 2v2 online: rede.jogadores = { azul2, vermelho, vermelho2 } (perfil de quem está em cada vaga; vaga vazia = IA)
+    const jog = dupla && rede ? (rede.jogadores || { azul2: rede.convidado }) : {};
     const deck = Estado.d.deck;
-    const deckIA = x1 ? embaralhar(rede.convidado.deck) : embaralhar(Mod.deckApelao() || deckAleatorioIA()).slice(0, 8);
+    const deckIA = x1 ? embaralhar(rede.convidado.deck) : jog.vermelho ? jog.vermelho.deck : embaralhar(Mod.deckApelao() || deckAleatorioIA()).slice(0, 8);
     const minhas = Estado.minhasTorres();
-    // 2v2: a dupla rival tem torres iguais às suas (sem a "desvantagem de IA")
-    const delas = x1 ? (rede.convidado.torres || minhas) : dupla ? { ...minhas } : torresIA(minhas);
+    // 2v2: a dupla rival tem torres iguais às suas (sem a "desvantagem de IA"); se tiver gente no time vermelho, usa as torres dela
+    const humanoV = jog.vermelho || jog.vermelho2;
+    const delas = x1 ? (rede.convidado.torres || minhas) : humanoV ? (humanoV.torres || minhas) : (dupla || ranque) ? { ...minhas } : torresIA(minhas);
     s = {
       modo, t: 0, prorrogacao: false, acabou: false, pausa: false,
       azul: lado(deck), vermelho: lado(deckIA),
@@ -81,19 +85,30 @@ const Batalha = (() => {
       rede, niveisV: x1 ? rede.convidado.niveis : null, eventos: [], snapTimer: 0,
       ias: x1 ? [] : ['vermelho'],
     };
+    if (ranque) {
+      s.ranque = ranque;
+      s.difIA = ranque.dif;
+      const media = Math.round(deck.reduce((a, id) => a + Estado.d.colecao[id].nivel, 0) / deck.length);
+      s.nivelIA = Math.max(1, Math.min(9, media + ranque.nivelDelta));
+    }
     if (dupla) {
       s.dupla = true;
-      s.azul2 = lado(rede ? rede.convidado.deck : deckAleatorioIA());
-      s.vermelho2 = lado(deckAleatorioIA());
-      s.niveisAzul2 = rede ? rede.convidado.niveis : null;
-      s.ias = rede ? ['vermelho', 'vermelho2'] : ['vermelho', 'vermelho2', 'azul2'];
-      s.nomeParceiro = rede ? rede.convidado.nome : 'Parceiro IA';
+      s.jogadores = jog;
+      s.azul2 = lado(jog.azul2 ? jog.azul2.deck : deckAleatorioIA());
+      s.vermelho2 = lado(jog.vermelho2 ? jog.vermelho2.deck : deckAleatorioIA());
+      s.niveis = { azul2: jog.azul2 && jog.azul2.niveis, vermelho: jog.vermelho && jog.vermelho.niveis, vermelho2: jog.vermelho2 && jog.vermelho2.niveis };
+      s.niveisAzul2 = s.niveis.azul2 || null;
+      s.ias = ['vermelho', 'vermelho2', 'azul2'].filter((l) => !jog[l]);
+      s.nomes = { azul: Estado.d.nome, azul2: jog.azul2 ? jog.azul2.nome : null, vermelho: jog.vermelho ? jog.vermelho.nome : null, vermelho2: jog.vermelho2 ? jog.vermelho2.nome : null };
+      s.nomeParceiro = jog.azul2 ? jog.azul2.nome : ranque && ranque.parceiro ? ranque.parceiro.nome : 'Parceiro IA';
       s.iaTimer_vermelho2 = 3.2; s.iaTimer_azul2 = 2.6;
       // com 4 jogadores as torres aguentam mais
       for (const t of s.ent) if (t.torre) { t.max = Math.round(t.max * 1.9); t.vida = t.max; }
-      if (!Mod.deckApelao()) s.nivelIA = Math.min(9, s.nivelIA + 1); // cartas da dupla rival no mesmo nível médio das suas
+      if (!Mod.deckApelao() && !ranque) s.nivelIA = Math.min(9, s.nivelIA + 1); // cartas da dupla rival no mesmo nível médio das suas
     }
-    montar(dupla ? (rede ? `2v2 com ${rede.convidado.nome}` : '2v2 · Batalha em dupla') : rede ? `X1 contra ${rede.convidado.nome}` : modo === 'elixir2x' ? 'Evento: elixir em dobro' : 'Batalha');
+    const tituloRanq = ranque ? `🏅 Ranqueada${dupla ? ' 2v2' : ''} · vs ${ranque.rivais.map((b) => b.nome).join(' e ')}` : null;
+    const humanosV = dupla ? [jog.vermelho, jog.vermelho2].filter(Boolean).map((p) => p.nome) : [];
+    montar(tituloRanq || (dupla ? (rede ? `2v2 · ${humanosV.length ? `vs ${humanosV.join(' e ')}` : `com ${s.nomeParceiro}`}` : '2v2 · Batalha em dupla') : rede ? `X1 contra ${rede.convidado.nome}` : modo === 'elixir2x' ? 'Evento: elixir em dobro' : 'Batalha'));
   }
 
   function montar(titulo) {
@@ -262,7 +277,7 @@ const Batalha = (() => {
     }
     if (c.custo > s.azul.elixir) { UI.toast('Elixir insuficiente'); return; }
     if (s.convidado) {
-      s.rede.enviarComando({ tipo: 'carta', i: s.selecionada, x: Math.round(x), y: Math.round(y) }); // o host espelha
+      s.rede.enviarComando({ tipo: 'carta', i: s.selecionada, x: Math.round(x), y: Math.round(y), lado: s.dupla ? s.meuLado : undefined }); // o host espelha
       efeito('onda-surgir azul', x, y, 700); // retorno imediato enquanto o host confirma
       s.azul.elixir -= c.custo;
       s.selecionada = null; s.zona.classList.remove('ativa'); desenharMao();
@@ -283,7 +298,8 @@ const Batalha = (() => {
     L.fila.splice(indice, 1);
     L.fila.push(id);
     const nivel = quem === 'azul' ? Estado.d.colecao[id].nivel
-      : quem === 'azul2' ? (s.niveisAzul2 ? (s.niveisAzul2[id] || 1) : nivelCartaIA(id))
+      : s.niveis && s.niveis[quem] ? (s.niveis[quem][id] || 1)
+      : quem === 'azul2' && s.niveisAzul2 ? (s.niveisAzul2[id] || 1)
       : s.niveisV ? (s.niveisV[id] || 1) : nivelCartaIA(id);
     const f = Math.pow(1.1, nivel - 1) * (quem === 'azul' && Mod.flag('danoX5') ? 5 : 1);
     if (c.feitico) {
@@ -592,7 +608,7 @@ const Batalha = (() => {
   function ativarHabilidade(t) {
     if (s.convidado) {
       if (!t.habilidade || t.recarga > 0 || s.azul.elixir < t.habilidade.custo) return false;
-      s.rede.enviarComando({ tipo: 'hab', id: t.hid });
+      s.rede.enviarComando({ tipo: 'hab', id: t.hid, lado: s.dupla ? s.meuLado : undefined });
       t.recarga = t.habilidade.recarga || 10;
       return true;
     }
@@ -1122,6 +1138,7 @@ const Batalha = (() => {
 
   // Dificuldade da IA baseada nos troféus do jogador
   function dificuldadeIA() {
+    if (s && s.difIA) return s.difIA; // ranqueada: a dificuldade é a da patente do bot
     const t = Estado.d.trofeus || 0;
     if (t >= 1500) return 5; // muito difícil
     if (t >= 900)  return 4; // raciocínio
@@ -1135,7 +1152,7 @@ const Batalha = (() => {
   // cartas da IA: em volta de 1 nível abaixo da média do seu deck; algumas ficam 2 abaixo (sorteado uma vez por partida)
   function nivelCartaIA(id) {
     if (!s.niveisIA) s.niveisIA = {};
-    if (!(id in s.niveisIA)) s.niveisIA[id] = Math.max(1, s.nivelIA - (!s.dupla && !Mod.deckApelao() && Math.random() < 0.4 ? 1 : 0));
+    if (!(id in s.niveisIA)) s.niveisIA[id] = Math.max(1, s.nivelIA - (!s.dupla && !s.ranque && !Mod.deckApelao() && Math.random() < 0.4 ? 1 : 0));
     return s.niveisIA[id];
   }
 
@@ -1384,6 +1401,8 @@ const Batalha = (() => {
       t: +s.t.toFixed(2), p: s.prorrogacao ? 1 : 0,
       cz: [s.azul.coroas, s.vermelho.coroas], el: [+s.azul.elixir.toFixed(2), +s.vermelho.elixir.toFixed(2), s.dupla ? +s.azul2.elixir.toFixed(2) : 0],
       fila: (s.dupla ? s.azul2 : s.vermelho).fila.slice(0, 5), d2: s.dupla ? 1 : 0,
+      filas: s.dupla ? Object.fromEntries(['azul2', 'vermelho', 'vermelho2'].filter((l) => s.jogadores && s.jogadores[l]).map((l) => [l, s[l].fila.slice(0, 5)])) : undefined,
+      els: s.dupla ? Object.fromEntries(LADOS.map((l) => [l, +s[l].elixir.toFixed(2)])) : undefined,
       tm: s.t < 3 ? Object.fromEntries(s.ent.filter((e) => e.torre).map((e) => [e.id, e.max])) : undefined,
       tw: Object.fromEntries(s.ent.filter((e) => e.torre).map((e) => [e.id, Math.round(e.vida)])),
       tr: s.ent.filter((e) => !e.torre).map((e) => [e.id, e.carta.id, e.time === 'azul' ? 0 : 1, Math.round(e.x * 10) / 10, Math.round(e.y * 10) / 10,
@@ -1400,34 +1419,43 @@ const Batalha = (() => {
   function iniciarConvidado({ fim, rede }) {
     ao_fim = fim;
     const dupla = rede.host.modo === '2v2';
+    // 2v2 online: rede.meuLado = minha vaga do ponto de vista do host (azul2, vermelho ou vermelho2)
+    const meuLado = dupla ? (rede.meuLado || 'azul2') : 'vermelho';
+    const parceiroLado = { azul: 'azul2', azul2: 'azul', vermelho: 'vermelho2', vermelho2: 'vermelho' }[meuLado];
     s = {
-      dupla, nomeParceiro: dupla ? rede.host.nome : null,
+      dupla, meuLado, parceiroLado, vira: !dupla || timeDe(meuLado) === 'vermelho',
+      nomeParceiro: dupla ? (rede.nomeParceiro || rede.host.nome) : null,
       modo: 'x1c', convidado: true, rede, t: 0, prorrogacao: false, acabou: false, pausa: false,
       azul: { elixir: 5, fila: [], coroas: 0 }, vermelho: { elixir: 5, fila: [], coroas: 0 },
       ent: torres(Estado.minhasTorres(), rede.host.torres || Estado.minhasTorres()), proj: [], efeitos: [], agenda: [], selecionada: null, id: 0, mapa: new Map(), pjEls: [],
       arenaId: rede.host.arena || 'festival',
     };
     if (dupla) s.azul2 = { elixir: 5 };
-    montar(dupla ? `2v2 com ${rede.host.nome}` : `X1 contra ${rede.host.nome}`);
+    montar(dupla ? `2v2 · ${rede.titulo || `com ${s.nomeParceiro}`}` : `X1 contra ${rede.host.nome}`);
   }
 
   function receberEstado(est) {
     if (!s || !s.convidado || s.acabou || !est) return;
-    // x1: a arena do convidado é espelhada. 2v2: o convidado está no mesmo time do host, nada vira.
-    const D = s.dupla;
-    const mx = (x) => (D ? x : W - x), my = (y) => (D ? y : H - y);
-    const mt = (n) => (D ? (n === 0 ? 'azul' : 'vermelho') : espelhoTime(n));
+    // quem está no time vermelho (x1 ou 2v2) vê a arena virada; quem está no time do host vê igual
+    const D = s.dupla, V = s.vira;
+    const mx = (x) => (V ? W - x : x), my = (y) => (V ? H - y : y);
+    const mt = (n) => (V ? espelhoTime(n) : (n === 0 ? 'azul' : 'vermelho'));
+    // lado do host -> lado na minha tela (eu sempre sou "azul")
+    const paraMim = (l) => (l === s.meuLado ? 'azul' : l === s.parceiroLado ? 'azul2' : l.endsWith('2') ? 'vermelho2' : 'vermelho');
     s.t = est.t; s.prorrogacao = !!est.p;
-    if (D) { s.azul.coroas = est.cz[0]; s.vermelho.coroas = est.cz[1]; s.azul.elixir = est.el[2] || 0; s.azul2.elixir = est.el[0]; }
-    else { s.azul.coroas = est.cz[1]; s.vermelho.coroas = est.cz[0]; s.azul.elixir = est.el[1]; s.vermelho.elixir = est.el[0]; }
-    const filaMudou = (est.fila || []).join() !== s.azul.fila.join();
-    s.azul.fila = est.fila || [];
+    if (V) { s.azul.coroas = est.cz[1]; s.vermelho.coroas = est.cz[0]; } else { s.azul.coroas = est.cz[0]; s.vermelho.coroas = est.cz[1]; }
+    if (D && est.els) { s.azul.elixir = est.els[s.meuLado] || 0; s.azul2.elixir = est.els[s.parceiroLado] || 0; }
+    else if (D) { s.azul.elixir = est.el[2] || 0; s.azul2.elixir = est.el[0]; }
+    else { s.azul.elixir = est.el[1]; s.vermelho.elixir = est.el[0]; }
+    const minhaFila = D && est.filas && est.filas[s.meuLado] ? est.filas[s.meuLado] : est.fila || [];
+    const filaMudou = minhaFila.join() !== s.azul.fila.join();
+    s.azul.fila = minhaFila;
     if (filaMudou) desenharMao();
     atualizarPlacar();
 
     // torres
     for (const t of s.ent.filter((e) => e.torre)) {
-      const idHost = D ? t.id : espelhoTorre(t.id);
+      const idHost = V ? espelhoTorre(t.id) : t.id;
       const v = est.tw ? est.tw[idHost] : undefined;
       if (v === undefined) { torreCaiuVisual(t); continue; }
       if (est.tm && est.tm[idHost] && !t.maxOk) { t.maxOk = true; t.max = est.tm[idHost]; t.vida = v; atualizarHp(t); t.el.querySelector('b').textContent = v; }
@@ -1443,8 +1471,8 @@ const Batalha = (() => {
       if (!t) {
         const time = mt(timeN);
         t = criarTropa(time, Estado.carta(cartaId), x, y, 1, nivel);
-        // 2v2: a tropa "segunda" do host (azul2) é a minha; a principal (azul) é do meu parceiro
-        if (D && time === 'azul') { t.dono = segundo ? 'azul' : 'azul2'; if (!segundo) t.el.classList.add('parceiro'); }
+        // 2v2: descobre de quem é a tropa (eu, meu parceiro ou um rival)
+        if (D) { t.dono = paraMim((timeN === 0 ? 'azul' : 'vermelho') + (segundo ? '2' : '')); if (t.dono === 'azul2') t.el.classList.add('parceiro'); }
         t.hid = hid; t.max = max; t.vida = vida;
         s.mapa.set(hid, t);
       }
@@ -1484,7 +1512,7 @@ const Batalha = (() => {
       const el = document.createElement('div');
       el.className = `projetil ${mt(timeN)}${deTorre ? ' de-torre' : ''}${sprite ? ' com-sprite' : ''}`;
       Object.assign(el.style, pct(mx(px), my(py)));
-      if (sprite) { el.style.backgroundImage = `url(${spriteUrl(sprite)})`; el.style.width = `${(16 / W) * 100}%`; el.style.transform = `translate(-50%, -50%) rotate(${(giro || 0) + (D ? 0 : 180)}deg)`; }
+      if (sprite) { el.style.backgroundImage = `url(${spriteUrl(sprite)})`; el.style.width = `${(16 / W) * 100}%`; el.style.transform = `translate(-50%, -50%) rotate(${(giro || 0) + (V ? 180 : 0)}deg)`; }
       s.arena.appendChild(el);
       return el;
     });
@@ -1500,7 +1528,7 @@ const Batalha = (() => {
       } else if (ev[0] === 'b') {
         efeito('barril-quebra', mx(ev[1]), my(ev[2]), 500);
       } else if (ev[0] === 'k') {
-        const x = mx(ev[1]), y = my(ev[2]), ang = ev[3] + (D ? 0 : Math.PI);
+        const x = mx(ev[1]), y = my(ev[2]), ang = ev[3] + (V ? Math.PI : 0);
         const raio = document.createElement('div');
         raio.className = 'kamehameha';
         Object.assign(raio.style, pct(x, y), { width: `${(320 / W) * 100}%`, transform: `translate(0, -50%) rotate(${ang}rad)` });
@@ -1528,8 +1556,8 @@ const Batalha = (() => {
     if (est.fim) {
       s.acabou = true;
       const inv = { vitoria: 'derrota', derrota: 'vitoria', empate: 'empate' };
-      const dados = D ? { resultado: est.fim.resultado || 'empate', coroas: est.cz[0], coroasInimigo: est.cz[1], modo: '2v2' }
-        : { resultado: inv[est.fim.resultado] || 'empate', coroas: est.cz[1], coroasInimigo: est.cz[0], modo: 'x1' };
+      const dados = D ? { resultado: (V ? inv[est.fim.resultado] : est.fim.resultado) || 'empate', coroas: s.azul.coroas, coroasInimigo: s.vermelho.coroas, modo: '2v2', deck: Estado.d.deck.slice(0, 8), deckParceiro: s.rede.deckParceiro || s.rede.host.deck, nomeParceiro: s.nomeParceiro, duracao: Math.round(s.t) }
+        : { resultado: inv[est.fim.resultado] || 'empate', coroas: est.cz[1], coroasInimigo: est.cz[0], modo: 'x1', deck: Estado.d.deck.slice(0, 8), deckRival: s.rede.host.deck, nomeRival: s.rede.host.nome, duracao: Math.round(s.t) };
       setTimeout(() => ao_fim && ao_fim(dados), 900);
     }
   }
@@ -1554,8 +1582,10 @@ const Batalha = (() => {
   function comandoRemoto(cmd) {
     if (!s || s.acabou || !s.rede) return;
     const D = s.dupla;
-    const quem = D ? 'azul2' : 'vermelho', time = timeDe(quem);
-    const x = D ? cmd.x : W - cmd.x, y = D ? cmd.y : H - cmd.y;
+    const quem = D ? (cmd.lado && s.jogadores && s.jogadores[cmd.lado] ? cmd.lado : 'azul2') : 'vermelho', time = timeDe(quem);
+    if (D && s.ias.includes(quem)) return; // a vaga virou IA
+    const vira = time === 'vermelho'; // quem joga do time vermelho vê a arena virada
+    const x = vira ? W - cmd.x : cmd.x, y = vira ? H - cmd.y : cmd.y;
     if (cmd.tipo === 'carta') {
       const id = s[quem].fila[cmd.i];
       if (!id || cmd.i > 3) return;
@@ -1569,13 +1599,14 @@ const Batalha = (() => {
     }
   }
 
-  function adversarioSaiu() {
+  function adversarioSaiu(quem = 'azul2') {
     if (!s || s.acabou) return;
     if (s.dupla && !s.convidado) {
-      // o parceiro saiu: a IA assume as cartas dele
-      if (!s.ias.includes('azul2')) s.ias.push('azul2');
-      UI.toast(`${s.nomeParceiro} saiu. A IA assumiu as cartas dele! 🤖`);
-      s.nomeParceiro = `${s.nomeParceiro} (IA)`;
+      // alguém saiu: a IA assume as cartas dele
+      if (!s.ias.includes(quem)) s.ias.push(quem);
+      const nome = (s.nomes && s.nomes[quem]) || s.nomeParceiro || 'Um jogador';
+      UI.toast(`${nome} saiu. A IA assumiu as cartas! 🤖`);
+      if (quem === 'azul2') s.nomeParceiro = `${s.nomeParceiro} (IA)`;
       return;
     }
     UI.toast(s.dupla ? 'Seu parceiro saiu da partida!' : 'Seu adversário saiu da partida!');
@@ -1684,10 +1715,14 @@ const Batalha = (() => {
       for (let j = i + 1; j < tropas.length; j++) {
         const a = tropas[i], b = tropas[j];
         const d0 = dist(a, b), min = a.raio + b.raio;
-        if (d0 < min && d0 > 0.01) {
-          const k = (min - d0) / 2 / d0;
-          a.x -= (b.x - a.x) * k; a.y -= (b.y - a.y) * k;
-          b.x += (b.x - a.x) * k; b.y += (b.y - a.y) * k;
+        if (d0 < min) {
+          // empurra cada uma metade da sobreposição (a conta usa a distância de ANTES de mover;
+          // antes usava a posição já mexida e às vezes arremessava a tropa pra fora da arena)
+          let ux, uy;
+          if (d0 > 0.01) { const k = (min - d0) / 2 / d0; ux = (b.x - a.x) * k; uy = (b.y - a.y) * k; }
+          else { const ang = ((a.id * 7 + b.id * 13) % 360) * (Math.PI / 180); ux = Math.cos(ang) * min / 2; uy = Math.sin(ang) * min / 2; }
+          a.x -= ux; a.y -= uy; b.x += ux; b.y += uy;
+          for (const e of [a, b]) { e.x = Math.max(10, Math.min(W - 10, e.x)); e.y = Math.max(10, Math.min(H - 10, e.y)); }
         }
       }
     }
@@ -1802,7 +1837,9 @@ const Batalha = (() => {
       const a = vidaMinima('azul'), v = vidaMinima('vermelho');
       resultado = Math.abs(a - v) < 0.01 ? 'empate' : a > v ? 'vitoria' : 'derrota';
     }
-    const dados = { resultado, coroas: s.azul.coroas, coroasInimigo: s.vermelho.coroas, modo: s.modo };
+    const dados = { resultado, coroas: s.azul.coroas, coroasInimigo: s.vermelho.coroas, modo: s.modo, ranque: s.ranque || null,
+      deck: s.azul.deck, deckRival: s.vermelho.deck, deckParceiro: s.azul2 && s.azul2.deck, deckRival2: s.vermelho2 && s.vermelho2.deck,
+      nomeRival: s.rede && s.rede.convidado ? s.rede.convidado.nome : null, nomeParceiro: s.nomeParceiro || null, duracao: Math.round(s.t) };
     if (s.rede && s.rede.fim) { s.rede.enviarEstado({ ...foto(), fim: { resultado } }); s.rede.fim(dados, desistiu); }
     setTimeout(() => ao_fim && ao_fim(dados), 900);
   }
