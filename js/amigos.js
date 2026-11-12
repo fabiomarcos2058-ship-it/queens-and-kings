@@ -7,7 +7,7 @@ const Amigos = (() => {
   const fb = () => Conta.fb();
   const uid = () => Conta.uid();
   const ONLINE_MS = 5 * 60 * 1000;
-  let pararPedidos = null, pararConvites = null, batimento = null;
+  let pararPedidos = null, pararConvites = null, pararConvitesRt = null, batimento = null;
   const convitesVistos = new Set();
 
   const ref = (...p) => fb().doc(fb().db, 'perfis', ...p);
@@ -116,17 +116,38 @@ const Amigos = (() => {
   }
 
   // ---------- Convite de x1 ----------
+  // Os convites vão pelo Realtime Database (rápido e com limite separado do Firestore).
+  // Ficam numa "caixa" com a ponta do ID de quem recebe: salas/c?????/convites/{quem chamou}
+  const caixa = (id) => `c${String(id).slice(0, 5)}`;
   async function convidar(id, codigo, modo = 'x1') {
-    const f = fb();
-    await f.setDoc(ref(id, 'convites', uid()), { nome: Estado.d.nome, estiloNome: Passe.estiloNome(), avatar: Estado.d.avatar, codigo, modo, t: Date.now(), quando: f.serverTimestamp() });
+    const dados = { nome: Estado.d.nome, estiloNome: Passe.estiloNome() || '', avatar: Estado.d.avatar, codigo, modo, t: Date.now(), para: id };
+    const { m, r } = await X1.rt();
+    await m.set(r(`salas/${caixa(id)}/convites/${uid()}`), dados);
+    // se o Firestore estiver funcionando, também deixa lá (versões antigas do jogo ouvem por ele)
+    try { const f = fb(); f.setDoc(ref(id, 'convites', uid()), { ...dados, quando: f.serverTimestamp() }).catch(() => {}); } catch (e) { /* nada */ }
   }
-  const apagarConvite = (de) => { try { fb().deleteDoc(ref(uid(), 'convites', de)).catch(() => {}); } catch (e) { /* sem conexão */ } };
+  const apagarConvite = (de) => {
+    X1.rt().then(({ m, r }) => m.remove(r(`salas/${caixa(uid())}/convites/${de}`))).catch(() => {});
+    try { fb().deleteDoc(ref(uid(), 'convites', de)).catch(() => {}); } catch (e) { /* sem conexão */ }
+  };
 
   // ---------- Ouvir pedidos e convites ----------
   function ouvir({ aoMudarPedidos, aoConvite }) {
     if (!fb() || !uid() || pararPedidos) return;
     const f = fb();
     pararPedidos = f.onSnapshot(col(uid(), 'pedidos'), (s) => aoMudarPedidos(s.docs.map((x) => ({ uid: x.id, ...x.data() }))), () => {});
+    // convites pelo Realtime Database
+    const receber = (c) => {
+      if (!c || !c.codigo || convitesVistos.has(c.codigo)) return;
+      const idade = c.t ? Date.now() - c.t : 0;
+      if (idade > 90 * 1000) { apagarConvite(c.de); return; }
+      convitesVistos.add(c.codigo);
+      aoConvite(c);
+    };
+    X1.rt().then(({ m, r }) => {
+      const parar = m.onChildAdded(r(`salas/${caixa(uid())}/convites`), (snap) => { const c = snap.val(); if (c && c.para === uid()) receber({ de: snap.key, ...c }); });
+      pararConvitesRt = parar;
+    }).catch(() => {});
     pararConvites = f.onSnapshot(col(uid(), 'convites'), (s) => {
       s.docChanges().forEach((m) => {
         if (m.type === 'removed') return;
@@ -143,8 +164,8 @@ const Amigos = (() => {
   }
 
   function parar() {
-    [pararPedidos, pararConvites].forEach((p) => p && p());
-    pararPedidos = pararConvites = null;
+    [pararPedidos, pararConvites, pararConvitesRt].forEach((p) => p && p());
+    pararPedidos = pararConvites = pararConvitesRt = null;
     clearInterval(batimento);
   }
 

@@ -94,7 +94,7 @@ const RanqueUI = (() => {
     const d = Estado.d, f = Ranque.info(Ranque.dados().pts);
     // cartões de batalha: o seu contra o do rival (no 2v2, os dois de cada lado ficam menores)
     const tam = pt.dupla ? 'mini' : 'medio';
-    const time = [Titulos.meuCartao({ tam, lado: 'eu' })].concat(pt.parceiro ? [pt.parceiro.humano ? Titulos.cartao({ nome: pt.parceiro.nome, avatar: pt.parceiro.avatar, pts: pt.parceiro.pts, favorita: null }, { tam }) : Titulos.cartaoBot(pt.parceiro, { tam })] : []);
+    const time = [Titulos.meuCartao({ tam, lado: 'eu' })].concat(pt.parceiro ? [pt.parceiro.humano ? Titulos.cartao({ nome: pt.parceiro.nome, estilo: pt.parceiro.estiloNome, avatar: pt.parceiro.avatar, pts: pt.parceiro.pts, favorita: pt.parceiro.favorita || null, titulo: pt.parceiro.titulo, raroTitulo: pt.parceiro.raroTitulo, trofeus: pt.parceiro.trofeus, nivel: pt.parceiro.nivel, cla: pt.parceiro.cla }, { tam }) : Titulos.cartaoBot(pt.parceiro, { tam })] : []);
     const rivais = pt.rivais.map((b) => Titulos.cartaoBot(b, { tam, lado: 'rival' }));
     const meuI = f.i;
     const pv = Ranque.previsao(pt.dupla, pt.rivalI, pt.rivalPts);
@@ -124,7 +124,7 @@ const RanqueUI = (() => {
     const pt = Ranque.partida(dupla, amigo);
     if (amigo) {
       // o amigo vê a mesma partida (pra ele, o parceiro sou eu)
-      X1.anunciarPartida({ ...pt, parceiro: { nome: d.nome, avatar: d.avatar, pts: Ranque.dados().pts, humano: true } }).catch(() => {});
+      X1.anunciarPartida({ ...pt, parceiro: { nome: d.nome, avatar: d.avatar, estiloNome: Passe.estiloNome(), ...X1.cartaoPublico(), pts: Ranque.dados().pts, humano: true } }).catch(() => {});
     }
     const r = Ranque.dados(), f = Ranque.info(r.pts);
     const el = document.createElement('div');

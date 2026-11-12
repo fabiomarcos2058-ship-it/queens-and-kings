@@ -89,7 +89,7 @@ const Ranque = (() => {
     const rivais = [r1];
     if (dupla) rivais.push(bot(base, [r1.nome], Math.max(0, info(r1.pts).i - info(base).i) > 0 ? 1 : 0));
     const parceiro = !dupla ? null : amigo
-      ? { nome: amigo.nome, avatar: amigo.avatar, pts: amigo.ranque || 0, info: info(amigo.ranque || 0), humano: true }
+      ? { nome: amigo.nome, avatar: amigo.avatar, estiloNome: amigo.estiloNome, titulo: amigo.titulo, raroTitulo: amigo.raroTitulo, favorita: amigo.favorita, trofeus: amigo.trofeus, nivel: amigo.nivel, cla: amigo.cla, pts: amigo.ranque || 0, info: info(amigo.ranque || 0), humano: true }
       : bot(r.pts, rivais.map((b) => b.nome), 0);
     const rivalI = Math.max(...rivais.map((b) => b.info.i));
     const meuI = info(r.pts).i;

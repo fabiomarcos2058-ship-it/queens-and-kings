@@ -23,7 +23,13 @@ const X1 = (() => {
 
   function perfil() {
     const d = Estado.d;
-    return { uid: Conta.uid(), ranque: typeof Ranque !== 'undefined' ? Ranque.dados().pts : 0, versao: String(window.VERSAO_JOGO || ''), arena: Arena.daQtd(d.recorde).id, nome: d.nome, estiloNome: Passe.estiloNome(), avatar: d.avatar, torres: Estado.minhasTorres(), deck: d.deck.slice(0, 8), niveis: Object.fromEntries(d.deck.map((id) => [id, d.colecao[id] ? Estado.nivelEfetivo(id) : 1])) };
+    return { uid: Conta.uid(), ranque: typeof Ranque !== 'undefined' ? Ranque.dados().pts : 0, versao: String(window.VERSAO_JOGO || ''), arena: Arena.daQtd(d.recorde).id, nome: d.nome, estiloNome: Passe.estiloNome(), avatar: d.avatar, ...cartaoPublico(), torres: Estado.minhasTorres(), deck: d.deck.slice(0, 8), niveis: Object.fromEntries(d.deck.map((id) => [id, d.colecao[id] ? Estado.nivelEfetivo(id) : 1])) };
+  }
+  // dados do cartão de batalha (aparecem no VS da ranqueada 2v2 pra quem está na dupla)
+  function cartaoPublico() {
+    const d = Estado.d;
+    if (typeof Titulos === 'undefined') return {};
+    try { return { titulo: Titulos.textoAtual(), raroTitulo: Titulos.raroDe(Titulos.atual()), favorita: Titulos.favorita() || '', trofeus: d.trofeus || 0, nivel: d.nivel || 1, cla: (d.cla && d.cla.nome) || '' }; } catch (e) { return {}; }
   }
   const novoCodigo = () => Array.from({ length: 4 }, () => 'ABCDEFGHJKLMNPQRSTUVWXYZ'[Math.floor(Math.random() * 24)]).join('');
 
@@ -231,5 +237,7 @@ const X1 = (() => {
   }
 
   const codigo = () => sala;
-  return { criarSala, comecar, comecar2v2, anunciarPartida, trocarTime, entrarSala, assistir, cancelar, responder, codigo, VAGAS };
+  // acesso ao Realtime Database (convites de amigos também passam por aqui)
+  async function rt() { await iniciar(); return { m, r }; }
+  return { criarSala, comecar, comecar2v2, anunciarPartida, trocarTime, entrarSala, assistir, cancelar, responder, codigo, VAGAS, rt, cartaoPublico };
 })();
