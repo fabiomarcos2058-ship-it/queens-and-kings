@@ -75,7 +75,7 @@ const RanqueUI = (() => {
     requestAnimationFrame(() => tela.classList.add('aberta'));
     tela.querySelector('#tr-voltar').onclick = fechar;
     tela.querySelector('#tr-1v1').onclick = () => procurar(false);
-    tela.querySelector('#tr-2v2').onclick = () => procurar(true);
+    tela.querySelector('#tr-2v2').onclick = escolher2v2;
     tela.querySelector('#tr-passe').onclick = passe;
     tela.querySelector('#tr-patentes').onclick = patentes;
     tela.querySelector('#tr-historico').onclick = () => historico();
@@ -86,11 +86,42 @@ const RanqueUI = (() => {
   }
 
   // ---------- procurando partida ----------
-  async function procurar(dupla) {
+  // tela de VS (serve pra quem procura e pro amigo que está na dupla)
+  function telaVS(el, pt) {
+    const d = Estado.d, f = Ranque.info(Ranque.dados().pts);
+    const lado = (nome, av, info, eu = false) => `<div class="vs-jogador${eu ? ' eu' : ''}">${emblema(info.i, 92, { raios: false })}<img class="vs-av" src="${avatar(av)}" alt="" /><b>${esc(nome)}</b><small>${info.nome}</small></div>`;
+    const time = [lado(d.nome || 'Você', d.avatar, f, true)].concat(pt.parceiro ? [lado(pt.parceiro.nome, pt.parceiro.avatar, Ranque.info(pt.parceiro.pts))] : []);
+    const rivais = pt.rivais.map((b) => lado(b.nome, b.avatar, Ranque.info(b.pts)));
+    const meuI = f.i;
+    const pv = Ranque.previsao(pt.dupla, pt.rivalI);
+    el.classList.add('achou');
+    el.innerHTML = `<div class="pr-raios"></div><div class="vs-tela">
+        <div class="vs-time rival">${rivais.join('')}</div>
+        <div class="vs-meio"><span>VS</span>${pt.rivalI > meuI ? `<em class="vs-alta">⬆ Patente mais alta! Vitória vale +${pv.ganho} PR</em>` : `<em>Vitória +${pv.ganho} PR · derrota -${pv.perda}</em>`}</div>
+        <div class="vs-time meu">${time.join('')}</div></div>`;
+    try { navigator.vibrate && navigator.vibrate(80); } catch (e) { /* nada */ }
+  }
+  function telaProcurando(dupla) {
+    const el = document.createElement('div');
+    el.className = 'procurando';
+    el.innerHTML = `<div class="pr-raios"></div>
+      <div class="pr-busca"><div class="pr-roleta">${Ranque.PATENTES.map((_, i) => `<img src="${Ranque.img(i, true)}" alt="" style="--i:${i}" />`).join('')}</div>
+        <b>Procurando ${dupla ? 'adversários' : 'adversário'}<span class="pontinhos"><i>.</i><i>.</i><i>.</i></span></b><small>${dupla ? 'Ranqueada 2v2' : 'Ranqueada 1v1'}</small>
+        <button class="btn-modal secundario" id="pr-cancelar">Cancelar</button></div>`;
+    $('app').appendChild(el);
+    return el;
+  }
+
+  // amigo = perfil do amigo que está na sua dupla (ranqueada 2v2 online)
+  async function procurar(dupla, amigo = null) {
     const d = Estado.d;
     if (d.deck.length < 8) { UI.toast('Você precisa de 8 cartas no deck para a ranqueada.'); return; }
-    if (typeof Atualizacao !== 'undefined' && !(await Atualizacao.podeJogar())) return;
-    const pt = Ranque.partida(dupla);
+    if (!amigo && typeof Atualizacao !== 'undefined' && !(await Atualizacao.podeJogar())) return;
+    const pt = Ranque.partida(dupla, amigo);
+    if (amigo) {
+      // o amigo vê a mesma partida (pra ele, o parceiro sou eu)
+      X1.anunciarPartida({ ...pt, parceiro: { nome: d.nome, avatar: d.avatar, pts: Ranque.dados().pts, humano: true } }).catch(() => {});
+    }
     const r = Ranque.dados(), f = Ranque.info(r.pts);
     const el = document.createElement('div');
     el.className = 'procurando';
@@ -100,25 +131,111 @@ const RanqueUI = (() => {
         <button class="btn-modal secundario" id="pr-cancelar">Cancelar</button></div>`;
     $('app').appendChild(el);
     let cancelou = false;
-    el.querySelector('#pr-cancelar').onclick = () => { cancelou = true; el.remove(); };
+    el.querySelector('#pr-cancelar').onclick = () => { cancelou = true; el.remove(); if (amigo) X1.cancelar(); };
+    if (amigo) el.querySelector('#pr-cancelar').remove(); // com amigo a partida já foi anunciada
     await new Promise((ok) => setTimeout(ok, 1600 + Math.random() * 1600));
     if (cancelou) return;
-    const lado = (nome, av, info, eu = false) => `<div class="vs-jogador${eu ? ' eu' : ''}">${emblema(info.i, 92, { raios: false })}<img class="vs-av" src="${avatar(av)}" alt="" /><b>${esc(nome)}</b><small>${info.nome}</small></div>`;
-    const meuNome = d.nome || 'Você';
-    const time = [lado(meuNome, d.avatar, f, true)].concat(pt.parceiro ? [lado(pt.parceiro.nome, pt.parceiro.avatar, pt.parceiro.info)] : []);
-    const rivais = pt.rivais.map((b) => lado(b.nome, b.avatar, b.info));
-    const pv = Ranque.previsao(dupla, pt.rivalI);
-    el.classList.add('achou');
-    el.innerHTML = `<div class="pr-raios"></div><div class="vs-tela">
-        <div class="vs-time rival">${rivais.join('')}</div>
-        <div class="vs-meio"><span>VS</span>${pt.rivalI > pt.meuI ? `<em class="vs-alta">⬆ Patente mais alta! Vitória vale +${pv.ganho} PR</em>` : `<em>Vitória +${pv.ganho} PR · derrota -${pv.perda}</em>`}</div>
-        <div class="vs-time meu">${time.join('')}</div></div>`;
-    try { navigator.vibrate && navigator.vibrate(80); } catch (e) { /* nada */ }
+    telaVS(el, pt);
     await new Promise((ok) => setTimeout(ok, 2300));
     el.classList.add('sumir');
     setTimeout(() => el.remove(), 300);
     fechar();
-    Batalha.iniciar({ modo: dupla ? '2v2' : 'ranq', ranque: pt, fim: M.fimDeBatalha });
+    if (amigo) X1.comecar2v2(M.fimDeBatalha, { ranque: pt });
+    else Batalha.iniciar({ modo: dupla ? '2v2' : 'ranq', ranque: pt, fim: M.fimDeBatalha });
+  }
+
+  // o amigo da dupla: vê a procura e o VS ao mesmo tempo que quem chamou
+  function procurandoConvidado(rq) {
+    if (!rq) return;
+    const el = telaProcurando(true);
+    el.querySelector('#pr-cancelar').remove();
+    const pt = { ...rq, meuI: Ranque.info(Ranque.dados().pts).i };
+    setTimeout(() => telaVS(el, pt), 1500);
+    // some quando a batalha começar
+    const fimVS = setInterval(() => { if (document.body.classList.contains('em-batalha') || !document.body.contains(el)) { clearInterval(fimVS); el.classList.add('sumir'); setTimeout(() => el.remove(), 300); } }, 200);
+    setTimeout(() => { clearInterval(fimVS); el.remove(); }, 15000);
+  }
+
+  // ---------- ranqueada 2v2: com parceiro IA ou com um amigo ----------
+  function escolher2v2() {
+    const m = UI.modal({
+      titulo: '🤝 Ranqueada 2v2',
+      classe: 'modal-ranq modal-escolher2v2',
+      html: `<p>Com quem você quer jogar? Os dois ganham (ou perdem) pontos na própria patente.</p>
+        <button class="tr-btn dois e2-btn" id="e2-amigo"><span>👥</span><b>Com um amigo</b><small>Vocês dois contra uma dupla de bots com patente</small></button>
+        <button class="tr-btn um e2-btn" id="e2-ia"><span>🤖</span><b>Com parceiro IA</b><small>Um bot com patente parecida com a sua</small></button>`,
+      botoes: [{ texto: 'Voltar', classe: 'secundario' }],
+    });
+    m.el.querySelector('#e2-ia').onclick = () => { m.fechar(); procurar(true); };
+    m.el.querySelector('#e2-amigo').onclick = () => { m.fechar(); salaRanq(); };
+  }
+
+  async function salaRanq() {
+    if (!Conta.logado()) { UI.toast('Entre numa conta para jogar com amigos!'); return; }
+    if (Estado.d.deck.length < 8) { UI.toast('Você precisa de 8 cartas no deck para a ranqueada.'); return; }
+    if (typeof Atualizacao !== 'undefined' && !(await Atualizacao.podeJogar())) return;
+    let parceiro = null, fechada = false;
+    const chamados = new Set();
+    const m = UI.modal({ titulo: '👥 Dupla da ranqueada', classe: 'modal-x1 modal-sala2v2', html: '<div class="x1-carregando"></div>',
+      botoes: [{ texto: 'Cancelar', classe: 'secundario', acao: () => { fechada = true; X1.cancelar(); } }] });
+    m.el.addEventListener('click', (e) => { if (e.target === m.el) e.stopPropagation(); }, true);
+    const corpo = m.el.querySelector('.modal-corpo');
+    const f = Ranque.info(Ranque.dados().pts);
+    const desenhar = () => {
+      const caixa = corpo.querySelector('#rq-dupla');
+      if (!caixa) return;
+      const fp = parceiro ? Ranque.info(parceiro.ranque || 0) : null;
+      caixa.innerHTML = `<div class="rq-dupla-linha">
+          <div class="vaga azul eu">${emblema(f.i, 46, { raios: false, animado: false })}<div><b>${esc(Estado.d.nome)}</b><small>${f.nome}</small></div></div>
+          <span class="rq-mais">+</span>
+          <div class="vaga azul${parceiro ? '' : ' vazia'}">${parceiro ? `${emblema(fp.i, 46, { raios: false, animado: false })}<div><b>${esc(parceiro.nome)}</b><small>${fp.nome}</small></div>` : '<span class="vaga-ia">❔</span><div><b>Esperando…</b><small>chame um amigo</small></div>'}</div>
+        </div>`;
+      const b = corpo.querySelector('#rq-procurar');
+      b.classList.toggle('desativado', !parceiro);
+      b.textContent = parceiro ? '🏅 Procurar partida' : 'Esperando o amigo entrar…';
+    };
+    try {
+      const cod = await X1.criarSala({
+        modo: '2v2', ranq: true,
+        aoMudarVagas: (v) => {
+          const antes = parceiro;
+          parceiro = v.azul2 || null;
+          if (parceiro && !antes) UI.toast(`${esc(parceiro.nome)} entrou na dupla! 🤝`);
+          desenhar();
+        },
+        aoResposta: (r) => { if (r && r.nome) UI.toast(`${esc(r.nome)} ${r.r === 'ocupado' ? 'está numa batalha agora' : 'não pode agora'}.`); },
+      });
+      if (fechada) { X1.cancelar(); return; }
+      corpo.innerHTML = `<div id="rq-dupla"></div>
+        <div class="sala-codigo"><small>Código</small><b>${cod}</b><button class="btn-peq" id="rq-copiar">📋 Copiar</button></div>
+        <div class="titulo-conquistas">Chamar um amigo</div>
+        <div id="rq-amigos" class="x1-amigos"><div class="x1-carregando"></div></div>
+        <button class="btn-modal principal sala-comecar desativado" id="rq-procurar">Esperando o amigo entrar…</button>`;
+      desenhar();
+      corpo.querySelector('#rq-copiar').onclick = () => navigator.clipboard?.writeText(cod).then(() => UI.toast('Código copiado!'), () => {});
+      Amigos.listar().then((lista) => {
+        const caixa = corpo.querySelector('#rq-amigos');
+        if (!caixa) return;
+        caixa.innerHTML = lista.length ? `<div class="lista-jogadores">${lista.map((p) => `<div class="linha-jogador"><div class="lj-avatar"><img src="${avatar(p.avatar || 'coroa')}" alt="" /></div><div class="lj-nome"><b>${esc(p.nome || 'Jogador')}</b><small>${Amigos.online(p) ? '<span class="txt-on">online</span> · ' : ''}${p.ranque ? `🏅 ${Ranque.info(p.ranque.pts).nome}` : 'Sem patente ainda'}</small></div><button class="btn-modal principal btn-chamar" data-chamar="${p.uid}">🤝 Chamar</button></div>`).join('')}</div>`
+          : '<p class="aviso">Adicione amigos em <b>👥 Amigos</b> ou mande o código.</p>';
+        caixa.querySelectorAll('[data-chamar]').forEach((b) => (b.onclick = async (e) => {
+          e.stopPropagation();
+          const p = lista.find((x) => x.uid === b.dataset.chamar);
+          if (chamados.has(p.uid)) return;
+          try { await Amigos.convidar(p.uid, cod, 'ranq2v2'); chamados.add(p.uid); b.textContent = 'Chamado ✓'; b.classList.add('desativado'); UI.toast(`Convite enviado pra ${esc(p.nome || 'seu amigo')}!`); } catch (er) { UI.toast('Não deu pra mandar o convite.'); }
+        }));
+      }).catch(() => {});
+      corpo.querySelector('#rq-procurar').onclick = () => {
+        if (!parceiro) return UI.toast('Espere seu amigo entrar na dupla!');
+        if (typeof Atualizacao !== 'undefined' && Atualizacao.versaoDoAmigo(parceiro.versao) !== 'igual') return UI.toast(`${esc(parceiro.nome)} precisa atualizar o jogo antes!`);
+        fechada = true; m.fechar();
+        procurar(true, parceiro);
+      };
+    } catch (e) {
+      m.fechar(); X1.cancelar();
+      UI.toast(e.message || 'Não deu para criar a dupla.');
+      console.error(e);
+    }
   }
 
   // ---------- fim da partida ranqueada ----------
@@ -306,5 +423,5 @@ const RanqueUI = (() => {
     atualizarBotao();
   }
 
-  return { init, abrir, fechar, fim, atualizarBotao, historico, patentes, passe, emblema, promocao };
+  return { init, abrir, fechar, fim, atualizarBotao, historico, patentes, passe, emblema, promocao, procurandoConvidado };
 })();

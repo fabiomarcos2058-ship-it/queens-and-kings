@@ -383,12 +383,13 @@
     const TEMPO = 30;
     const el = document.createElement('div');
     el.className = 'convite-x1';
-    const ehDupla = c.modo === '2v2';
+    const ehRanq = c.modo === 'ranq2v2';
+    const ehDupla = c.modo === '2v2' || ehRanq;
     if (ehDupla) el.classList.add('convite-2v2');
     el.innerHTML = `<div class="convite-caixa">
-        <div class="convite-titulo">${ehDupla ? '🤝 Bora de 2v2?' : '⚔️ Desafio de x1!'}</div>
+        <div class="convite-titulo">${ehRanq ? '🏅 Ranqueada 2v2!' : ehDupla ? '🤝 Bora de 2v2?' : '⚔️ Desafio de x1!'}</div>
         <img class="convite-avatar" src="${avatarDe(c.avatar)}" alt="" />
-        <p><b>${Passe.nomeHtml(c.nome || 'Um amigo', c.estiloNome)}</b> ${ehDupla ? 'te chamou pra uma sala de 2v2!' : 'está te chamando pra um x1!'}</p>
+        <p><b>${Passe.nomeHtml(c.nome || 'Um amigo', c.estiloNome)}</b> ${ehRanq ? 'quer jogar a Ranqueada 2v2 com você na dupla!' : ehDupla ? 'te chamou pra uma sala de 2v2!' : 'está te chamando pra um x1!'}</p>
         <div class="convite-tempo"><i style="animation-duration:${TEMPO}s"></i></div>
         <div class="convite-botoes"><button class="btn-modal secundario" data-r="nao">Recusar</button><button class="btn-modal principal" data-r="sim">${ehDupla ? 'Entrar na sala 🤝' : 'Aceitar ⚔️'}</button></div>
       </div>`;
@@ -805,8 +806,9 @@
           const p = info.vagas[par];
           const rivais = Object.entries(info.vagas).filter(([l]) => timeVaga(l) !== timeVaga(info.meuLado)).map(([, x]) => x.nome);
           X1.assistir(h, fimDeBatalha, { meuLado: info.meuLado, nomeParceiro: p ? p.nome : 'Parceiro IA', deckParceiro: p ? p.deck : null,
-            titulo: rivais.length ? `vs ${rivais.join(' e ')}` : `com ${p ? p.nome : 'IA'}` });
+            titulo: rivais.length ? `vs ${rivais.join(' e ')}` : `com ${p ? p.nome : 'IA'}`, ranque: info.ranque || null });
         },
+        aoProcurando: (rq) => { espera.fechar(); RanqueUI.procurandoConvidado(rq); },
         aoMudarVagas: (v, eu) => { vagasSala = v; meuLadoSala = eu; desenharSala(); },
       });
       const vs = Atualizacao.versaoDoAmigo(host.versao);
@@ -816,6 +818,16 @@
         return;
       }
       espera.el.querySelector('.modal-titulo').textContent = `Sala de ${host.nome}`;
+      if (host.modo === '2v2' && host.ranq) {
+        const f = Ranque.info(host.ranque || 0);
+        espera.el.querySelector('.modal-titulo').textContent = '🏅 Dupla da ranqueada';
+        espera.el.querySelector('.modal-corpo').innerHTML = `<div class="rq-dupla-linha">
+            <div class="vaga azul">${RanqueUI.emblema(f.i, 46, { raios: false, animado: false })}<div><b>${esc(host.nome)}</b><small>${f.nome}</small></div></div>
+            <span class="rq-mais">+</span>
+            <div class="vaga azul eu">${RanqueUI.emblema(Ranque.info(Ranque.dados().pts).i, 46, { raios: false, animado: false })}<div><b>${esc(d().nome)}</b><small>Você</small></div></div></div>
+          <p class="x1-esperando">${esc(host.nome)} vai procurar a partida<span>...</span></p>`;
+        return;
+      }
       if (host.modo === '2v2') {
         meuLadoSala = host.meuLado;
         espera.el.querySelector('.modal-corpo').innerHTML = `<div id="sala-vagas"></div>

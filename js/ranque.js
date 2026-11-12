@@ -80,12 +80,16 @@ const Ranque = (() => {
     const alvo = Math.max(0, Math.min(3400, pts + passo * 300 + Math.round((Math.random() - 0.5) * 120)));
     return { nome: nomeBot(usados), avatar: AVATARES[Math.floor(Math.random() * AVATARES.length)], pts: alvo, info: info(alvo) };
   }
-  function partida(dupla) {
+  // amigo = { nome, avatar, ranque } quando a dupla é com um amigo de verdade (os bots ficam na média dos dois)
+  function partida(dupla, amigo = null) {
     const r = dados();
-    const r1 = bot(r.pts);
+    const base = amigo ? Math.round((r.pts + (amigo.ranque || 0)) / 2) : r.pts;
+    const r1 = bot(base);
     const rivais = [r1];
-    if (dupla) rivais.push(bot(r.pts, [r1.nome], Math.max(0, info(r1.pts).i - info(r.pts).i) > 0 ? 1 : 0));
-    const parceiro = dupla ? bot(r.pts, rivais.map((b) => b.nome), 0) : null;
+    if (dupla) rivais.push(bot(base, [r1.nome], Math.max(0, info(r1.pts).i - info(base).i) > 0 ? 1 : 0));
+    const parceiro = !dupla ? null : amigo
+      ? { nome: amigo.nome, avatar: amigo.avatar, pts: amigo.ranque || 0, info: info(amigo.ranque || 0), humano: true }
+      : bot(r.pts, rivais.map((b) => b.nome), 0);
     const rivalI = Math.max(...rivais.map((b) => b.info.i));
     const meuI = info(r.pts).i;
     // dificuldade e nível das cartas dos bots crescem com a patente deles

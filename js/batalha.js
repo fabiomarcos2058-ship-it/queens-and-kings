@@ -1431,7 +1431,8 @@ const Batalha = (() => {
       arenaId: rede.host.arena || 'festival',
     };
     if (dupla) s.azul2 = { elixir: 5 };
-    montar(dupla ? `2v2 · ${rede.titulo || `com ${s.nomeParceiro}`}` : `X1 contra ${rede.host.nome}`);
+    if (rede.ranque) s.ranque = rede.ranque;
+    montar(rede.ranque ? `🏅 Ranqueada 2v2 · vs ${rede.ranque.rivais.map((b) => b.nome).join(' e ')}` : dupla ? `2v2 · ${rede.titulo || `com ${s.nomeParceiro}`}` : `X1 contra ${rede.host.nome}`);
   }
 
   function receberEstado(est) {
@@ -1556,7 +1557,7 @@ const Batalha = (() => {
     if (est.fim) {
       s.acabou = true;
       const inv = { vitoria: 'derrota', derrota: 'vitoria', empate: 'empate' };
-      const dados = D ? { resultado: (V ? inv[est.fim.resultado] : est.fim.resultado) || 'empate', coroas: s.azul.coroas, coroasInimigo: s.vermelho.coroas, modo: '2v2', deck: Estado.d.deck.slice(0, 8), deckParceiro: s.rede.deckParceiro || s.rede.host.deck, nomeParceiro: s.nomeParceiro, duracao: Math.round(s.t) }
+      const dados = D ? { resultado: (V ? inv[est.fim.resultado] : est.fim.resultado) || 'empate', coroas: s.azul.coroas, coroasInimigo: s.vermelho.coroas, modo: '2v2', ranque: s.ranque || null, deck: Estado.d.deck.slice(0, 8), deckParceiro: s.rede.deckParceiro || s.rede.host.deck, nomeParceiro: s.nomeParceiro, duracao: Math.round(s.t) }
         : { resultado: inv[est.fim.resultado] || 'empate', coroas: est.cz[1], coroasInimigo: est.cz[0], modo: 'x1', deck: Estado.d.deck.slice(0, 8), deckRival: s.rede.host.deck, nomeRival: s.rede.host.nome, duracao: Math.round(s.t) };
       setTimeout(() => ao_fim && ao_fim(dados), 900);
     }
