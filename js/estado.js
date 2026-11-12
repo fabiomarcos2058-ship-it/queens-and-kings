@@ -3,7 +3,19 @@ const Estado = (() => {
   const CHAVE = 'queens-and-kings-v3'; // v3: começa sem cartas e ganha as 8 básicas nos baús iniciais
   const NIVEL_MAX = 9;
   // Para evoluir do nível N para N+1: cópias e ouro (índice = nível atual)
-  const COPIAS = [0, 2, 4, 10, 20, 50, 100, 200, 400];
+  const COPIAS = [0, 2, 4, 10, 20, 50, 100, 200, 400]; // comuns
+  // cópias para subir de nível conforme a raridade (cartas raras saem bem menos dos baús, então pedem menos)
+  const COPIAS_RAR = {
+    comum: COPIAS,
+    rara: [0, 2, 4, 8, 15, 30, 60, 110, 200],
+    epica: [0, 1, 2, 4, 8, 15, 30, 50, 90],
+    lendaria: [0, 1, 2, 3, 5, 8, 14, 22, 35],
+  };
+  // cópias que a carta precisa para sair do nível n
+  function copiasNivel(id, n) {
+    const c = typeof id === 'string' ? carta(id) : id;
+    return (COPIAS_RAR[c && c.raridade] || COPIAS)[n] || 0;
+  }
   const OURO = [0, 25, 80, 200, 500, 1200, 3000, 6000, 12000]; // OURO[n] = preço para evoluir uma carta do nível n ao n+1
   const XP_NIVEL = (n) => 30 + n * 20; // nível 2 com ~2 vitórias; nível 9 com ~40 batalhas
 
@@ -214,7 +226,7 @@ const Estado = (() => {
   function podeEvoluir(id) {
     const n = d.colecao[id].nivel;
     if (n >= NIVEL_MAX) return { ok: false, motivo: 'Nível máximo' };
-    if (d.colecao[id].copias < COPIAS[n]) return { ok: false, motivo: `Faltam cópias (${d.colecao[id].copias}/${COPIAS[n]})` };
+    if (d.colecao[id].copias < copiasNivel(id, n)) return { ok: false, motivo: `Faltam cópias (${d.colecao[id].copias}/${copiasNivel(id, n)})` };
     if (d.ouro < OURO[n]) return { ok: false, motivo: `Falta ouro (${OURO[n]})` };
     return { ok: true };
   }
@@ -222,7 +234,7 @@ const Estado = (() => {
   function evoluir(id) {
     if (!podeEvoluir(id).ok) return false;
     const n = d.colecao[id].nivel;
-    d.colecao[id].copias -= COPIAS[n];
+    d.colecao[id].copias -= copiasNivel(id, n);
     d.ouro -= OURO[n];
     d.colecao[id].nivel++;
     d.conquistas.evolucoes++;
@@ -233,7 +245,7 @@ const Estado = (() => {
 
   // Distribui cópias entre cartas aleatórias.
   // Quase tudo vai para cartas que você já tem; uma carta nova só aparece com a chance do baú.
-  const PESO = { comum: 6, rara: 3, epica: 1, lendaria: 0.2 };
+  const PESO = { comum: 6, rara: 4.5, epica: 3.6, lendaria: 1.8 };
   function pesado(lista) {
     const soma = lista.reduce((a, c) => a + PESO[c.raridade], 0);
     let r = Math.random() * soma;
@@ -257,7 +269,7 @@ const Estado = (() => {
     const col = d.colecao[id];
     if (!col) return Infinity;
     let falta = 0;
-    for (let n = col.nivel || 1; n < NIVEL_MAX; n++) falta += COPIAS[n];
+    for (let n = col.nivel || 1; n < NIVEL_MAX; n++) falta += copiasNivel(id, n);
     return Math.max(0, falta - (col.copias || 0));
   }
   // carta no máximo (ou com cópias suficientes para chegar lá): não vem mais em baú, passe ou loja
@@ -281,7 +293,7 @@ const Estado = (() => {
     if (!pool.length && total > 0) { ganhos._ouro = total * 25; d.ouro += total * 25; total = 0; }
     while (total > 0 && pool.length) {
       const c = pesado(pool);
-      const q = Math.min(total, Math.max(1, Math.round(total * (c.raridade === 'comum' ? 0.4 : c.raridade === 'rara' ? 0.3 : 0.15))));
+      const q = Math.min(total, Math.max(1, Math.round(total * ({ comum: 0.32, rara: 0.2, epica: 0.1, lendaria: 0.05 }[c.raridade] || 0.2))));
       ganhos[c.id] = (ganhos[c.id] || 0) + q;
       total -= q;
     }
@@ -420,7 +432,7 @@ const Estado = (() => {
 
   return {
     get d() { return d; }, carregar, salvar, apagar, importar, recarregarCatalogo, aoSalvar, carta, stats, catalogo: () => catalogo, tem, liberada, disponiveis, proximaLiberacao, baisAteLendaria,
-    COPIAS, OURO, NIVEL_MAX, BAUS, XP_NIVEL, CORINGAS, darCoringa, usarCoringa, maxada, faltaParaMax,
+    COPIAS, COPIAS_RAR, copiasNivel, OURO, NIVEL_MAX, BAUS, XP_NIVEL, CORINGAS, darCoringa, usarCoringa, maxada, faltaParaMax,
     contarUsos, usosRestantes, todasCartas: () => todas.filter((c) => !c.token),
     TORRE_OURO, TROPAS_TORRE, nivelRei, minhasTorres, statsTorre, podeEvoluirTorre, evoluirTorre, escolherTropaTorre,
     ganharXp, podeEvoluir, evoluir, abrirBau, tempoRestante, sortearCopias, ofertasDoDia, presenteDiario, sorteio,

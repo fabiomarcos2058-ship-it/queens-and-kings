@@ -37,7 +37,7 @@ const Inventario = (() => {
       classe: 'modal-inv-cartas',
       html: `<p class="aviso">Você tem <b>${Estado.d.coringas[tipo]}</b>. Toque na carta que vai receber as cópias.</p>
         <div class="inv-cartas">${lista.map((c) => {
-          const col = Estado.d.colecao[c.id], prec = Estado.COPIAS[col.nivel] || 1;
+          const col = Estado.d.colecao[c.id], prec = Estado.copiasNivel(c, col.nivel) || 1;
           return `<button class="inv-carta" data-id="${c.id}">${Cartas.html(c, { mini: true })}
             <div class="inv-barra${col.copias >= prec ? ' cheia' : ''}"><i style="width:${Math.min(100, (col.copias / prec) * 100)}%"></i><small>${col.copias}/${prec}</small></div></button>`;
         }).join('')}</div>`,
@@ -49,7 +49,7 @@ const Inventario = (() => {
   function quantidade(tipo, c, depois) {
     const col = Estado.d.colecao[c.id];
     const max = Math.min(Estado.d.coringas[tipo] || 0, Estado.faltaParaMax(c.id));
-    const prec = Estado.COPIAS[col.nivel] || 1;
+    const prec = Estado.copiasNivel(c, col.nivel) || 1;
     const sugerido = Math.max(1, Math.min(max, prec - col.copias > 0 ? prec - col.copias : 1));
     const md = UI.modal({
       titulo: esc(c.nome),

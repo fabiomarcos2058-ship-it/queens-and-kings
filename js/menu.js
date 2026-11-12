@@ -1178,7 +1178,6 @@
     const deck = d().deck;
     const etiqueta = (id) => {
       const col = d().colecao[id];
-      const prec = Estado.COPIAS[col.nivel];
       const u = Estado.usosRestantes(id);
       if (u !== null) return `Nível ${col.nivel} · ${u} partida${u === 1 ? '' : 's'}`;
       return col.nivel >= Estado.NIVEL_MAX ? `Nível ${col.nivel} · máx` : `Nível ${col.nivel}`;
@@ -1186,7 +1185,7 @@
     const barraCopias = (id) => {
       const col = d().colecao[id];
       if (col.nivel >= Estado.NIVEL_MAX) return '';
-      const prec = Estado.COPIAS[col.nivel];
+      const prec = Estado.copiasNivel(id, col.nivel);
       const pode = Estado.podeEvoluir(id).ok;
       return `<div class="copias${pode ? ' pode' : ''}"><i style="width:${Math.min(100, (col.copias / prec) * 100)}%"></i><b>${pode ? 'Evoluir!' : `${col.copias}/${prec}`}</b></div>`;
     };
@@ -1269,7 +1268,7 @@
       html: `<div class="detalhe-carta">${c.evolucao ? `<div class="evo-palco"><video class="evo-video" src="assets/evolucao/raios.mp4" autoplay muted loop playsinline></video>${Cartas.html(c, { mini: true })}</div>` : Cartas.html(c, { mini: true })}
         <div><span class="raridade-tag ${c.evolucao ? 'evo' : c.raridade}">${c.evolucao ? '🧬 Evolução' : Cartas.NOMES_RARIDADE[c.raridade]}</span>
         <p class="tipo">${c.tipo} · ${c.custo} de elixir</p><p>${c.descricao}</p>
-        <p class="aviso">Nível ${col.nivel} · cópias ${col.copias}${col.nivel < Estado.NIVEL_MAX ? `/${Estado.COPIAS[col.nivel]}` : ''}</p></div></div>
+        <p class="aviso">Nível ${col.nivel} · cópias ${col.copias}${col.nivel < Estado.NIVEL_MAX ? `/${Estado.copiasNivel(c, col.nivel)}` : ''}</p></div></div>
         <div class="tabela-stats">${linhas.map(([k, v]) => `<div><span>${k}</span><b>${typeof v === 'number' ? fmt(v) : v}</b></div>`).join('')}</div>
         ${infoClasse(c)}
         ${c.evolucao ? `<div class="hab-detalhe evo-detalhe"><b>🧬 ${c.evolucao.nome}</b><br><small>${c.evolucao.descricao}</small></div>` : ''}
