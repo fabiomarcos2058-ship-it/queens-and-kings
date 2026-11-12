@@ -2912,6 +2912,628 @@
         "mult": 1.8,
         "descricao": "Voa de inimigo em inimigo (até 4), acertando cada um com um golpe de 1,8x e deixando tonto."
       }
+    },
+    {
+      "id": "goku_vegeta",
+      "nome": "Goku & Vegeta",
+      "raridade": "ultra",
+      "custo": 7,
+      "tipo": "Ultra · Rivais Eternos",
+      "descricao": "Os dois maiores rivais do universo lutando lado a lado. Goku desvia de tudo com o Instinto Superior, Vegeta fica mais forte a cada golpe com o Ultra Ego. Os dois se revezam na frente da luta.",
+      "vida": 2500,
+      "dano": 330,
+      "velocidade": 85,
+      "alcance": 18,
+      "cadencia": 0.85,
+      "danoTorre": 0.55,
+      "passiva": {
+        "nome": "Instinto & Ego",
+        "tipo": "rivais",
+        "descricao": "Os dois se revezam a cada 6s. Instinto (Goku na frente): 45% de chance de desviar, e todo desvio vira contra-ataque. Ego (Vegeta na frente): cada golpe que leva dá +4% de dano (até +60%) e ele cura 15% do dano que causa."
+      },
+      "habilidade": {
+        "nome": "Rivais Eternos",
+        "tipo": "rivaisEternos",
+        "custo": 4,
+        "recarga": 22,
+        "mult": 2.6,
+        "descricao": "Goku solta um Kamehameha e Vegeta um Hakai, um de cada lado, cruzando no inimigo mais forte. Depois os dois entram em Sincronia por 6s: desvio do Goku e Ego do Vegeta ao mesmo tempo."
+      },
+      "trofeus": 0,
+      "exclusivo": [],
+      "summon": true,
+      "alvo": "tudo",
+      "arena": 1,
+      "rosto": [
+        360,
+        390,
+        250
+      ],
+      "arte": [
+        23,
+        0,
+        690
+      ]
+    },
+    {
+      "id": "gogeta_vegetto_blue",
+      "nome": "Gogeta & Vegetto (Blue)",
+      "raridade": "ultra",
+      "custo": 7,
+      "tipo": "Ultra · Fusões Supremas",
+      "descricao": "As duas fusões mais fortes chegam juntas, em dois corpos. Dividem todo o dano que levam, sempre atacam o mesmo alvo e, se uma cair, a outra fica furiosa.",
+      "vida": 1500,
+      "dano": 260,
+      "velocidade": 82,
+      "alcance": 18,
+      "cadencia": 0.85,
+      "danoTorre": 0.55,
+      "passiva": {
+        "nome": "Ligação das Fusões",
+        "tipo": "gemeos",
+        "descricao": "Entram os dois: Gogeta (soco pesado) e Vegetto (Espada Espiritual rápida). Metade do dano que um leva vai pro outro, e os dois sempre focam no mesmo inimigo. Se um cair, o outro entra em Fúria da Fusão: cura 30%, +60% de dano e ataca 25% mais rápido."
+      },
+      "habilidade": {
+        "nome": "Kamehameha Final + Big Bang",
+        "tipo": "fusaoDupla",
+        "custo": 4,
+        "recarga": 20,
+        "mult": 2.2,
+        "descricao": "Gogeta solta o Big Bang Kamehameha e Vegetto o Kamehameha Final no mesmo alvo. Onde os dois raios se encontram, uma explosão enorme."
+      },
+      "trofeus": 0,
+      "exclusivo": [],
+      "summon": true,
+      "alvo": "tudo",
+      "arena": 1,
+      "rosto": [
+        325,
+        380,
+        220
+      ],
+      "arte": [
+        0,
+        0,
+        736
+      ],
+      "gemeos": [
+        "gogeta_blue_solo",
+        "vegetto_blue_solo"
+      ]
+    },
+    {
+      "id": "vegetto_gogeta",
+      "nome": "Vegetto & Gogeta (SSJ)",
+      "raridade": "ultra",
+      "custo": 7,
+      "tipo": "Ultra · Lâmina & Punho",
+      "descricao": "Vegetto com a Espada Espiritual e Gogeta com os punhos e a esfera roxa que purifica tudo. Nenhum truque funciona contra eles.",
+      "vida": 2500,
+      "dano": 330,
+      "velocidade": 84,
+      "alcance": 18,
+      "cadencia": 0.9,
+      "danoTorre": 0.55,
+      "passiva": {
+        "nome": "Espada & Punho",
+        "tipo": "alternar",
+        "descricao": "Os golpes se alternam. Espada Espiritual do Vegetto: corta em linha, atravessa escudos e não dá pra desviar. Punho do Gogeta: atordoa e arremessa."
+      },
+      "habilidade": {
+        "nome": "Soul Punisher",
+        "tipo": "soulPunisher",
+        "custo": 4,
+        "recarga": 22,
+        "mult": 2.4,
+        "descricao": "Gogeta lança a esfera roxa: purifica os inimigos em volta (tira escudos, anéis, esmeraldas, Infinito, fúria, desvio e renascer), causa 2,4x de dano e cura 25% dos aliados na área."
+      },
+      "trofeus": 0,
+      "exclusivo": [],
+      "summon": true,
+      "alvo": "tudo",
+      "arena": 1,
+      "rosto": [
+        290,
+        440,
+        230
+      ],
+      "arte": [
+        0,
+        150,
+        736
+      ]
+    },
+    {
+      "id": "vegeta_ultra_ego",
+      "nome": "Vegeta Ultra Ego",
+      "raridade": "ultra",
+      "custo": 7,
+      "tipo": "Ultra · Deus da Destruição",
+      "descricao": "O Ego de um Deus da Destruição. Quanto mais apanha, mais forte fica, e quando parece que caiu, o orgulho dele não deixa.",
+      "vida": 2600,
+      "dano": 320,
+      "velocidade": 82,
+      "alcance": 18,
+      "cadencia": 0.95,
+      "danoTorre": 0.55,
+      "passiva": {
+        "nome": "Ego Destrutivo",
+        "tipo": "ultraEgo",
+        "descricao": "+1% de dano a cada 1% de vida perdida (até +90%) e cura 20% do dano que causa. Uma vez por batalha, quando cairia, volta com 35% de vida e +30% de dano."
+      },
+      "habilidade": {
+        "nome": "Hakai",
+        "tipo": "hakai",
+        "custo": 4,
+        "recarga": 24,
+        "mult": 2,
+        "descricao": "Destruição em área: 2x de dano + 15% da vida máxima de cada inimigo. Quem ficar abaixo de 25% de vida é apagado na hora (menos torres)."
+      },
+      "trofeus": 0,
+      "exclusivo": [],
+      "summon": true,
+      "alvo": "tudo",
+      "arena": 1,
+      "rosto": [
+        230,
+        350,
+        110
+      ],
+      "arte": [
+        0,
+        40,
+        735
+      ]
+    },
+    {
+      "id": "goku_blue_kaioken_remake",
+      "nome": "Goku Blue Kaioken (Remake)",
+      "raridade": "ultra",
+      "custo": 6,
+      "tipo": "Ultra · Kaioken x20",
+      "descricao": "Super Saiyajin Blue com Kaioken. A cada golpe ele empilha o Kaioken, ficando mais forte e mais rápido, mas o corpo sente.",
+      "vida": 1850,
+      "dano": 290,
+      "velocidade": 90,
+      "alcance": 18,
+      "cadencia": 0.75,
+      "danoTorre": 0.55,
+      "passiva": {
+        "nome": "Kaioken x20",
+        "tipo": "kaiokenRemake",
+        "descricao": "Cada golpe sobe 1 nível de Kaioken (até 10): +6% de dano e +4% de velocidade de ataque por nível, mas perde 0,15% da vida por segundo por nível. Sem bater por 3s, o Kaioken baixa."
+      },
+      "habilidade": {
+        "nome": "Kamehameha Kaioken x20",
+        "tipo": "kameKaioken",
+        "custo": 4,
+        "recarga": 18,
+        "mult": 3,
+        "descricao": "Kamehameha vermelho e azul gigante: 3x de dano + 30% por nível de Kaioken. Gasta os níveis e 10% da vida."
+      },
+      "trofeus": 0,
+      "exclusivo": [],
+      "summon": true,
+      "alvo": "tudo",
+      "arena": 1,
+      "rosto": [
+        115,
+        640,
+        125
+      ],
+      "arte": [
+        0,
+        320,
+        736
+      ]
+    },
+    {
+      "id": "goku_deus_remake",
+      "nome": "Goku Deus (Remake)",
+      "raridade": "ultra",
+      "custo": 6,
+      "tipo": "Ultra · Ki Divino",
+      "descricao": "O Super Saiyajin Deus. O ki divino dele protege e fortalece todos os aliados em volta.",
+      "vida": 1900,
+      "dano": 250,
+      "velocidade": 85,
+      "alcance": 18,
+      "cadencia": 0.9,
+      "danoTorre": 0.55,
+      "passiva": {
+        "nome": "Aura Divina",
+        "tipo": "kiDivino",
+        "descricao": "Aliados perto dele curam 1,5% da vida por segundo e causam +15% de dano. Ele é imune a atordoamento e lentidão."
+      },
+      "habilidade": {
+        "nome": "Punho do Deus Saiyajin",
+        "tipo": "punhoDeus",
+        "custo": 3,
+        "recarga": 18,
+        "mult": 3,
+        "descricao": "Aparece do lado do inimigo mais forte, golpe de 3x que atordoa por 1s, e cura 25% de todos os aliados em volta."
+      },
+      "trofeus": 0,
+      "exclusivo": [],
+      "summon": true,
+      "alvo": "tudo",
+      "arena": 1,
+      "rosto": [
+        565,
+        345,
+        85
+      ],
+      "arte": [
+        0,
+        150,
+        701
+      ]
+    },
+    {
+      "id": "goku_black_rose",
+      "nome": "Goku Black Rosé",
+      "raridade": "ultra",
+      "custo": 6,
+      "tipo": "Ultra · Lâmina Divina",
+      "descricao": "Um deus no corpo do Goku. Corta com uma lâmina de ki que atravessa tudo e deixa feridas que não fecham.",
+      "vida": 1850,
+      "dano": 300,
+      "velocidade": 92,
+      "alcance": 20,
+      "cadencia": 0.85,
+      "danoTorre": 0.5,
+      "passiva": {
+        "nome": "Lâmina Divina",
+        "tipo": "laminaDivina",
+        "descricao": "Os cortes atravessam e acertam quem está atrás. Deixam a Ferida Divina: o alvo não pode ser curado e perde 3% da vida por segundo por 3s."
+      },
+      "habilidade": {
+        "nome": "Ceifa Divina",
+        "tipo": "ceifaDivina",
+        "custo": 4,
+        "recarga": 22,
+        "mult": 2.2,
+        "descricao": "Uma foice de ki corta tudo em volta (2,2x de dano) e surgem 2 clones do Black que lutam por 8s."
+      },
+      "trofeus": 0,
+      "exclusivo": [],
+      "summon": true,
+      "alvo": "tudo",
+      "arena": 1,
+      "rosto": [
+        520,
+        330,
+        95
+      ],
+      "arte": [
+        0,
+        100,
+        736
+      ]
+    },
+    {
+      "id": "vegeta_evolution",
+      "nome": "Vegeta Blue Evolution",
+      "raridade": "ultra",
+      "custo": 6,
+      "tipo": "Ultra · Orgulho do Príncipe",
+      "descricao": "O Blue Evolution do Vegeta. Cada vez que quebram a defesa dele, ele evolui e bate mais forte.",
+      "vida": 1650,
+      "dano": 260,
+      "velocidade": 82,
+      "alcance": 18,
+      "cadencia": 0.9,
+      "danoTorre": 0.55,
+      "passiva": {
+        "nome": "Evolução",
+        "tipo": "orgulho",
+        "descricao": "Começa com escudo de 20% da vida. Toda vez que o escudo quebra, Evolução: +30% de dano por 6s. A cada 10s o escudo volta (10%)."
+      },
+      "habilidade": {
+        "nome": "Final Flash Evolution",
+        "tipo": "finalFlash",
+        "custo": 4,
+        "recarga": 20,
+        "mult": 3.2,
+        "descricao": "Final Flash enorme e longo (3,2x de dano). Quem é atingido fica marcado: leva +25% de dano de todos por 4s."
+      },
+      "trofeus": 0,
+      "exclusivo": [],
+      "summon": true,
+      "alvo": "tudo",
+      "arena": 1,
+      "rosto": [
+        300,
+        400,
+        70
+      ],
+      "arte": [
+        0,
+        150,
+        640
+      ]
+    },
+    {
+      "id": "vegeta_ssj4",
+      "nome": "Vegeta SSJ4",
+      "raridade": "lendaria",
+      "custo": 5,
+      "tipo": "Saiyajin Primitivo",
+      "descricao": "O poder primitivo do Super Saiyajin 4. Quanto mais machucado, mais rápido bate, e rouba vida.",
+      "vida": 1500,
+      "dano": 250,
+      "velocidade": 82,
+      "alcance": 18,
+      "cadencia": 0.95,
+      "danoTorre": 0.55,
+      "passiva": {
+        "nome": "Poder Primitivo",
+        "tipo": "primitivo",
+        "descricao": "Ataca mais rápido quanto menos vida tem (até 45%) e cura 15% do dano que causa."
+      },
+      "trofeus": 0,
+      "exclusivo": [],
+      "summon": true,
+      "alvo": "tudo",
+      "arena": 1,
+      "rosto": [
+        290,
+        280,
+        75
+      ],
+      "arte": [
+        0,
+        30,
+        736
+      ]
+    },
+    {
+      "id": "vegeta_blue",
+      "nome": "Vegeta Blue",
+      "raridade": "lendaria",
+      "custo": 5,
+      "tipo": "Super Saiyajin Blue",
+      "descricao": "O Super Saiyajin Blue do Vegeta, com o Galick Gun.",
+      "vida": 1450,
+      "dano": 245,
+      "velocidade": 82,
+      "alcance": 18,
+      "cadencia": 0.9,
+      "danoTorre": 0.55,
+      "passiva": {
+        "nome": "Galick Gun",
+        "tipo": "galick",
+        "descricao": "A cada 4 golpes, solta um Galick Gun que atravessa em linha (1,6x de dano)."
+      },
+      "trofeus": 0,
+      "exclusivo": [],
+      "summon": true,
+      "alvo": "tudo",
+      "arena": 1,
+      "rosto": [
+        440,
+        560,
+        95
+      ],
+      "arte": [
+        0,
+        250,
+        720
+      ]
+    },
+    {
+      "id": "vegeta_deus",
+      "nome": "Vegeta Deus",
+      "raridade": "lendaria",
+      "custo": 5,
+      "tipo": "Super Saiyajin Deus",
+      "descricao": "O Super Saiyajin Deus do Vegeta. Ki divino que regenera e não deixa ele parar.",
+      "vida": 1400,
+      "dano": 240,
+      "velocidade": 84,
+      "alcance": 18,
+      "cadencia": 0.9,
+      "danoTorre": 0.55,
+      "passiva": {
+        "nome": "Ki Divino",
+        "tipo": "kiVegeta",
+        "descricao": "Cura 3% da vida a cada golpe e é imune a atordoamento e lentidão."
+      },
+      "trofeus": 0,
+      "exclusivo": [],
+      "summon": true,
+      "alvo": "tudo",
+      "arena": 1,
+      "rosto": [
+        370,
+        520,
+        130
+      ],
+      "arte": [
+        0,
+        200,
+        699
+      ]
+    },
+    {
+      "id": "majin_vegeta",
+      "nome": "Majin Vegeta",
+      "raridade": "lendaria",
+      "custo": 5,
+      "tipo": "Príncipe Majin",
+      "descricao": "O Vegeta sob o controle do Babidi. Quando cai, se explode levando todo mundo junto.",
+      "vida": 1350,
+      "dano": 255,
+      "velocidade": 84,
+      "alcance": 18,
+      "cadencia": 0.9,
+      "danoTorre": 0.55,
+      "passiva": {
+        "nome": "Explosão Final",
+        "tipo": "explosaoFinal",
+        "descricao": "Quando cai, se explode: 3x de dano em área grande e atordoa quem sobrar."
+      },
+      "trofeus": 0,
+      "exclusivo": [],
+      "summon": true,
+      "alvo": "tudo",
+      "arena": 1,
+      "rosto": [
+        490,
+        240,
+        95
+      ],
+      "arte": [
+        23,
+        0,
+        690
+      ]
+    },
+    {
+      "id": "vegeta_ssj",
+      "nome": "Vegeta SSJ",
+      "raridade": "epica",
+      "custo": 4,
+      "tipo": "Super Saiyajin",
+      "descricao": "O Super Saiyajin do Vegeta, com o Big Bang Attack.",
+      "vida": 1100,
+      "dano": 200,
+      "velocidade": 82,
+      "alcance": 18,
+      "cadencia": 0.9,
+      "danoTorre": 0.55,
+      "passiva": {
+        "nome": "Big Bang Attack",
+        "tipo": "bigBang",
+        "descricao": "A cada 5 golpes, a esfera de ki explode em área (1,8x)."
+      },
+      "trofeus": 0,
+      "exclusivo": [],
+      "summon": true,
+      "alvo": "tudo",
+      "arena": 1,
+      "rosto": [
+        380,
+        450,
+        150
+      ],
+      "arte": [
+        0,
+        100,
+        736
+      ]
+    },
+    {
+      "id": "vegeta_base",
+      "nome": "Vegeta",
+      "raridade": "epica",
+      "custo": 3,
+      "tipo": "Príncipe dos Saiyajins",
+      "descricao": "O príncipe dos Saiyajins, orgulhoso como sempre.",
+      "vida": 900,
+      "dano": 175,
+      "velocidade": 85,
+      "alcance": 18,
+      "cadencia": 0.85,
+      "danoTorre": 0.55,
+      "passiva": {
+        "nome": "Orgulho Saiyajin",
+        "tipo": "orgulhoSaiyajin",
+        "descricao": "25% de chance de golpe crítico (1,8x)."
+      },
+      "trofeus": 0,
+      "exclusivo": [],
+      "summon": true,
+      "alvo": "tudo",
+      "arena": 1,
+      "rosto": [
+        310,
+        350,
+        170
+      ],
+      "arte": [
+        0,
+        0,
+        640
+      ]
+    },
+    {
+      "id": "gogeta_blue_solo",
+      "nome": "Gogeta Blue",
+      "raridade": "ultra",
+      "custo": 7,
+      "tipo": "Fusão Supreme",
+      "descricao": "Gogeta Super Saiyajin Blue.",
+      "vida": 1500,
+      "dano": 260,
+      "velocidade": 82,
+      "alcance": 18,
+      "cadencia": 0.85,
+      "danoTorre": 0.55,
+      "passiva": {
+        "nome": "Ligação das Fusões",
+        "tipo": "gemeos",
+        "descricao": "Divide o dano com o Vegetto."
+      },
+      "trofeus": 0,
+      "exclusivo": [],
+      "summon": true,
+      "alvo": "tudo",
+      "arena": 1,
+      "corpo": true,
+      "rosto": [
+        170,
+        320,
+        115
+      ],
+      "arte": [
+        0,
+        60,
+        400
+      ],
+      "habilidade": {
+        "nome": "Kamehameha Final + Big Bang",
+        "tipo": "fusaoDupla",
+        "custo": 4,
+        "recarga": 20,
+        "mult": 2.2,
+        "descricao": "Gogeta solta o Big Bang Kamehameha e Vegetto o Kamehameha Final no mesmo alvo. Onde os dois raios se encontram, uma explosão enorme."
+      }
+    },
+    {
+      "id": "vegetto_blue_solo",
+      "nome": "Vegetto Blue",
+      "raridade": "ultra",
+      "custo": 7,
+      "tipo": "Fusão Potara",
+      "descricao": "Vegetto Super Saiyajin Blue.",
+      "vida": 1300,
+      "dano": 230,
+      "velocidade": 88,
+      "alcance": 18,
+      "cadencia": 0.7,
+      "danoTorre": 0.5,
+      "passiva": {
+        "nome": "Ligação das Fusões",
+        "tipo": "gemeos",
+        "descricao": "Divide o dano com o Gogeta."
+      },
+      "trofeus": 0,
+      "exclusivo": [],
+      "summon": true,
+      "alvo": "tudo",
+      "arena": 1,
+      "corpo": true,
+      "rosto": [
+        480,
+        290,
+        115
+      ],
+      "arte": [
+        330,
+        30,
+        406
+      ]
     }
   ]
 }

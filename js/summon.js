@@ -60,8 +60,27 @@ const Summon = (() => {
     chances: { ultra: 0.025, lendaria: 0.2, epica: 0.775 },
     // garantia do destaque: Mark & Eve vem com certeza na 180ª invocação sem ele neste banner
     pityDestaque: 180,
+  }, {
+    id: 'saiyajins',
+    nome: 'SAIYAJINS',
+    sub: 'Rivais Eternos',
+    tema: 'db',
+    logo: 'db',
+    fim: new Date(2027, 0, 31, 23, 59, 59), // 31/01/2027
+    centro: 'goku_vegeta',
+    destaque: ['vegetto_gogeta', 'gogeta_vegetto_blue', 'goku_vegeta', 'vegeta_ultra_ego', 'goku_black_rose'],
+    pool: {
+      ultra: ['goku_vegeta', 'gogeta_vegetto_blue', 'vegetto_gogeta', 'vegeta_ultra_ego', 'goku_blue_kaioken_remake', 'goku_deus_remake', 'goku_black_rose', 'vegeta_evolution'],
+      lendaria: ['vegeta_ssj4', 'vegeta_blue', 'vegeta_deus', 'majin_vegeta'],
+      epica: ['vegeta_ssj', 'vegeta_base'],
+    },
+    // Goku & Vegeta é o mais difícil; as duas duplas de fusão e o Ultra Ego vêm logo atrás
+    pesos: { goku_vegeta: 1, gogeta_vegetto_blue: 1.5, vegetto_gogeta: 1.5, vegeta_ultra_ego: 1.5, goku_blue_kaioken_remake: 4, goku_deus_remake: 4, goku_black_rose: 4, vegeta_evolution: 4 },
+    chances: { ultra: 0.02, lendaria: 0.18, epica: 0.8 },
+    // garantia do destaque: Goku & Vegeta vem com certeza na 200ª invocação sem ele neste banner
+    pityDestaque: 200,
   }];
-  let atualI = 1; // abre no banner mais novo
+  let atualI = BANNERS.length - 1; // abre no banner mais novo
   const banner = () => BANNERS[Math.min(atualI, BANNERS.length - 1)];
   const diasRestantes = (b = banner()) => Math.max(0, Math.ceil((b.fim.getTime() - Date.now()) / 86400000));
   // só entra no sorteio quem existe na lista de cartas
@@ -172,7 +191,7 @@ const Summon = (() => {
     }).join('');
     const pct = Math.round(((PITY - faltaPity()) / PITY) * 100);
     const abas = BANNERS.map((x, i) => `<button class="sm-aba${i === atualI ? ' ativa' : ''}${x.tema ? ` t-${x.tema}` : ''}" data-b="${i}"><img src="${Cartas.arte(Estado.carta(x.centro || x.destaque[0]) || {})}" alt="" /><span>${esc(x.nome)}</span></button>`).join('');
-    const titulo = b.logo ? logoInvencivel(b) : `<div class="smb-titulo"><em>NOVA RARIDADE</em><b>${esc(b.nome)}</b><small>${esc(b.sub)}</small></div>`;
+    const titulo = b.logo === 'db' ? logoSaiyajin(b) : b.logo ? logoInvencivel(b) : `<div class="smb-titulo"><em>NOVA RARIDADE</em><b>${esc(b.nome)}</b><small>${esc(b.sub)}</small></div>`;
     el.innerHTML = `${fundoMultiverso()}
       <div class="sm-topo"><button class="tr-voltar" id="sm-voltar">‹</button><div><b>Summon</b><small>Termina em ${diasRestantes()} dia${diasRestantes() === 1 ? '' : 's'}</small></div>
         <span class="sm-gemas">💎 ${fmt(Estado.d.gemas)}</span></div>
@@ -208,6 +227,15 @@ const Summon = (() => {
     el.classList.add('sumir');
     setTimeout(() => el.remove(), 250);
     aoFechar();
+  }
+  // logo do banner dos Saiyajins (desenho próprio do jogo: aura de ki com um raio)
+  function logoSaiyajin(b) {
+    return `<div class="smb-logo-db"><svg class="sld-emblema" viewBox="0 0 120 120" aria-hidden="true">
+        <defs><radialGradient id="sldN" cx=".5" cy=".55" r=".5"><stop offset="0" stop-color="#FFF6C8"/><stop offset=".45" stop-color="#FFC21A"/><stop offset="1" stop-color="#FF6A00"/></radialGradient>
+          <linearGradient id="sldR" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#E8F4FF"/><stop offset="1" stop-color="#7FD3FF"/></linearGradient></defs>
+        <path d="M60 4 C70 22 92 20 86 44 C104 40 108 66 94 78 C104 96 84 112 66 104 C60 118 44 116 40 102 C20 110 8 90 20 76 C4 64 12 40 32 44 C26 22 50 22 60 4 Z" fill="url(#sldN)" stroke="#7a2a00" stroke-width="3" stroke-linejoin="round"/>
+        <path d="M66 22 L42 64 L58 64 L50 98 L80 52 L63 52 L72 22 Z" fill="url(#sldR)" stroke="#123a6a" stroke-width="3" stroke-linejoin="round"/></svg>
+      <div class="sld-txt"><b>${esc(b.nome)}</b><small>${esc(b.sub)}</small></div></div>`;
   }
   // logo do banner do Invencível (desenho próprio do jogo)
   function logoInvencivel(b) {
@@ -403,7 +431,7 @@ const Summon = (() => {
         <div class="smu-velocidade"></div>
         <div class="smu-arte"><img src="${Cartas.arte(c)}" alt="" draggable="false" /><i class="smu-holo"></i></div>
         <div class="smu-texto"><div class="smu-ultra">${letras}</div><b class="smu-nome">${esc(c.nome)}</b><small>${esc(c.tipo)}</small>
-          <p>${banner().tema === 'invencivel' ? 'Atravessou o multiverso pra lutar do seu lado!' : 'Um prodígio atravessou o multiverso!'}</p>${r.novo ? '<em class="smu-novo">NOVO!</em>' : `<em class="smu-novo rep">${r.copias ? `+${r.copias} cópia` : `+${fmt(r.ouro)} 🪙`}</em>`}</div>
+          <p>${banner().tema === 'db' ? 'Um Saiyajin lendário chegou pra lutar do seu lado!' : banner().tema === 'invencivel' ? 'Atravessou o multiverso pra lutar do seu lado!' : 'Um prodígio atravessou o multiverso!'}</p>${r.novo ? '<em class="smu-novo">NOVO!</em>' : `<em class="smu-novo rep">${r.copias ? `+${r.copias} cópia` : `+${fmt(r.ouro)} 🪙`}</em>`}</div>
         ${Array.from({ length: 30 }, (_, k) => `<i class="smu-brilho" style="--x:${Math.round(Math.random() * 100)}%;--d:${(1.8 + Math.random() * 2).toFixed(2)}s;--a:${(Math.random() * 2).toFixed(2)}s;--h:${k * 37 % 360}"></i>`).join('')}
       </div>
       <small class="smu-toque">toque para continuar</small>`;

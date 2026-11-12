@@ -114,7 +114,7 @@ const Estado = (() => {
   let todas = []; // cartas.json inteiro
   let catalogo = []; // só as cartas que este jogador pode ver (as exclusivas aparecem só para os IDs da carta)
   const meuUid = () => (typeof Conta !== 'undefined' && Conta.uid ? Conta.uid() : null);
-  const visivel = (c) => !c.token && (!c.exclusivo || c.exclusivo.includes(meuUid()) || (!c.intransferivel && !!(d && d.cartasExtras && d.cartasExtras.includes(c.id)))) && !(d && d.esgotadas && d.esgotadas.includes(c.id)); // tokens (ex.: minis do barril) não são cartas
+  const visivel = (c) => !c.token && !c.corpo && (!c.exclusivo || c.exclusivo.includes(meuUid()) || (!c.intransferivel && !!(d && d.cartasExtras && d.cartasExtras.includes(c.id)))) && !(d && d.esgotadas && d.esgotadas.includes(c.id)); // tokens (ex.: minis do barril) não são cartas
   let d = null;
 
   function novo() {

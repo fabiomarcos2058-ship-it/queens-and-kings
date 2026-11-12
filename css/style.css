@@ -2882,3 +2882,71 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 @keyframes meioEsconde { 0%, 49% { visibility: visible; } 50%, 100% { visibility: hidden; } }
 /* a etiqueta "NOVO!" pulsa com transform, que apagava o centralizado: centraliza sem transform */
 .sma-tag { left: 0; right: 0; width: max-content; margin: 0 auto; transform: none; }
+
+/* ===== Banner dos Saiyajins (Dragon Ball) ===== */
+.sm-aba.t-db.ativa { border-color: #FFC21A; box-shadow: 0 0 12px #FF8A0088; background: #3a1a02; }
+.sm-banner.t-db { background: linear-gradient(160deg, #3a1402, #160a2a 55%, #06203f); }
+.sm-banner.t-db::before { background: conic-gradient(from var(--ang), #FFC21A, #FF6A00, #C04BFF, #3FC4FF, #FFC21A); }
+.sm-banner.t-db .smb-painel { flex: 0.85; }
+.sm-banner.t-db .smb-painel.centro { flex: 1.5; z-index: 2; clip-path: polygon(14% 0, 86% 0, 100% 100%, 0 100%); filter: drop-shadow(0 0 10px #FF8A00); }
+.sm-banner.t-db .smb-painel.centro img { animation: painelRespira 5s ease-in-out infinite alternate; object-position: 50% 30%; }
+.sm-banner.t-db .smb-painel.centro::before { content: 'DESTAQUE'; position: absolute; top: 8px; left: 50%; transform: translateX(-50%); z-index: 3; font: 10px 'Lilita One', sans-serif; letter-spacing: 1.5px; padding: 2px 8px; border-radius: 6px; color: #2a0a00; background: linear-gradient(90deg, #FFE45C, #FF8A00); }
+.sm-banner.t-db .smb-painel span { bottom: 34%; font-size: 10px; text-shadow: 0 2px 4px #000, 0 0 8px #FF8A00; }
+.sm-banner.t-db .smb-painel:not(.centro) span { display: none; }
+.sm-banner.t-db .smb-painel::after { background: linear-gradient(180deg, transparent 45%, #12061ef0 92%), linear-gradient(100deg, transparent 70%, #FF8A0033 85%, #FFC21A55 100%); }
+.smb-logo-db { position: absolute; left: 0; right: 0; bottom: 6px; z-index: 3; display: flex; align-items: center; justify-content: center; gap: 4px; }
+.sld-emblema { width: 62px; height: 62px; filter: drop-shadow(0 3px 0 #0008) drop-shadow(0 0 10px #FF8A00aa); animation: emblemaDb 1.6s ease-in-out infinite; }
+@keyframes emblemaDb { 0%, 100% { transform: scale(1) rotate(-4deg); } 50% { transform: scale(1.08) rotate(4deg); } }
+.sld-txt { display: flex; flex-direction: column; align-items: flex-start; transform: skewX(-8deg); }
+.sld-txt b { font: 38px 'Lilita One', sans-serif; line-height: 0.95; letter-spacing: 1px; background: linear-gradient(180deg, #FFF6C8 8%, #FFC21A 50%, #FF6A00 90%); -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(3px 3px 0 #5a1a00) drop-shadow(0 0 10px #FF8A0088); }
+.sld-txt small { font: 12.5px 'Lilita One', sans-serif; letter-spacing: 2.5px; color: #8FD8FF; text-shadow: 0 1px 2px #000, 0 0 6px #3FC4FF; padding-left: 4px; }
+.leve .sld-txt b { filter: none; text-shadow: 3px 3px 0 #5a1a00; }
+.leve .sld-emblema { filter: none; animation: none; }
+
+/* ===== Batalha: Saiyajins ===== */
+.dano-num.fala-db { font: 13px 'Lilita One', sans-serif; color: #FFE45C; white-space: nowrap; text-shadow: 2px 2px 0 #7a2a00, -1px -1px 0 #000, 1px 1px 0 #000, 0 0 8px #FF8A00; }
+.dano-num.fala-hakai { font: 16px 'Lilita One', sans-serif; color: #E7B8FF; white-space: nowrap; text-shadow: 2px 2px 0 #3a0b5c, -1px -1px 0 #000, 1px 1px 0 #000, 0 0 10px #C04BFF; }
+.cutin[class*="db_"]::before { background: radial-gradient(circle at 50% 45%, #ffb00055, #2a0a00cc 75%); }
+.cutin[class*="db_"] .cutin-faixa { border-color: #FFC21A; box-shadow: 0 0 22px #FF8A00, 0 0 40px #FFC21A88; }
+.cutin[class*="db_"] .cutin-legenda { color: #FFE45C; text-shadow: 3px 3px 0 #7a2a00, -1px -1px 0 #000, 1px 1px 0 #000, 0 0 12px #FF8A00; }
+.cutin.db_ultra_ego .cutin-faixa, .cutin.db_vegetto_gogeta .cutin-faixa { border-color: #C04BFF; box-shadow: 0 0 22px #C04BFF, 0 0 40px #FF5CC888; }
+.cutin.db_ultra_ego .cutin-legenda, .cutin.db_vegetto_gogeta .cutin-legenda { color: #E7B8FF; text-shadow: 3px 3px 0 #3a0b5c, -1px -1px 0 #000, 1px 1px 0 #000, 0 0 12px #C04BFF; }
+.cutin.db_black .cutin-faixa { border-color: #FF5CC8; box-shadow: 0 0 22px #FF5CC8; }
+.cutin.db_gogeta_vegetto .cutin-faixa, .cutin.db_evolution .cutin-faixa { border-color: #3FC4FF; box-shadow: 0 0 22px #3FC4FF, 0 0 40px #1E6BFF88; }
+.cutin.db_kaioken .cutin-faixa { border-color: #FF2E5E; box-shadow: 0 0 22px #FF2E5E, 0 0 40px #3FC4FF88; }
+.cutin.db_goku_deus .cutin-faixa { border-color: #FF4B3A; box-shadow: 0 0 22px #FF4B3A; }
+.cutin.db_goku_vegeta .cutin-faixa img, .cutin.db_gogeta_vegetto .cutin-faixa img, .cutin.db_vegetto_gogeta .cutin-faixa img { object-position: 50% 30%; }
+/* posturas do Goku & Vegeta */
+.tropa.postura-instinto .tropa-medalhao { box-shadow: 0 0 0 3px #E8F4FF, 0 0 16px 6px #9FC8FFcc; }
+.tropa.postura-ego .tropa-medalhao { box-shadow: 0 0 0 3px #C04BFF, 0 0 16px 6px #C04BFFcc; }
+.tropa.sincronia .tropa-medalhao { box-shadow: 0 0 0 3px #fff, 0 0 0 5px #C04BFF, 0 0 20px 8px #9FC8FF; animation: flowPulsa 0.4s ease-in-out infinite alternate; }
+.tropa.postura-instinto .tropa-corpo::before, .tropa.postura-ego .tropa-corpo::before { content: ''; position: absolute; left: 50%; top: 50%; width: 165%; aspect-ratio: 1; transform: translate(-50%, -50%); border-radius: 50%; pointer-events: none; animation: pulsa 0.7s infinite; }
+.tropa.postura-instinto .tropa-corpo::before { background: radial-gradient(#E8F4FF55, transparent 66%); }
+.tropa.postura-ego .tropa-corpo::before { background: radial-gradient(#C04BFF55, transparent 66%); }
+.tropa.kaioken .tropa-medalhao { box-shadow: 0 0 0 3px #FF2E5E, 0 0 calc(8px + var(--kaio, 1) * 1.6px) calc(2px + var(--kaio, 1) * 0.7px) #FF2E5Ecc; }
+.tropa.aura-divina .tropa-medalhao { box-shadow: 0 0 0 2px #FF8A6A, 0 0 12px 4px #FF4B3A99; }
+.tropa.ego-desperto .tropa-medalhao { box-shadow: 0 0 0 3px #E7B8FF, 0 0 20px 8px #C04BFF; animation: flowPulsa 0.35s ease-in-out infinite alternate; }
+.tropa.furia-fusao .tropa-medalhao { box-shadow: 0 0 0 3px #5CE1FF, 0 0 20px 8px #3FC4FF; animation: flowPulsa 0.35s ease-in-out infinite alternate; }
+.tropa.gemeo .tropa-medalhao { box-shadow: 0 0 0 2px #5CE1FF, 0 0 10px 3px #3FC4FF99; }
+.tropa.ferida-divina .tropa-medalhao { filter: saturate(0.7) brightness(0.9); box-shadow: 0 0 0 2px #FF5CC8, 0 0 10px 3px #FF5CC8aa; }
+.tropa.evoluindo .tropa-medalhao { box-shadow: 0 0 0 3px #3B6BFF, 0 0 20px 8px #3FC4FF; animation: flowPulsa 0.4s ease-in-out infinite alternate; }
+.tropa.clone-black { opacity: 0.72; filter: hue-rotate(-10deg) saturate(1.3); }
+/* raios */
+.kamehameha.galick { height: 26px; background: linear-gradient(transparent 0%, #7C3AED44 12%, #B57BFF 32%, #fff 50%, #B57BFF 68%, #7C3AED44 88%, transparent 100%); box-shadow: 0 0 20px 6px #A855F7aa; }
+.kamehameha.final-flash { height: 46px; background: linear-gradient(transparent 0%, #FFC21A44 10%, #FFE45C 30%, #fff 50%, #FFE45C 70%, #FFC21A44 90%, transparent 100%); box-shadow: 0 0 34px 12px #FFD25Ecc; }
+.kamehameha.final-shine { height: 34px; background: linear-gradient(transparent 0%, #22C55E44 12%, #7CFF8A 32%, #fff 50%, #7CFF8A 68%, #22C55E44 88%, transparent 100%); box-shadow: 0 0 26px 8px #4ADE80aa; }
+.kamehameha.kaioken-x20 { height: 50px; background: linear-gradient(transparent 0%, #FF2E5E66 8%, #FF2E5E 22%, #5CE1FF 38%, #fff 50%, #5CE1FF 62%, #FF2E5E 78%, #FF2E5E66 92%, transparent 100%); box-shadow: 0 0 34px 12px #FF2E5Ecc, 0 0 60px 20px #3FC4FF66; }
+.kamehameha.hakai-raio { height: 30px; background: linear-gradient(transparent 0%, #3a0b5c66 10%, #C04BFF 30%, #FFB8FA 50%, #C04BFF 70%, #3a0b5c66 90%, transparent 100%); box-shadow: 0 0 26px 8px #C04BFFcc; }
+.kamehameha.kame-prata { height: 30px; background: linear-gradient(transparent 0%, #9FC8FF44 12%, #E8F4FF 32%, #fff 50%, #E8F4FF 68%, #9FC8FF44 88%, transparent 100%); box-shadow: 0 0 26px 8px #C8E4FFcc; }
+.kamehameha.big-bang { height: 36px; background: linear-gradient(transparent 0%, #1E6BFF44 10%, #3FC4FF 30%, #fff 50%, #3FC4FF 70%, #1E6BFF44 90%, transparent 100%); box-shadow: 0 0 30px 10px #3FC4FFcc; }
+/* efeitos */
+.fx-db-cruz { position: absolute; pointer-events: none; z-index: 1760; width: 46%; aspect-ratio: 1; transform: translate(-50%, -50%); border-radius: 50%; background: conic-gradient(#E8F4FF 0 25%, #C04BFF 25% 50%, #E8F4FF 50% 75%, #C04BFF 75% 100%); -webkit-mask: radial-gradient(#000 0 18%, transparent 20% 40%, #000 42% 46%, transparent 48%); mask: radial-gradient(#000 0 18%, transparent 20% 40%, #000 42% 46%, transparent 48%); animation: trunfoFx 0.9s ease-out forwards; }
+.fx-db-aura { position: absolute; pointer-events: none; z-index: 1760; width: 30%; aspect-ratio: 1; transform: translate(-50%, -50%); border-radius: 50%; background: radial-gradient(circle, #ffffffcc 0 12%, #FFC21A88 30%, #FF6A0044 50%, transparent 66%); animation: trunfoFx 0.9s ease-out forwards; }
+.fx-db-explosao { position: absolute; pointer-events: none; z-index: 1760; width: 44%; aspect-ratio: 1; transform: translate(-50%, -50%); border-radius: 50%; background: radial-gradient(circle, #fff 0 14%, #FFE45C 26%, #FF8A00aa 42%, #FF4B3A44 58%, transparent 68%); animation: trunfoFx 0.9s ease-out forwards; }
+.fx-soul-punisher { position: absolute; pointer-events: none; z-index: 1760; width: 56%; aspect-ratio: 1; transform: translate(-50%, -50%); border-radius: 50%; background: radial-gradient(circle, #ffffffee 0 10%, #E7B8FF 22%, #B57BFF99 40%, #7C3AED44 56%, transparent 66%); box-shadow: 0 0 30px #C04BFF; animation: trunfoFx 1s ease-out forwards; }
+.fx-hakai { position: absolute; pointer-events: none; z-index: 1760; width: 46%; aspect-ratio: 1; transform: translate(-50%, -50%); border-radius: 50%; background: radial-gradient(circle, #000 0 12%, #3a0b5c 20%, #C04BFF 34%, #FFB8FA88 44%, #C04BFF33 56%, transparent 66%); animation: trunfoFx 1s ease-out forwards; }
+.fx-foice { position: absolute; pointer-events: none; z-index: 1760; width: 56%; aspect-ratio: 1; transform: translate(-50%, -50%); border-radius: 50%; background: conic-gradient(from 200deg, transparent 0 40%, #FF5CC8 55%, #fff 62%, #FF5CC888 70%, transparent 80%); -webkit-mask: radial-gradient(transparent 52%, #000 56%, #000 66%, transparent 70%); mask: radial-gradient(transparent 52%, #000 56%, #000 66%, transparent 70%); animation: foiceGira 0.8s ease-out forwards; }
+@keyframes foiceGira { from { transform: translate(-50%, -50%) rotate(-120deg) scale(0.6); opacity: 1; } to { transform: translate(-50%, -50%) rotate(240deg) scale(1.2); opacity: 0; } }
+.sm-banner.t-db .smb-painel { margin: 0 -6%; }
+.sm-banner.t-db .smb-painel.centro { flex: 1.3; }
+.sm-banner.t-db .smb-painel:nth-child(4) img { object-position: 22% 15%; }
