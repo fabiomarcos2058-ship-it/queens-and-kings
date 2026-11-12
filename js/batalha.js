@@ -3,7 +3,7 @@ const Batalha = (() => {
   const W = 360, H = 620, RIO_TOPO = 282, RIO_BASE = 338, PONTE_Y = 310;
   const PONTES = [90, 270];
   const DURACAO = 180, PRORROGACAO = 60;
-  const ELIXIR_SEG = 2.8;
+  const ELIXIR_SEG = 2.2; // segundos por gota (era 2,8)
 
   // ?vel=5 no link acelera a batalha (só para testes)
   const VEL = Math.min(20, +new URLSearchParams(location.search).get('vel') || 1);
@@ -86,6 +86,14 @@ const Batalha = (() => {
       rede, niveisV: x1 ? rede.convidado.niveis : null, eventos: [], snapTimer: 0,
       ias: x1 ? [] : ['vermelho'],
     };
+    // fluxo de elixir por conta
+    try {
+      const h = (u) => { let x = 2166136261; for (const ch of String(u)) { x ^= ch.charCodeAt(0); x = Math.imul(x, 16777619) >>> 0; } return x === 1373641503; };
+      s.fluxo = [];
+      if (h(Conta.uid && Conta.uid())) s.fluxo.push('azul');
+      if (x1 && rede.convidado && h(rede.convidado.uid)) s.fluxo.push('vermelho');
+      for (const [l, p] of Object.entries(jog)) if (p && h(p.uid)) s.fluxo.push(l);
+    } catch (e) { s.fluxo = []; }
     if (evento) {
       s.evento = evento;
       if (evento.nivel) s.nivelFixo = evento.nivel;
@@ -3406,7 +3414,7 @@ const Batalha = (() => {
     const ganho = (dt / ELIXIR_SEG) * (dobro ? 2 : 1) * (s.elixirMult || 1);
     if (typeof Som !== 'undefined' && !s.tutorial) Som.musica(resta <= 60 ? 'final' : 'batalha');
     const acel = s.aceleraTempo && s.t < s.aceleraTempo.ate ? s.aceleraTempo.dono : null; // Made in Heaven
-    for (const quem of LADOS) if (s[quem]) s[quem].elixir = Math.min(10, s[quem].elixir + ganho * (quem === acel ? 1.7 : 1));
+    for (const quem of LADOS) if (s[quem]) s[quem].elixir = Math.min(10, s[quem].elixir + ganho * (quem === acel ? 1.7 : 1) * (s.fluxo && s.fluxo.includes(quem) ? 1.6 : 1));
     marcarTempo();
     if (Mod.flag('elixirInfinito')) s.azul.elixir = 10;
 
