@@ -2829,14 +2829,14 @@
     },
     {
       "id": "omni_man",
-      "nome": "Omni-Man",
+      "nome": "Thragg",
       "raridade": "ultra",
       "custo": 7,
-      "tipo": "Ultra · Guerreiro de Viltrum",
+      "tipo": "Ultra · Grande Regente de Viltrum",
       "trofeus": 0,
       "exclusivo": [],
       "summon": true,
-      "descricao": "O pai do Mark, um dos guerreiros mais fortes de Viltrum. Voa, aguenta quase tudo e cada soco arremessa o inimigo longe.",
+      "descricao": "O Grande Regente do Império Viltrumita, o guerreiro mais forte de Viltrum. Voa, aguenta quase tudo e cada soco arremessa o inimigo longe.",
       "rosto": [
         335,
         178,
@@ -2862,7 +2862,7 @@
         "descricao": "Voa. Leva 20% menos dano, cada soco arremessa e atordoa um instante, e a cada 3 socos vem um golpe com o dobro de força."
       },
       "habilidade": {
-        "nome": "Fúria de Viltrum",
+        "nome": "Fúria do Regente",
         "tipo": "furiaViltrum",
         "custo": 4,
         "recarga": 20,
