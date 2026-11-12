@@ -2812,3 +2812,73 @@ body.em-batalha #spotify-player:not(.aberto) .sp-alca { opacity: 0.6; }
 .sm-banner.t-invencivel .smb-painel:first-child { margin-left: 0; } .sm-banner.t-invencivel .smb-painel:last-child { margin-right: 0; }
 .sm-banner.t-invencivel .smb-painel img { object-position: 50% 12%; }
 .sm-banner.t-invencivel .smb-painel:not(.centro) span { display: none; }
+
+/* ===== Summon: o fundo não roda escondido atrás do campo de futebol ===== */
+.sm-anim.no-gol > .sm-fundo, .sm-anim.no-gol > .sma-portal, .sm-anim.no-gol > .sma-tunel { visibility: hidden; animation-play-state: paused; }
+.sm-anim.no-gol > .sm-fundo * { animation-play-state: paused; }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+
+/* ===== Modo leve (Android / pouca memória): mesma animação, sem os efeitos que estouram a GPU ===== */
+.leve .sm-nebulosa { filter: none; animation: none; inset: 0; }
+.leve .sm-anel { display: none; }
+.leve .sm-estrelas { animation: none; }
+.leve .sm-fenda { filter: none; box-shadow: 0 0 8px #FF5CF4; }
+.leve .sma-vortice { filter: none; }
+.leve .sma-part { box-shadow: none; }
+.leve .sma-tunel { width: 150vmax; height: 150vmax; margin: -75vmax; -webkit-mask: none; mask: none;
+  background: repeating-conic-gradient(from 0deg, #ffffff00 0 3deg, #ffffffaa 3deg 3.6deg, #ffffff00 3.6deg 9deg); }
+.leve .sm-anim.cor-ultra.tunel .sma-tunel { filter: none; animation: tunelVoa 1s ease-in forwards; }
+.leve .sm-ultra.f1 ~ .sm-anim, .leve .sm-anim:has(~ .sm-ultra.f1) { animation: none; }
+.leve .smu-glitch i { mix-blend-mode: normal; opacity: 0.6; }
+.leve .smu-singular { box-shadow: 0 0 16px 6px #fff, 0 0 40px 14px #FF5CF4; }
+.leve .sm-ultra.f4 .smu-singular { animation: estouraLeve 0.7s ease-out forwards; }
+@keyframes estouraLeve { 0% { opacity: 1; transform: scale(0.15); } 50% { opacity: 1; transform: scale(9); } 100% { opacity: 0; transform: scale(12); } }
+.leve .smu-raios { width: 150vmax; height: 150vmax; margin: -75vmax; }
+.leve .sm-ultra.f4 .smu-raios { animation: raiosUltra 0.6s ease-out forwards; }
+.leve .smu-velocidade { display: none; }
+.leve .smu-holo { mix-blend-mode: normal; opacity: 0.18; }
+.leve .sm-ultra.f5 .smu-arte { animation: arteEntraLeve 0.7s cubic-bezier(0.2, 1.4, 0.4, 1) forwards; }
+@keyframes arteEntraLeve { 0% { opacity: 0; transform: translateX(-50%) translateX(-110vw) scale(1.2); } 60% { opacity: 1; transform: translateX(-50%) translateX(3vw) scale(1); } 100% { opacity: 1; transform: translateX(-50%); } }
+.leve .smu-nome { filter: none; text-shadow: none; }
+.leve .sma-carta.r-lendaria.virada .sma-frente, .leve .sma-carta.r-ultra.virada .sma-frente { filter: none; }
+.leve .sma-carta.r-ultra .sma-costas { animation: none; }
+.leve .sma-costas i { animation: none; }
+/* campo de futebol */
+.leve .gs-refletor { filter: none; opacity: 0.5; }
+.leve .v-lendaria .gs-jog, .leve .v-ultra .gs-jog { filter: none; }
+.leve .v-ultra .gs-trave { filter: none; }
+.leve .gol-summon.fogo .gs-bola { filter: none; }
+.leve .gol-summon.fogo .gs-bola::after { filter: none; animation: none; }
+.leve .gs-racha { box-shadow: 0 0 8px #FF5CF4; }
+.leve .gs-fenda { box-shadow: 0 0 10px #FF5CF4; }
+.gol-summon { contain: layout paint; }
+.leve .v-ultra .gs-gooool span, .leve .gs-gooool span { text-shadow: 0 4px 0 #1A3A9A; }
+.leve .v-lendaria .gs-gooool span { text-shadow: 0 4px 0 #8a5a00; }
+.leve .v-ultra .gs-gooool span { text-shadow: 2px 0 0 #ff00ea, -2px 0 0 #00e5ff, 0 4px 0 #3a0b5c; }
+.leve .gs-confetes i:nth-child(n+21) { display: none; }
+/* tela do banner */
+.leve .smb-painel img { animation: none; }
+.leve .smb-titulo b { filter: none; text-shadow: 0 3px 0 #3a0b5c; }
+
+/* navegador sem color-mix (WebView antigo): usa a cor pura */
+@supports not (color: color-mix(in srgb, red 50%, blue)) {
+  .sma-vortice.v2 { background: repeating-conic-gradient(from 10deg, #ffffff00 0 8deg, var(--cor) 8deg 10deg); }
+  .sma-runas { stroke: var(--cor); }
+  .sma-tunel { background: repeating-conic-gradient(from 0deg, #ffffff00 0 3deg, #ffffffaa 3deg 3.6deg, #ffffff00 3.6deg 9deg); }
+  .sma-costas { border-color: var(--cor); background: radial-gradient(circle at 50% 45%, var(--cor) 0 8%, transparent 9%), repeating-conic-gradient(from 0deg at 50% 45%, #1b0f45 0 10deg, #2a1868 10deg 20deg); box-shadow: 0 0 12px var(--cor), inset 0 0 14px #000a; }
+  .sma-borda { background: radial-gradient(circle, #000 0 40%, #1a0630 70%, transparent 72%); }
+  .smi-bloco { border-color: var(--cor); }
+  .smi-cab span { background: #0008; }
+}
+/* modo leve: a carta vira "de lado" (2D) em vez de girar em 3D, que some/pisca no Android */
+.leve .sma-cartas { perspective: none; }
+.leve .sma-giro { transform-style: flat; transition: none; }
+.leve .sma-frente { transform: none; visibility: hidden; }
+.leve .sma-carta.virada .sma-giro { transform: none; animation: viraLeve 0.42s ease-in-out; }
+.leve .sma-carta.virada .sma-frente { animation: meioMostra 0.42s linear forwards; }
+.leve .sma-carta.virada .sma-costas { animation: meioEsconde 0.42s linear forwards; }
+@keyframes viraLeve { 0% { transform: scaleX(1); } 50% { transform: scaleX(0.02); } 100% { transform: scaleX(1); } }
+@keyframes meioMostra { 0%, 49% { visibility: hidden; } 50%, 100% { visibility: visible; } }
+@keyframes meioEsconde { 0%, 49% { visibility: visible; } 50%, 100% { visibility: hidden; } }
+/* a etiqueta "NOVO!" pulsa com transform, que apagava o centralizado: centraliza sem transform */
+.sma-tag { left: 0; right: 0; width: max-content; margin: 0 auto; transform: none; }

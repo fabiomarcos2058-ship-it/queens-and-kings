@@ -9,6 +9,16 @@ const Summon = (() => {
   const som = (n) => { try { typeof Som !== 'undefined' && Som.tocar(n); } catch (e) { /* nada */ } };
   const espera = (ms) => new Promise((ok) => setTimeout(ok, ms));
 
+  // Celular Android (e aparelhos com pouca memória): versão leve das animações.
+  // Os efeitos gigantes (túnel, raios, desfoques, mistura de cores) estouram a memória de vídeo
+  // e o celular deixa pedaços sem desenhar, pisca e fica lento.
+  try {
+    const ua = navigator.userAgent || '';
+    const pouca = (navigator.deviceMemory && navigator.deviceMemory <= 4);
+    let forcado = null; try { forcado = localStorage.getItem('qk_anim_leve'); } catch (e) { /* nada */ }
+    if (forcado === '1' || (forcado !== '0' && (/Android/i.test(ua) || pouca))) document.documentElement.classList.add('leve');
+  } catch (e) { /* nada */ }
+
   const PRECO1 = 50, PRECO10 = 450;
   const PITY = 70, SUAVE = 55;
   const ORDEM = ['ultra', 'lendaria', 'epica', 'rara', 'comum'];
@@ -311,10 +321,11 @@ const Summon = (() => {
     if (typeof GolSummon !== 'undefined') {
       const cena = document.createElement('div');
       el.insertBefore(cena, el.querySelector('.sma-flash'));
+      el.classList.add('no-gol'); // o fundo fica escondido atrás do campo (não precisa desenhar)
       try { await GolSummon.jogar(cena, variante, { pulou: () => pulou, som }); } catch (e) { console.warn('GolSummon', e); }
       el.classList.add('flash');
       await espera(pulou ? 0 : 200);
-      cena.remove();
+      cena.remove(); el.classList.remove('no-gol');
     } else {
       // (reserva) a fenda abre
       el.classList.add('abrindo'); som('carga');
