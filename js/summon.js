@@ -164,7 +164,8 @@ const Summon = (() => {
     if (!col || !col.tem) {
       if (c.exclusivo) d.cartasExtras = [...new Set([...(d.cartasExtras || []), id])];
       const forte = c.raridade === 'ultra' || c.raridade === 'lendaria';
-      const nivel = Math.max(col && col.nivel || 1, Math.min(9, Math.max(forte ? 5 : 3, nivelMedio() - (forte ? 1 : 2))));
+      // nível fixo baixo (mais justo): ultra e lendária vêm no 3, as outras no 5; dá pra upar com cópias e ouro
+      const nivel = Math.max(col && col.nivel || 1, forte ? 3 : 5);
       d.colecao[id] = { nivel, copias: (col && col.copias) || 0, tem: true };
       Estado.recarregarCatalogo();
       return { novo: true, nivel };
@@ -264,7 +265,7 @@ const Summon = (() => {
     const md = UI.modal({
       titulo: '📜 Personagens e chances',
       classe: 'modal-summon-info',
-      html: `<p class="smi-txt">Cada invocação sorteia uma raridade e depois um personagem dela. <b>Ultra garantido na ${PITY}ª</b> invocação sem Ultra (a chance sobe a partir da ${SUAVE}ª). Repetida vira cópias; se a carta já estiver no máximo, vira ouro.</p>${blocos}`,
+      html: `<p class="smi-txt">Cada invocação sorteia uma raridade e depois um personagem dela. <b>Ultra garantido na ${PITY}ª</b> invocação sem Ultra (a chance sobe a partir da ${SUAVE}ª). Carta nova vem no <b>nível 3</b> (Ultra e Lendária) ou <b>5</b> (as outras). Repetida vira cópias; se a carta já estiver no máximo, vira ouro.</p>${blocos}`,
       botoes: [{ texto: 'Fechar', classe: 'principal' }],
     });
     md.el.querySelectorAll('.smi-carta').forEach((x) => (x.onclick = () => detalhe(Estado.carta(x.dataset.id))));

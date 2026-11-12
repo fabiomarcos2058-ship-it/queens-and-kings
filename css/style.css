@@ -2950,3 +2950,28 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 .sm-banner.t-db .smb-painel { margin: 0 -6%; }
 .sm-banner.t-db .smb-painel.centro { flex: 1.3; }
 .sm-banner.t-db .smb-painel:nth-child(4) img { object-position: 22% 15%; }
+
+/* ===== Cyberpunk ===== */
+.dano-num.fala-cyber { font: 13px 'Lilita One', sans-serif; color: #FCEE0A; white-space: nowrap; text-shadow: 2px 2px 0 #FF003C, -1px -1px 0 #000, 1px 1px 0 #000, 0 0 8px #00F0FF; }
+.cutin[class*="cy_"]::before { background: radial-gradient(circle at 50% 45%, #00f0ff33, #12001acc 75%); }
+.cutin[class*="cy_"] .cutin-faixa { border-color: #FCEE0A; box-shadow: 0 0 22px #FF003C, 0 0 40px #00F0FF88; }
+.cutin[class*="cy_"] .cutin-legenda { color: #FCEE0A; text-shadow: 3px 3px 0 #FF003C, -1px -1px 0 #000, 1px 1px 0 #000, 0 0 12px #00F0FF; }
+.tropa.sandevistan .tropa-medalhao { box-shadow: 0 0 0 3px #3CFF9A, -8px 0 0 -1px #00F0FF88, -16px 0 0 -3px #FF003C55, 0 0 14px 4px #3CFF9A; }
+.tropa.ciberpsicose .tropa-medalhao { box-shadow: 0 0 0 3px #FF003C, 0 0 20px 8px #FF003C; animation: glitchPsico 0.18s steps(2) infinite; }
+@keyframes glitchPsico { 0% { transform: translate(1px, -1px); filter: hue-rotate(0deg); } 50% { transform: translate(-2px, 1px); filter: hue-rotate(40deg) saturate(1.6); } 100% { transform: translate(1px, 1px); } }
+.tropa.acoplado { transform-origin: center; }
+.tropa.acoplado .tropa-corpo { transform: scale(0.62); }
+.tropa.acoplado .hp, .tropa.acoplado .tropa-sombra { opacity: 0; }
+.tropa.com-camera .tropa-medalhao { box-shadow: 0 0 0 2px #3CFF9A, 0 0 12px 4px #3CFF9A99; }
+.tropa.hackeada .tropa-medalhao { box-shadow: 0 0 0 3px #FF5CF4, 0 0 14px 5px #00F0FF; filter: hue-rotate(160deg) saturate(1.4); }
+.tropa.parada-tempo .tropa-medalhao { filter: grayscale(0.6) brightness(0.85); }
+.fx-sandevistan { position: absolute; pointer-events: none; z-index: 1760; width: 70%; aspect-ratio: 1; transform: translate(-50%, -50%); border-radius: 50%; background: radial-gradient(circle, transparent 0 40%, #3CFF9A55 52%, #00F0FF88 58%, #FF003C44 64%, transparent 70%); animation: trunfoFx 0.9s ease-out forwards; }
+.fx-hack { position: absolute; pointer-events: none; z-index: 1760; width: 18%; aspect-ratio: 1; transform: translate(-50%, -50%); background: repeating-linear-gradient(0deg, #FF5CF4aa 0 2px, transparent 2px 5px), radial-gradient(circle, #00F0FF88, transparent 70%); border-radius: 8px; animation: trunfoFx 0.7s ease-out forwards; }
+.fx-missil { position: absolute; pointer-events: none; z-index: 1760; width: 14%; aspect-ratio: 1; transform: translate(-50%, -50%); border-radius: 50%; background: radial-gradient(circle, #fff 0 12%, #FFD25E 26%, #FF6A3Aaa 44%, transparent 66%); animation: trunfoFx 0.5s ease-out forwards; }
+.desafio-caixa.cyber { border-color: #FCEE0A; box-shadow: 0 0 14px #FF003C88, 0 0 24px #00F0FF44; }
+.desafio-caixa.cyber::after { background: linear-gradient(90deg, #12001af2 0%, #12001acc 55%, #12001a22 100%); }
+.desafio-caixa.cyber b { color: #FCEE0A; text-shadow: 2px 2px 0 #FF003C; }
+.cyber-fundo { position: absolute; inset: 0; display: grid; grid-template-columns: repeat(5, 1fr); }
+.cyber-fundo img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 15%; }
+.modal-ver-cyber .es-op { cursor: default; }
+.modal-ver-cyber .es-op small { display: block; font-size: 10px; opacity: 0.85; }

@@ -237,7 +237,11 @@ const Eventos = (() => {
   const YUGI = 'yugi_moto';
   const FAMILIA_SONIC = ['sonic', 'shadow', 'super_sonic', 'dark_sonic', 'sonic_excalibur', 'hyper_sonic'];
   const FIM_DESAFIOS = new Date(2026, 11, 14, 23, 59, 59); // 14/12/2026
-  const desafiosAbertos = () => Date.now() < FIM_DESAFIOS.getTime();
+  const FIM_CYBER = new Date(2027, 0, 15, 23, 59, 59); // 15/01/2027
+  const CYBER = ['roman_cyber', 'agente_rubi', 'lucy_kushinada', 'david_martinez', 'adam_smasher'];
+  const fimDe = (k) => (DESAFIOS[k] && DESAFIOS[k].fim) || FIM_DESAFIOS;
+  const aberto = (k) => Date.now() < fimDe(k).getTime();
+  const desafiosAbertos = () => Object.keys(DESAFIOS).some(aberto);
   const diasDesafios = () => Math.max(0, Math.ceil((FIM_DESAFIOS.getTime() - Date.now()) / 86400000));
   const lendariasRival = () => embaralhar(pool((c) => c.raridade === 'lendaria')).slice(0, 8).map((c) => c.id);
   const DESAFIOS = {
@@ -253,6 +257,19 @@ const Eventos = (() => {
         { nome: 'Elixir das Sombras', ic: '⚡', desc: 'Elixir 2,5x mais rápido e o Faraó só joga com lendárias.', montar: (ev) => { ev.deckIA = lendariasRival(); }, cfg: { elixirMult: 2.5, dif: 5 } },
         { nome: 'Morte Súbita Turbo', ic: '💀', desc: 'Tropas muito mais rápidas, 2 minutos, e a primeira torre que cair decide tudo.', cfg: { subita: true, turbo: true, dif: 5 } },
         { nome: 'O Faraó', ic: '👁️', desc: 'A IA super inteligente, com o próprio Yugi no deck e cartas 1 nível acima das suas. Boa sorte, duelista.', cfg: { dif: 6, cartaIA: YUGI, nivelIAMais: 3 } },
+      ],
+    },
+    cyber: {
+      nome: 'Noite em Night City', vidas: 3, preco: 20, fim: FIM_CYBER,
+      falas: { roman_cyber: '"Tá gravando? Tá gravando! Eu vou junto, {n}."', agente_rubi: '"MaxTac. Fica atrás de mim, {n}."', lucy_kushinada: '"Eu sempre quis ir pra Lua... mas pode ser do seu lado, {n}."', david_martinez: '"Eu vou chegar no topo de Night City, {n}. Vem comigo."', adam_smasher: '"Carne fraca. Mas você venceu, {n}."' },
+      premios: [{ carta: 'roman_cyber' }, { carta: 'agente_rubi' }, { ouro: 600 }, { carta: 'lucy_kushinada' }, { carta: 'david_martinez' }, { carta: 'adam_smasher' }],
+      etapas: [
+        { nome: 'Ruas de Night City', ic: '🌃', desc: 'Uma batalha normal pra aquecer. Prêmio: Roman.', cfg: { dif: 2 } },
+        { nome: 'Sobrecarga', ic: '⚡', desc: 'Elixir 2x mais rápido. Prêmio: Agente Rubi.', cfg: { elixirMult: 2, dif: 3 } },
+        { nome: 'Netrunner', ic: '💻', desc: 'Suas cartas ficam viradas pra baixo (você só vê o custo). Lembre do seu deck!', cfg: { cartasViradas: true, dif: 3 } },
+        { nome: 'Sandevistan', ic: '⏩', desc: 'Todas as tropas andam e atacam muito mais rápido. Prêmio: Lucy.', cfg: { turbo: true, dif: 4 } },
+        { nome: 'MaxTac', ic: '🚨', desc: '2 minutos e a primeira torre derrubada vence. Prêmio: David.', cfg: { subita: true, dif: 5 } },
+        { nome: 'Adam Smasher', ic: '🤖', desc: 'O chefe: a IA mais esperta, com o Adam Smasher no deck e cartas 2 níveis acima. Vença e o Adam é seu!', cfg: { dif: 6, cartaIA: 'adam_smasher', nivelIAMais: 2 } },
       ],
     },
     sonic: {
@@ -274,7 +291,7 @@ const Eventos = (() => {
   }
   function jogarDesafio(k, iniciar) {
     const D = DESAFIOS[k], f = dadosDesafio(k);
-    if (!desafiosAbertos()) { UI.toast('Esse evento já acabou 😢'); return; }
+    if (!aberto(k)) { UI.toast('Esse evento já acabou 😢'); return; }
     if (!f.ativo) {
       if (f.tentativas > 0) {
         if (Estado.d.gemas < D.preco) { UI.toast(`Precisa de ${D.preco} gemas para tentar de novo`); return; }
@@ -353,13 +370,14 @@ const Eventos = (() => {
       f.v++;
       if (f.v >= total) { f.ativo = false; f.completo = true; }
       Estado.salvar();
-      const txt = premio.escolha ? 'Escolha um Sonic!' : premio.carta ? 'Yugi Moto!' : txtPremio(premio);
-      UI.modal({ titulo: k === 'yugi' ? '🃏 Você venceu o duelo!' : '💨 Venceu!', html: `<p class="ev-res">${f.v >= total ? `${D.nome} completo!` : `Vitória ${f.v}/${total}! Você ganhou <b>${txt}</b>`}</p>`, botoes: [{ texto: 'Oba!', classe: 'principal' }] });
+      const txt = premio.escolha ? 'Escolha um Sonic!' : premio.carta ? `${esc(Estado.carta(premio.carta).nome)}!` : txtPremio(premio);
+      UI.modal({ titulo: k === 'yugi' ? '🃏 Você venceu o duelo!' : k === 'cyber' ? '🌃 Missão cumprida!' : '💨 Venceu!', html: `<p class="ev-res">${f.v >= total ? `${D.nome} completo!` : `Vitória ${f.v}/${total}! Você ganhou <b>${txt}</b>`}</p>`, botoes: [{ texto: 'Oba!', classe: 'principal' }] });
       setTimeout(() => {
         if (premio.escolha) escolherSonic(tudo);
         else if (premio.carta) {
-          if (Estado.tem(premio.carta)) { Estado.d.gemas += 200; Estado.salvar(); UI.toast('Você já tinha o Yugi: +200 💎'); }
-          else revelarNino(Ranque.darEvolucao(premio.carta), 'LENDÁRIA EXCLUSIVA DE EVENTO', D.fala.replace('{n}', esc(nomeJ())));
+          const cp = Estado.carta(premio.carta);
+          if (Estado.tem(premio.carta)) { Estado.d.gemas += 100; Estado.salvar(); UI.toast(`Você já tinha ${cp.nome}: +100 💎`); }
+          else revelarNino(Ranque.darEvolucao(premio.carta), `${cp.raridade === 'epica' ? 'ÉPICA' : 'LENDÁRIA'} EXCLUSIVA DE EVENTO`, (D.falas && D.falas[premio.carta] || D.fala || '"Bora."').replace('{n}', esc(nomeJ())));
           tudo();
         } else { darPremio(premio, mostrarBau); tudo(); }
       }, 120);
@@ -374,10 +392,25 @@ const Eventos = (() => {
       botoes: [{ texto: 'OK', classe: 'principal', acao: () => tudo() }],
     });
   }
+  function caixaCyber(D, f, total) {
+    const premioI = (i) => D.premios[i] && D.premios[i].carta;
+    const pips = D.etapas.map((E, i) => `<span class="fn-pip${i < f.v ? ' ok' : ''}${premioI(i) ? ' final' : ''}" title="${esc(E.nome)}">${premioI(i) ? `<img src="assets/cartas/${premioI(i)}_medalhao.png" alt="" />` : E.ic}</span>`).join('');
+    const vidas = Array.from({ length: D.vidas }, (_, i) => `<i class="${i < D.vidas - f.l ? '' : 'perdida'}">💾</i>`).join('');
+    const prox = D.etapas[Math.min(f.v, total - 1)];
+    const dias = Math.max(0, Math.ceil((D.fim.getTime() - Date.now()) / 86400000));
+    const faltam = CYBER.filter((id) => !Estado.tem(id)).length;
+    const botao = `<button class="selo botao" data-desafio="cyber">${f.ativo ? `Jogar: ${prox.nome}` : f.tentativas ? `De novo · ${D.preco} 💎` : 'Começar (grátis)'}</button>`;
+    return `<div class="desafio-caixa cyber"><div class="cyber-fundo">${CYBER.map((id) => `<img src="assets/cartas/${id}.jpg" alt="" />`).join('')}</div><div class="mc-conteudo">
+      <b>🌃 ${D.nome}</b><span>${faltam ? `${total} missões com regras diferentes. Cada personagem vem numa missão, e o <b>Adam Smasher</b> é o chefe final! · ${dias} dias` : 'Você já tem todo mundo de Night City! Jogue pelos prêmios.'}</span>
+      <div class="fn-pips">${pips}</div><div class="fn-linha"><div class="fn-vidas">${vidas}</div>${botao}</div>
+      <button class="fn-ver" data-ver-cyber="1">Ver os personagens</button></div></div>`;
+  }
   function htmlDesafios() {
     if (!desafiosAbertos()) return '';
     const caixa = (k) => {
+      if (!aberto(k)) return '';
       const D = DESAFIOS[k], f = dadosDesafio(k), total = D.etapas.length;
+      if (k === 'cyber') return caixaCyber(D, f, total);
       const pips = D.etapas.map((E, i) => `<span class="fn-pip${i < f.v ? ' ok' : ''}${i === total - 1 ? ' final' : ''}" title="${esc(E.nome)}">${i === total - 1 ? (k === 'yugi' ? `<img src="assets/cartas/${YUGI}_medalhao.png" alt="" />` : '<img src="assets/cartas/sonic_medalhao.png" alt="" />') : E.ic}</span>`).join('');
       const vidas = Array.from({ length: D.vidas }, (_, i) => `<i class="${i < D.vidas - f.l ? '' : 'perdida'}">${k === 'yugi' ? '🃏' : '💍'}</i>`).join('');
       const prox = D.etapas[Math.min(f.v, total - 1)];
@@ -391,7 +424,7 @@ const Eventos = (() => {
         <div class="fn-pips">${pips}</div><div class="fn-linha"><div class="fn-vidas">${vidas}</div>${botao}</div>
         ${k === 'yugi' ? `<button class="fn-ver" data-ver="${YUGI}">Ver a carta</button>` : '<button class="fn-ver" data-ver-sonic="1">Ver os Sonics</button>'}</div></div>`;
     };
-    return `<div class="desafios-evento"><div class="mitas-cab"><small>EVENTOS NOVOS · ${diasDesafios()} dias</small><b>⚔️ Desafios Lendários</b></div>${caixa('yugi')}${caixa('sonic')}</div>`;
+    return `<div class="desafios-evento"><div class="mitas-cab"><small>EVENTOS NOVOS</small><b>⚔️ Desafios Lendários</b></div>${caixa('cyber')}${caixa('yugi')}${caixa('sonic')}</div>`;
   }
 
   // ---------- tela (dentro da aba Eventos) ----------
@@ -430,6 +463,12 @@ const Eventos = (() => {
     if (j) j.onclick = () => jogarFestival(iniciar);
     raiz.querySelectorAll('[data-mita]').forEach((b) => (b.onclick = () => jogarMita(b.dataset.mita, iniciar)));
     raiz.querySelectorAll('[data-desafio]').forEach((b) => (b.onclick = () => jogarDesafio(b.dataset.desafio, iniciar)));
+    raiz.querySelectorAll('[data-ver-cyber]').forEach((b) => (b.onclick = () => UI.modal({
+      titulo: '🌃 Night City',
+      classe: 'modal-ver-cyber',
+      html: `<div class="escolha-sonic">${CYBER.map((id) => { const c = Estado.carta(id); return `<div class="es-op${Estado.tem(id) ? ' ja-tem' : ''}">${Cartas.html(c, { mini: true })}<b>${esc(c.nome)}</b><small>${esc(c.passiva ? c.passiva.nome : '')}${c.habilidade ? ` · ${esc(c.habilidade.nome)}` : ''}</small></div>`; }).join('')}</div>`,
+      botoes: [{ texto: 'Fechar', classe: 'principal' }],
+    })));
     raiz.querySelectorAll('[data-ver-sonic]').forEach((b) => (b.onclick = () => {
       const md = UI.modal({
         titulo: '💨 Família Sonic', classe: 'modal-escolha-sonic',
@@ -551,6 +590,11 @@ const Eventos = (() => {
       if ((f.completo || f.v >= VITORIAS) && !Estado.tem(NINO)) {
         f.completo = true; f.ativo = false;
         setTimeout(() => { if (!Estado.tem(NINO)) revelarNino(Ranque.darEvolucao(NINO)); }, 900);
+      }
+      // Adam Smasher (Evolução): exclusivo do Enzo
+      if ((Conta.uid && Conta.uid()) === ENZO && !Estado.tem('adam_smasher_evo') && !(d.presentesEspeciais || []).includes('adam-evo-enzo')) {
+        d.presentesEspeciais = [...(d.presentesEspeciais || []), 'adam-evo-enzo'];
+        setTimeout(() => revelarNino(Ranque.darEvolucao('adam_smasher_evo'), 'ULTRA EXCLUSIVA DO ENZO', '"Você pediu, eu vim. Night City inteira vai saber o seu nome, Enzo."'), 1200);
       }
       // reparo do Enzo: o bug do carregamento apagou cartas dele. Volta tudo (nível 5 no mínimo) + compensação.
       if ((Conta.uid && Conta.uid()) === ENZO && !(d.presentesEspeciais || []).includes('reparo-enzo')) {

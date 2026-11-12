@@ -621,6 +621,7 @@ const Batalha = (() => {
       return 0;
     }
     // pulando / atravessando (Goku Presságio e MUI): nada acerta
+    if (e.acoplado) return 0;
     if (!e.torre && e.intocavel > 0) { esquivou(e); return 0; }
     // Diavolo: vê o golpe no futuro e desvia (a cada 7s)
     if (!e.torre && fonte && !opc.atravessa && e.atk && e.atk.m && e.atk.m.epitafio && (e.epitafioAte || 0) <= s.t && dano >= 25) { e.epitafioAte = s.t + e.atk.m.epitafio; falar(e, 'Epitáfio!', 'fala-jojo'); esquivou(e); return 0; }
@@ -917,6 +918,11 @@ const Batalha = (() => {
     if (h.tipo === 'punhoDeus') punhoDeus(t, h);
     if (h.tipo === 'ceifaDivina') ceifaDivina(t, h);
     if (h.tipo === 'finalFlash') finalFlash(t, h);
+    if (h.tipo === 'sandevistan') sandevistanDavid(t, h);
+    if (h.tipo === 'misseis') misseisAdam(t, h);
+    if (h.tipo === 'smasherTotal') smasherTotal(t, h);
+    if (h.tipo === 'ciberpsicose') ciberpsicose(t, h);
+    if (h.tipo === 'silverhand') chamarSilverhand(t, h);
     if (h.tipo === 'investidaInv') investidaInv(t, h);
     if (h.tipo === 'barreiraAtomica') barreiraAtomica(t, h);
     if (h.tipo === 'esmagar') esmagar(t, h);
@@ -1120,8 +1126,8 @@ const Batalha = (() => {
   }
 
   // corte de cena por cima da arena (aparece pra todo mundo da partida)
-  const CUTINS = ['goku_furia', 'jojo_jotaro', 'jojo_dio', 'jojo_diavolo', 'jojo_pucci', 'jojo_gyro', 'jojo_johnny', 'sonic_shadow', 'sonic_super', 'sonic_dark', 'sonic_excalibur', 'sonic_hyper', 'yugi_reino', 'ultra_sae', 'ultra_rin', 'ultra_isagi', 'ultra_anri', 'inv_mark_eve', 'inv_mark', 'inv_eve', 'inv_conquest', 'inv_omni', 'inv_anissa', 'db_goku_vegeta', 'db_gogeta_vegetto', 'db_vegetto_gogeta', 'db_ultra_ego', 'db_kaioken', 'db_goku_deus', 'db_black', 'db_evolution'];
-  const TEXTO_CUTIN_2 = { sonic_shadow: 'Chaos Control!', sonic_super: 'Super Boost!', sonic_dark: 'Explosão Sombria!', sonic_excalibur: 'Soul Surge!', sonic_hyper: 'Hiper Velocidade!', yugi_reino: 'Reino das Sombras!', ultra_sae: 'Visão do Gênio!', ultra_rin: 'Flow: Destruição!', ultra_isagi: 'Direct Shot!', ultra_anri: 'Doces ou Travessuras?', inv_mark_eve: 'Juntos somos invencíveis!', inv_mark: 'Investida Invencível!', inv_eve: 'Barreira Atômica!', inv_conquest: 'Esmagar!', inv_omni: 'Fúria do Regente!', inv_anissa: 'Rajada Viltrumita!', db_goku_vegeta: 'Rivais Eternos!', db_gogeta_vegetto: 'Kamehameha Final + Big Bang!', db_vegetto_gogeta: 'Soul Punisher!', db_ultra_ego: 'Hakai!', db_kaioken: 'Kaioken x20!', db_goku_deus: 'Punho do Deus Saiyajin!', db_black: 'Ceifa Divina!', db_evolution: 'Final Flash!' };
+  const CUTINS = ['goku_furia', 'jojo_jotaro', 'jojo_dio', 'jojo_diavolo', 'jojo_pucci', 'jojo_gyro', 'jojo_johnny', 'sonic_shadow', 'sonic_super', 'sonic_dark', 'sonic_excalibur', 'sonic_hyper', 'yugi_reino', 'ultra_sae', 'ultra_rin', 'ultra_isagi', 'ultra_anri', 'inv_mark_eve', 'inv_mark', 'inv_eve', 'inv_conquest', 'inv_omni', 'inv_anissa', 'db_goku_vegeta', 'db_gogeta_vegetto', 'db_vegetto_gogeta', 'db_ultra_ego', 'db_kaioken', 'db_goku_deus', 'db_black', 'db_evolution', 'cy_david', 'cy_adam', 'cy_adam_evo', 'cy_rubi', 'cy_silverhand'];
+  const TEXTO_CUTIN_2 = { sonic_shadow: 'Chaos Control!', sonic_super: 'Super Boost!', sonic_dark: 'Explosão Sombria!', sonic_excalibur: 'Soul Surge!', sonic_hyper: 'Hiper Velocidade!', yugi_reino: 'Reino das Sombras!', ultra_sae: 'Visão do Gênio!', ultra_rin: 'Flow: Destruição!', ultra_isagi: 'Direct Shot!', ultra_anri: 'Doces ou Travessuras?', inv_mark_eve: 'Juntos somos invencíveis!', inv_mark: 'Investida Invencível!', inv_eve: 'Barreira Atômica!', inv_conquest: 'Esmagar!', inv_omni: 'Fúria do Regente!', inv_anissa: 'Rajada Viltrumita!', db_goku_vegeta: 'Rivais Eternos!', db_gogeta_vegetto: 'Kamehameha Final + Big Bang!', db_vegetto_gogeta: 'Soul Punisher!', db_ultra_ego: 'Hakai!', db_kaioken: 'Kaioken x20!', db_goku_deus: 'Punho do Deus Saiyajin!', db_black: 'Ceifa Divina!', db_evolution: 'Final Flash!', cy_david: 'Sandevistan!', cy_adam: 'Rajada de Mísseis!', cy_adam_evo: 'Mísseis + Sandevistan!', cy_rubi: 'Ciberpsicose!', cy_silverhand: 'Johnny Silverhand!' };
   const TEXTO_CUTIN = { ...TEXTO_CUTIN_2, goku_furia: "You're going to pay for this!", jojo_jotaro: 'Star Platinum: The World!', jojo_dio: 'ZA WARUDO! Toki yo tomare!', jojo_diavolo: 'King Crimson!', jojo_pucci: 'Made in Heaven!', jojo_gyro: 'Ball Breaker!', jojo_johnny: 'Tusk Act 4!' };
   const cutinRede = (qual) => { cutin(qual); if (s.rede || s.aoVivo) s.eventos.push(['c', CUTINS.indexOf(qual)]); };
   function cutin(qual) {
@@ -1173,7 +1179,7 @@ const Batalha = (() => {
     setTimeout(() => n.remove(), 1100);
     if (rede && (s.rede || s.aoVivo)) s.eventos.push(['z', Math.round(e.x), Math.round(e.y), texto, classe]);
   }
-  const imuneA = (e) => !!(e.atk && e.atk.m && e.atk.m.imune) || e.flow > 0;
+  const imuneA = (e) => !!(e.atk && e.atk.m && e.atk.m.imune) || e.flow > 0 || e.psico > 0;
   function prender(e, seg) {
     if (e.torre || e.vida <= 0 || imuneA(e)) return;
     e.atord = Math.max(e.atord, seg);
@@ -1287,6 +1293,124 @@ const Batalha = (() => {
     }
     // quem mirava na Nino tem que escolher de novo
     for (const e of s.ent) if (e.alvo === t) e.alvo = null;
+  }
+
+  // =================== Cyberpunk: Night City ===================
+  // David e Adam Smasher: o tempo quase para pros inimigos em volta
+  function sandevistan(t, seg, raio = 220) {
+    t.sande = seg; t.el.classList.add('sandevistan');
+    fxEl('fx-sandevistan', t.x, t.y, 900); fxJ(34, t.x, t.y);
+    for (const e of s.ent) {
+      if (e.torre || e.time === t.time || e.vida <= 0 || imuneA(e) || dist(e, t) > raio + e.raio) continue;
+      e.atord = Math.max(e.atord, seg); e.el.classList.add('parada-tempo');
+    }
+    falar(t, 'Sandevistan!', 'fala-cyber');
+  }
+  function sandevistanDavid(t, h) { cutinRede('cy_david'); sandevistan(t, 3); }
+  // Adam Smasher: rajada de mísseis
+  function rajadaMisseis(t, h) {
+    const alvos = s.ent.filter((e) => e.time !== t.time && e.vida > 0 && !(e.banido > 0) && !e.acoplado && dist(e, t) < 240);
+    if (!alvos.length) return;
+    const tropas = alvos.filter((e) => !e.torre), lista = tropas.length ? tropas : alvos;
+    const n = h.n || 8;
+    for (let i = 0; i < n; i++) {
+      const alvo = lista[i % lista.length];
+      agendar(i * 0.09, () => {
+        if (!s || s.acabou) return;
+        const x = alvo.x + (Math.random() - 0.5) * 16, y = alvo.y + (Math.random() - 0.5) * 16;
+        voarSprite('missil', t, { x, y }, 0.32, 18, { mira: true, arco: 30 });
+        agendar(0.32, () => {
+          if (!s || s.acabou) return;
+          fxEl('fx-missil', x, y, 500);
+          explosaoArea(t, { x, y }, Math.round(t.dano * (h.mult || 1)), 30, { visual: 'impacto', cor: '#FF6A3A', torreMult: 0.4 });
+        });
+      });
+    }
+    falar(t, 'Mísseis!', 'fala-cyber');
+  }
+  function misseisAdam(t, h) { cutinRede('cy_adam'); rajadaMisseis(t, h); }
+  function smasherTotal(t, h) { cutinRede('cy_adam_evo'); rajadaMisseis(t, h); agendar(1, () => { if (t.vida > 0 && s && !s.acabou) sandevistan(t, 2.5); }); }
+  // Agente Rubi: ciberpsicose (muito forte por 5s, depois cai)
+  function ciberpsicose(t, h) {
+    cutinRede('cy_rubi');
+    t.psico = 5; t.atord = 0; t.el.classList.remove('atordoada');
+    t.el.classList.add('ciberpsicose');
+    falar(t, 'CIBERPSICOSE!', 'fala-cyber');
+    fxEl('fx-sandevistan', t.x, t.y, 900); fxJ(34, t.x, t.y);
+  }
+  // Lucy: hack rápido a cada 7s
+  function hackear(e, seg) {
+    if (e.hackeado > 0 || e.torre) return;
+    const orig = e.time, novo = orig === 'azul' ? 'vermelho' : 'azul';
+    Object.assign(e, { hackeado: seg, timeOrig: orig, time: novo, alvo: null });
+    e.el.classList.remove(orig); e.el.classList.add(novo, 'hackeada');
+  }
+  function desHackear(e) {
+    const agora = e.time;
+    Object.assign(e, { hackeado: 0, time: e.timeOrig, alvo: null });
+    e.el.classList.remove(agora, 'hackeada'); e.el.classList.add(e.time);
+  }
+  function hackLucy(t) {
+    const alvo = inimigosPerto(t, 170).sort((a, b) => dist(a, t) - dist(b, t))[0];
+    if (!alvo) return false;
+    const r = Math.floor(Math.random() * 3);
+    fxEl('fx-hack', alvo.x, alvo.y, 700); fxJ(35, alvo.x, alvo.y);
+    if (r === 0 && !imuneA(alvo)) { alvo.atord = Math.max(alvo.atord, 1.5); alvo.el.classList.add('atordoada'); falar(alvo, 'Sistema travado!', 'fala-cyber'); }
+    else if (r === 2 && !imuneA(alvo) && !(alvo.hackeado > 0)) { hackear(alvo, 3); falar(alvo, 'Hackeado!', 'fala-cyber'); }
+    else { ferir(alvo, Math.round(t.dano * 2 * multClasse(t, alvo)), t.time, t, { atravessa: true, semEsquiva: true }); falar(alvo, 'Curto-circuito!', 'fala-cyber'); }
+    return true;
+  }
+  // Roman: se prende num aliado com a câmera
+  function acharAncora(t) {
+    let melhor = null, md = 280;
+    for (const e of s.ent) {
+      if (e === t || e.torre || e.time !== t.time || e.vida <= 0 || e.acoplado || (e.atk && e.atk.m && e.atk.m.camera) || e.temporario) continue;
+      const d0 = dist(e, t);
+      if (d0 < md) { md = d0; melhor = e; }
+    }
+    return melhor;
+  }
+  function soltarCamera(t) {
+    if (t.ancora) { t.ancora.cameraBuff = 0; t.ancora.el.classList.remove('com-camera'); }
+    t.ancora = null; t.acoplado = false; t.el.classList.remove('acoplado');
+  }
+  function passivasCyber(t, dt, mm) {
+    // efeitos com tempo
+    if (t.sande > 0 && (t.sande -= dt) <= 0) t.el.classList.remove('sandevistan');
+    if (t.psico > 0 && (t.psico -= dt) <= 0) {
+      t.el.classList.remove('ciberpsicose');
+      falar(t, '...', 'fala-cyber');
+      ferir(t, t.vida + 1, t.time === 'azul' ? 'vermelho' : 'azul', null, { atravessa: true, semEsquiva: true, ignoraEscudo: true, semContra: true });
+      return true;
+    }
+    t.velMult = (t.cameraBuff ? 1.25 : 1) * (t.sande > 0 ? 2.5 : 1) * (t.psico > 0 ? 1.8 : 1);
+    if (mm.netrunner && (t.hackT = (t.hackT || 0) + dt) >= mm.netrunner) { if (hackLucy(t)) t.hackT = 0; else t.hackT = mm.netrunner - 0.5; }
+    if (mm.camera) {
+      if (t.ancora && (t.ancora.vida <= 0 || !s.ent.includes(t.ancora) || t.ancora.time !== t.time)) soltarCamera(t);
+      if (!t.ancora && (t.buscaT = (t.buscaT || 0) - dt) <= 0) {
+        t.buscaT = 0.6;
+        const a = acharAncora(t);
+        if (a) {
+          t.ancora = a; t.acoplado = true; t.alvo = null;
+          a.cameraBuff = 1; a.el.classList.add('com-camera');
+          t.el.classList.add('acoplado');
+          particulas(t.x, t.y, '#3CFF9A', 6, 16);
+          falar(a, 'Gravando!', 'fala-cyber');
+        }
+      }
+      if (t.ancora) {
+        t.x = t.ancora.x + 9; t.y = t.ancora.y - 10;
+        return true; // preso no aliado: não anda nem ataca
+      }
+    }
+    return false;
+  }
+  // V: chama o Johnny Silverhand pra ajudar (por 12s)
+  function chamarSilverhand(t, h) {
+    cutinRede('cy_silverhand');
+    const j = donoDe(criarTropa(t.time, Estado.carta('johnny_silverhand'), Math.max(16, Math.min(W - 16, t.x + 16)), t.y + 4, t.f || 1, t.nivel), t.dono);
+    j.temporario = h.seg || 12; j.invocado = true;
+    falar(j, 'Acorda, samurai. Temos uma cidade pra queimar.', 'fala-cyber');
   }
 
   // =================== Dragon Ball: banner dos Saiyajins ===================
@@ -1654,7 +1778,7 @@ const Batalha = (() => {
   }
 
   // =================== Família Sonic + Yugi ===================
-  const inimigosPerto = (t, r) => s.ent.filter((e) => !e.torre && e.time !== t.time && e.vida > 0 && !(e.banido > 0) && dist(e, t) < r + e.raio);
+  const inimigosPerto = (t, r) => s.ent.filter((e) => !e.torre && e.time !== t.time && e.vida > 0 && !(e.banido > 0) && !e.acoplado && dist(e, t) < r + e.raio);
   function passivasSonic(t, dt) {
     const m = t.atk.m;
     // Super Sonic: os anéis vão acabando com o tempo
@@ -1864,7 +1988,7 @@ const Batalha = (() => {
 
   // =================== JoJo: Stands ===================
   const fxJ = (i, x, y) => { if (s.rede || s.aoVivo) s.eventos.push(['j', i, Math.round(x), Math.round(y)]); };
-  const FX_J = [['fx-ora', 650], ['fx-facas', 2600], ['fx-rolo', 1100], ['fx-kc', 800], ['fx-disco', 700], ['fx-tusk', 900], ['fx-coracao', 1200], ['fx-arquivo', 1400], ['fx-glitch', 700], ['fx-murasame', 750], ['fx-trunfo', 900], ['fx-carta-yugi', 900], ['fx-reino', 1300], ['fx-aneis', 800], ['fx-chaos', 900], ['fx-hyper-flash', 600], ['fx-sombria', 900], ['fx-spin', 450], ['fx-espelho', 500], ['fx-soul', 900], ['fx-passe', 500], ['fx-flow', 900], ['fx-cha', 700], ['fx-abobora', 700], ['fx-fantasma', 600], ['fx-separar', 900], ['fx-barreira', 900], ['fx-esmagar', 800], ['fx-db-cruz', 900], ['fx-db-aura', 900], ['fx-db-explosao', 900], ['fx-soul-punisher', 1000], ['fx-hakai', 1000], ['fx-foice', 800]];
+  const FX_J = [['fx-ora', 650], ['fx-facas', 2600], ['fx-rolo', 1100], ['fx-kc', 800], ['fx-disco', 700], ['fx-tusk', 900], ['fx-coracao', 1200], ['fx-arquivo', 1400], ['fx-glitch', 700], ['fx-murasame', 750], ['fx-trunfo', 900], ['fx-carta-yugi', 900], ['fx-reino', 1300], ['fx-aneis', 800], ['fx-chaos', 900], ['fx-hyper-flash', 600], ['fx-sombria', 900], ['fx-spin', 450], ['fx-espelho', 500], ['fx-soul', 900], ['fx-passe', 500], ['fx-flow', 900], ['fx-cha', 700], ['fx-abobora', 700], ['fx-fantasma', 600], ['fx-separar', 900], ['fx-barreira', 900], ['fx-esmagar', 800], ['fx-db-cruz', 900], ['fx-db-aura', 900], ['fx-db-explosao', 900], ['fx-soul-punisher', 1000], ['fx-hakai', 1000], ['fx-foice', 800], ['fx-sandevistan', 900], ['fx-hack', 700]];
   // Tempo parado: o outro time congela (tropas e torres). Quem tem moveNoTempo (Jotaro, Dio) continua andando.
   function pararTempo(t, seg, raio, nome) {
     typeof Som !== 'undefined' && Som.tocar('tempoParado');
@@ -2138,7 +2262,7 @@ const Batalha = (() => {
 
   // ---------- Inteligência das tropas ----------
   function escolherAlvo(t) {
-    const inimigos = s.ent.filter((e) => e.time !== t.time && e.vida > 0 && !(e.banido > 0) && (t.alvoTipo === 'tudo' || e.torre));
+    const inimigos = s.ent.filter((e) => e.time !== t.time && e.vida > 0 && !(e.banido > 0) && !e.acoplado && !(t.hackeado > 0 && e.torre) && (t.alvoTipo === 'tudo' || e.torre));
     // atiradores enxergam mais longe (param pra atirar em vez de ir andando até o inimigo)
     const visaoTropa = Math.max(140, t.alcance + 55);
     let melhor = null, md = Infinity;
@@ -2199,7 +2323,7 @@ const Batalha = (() => {
     }
     const dx = px - t.x, dy = py - t.y, d0 = Math.hypot(dx, dy) || 1;
     const arrancada = t.atk && t.atk.m && t.atk.m.investida && !t.investiu && dist(t, alvo) < 130 ? 2.6 : 1;
-    const passo = Math.min(d0, t.vel * (t.furia > 0 ? 1.25 : 1) * (t.lento > 0 ? 1 - t.lentoPct : 1) * arrancada * (s.turbo && !t.torre ? 1.4 : 1) * (t.acelerado > 0 ? 1.5 : 1) * (t.trunfo > 0 ? 1.4 : 1) * (t.semLimite ? 1.2 : 1) * (t.flow > 0 || t.passe > 0 ? 1.3 : 1) * dt);
+    const passo = Math.min(d0, t.vel * (t.furia > 0 ? 1.25 : 1) * (t.lento > 0 ? 1 - t.lentoPct : 1) * arrancada * (s.turbo && !t.torre ? 1.4 : 1) * (t.acelerado > 0 ? 1.5 : 1) * (t.trunfo > 0 ? 1.4 : 1) * (t.semLimite ? 1.2 : 1) * (t.flow > 0 || t.passe > 0 ? 1.3 : 1) * (t.velMult || 1) * dt);
     if (arrancada > 1 && !t.correndo) { t.correndo = true; t.el.classList.add('arrancada'); }
     let vx = dx / d0, vy = dy / d0;
     // se tem uma torre no caminho (que não é o alvo), desvia pelo lado mais curto
@@ -2250,6 +2374,8 @@ const Batalha = (() => {
     if (a.auraDivina) d0 *= 1.15;
     if (a.evolucao > 0) d0 *= 1.3;
     if (a.furiaFusao) d0 *= 1.6;
+    if (a.cameraBuff) d0 *= 1.3;
+    if (a.psico > 0) d0 *= 2;
     if (a.raiva > 0) d0 *= 1 + 0.2 * (a.raivaN || 1);
     if (a.golpesFortes > 0) { d0 *= a.multGolpes || 2.5; a.golpesFortes--; if (!a.golpesFortes) a.el.classList.remove('aura-golpes'); }
     if (alvo) d0 *= multClasse(a, alvo);
@@ -2770,6 +2896,10 @@ const Batalha = (() => {
         || ((h.tipo === 'rivaisEternos' || h.tipo === 'fusaoDupla' || h.tipo === 'finalFlash' || h.tipo === 'kameKaioken') && t.alvo && dist(t, t.alvo) < 250 && (t.alvo.torre || t.alvo.vida > t.dano * 2 || s.ent.filter((e) => !e.torre && e.time !== t.time && e.vida > 0 && dist(e, t) < 250).length >= 2))
         || ((h.tipo === 'soulPunisher' || h.tipo === 'hakai') && s.ent.some((e) => !e.torre && e.time !== t.time && e.vida > 0 && dist(e, t) < 240 && (e.vida > t.dano * 2 || e.escudo > 0 || e.aneis > 0 || e.esmeraldas > 0 || e.infinito > 0)))
         || (h.tipo === 'punhoDeus' && (s.ent.some((e) => !e.torre && e.time !== t.time && e.vida > t.dano * 2 && dist(e, t) < 240) || s.ent.filter((e) => !e.torre && e.time === t.time && e.vida > 0 && e.vida < e.max * 0.6 && dist(e, t) < 140).length >= 2))
+        || ((h.tipo === 'sandevistan' || h.tipo === 'smasherTotal') && s.ent.filter((e) => !e.torre && e.time !== t.time && e.vida > 0 && dist(e, t) < 200).length >= 2)
+        || (h.tipo === 'misseis' && s.ent.filter((e) => e.time !== t.time && e.vida > 0 && dist(e, t) < 230).length >= 2)
+        || (h.tipo === 'ciberpsicose' && t.alvo && dist(t, t.alvo) < 120 && (t.alvo.torre || t.alvo.vida > t.dano * 2 || t.vida < t.max * 0.4))
+        || (h.tipo === 'silverhand' && t.alvo && dist(t, t.alvo) < 200)
         || (h.tipo === 'ceifaDivina' && s.ent.filter((e) => !e.torre && e.time !== t.time && e.vida > 0 && dist(e, t) < 110).length >= 2)
         || (h.tipo === 'investidaInv' && t.alvo && dist(t, t.alvo) < 230 && (t.alvo.torre || s.ent.filter((e) => !e.torre && e.time !== t.time && e.vida > 0 && dist(e, t) < 230).length >= 2 || t.alvo.vida > t.dano * 2))
         || (h.tipo === 'barreiraAtomica' && (s.ent.filter((e) => !e.torre && e.time === t.time && e.vida > 0 && dist(e, t) < 130).length >= 2 || s.ent.filter((e) => !e.torre && e.time !== t.time && e.vida > 0 && dist(e, t) < 110).length >= 2))
@@ -2933,7 +3063,7 @@ const Batalha = (() => {
       tw: Object.fromEntries(s.ent.filter((e) => e.torre).map((e) => [e.id, Math.round(e.vida)])),
       tr: s.ent.filter((e) => !e.torre).map((e) => [e.id, e.carta.id, e.time === 'azul' ? 0 : 1, Math.round(e.x * 10) / 10, Math.round(e.y * 10) / 10,
         Math.round(e.vida), e.max, e.nivel, (e.surgir > 0 ? 1 : 0) | (e.furia > 0 ? 2 : 0) | (e.golpesFortes > 0 ? 4 : 0) | (e.fenix > 0 ? 8 : 0) | (e.congelado > 0 ? 16 : 0) | (e.esquiva > 0 ? 32 : 0) | (e.atord > 0 ? 64 : 0) | (e.lento > 0 ? 128 : 0) | (e.queima > 0 ? 256 : 0) | (e.escudo > 0 ? 512 : 0) | (e.fraco > 0 ? 1024 : 0) | ((e.adaptacao || 0) << 11) | (e.evo ? 131072 : 0) | (e.infinito > 0 ? 262144 : 0) | (e.canal > 0 ? 524288 : 0) | (e.trunfo > 0 ? 1048576 : 0) | (e.sombra > 0 ? 2097152 : 0) | (e.maldAte > s.t ? 4194304 : 0) | (e.aneis > 0 && e.aneisMax ? 8388608 : 0) | (e.semLimite ? 16777216 : 0) | (e.esmeraldas > 0 ? 33554432 : 0) | (e.banido > 0 ? 67108864 : 0) | (e.espelho > 0 ? 134217728 : 0) | (e.raiva > 0 ? 268435456 : 0) | (e.flow > 0 ? 536870912 : 0) | (e.passe > 0 ? 1073741824 : 0) | (e.abobora > 0 ? (1 << 31) : 0), e.recarga > 0 ? +e.recarga.toFixed(1) : 0, e.dono && e.dono.endsWith('2') ? 1 : 0,
-        (e.postura === 'instinto' ? 1 : 0) | (e.postura === 'ego' ? 2 : 0) | (e.sincronia > 0 ? 4 : 0) | (e.kaio > 0 ? 8 : 0) | (e.auraDivina ? 16 : 0) | (e.egoDesperto ? 32 : 0) | (e.furiaFusao ? 64 : 0) | (e.ferida > 0 ? 128 : 0) | (e.evolucao > 0 ? 256 : 0)]),
+        (e.postura === 'instinto' ? 1 : 0) | (e.postura === 'ego' ? 2 : 0) | (e.sincronia > 0 ? 4 : 0) | (e.kaio > 0 ? 8 : 0) | (e.auraDivina ? 16 : 0) | (e.egoDesperto ? 32 : 0) | (e.furiaFusao ? 64 : 0) | (e.ferida > 0 ? 128 : 0) | (e.evolucao > 0 ? 256 : 0) | (e.sande > 0 ? 512 : 0) | (e.psico > 0 ? 1024 : 0) | (e.acoplado ? 2048 : 0) | (e.cameraBuff ? 4096 : 0) | (e.hackeado > 0 ? 8192 : 0)]),
       pj: s.proj.map((p) => [Math.round(p.x), Math.round(p.y - (p.alt || 0)), p.time === 'azul' ? 0 : 1, p.el.classList.contains('de-torre') ? 1 : 0, p.sprite || 0, Math.round(p.giro || 0)]),
       ev: s.eventos,
     };
@@ -3078,7 +3208,7 @@ const Batalha = (() => {
       t.el.classList.toggle('em-flow', !!(flags & 536870912));
       t.el.classList.toggle('passe-buff', !!(flags & 1073741824));
       t.el.classList.toggle('abobora', !!(flags & (1 << 31)));
-      [['postura-instinto', 1], ['postura-ego', 2], ['sincronia', 4], ['kaioken', 8], ['aura-divina', 16], ['ego-desperto', 32], ['furia-fusao', 64], ['ferida-divina', 128], ['evoluindo', 256]].forEach(([k, b]) => t.el.classList.toggle(k, !!(f2 & b)));
+      [['postura-instinto', 1], ['postura-ego', 2], ['sincronia', 4], ['kaioken', 8], ['aura-divina', 16], ['ego-desperto', 32], ['furia-fusao', 64], ['ferida-divina', 128], ['evoluindo', 256], ['sandevistan', 512], ['ciberpsicose', 1024], ['acoplado', 2048], ['com-camera', 4096], ['hackeada', 8192]].forEach(([k, b]) => t.el.classList.toggle(k, !!(f2 & b)));
       const ad = (flags >> 11) & 63, selo = t.el.querySelector('.selo-adapt');
       if (selo && String(ad || '') !== selo.textContent) { selo.textContent = ad || ''; t.el.classList.toggle('adaptado', !!(t.carta.passiva && ad >= t.carta.passiva.max)); }
       t.recarga = recarga;
@@ -3328,6 +3458,7 @@ const Batalha = (() => {
       if (mm && mm.marmita) ninoPassiva(t, dt);
       if (mm && mm.murasame) murasamePassiva(t, dt);
       if (mm && (mm.rivais || mm.kaiokenRemake || mm.orgulho || t.segue)) passivasSaiyajin(t, dt, mm);
+      if (mm && (mm.camera || mm.netrunner || t.sande > 0 || t.psico > 0 || t.velMult !== 1 && t.velMult)) { if (passivasCyber(t, dt, mm)) continue; }
       if (mm && mm.separar && !t.separou && t.vida > 0 && t.vida < t.max * mm.separar) { separarDupla(t); continue; }
       if (mm && mm.chaEncantado && (t.chaT = (t.chaT || 0) + dt) >= mm.chaEncantado[0]) { t.chaT = 0; chaEncantado(t, mm.chaEncantado); }
       if (mm && (mm.superForma || mm.spinDash || mm.inibidores || mm.hyperFlash || mm.duelista || mm.raivaSombria)) passivasSonic(t, dt);
@@ -3446,6 +3577,9 @@ const Batalha = (() => {
     if (t.seguidos) k *= 1 - 0.07 * t.seguidos;
     if (t.kaio) k *= 1 - 0.04 * t.kaio;
     if (t.furiaFusao) k *= 0.75;
+    if (t.cameraBuff) k *= 0.8;
+    if (t.sande > 0) k *= 0.25;
+    if (t.psico > 0) k *= 0.67;
     if (t.passe > 0) k *= 0.77;
     if (t.lentoAtq > 0) k *= 1 + t.lentoAtqPct;
     const m = t.atk && t.atk.m;
@@ -3455,6 +3589,7 @@ const Batalha = (() => {
   }
 
   function atualizarStatus(t, dt) {
+    if (t.hackeado > 0 && (t.hackeado -= dt) <= 0) desHackear(t);
     if (t.ferida > 0) {
       if (t.feridaVida > 0 && t.vida > t.feridaVida) { t.vida = t.feridaVida; atualizarHp(t); }
       t.feridaAcum = (t.feridaAcum || 0) + t.max * 0.03 * dt;
@@ -3579,5 +3714,5 @@ const Batalha = (() => {
   }
 
   // _teste: usado só pelos testes automáticos de balanceamento
-  return { iniciar, iniciarConvidado, iniciarEspectador, espectadorFim, sairEspectador, aoSairEspectador: (f) => (ao_esp = f), receberEstado, comandoRemoto, adversarioSaiu, fechar, vencerAgora, _estado: () => s, _teste: { jogar, criarTropa, gemeosEntram, ativarHabilidade } };
+  return { iniciar, iniciarConvidado, iniciarEspectador, espectadorFim, sairEspectador, aoSairEspectador: (f) => (ao_esp = f), receberEstado, comandoRemoto, adversarioSaiu, fechar, vencerAgora, _estado: () => s, _teste: { jogar, criarTropa, gemeosEntram, ativarHabilidade, passo } };
 })();

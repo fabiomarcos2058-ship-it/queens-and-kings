@@ -23,9 +23,9 @@ const Ataques = (() => {
   const NA_TORRE = { tanque: 1.1, lutador: 0.85, assassino: 0.8, atirador: 0.7, mago: 0.65, enxame: 1 };
 
   const CLASSE_DA_CARTA = {
-    tanque: ['itsuki', 'shizuku', 'gogeta_ssj4', 'goku_ssj3', 'goku_ssj4', 'goku_blue_lb', 'gogeta_ultra', 'sonic_excalibur', 'conquest', 'omni_man', 'vegeta_ultra_ego', 'gogeta_blue_solo'],
-    assassino: ['bra', 'teto', 'pan_dbh', 'akame', 'mbappe', 'kashimo', 'goku_pressagio', 'diavolo', 'mita_malvada', 'akame_murasame', 'sonic', 'dark_sonic', 'kurona', 'goku_black_rose', 'goku_blue_kaioken_remake', 'vegetto_blue_solo'],
-    atirador: ['mai', 'miku_nakano', 'pan_gt', 'riruka', 'rukia_remake', 'nino_nakano', 'gyro', 'johnny'],
+    tanque: ['itsuki', 'shizuku', 'gogeta_ssj4', 'goku_ssj3', 'goku_ssj4', 'goku_blue_lb', 'gogeta_ultra', 'sonic_excalibur', 'conquest', 'omni_man', 'vegeta_ultra_ego', 'gogeta_blue_solo', 'adam_smasher', 'adam_smasher_evo'],
+    assassino: ['bra', 'teto', 'pan_dbh', 'akame', 'mbappe', 'kashimo', 'goku_pressagio', 'diavolo', 'mita_malvada', 'akame_murasame', 'sonic', 'dark_sonic', 'kurona', 'goku_black_rose', 'goku_blue_kaioken_remake', 'vegetto_blue_solo', 'agente_rubi', 'david_martinez', 'lucy_kushinada'],
+    atirador: ['mai', 'miku_nakano', 'pan_gt', 'riruka', 'rukia_remake', 'nino_nakano', 'gyro', 'johnny', 'roman_cyber', 'johnny_silverhand'],
     mago: ['rukia', 'nami_last', 'hatsune_miku', 'bambietta', 'bulma', 'gojo', 'robin', 'pucci', 'mita_gentil', 'yugi_moto', 'anri_halloween', 'eve_atomica'],
     enxame: ['mini'],
   };
@@ -75,6 +75,13 @@ const Ataques = (() => {
     mark_sem_lentes: { v: { g: 'soco', cor: '#FFC21A' }, m: { critico: [0.3, 2], voo: true }, d: '30% de chance de crítico.' },
     mark_flaxan: { v: { g: 'soco', cor: '#7FB8A8' }, m: { escudo: 0.3 }, d: 'Armadura Flaxan: começa com escudo.' },
     mark_prisioneiro: { v: { g: 'soco', cor: '#E8A07A' }, d: 'Rápido e escorregadio: desvia de golpes.' },
+    roman_cyber: { v: { g: 'tiro', s: 'bala', cor: '#3CFF9A' }, m: { camera: true }, d: 'Se prende num aliado: +30% de dano, ataque e movimento 25% mais rápidos.' },
+    lucy_kushinada: { v: { g: 'corte', cor: '#FF5CF4' }, m: { netrunner: 7 }, d: 'A cada 7s hackeia um inimigo: atordoa, curto-circuito ou controle mental.' },
+    agente_rubi: { v: { g: 'soco', cor: '#FF3A3A' }, m: { critico: [0.2, 1.8] }, d: 'Ciberpsicose: muito forte por 5s, depois cai.' },
+    david_martinez: { v: { g: 'soco', cor: '#3CFF9A' }, m: { empurrar: 8 }, d: 'Sandevistan: os inimigos param e ele ataca 4x mais rápido.' },
+    adam_smasher: { v: { g: 'tiro', s: 'bala', cor: '#FF6A3A' }, m: { veterano: 0.25, imune: true }, d: 'Recebe 25% menos dano e não pode ser atordoado. Rajada de mísseis.' },
+    adam_smasher_evo: { v: { g: 'tiro', s: 'bala', cor: '#FF3A3A' }, m: { veterano: 0.25, imune: true }, d: 'Chassi militar, mísseis e Sandevistan.' },
+    johnny_silverhand: { v: { g: 'tiro', s: 'bala', cor: '#FFD25E' }, m: {}, d: 'Malorian Arms: tiro pesado.' },
     goku_vegeta: { v: { g: 'soco', cor: '#C9B8FF', pesado: true }, m: { rivais: true, voo: true }, d: 'Revezam: Instinto (desvia e revida) e Ego (fica mais forte apanhando e rouba vida).' },
     gogeta_vegetto_blue: { v: { g: 'soco', cor: '#3FC4FF', pesado: true }, m: { voo: true }, d: 'Entram dois: Gogeta e Vegetto. Dividem o dano e focam o mesmo alvo.' },
     gogeta_blue_solo: { v: { g: 'soco', cor: '#3FC4FF', pesado: true }, m: { empurrar: 8, voo: true }, d: 'Soco pesado. Divide o dano com o Vegetto.' },
