@@ -147,6 +147,7 @@ const Batalha = (() => {
   // personagens: só aparecem se você tem a carta
   const emotesLiberados = () => EMOTES.filter((e) => !e.carta || Estado.tem(e.carta));
   function mostrarEmote(ladoTela, id) {
+    typeof Som !== 'undefined' && Som.tocar('emote');
     const e = EMOTES.find((x) => x.id === id);
     const jan = document.querySelector('.arena-grande-janela');
     if (!e || !jan) return;
@@ -235,6 +236,7 @@ const Batalha = (() => {
     }
     $('btn-sair').onclick = desistir;
     botaoEmote();
+    if (typeof Som !== 'undefined') Som.musica('batalha');
     if (s.superIA) {
       const jan = document.querySelector('.arena-grande-janela');
       const b = document.createElement('div');
@@ -400,6 +402,7 @@ const Batalha = (() => {
   }
 
   function jogar(quem, indice, x, y) {
+    typeof Som !== 'undefined' && Som.tocar('carta');
     const time = timeDe(quem);
     const L = s[quem];
     const id = L.fila[indice];
@@ -472,6 +475,7 @@ const Batalha = (() => {
   }
 
   function tremer(forte = false) {
+    if (forte) typeof Som !== 'undefined' && Som.tocar('explosao');
     s.arena.classList.remove('tremendo', 'tremendo-forte');
     piscar(s.arena, forte ? 'tremendo-forte' : 'tremendo');
   }
@@ -541,6 +545,7 @@ const Batalha = (() => {
   }
 
   function lancarFeitico(time, c, x, y, dano) {
+    typeof Som !== 'undefined' && Som.tocar('feitico');
     if (s.rede || s.aoVivo) s.eventos.push(['f', c.id, Math.round(x), Math.round(y), time === 'azul' ? 0 : 1]);
     const largura = { width: `${((c.area * 2) / W) * 100}%` };
     efeito(`mira-feitico ${time}`, x, y, 650, largura);
@@ -690,6 +695,7 @@ const Batalha = (() => {
   }
 
   function destruirTorre(t, deTime) {
+    typeof Som !== 'undefined' && Som.tocar('torre');
     t.vida = 0;
     if (s.ias && s.ias.length) {
       const perdeu = s.ias.find((l) => timeDe(l) === t.time), ganhou = s.ias.find((l) => timeDe(l) !== t.time);
@@ -807,6 +813,7 @@ const Batalha = (() => {
   }
 
   function esquivou(e) {
+    typeof Som !== 'undefined' && Som.tocar('esquiva');
     const n = document.createElement('div');
     n.className = 'dano-num esquiva';
     n.textContent = 'esquivou!';
@@ -864,6 +871,7 @@ const Batalha = (() => {
     return alvo ? Math.atan2(alvo.y - t.y, alvo.x - t.x) : null;
   }
   function kamehameha(t, dano, opc = {}) {
+    typeof Som !== 'undefined' && Som.tocar('kame');
     const ang = opc.ang != null ? opc.ang : melhorDirecao(t);
     if (ang == null) return;
     const tipo = opc.tipo || 0, comp = opc.comp || 320, larg = opc.larg || 34;
@@ -1157,6 +1165,7 @@ const Batalha = (() => {
   const FX_J = [['fx-ora', 650], ['fx-facas', 2600], ['fx-rolo', 1100], ['fx-kc', 800], ['fx-disco', 700], ['fx-tusk', 900]];
   // Tempo parado: o outro time congela (tropas e torres). Quem tem moveNoTempo (Jotaro, Dio) continua andando.
   function pararTempo(t, seg, raio, nome) {
+    typeof Som !== 'undefined' && Som.tocar('tempoParado');
     sacudir();
     fxEl('fx-tempo-parado', t.x, t.y, 1000);
     s.tempoParadoAte = Math.max(s.tempoParadoAte || 0, s.t + seg);
@@ -1249,6 +1258,7 @@ const Batalha = (() => {
     voarSprite('disco', alvo, a, 0.4, 16);
   }
   function madeInHeaven(t) {
+    typeof Som !== 'undefined' && Som.tocar('acelera');
     cutinRede('jojo_pucci');
     falar(t, 'Made in Heaven!', 'fala-jojo');
     s.aceleraTempo = { time: t.time, dono: t.dono || t.time, ate: s.t + 7 };
@@ -1615,12 +1625,14 @@ const Batalha = (() => {
     if (v.pesado) tremer();
   }
   function golpeVisual(a, alvo, v) {
+    typeof Som !== 'undefined' && Som.tocar('golpe', v && v.pesado ? 1.5 : 1);
     efeitoGolpe(v.g || 'soco', a, alvo, v);
     if (s.rede && a.carta) s.eventos.push(['h', Math.round(a.x), Math.round(a.y), Math.round(alvo.x), Math.round(alvo.y), a.carta.id]);
   }
 
   // ---------- Projéteis ----------
   function criarProjetil(a, alvo, dano, v, opc = {}) {
+    typeof Som !== 'undefined' && !(a && a.torre) && Som.tocar('tiro');
     const p = document.createElement('div');
     const sprite = v && v.p && SPRITES.has(v.p) ? v.p : null;
     p.className = `projetil ${a.time}${a.torre ? ` de-torre${a.tropa ? ` t-${a.tropa}` : ''}` : ''}${sprite ? ' com-sprite' : ''}`;
@@ -2407,6 +2419,7 @@ const Batalha = (() => {
     const resta = Math.max(0, limite - s.t);
     const dobro = s.modo === 'elixir2x' || s.prorrogacao || resta <= 60;
     const ganho = (dt / ELIXIR_SEG) * (dobro ? 2 : 1) * (s.elixirMult || 1);
+    if (typeof Som !== 'undefined' && !s.tutorial) Som.musica(resta <= 60 ? 'final' : 'batalha');
     const acel = s.aceleraTempo && s.t < s.aceleraTempo.ate ? s.aceleraTempo.dono : null; // Made in Heaven
     for (const quem of LADOS) if (s[quem]) s[quem].elixir = Math.min(10, s[quem].elixir + ganho * (quem === acel ? 1.7 : 1));
     marcarTempo();
@@ -2634,6 +2647,7 @@ const Batalha = (() => {
     const dados = { resultado, coroas: s.azul.coroas, coroasInimigo: s.vermelho.coroas, modo: s.modo, ranque: s.ranque || null,
       deck: s.azul.deck, deckRival: s.vermelho.deck, deckParceiro: s.azul2 && s.azul2.deck, deckRival2: s.vermelho2 && s.vermelho2.deck,
       nomeRival: s.rede && s.rede.convidado ? s.rede.convidado.nome : null, nomeParceiro: s.nomeParceiro || null, duracao: Math.round(s.t), evento: s.evento || null, tutorial: s.tutorial ? true : undefined };
+    if (typeof Som !== 'undefined') { Som.musica(null); Som.tocar(resultado === 'vitoria' ? 'vitoria' : 'derrota'); }
     if (s.adaptativa) Estado.ajustarHabilidade(resultado, s.superIA, s.azul.coroas - s.vermelho.coroas);
     if (typeof AoVivo !== 'undefined') AoVivo.terminou(foto(), resultado);
     if (s.rede && s.rede.fim) { s.rede.enviarEstado({ ...foto(), fim: { resultado } }); s.rede.fim(dados, desistiu); }
@@ -2663,6 +2677,7 @@ const Batalha = (() => {
   function fechar() {
     $('batalha').classList.add('oculto');
     document.body.classList.remove('em-batalha', 'espectando');
+    if (typeof Som !== 'undefined') Som.musica('menu');
     if (s) s.acabou = true;
     s = null;
   }

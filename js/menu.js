@@ -37,6 +37,7 @@
   }
 
   function mostrarBau(tipo, r) {
+    if (typeof Som !== 'undefined') Som.tocar('bau');
     UI.modal({
       titulo: Estado.BAUS[tipo].nome,
       classe: 'modal-bau',
@@ -283,6 +284,8 @@
   $('btn-eventos-ir').onclick = () => irPara('eventos');
   $('btn-tutorial').onclick = () => Tutorial.comecar(fimDeBatalha);
   $('btn-inventario').onclick = () => Inventario.abrir(() => tudo());
+  $('btn-som').onclick = () => Som.abrirConfig();
+  Som.musica('menu');
   window.MenuAPI = { tudo: () => tudo(), mostrarBau: (t, r) => mostrarBau(t, r), irPara: (a) => irPara(a) };
   $('btn-x1').onclick = () => x1();
   $('btn-2v2').onclick = () => dupla();

@@ -2037,3 +2037,20 @@ body.arrastando-carta #deck .slot-carta { animation: tremerSlot 0.9s ease-in-out
 .cutin.jojo_jotaro .cutin-faixa, .cutin.jojo_dio .cutin-faixa, .cutin.jojo_diavolo .cutin-faixa, .cutin.jojo_pucci .cutin-faixa, .cutin.jojo_gyro .cutin-faixa, .cutin.jojo_johnny .cutin-faixa { border-color: #B15CFF; box-shadow: 0 0 22px #B15CFF; }
 .cutin[class*="jojo_"] .cutin-legenda { color: #FFE45C; text-shadow: 3px 3px 0 #6a1fc0, -1px -1px 0 #000, 1px 1px 0 #000; }
 .kamehameha.bola-aco { box-shadow: none; height: 46px; border-radius: 0 30px 30px 0; }
+
+/* ===== Som ===== */
+.btn-som { width: 38px; height: 38px; border-radius: 50%; font-size: 18px; flex: none; margin-left: 4px; background: linear-gradient(#00000080, #0009), url(../assets/ui/menu/madeira.jpg) 0 0 / 160px; border: 2px solid #c99a3a88; box-shadow: 0 2px 0 #0008; }
+.btn-som:active { transform: scale(0.92); }
+.modal-som .som-linha { display: flex; justify-content: space-between; align-items: center; margin: 10px 2px 2px; font-weight: 700; }
+.modal-som .som-linha input { width: 22px; height: 22px; accent-color: #B15CFF; }
+.modal-som input[type=range] { width: 100%; accent-color: #B15CFF; }
+.som-spotify { margin-top: 14px; padding: 10px; border-radius: 12px; background: #1db95422; border: 1px solid #1db95466; display: flex; flex-direction: column; gap: 6px; text-align: left; }
+.som-spotify small { font-size: 11px; opacity: 0.85; }
+.som-spotify input { width: 100%; padding: 8px; border-radius: 8px; border: none; font-size: 13px; }
+.som-sp-botoes { display: flex; gap: 6px; }
+#spotify-player { position: fixed; left: 8px; bottom: 86px; z-index: 900; display: flex; align-items: flex-end; gap: 4px; }
+#spotify-player iframe { width: 0; height: 80px; border: 0; border-radius: 12px; transition: width 0.25s; }
+#spotify-player.aberto iframe { width: min(300px, 76vw); box-shadow: 0 6px 18px #000a; }
+#spotify-player .sp-alca { width: 40px; height: 40px; border-radius: 50%; background: #1DB954; font-size: 20px; box-shadow: 0 3px 0 #0b5a28, 0 4px 10px #0007; }
+body.em-batalha #spotify-player { bottom: auto; top: 70px; left: auto; right: 6px; flex-direction: row-reverse; }
+body.em-batalha #spotify-player:not(.aberto) .sp-alca { opacity: 0.6; }
