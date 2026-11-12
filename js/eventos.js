@@ -94,6 +94,49 @@ const Eventos = (() => {
     iniciar({ id: 'festival', nome: `Festival das Quíntuplas · ${f.v + 1}ª batalha`, dif: Math.min(5, 2 + f.v), festival: true });
   }
 
+  // ---------- Caça aos Tokens (evento fixo) ----------
+  const LIMITE_TOKENS_DIA = 300;
+  const TROCAS = [{ t: 100, g: 10 }, { t: 450, g: 50, tag: '+11%' }, { t: 850, g: 100, tag: '+18%' }];
+  const dia = () => { const t = new Date(); return `${t.getFullYear()}-${t.getMonth() + 1}-${t.getDate()}`; };
+  function tokensHoje() {
+    const d = Estado.d;
+    if (!d.tokensDia || d.tokensDia.dia !== dia()) d.tokensDia = { dia: dia(), qtd: 0 };
+    return d.tokensDia;
+  }
+  // ganha tokens respeitando o limite do dia
+  function ganharTokens(q) {
+    const h = tokensHoje();
+    const g = Math.max(0, Math.min(q, LIMITE_TOKENS_DIA - h.qtd));
+    h.qtd += g;
+    Estado.d.tokens = (Estado.d.tokens || 0) + g;
+    Estado.salvar();
+    return g;
+  }
+  function jogarTokens(iniciar) {
+    if (tokensHoje().qtd >= LIMITE_TOKENS_DIA) UI.toast('Você já pegou todos os tokens de hoje! Pode jogar, mas só ganha ouro 😉');
+    iniciar({ id: 'tokens', nome: 'Caça aos Tokens', tokens: true, elixirMult: 1.25 });
+  }
+  function trocarTokens(depois) {
+    const d = Estado.d;
+    const md = UI.modal({
+      titulo: '🪙 Trocar tokens',
+      classe: 'modal-tokens',
+      html: `<div class="tk-saldo"><img src="assets/ui/token.svg" alt="" /><b>${UI.fmt(d.tokens || 0)}</b><small>tokens</small></div>
+        <div class="tk-trocas">${TROCAS.map((x, i) => `<button class="tk-troca${(d.tokens || 0) < x.t ? ' travado' : ''}" data-i="${i}">
+          ${x.tag ? `<em>${x.tag}</em>` : ''}<span><img src="assets/ui/token.svg" alt="" />${x.t}</span><i>➜</i><span><i class="ic-gema"></i>${x.g}</span></button>`).join('')}</div>`,
+      botoes: [{ texto: 'Fechar', classe: 'principal' }],
+    });
+    md.el.querySelectorAll('.tk-troca').forEach((b) => (b.onclick = () => {
+      const x = TROCAS[+b.dataset.i];
+      if ((d.tokens || 0) < x.t) { UI.toast(`Faltam ${x.t - (d.tokens || 0)} tokens`); return; }
+      d.tokens -= x.t; d.gemas += x.g; Estado.salvar();
+      UI.toast(`+${x.g} 💎!`);
+      md.fechar();
+      if (depois) depois();
+      if (window.MenuAPI) window.MenuAPI.tudo();
+    }));
+  }
+
   // ---------- tela (dentro da aba Eventos) ----------
   function html() {
     const f = nino();
@@ -116,12 +159,22 @@ const Eventos = (() => {
         </div>
       </div>`;
     const modos = hoje.map((id) => { const m = MODOS[id]; return `<div class="evento modo-ev ${m.cor}"><span class="modo-ic">${m.ic}</span><div><b>${m.nome}</b><span>${m.desc}</span><small class="modo-tempo">Troca em ${horasAteAmanha()}h · vitória = 60 🪙</small></div><button class="selo botao" data-modo="${id}">Jogar</button></div>`; }).join('');
-    return `${festival}<div class="eventos-cab">🎪 Modos de hoje</div>${modos}`;
+    const h = tokensHoje();
+    const tokens = `<div class="evento ev-tokens"><img class="ev-tk-ic" src="assets/ui/token.svg" alt="" /><div><b>Caça aos Tokens</b>
+        <span>Batalhas com elixir mais rápido. Vitória = 30 tokens (+5 por coroa), empate 15, derrota 8. Troque os tokens por gemas!</span>
+        <div class="ev-barra"><i style="width:${(h.qtd / LIMITE_TOKENS_DIA) * 100}%"></i><small>${h.qtd}/${LIMITE_TOKENS_DIA} hoje</small></div>
+        <small class="modo-tempo">Você tem <b>${UI.fmt(Estado.d.tokens || 0)}</b> tokens</small></div>
+        <div class="ev-tk-botoes"><button class="selo botao" id="tk-jogar">Jogar</button><button class="selo botao tk-trocar" id="tk-trocar">Trocar</button></div></div>`;
+    return `${festival}${tokens}<div class="eventos-cab">🎪 Modos de hoje</div>${modos}`;
   }
   function ligar(raiz, { iniciar, verCarta }) {
     raiz.querySelectorAll('[data-modo]').forEach((b) => (b.onclick = () => jogarModo(b.dataset.modo, iniciar)));
     const j = raiz.querySelector('#fn-jogar');
     if (j) j.onclick = () => jogarFestival(iniciar);
+    const tj = raiz.querySelector('#tk-jogar');
+    if (tj) tj.onclick = () => jogarTokens(iniciar);
+    const tt = raiz.querySelector('#tk-trocar');
+    if (tt) tt.onclick = () => trocarTokens(() => { if (window.MenuAPI) window.MenuAPI.tudo(); });
     const v = raiz.querySelector('#fn-ver');
     if (v) v.onclick = () => verCarta(Estado.carta(NINO));
   }
@@ -183,14 +236,15 @@ const Eventos = (() => {
       });
       return;
     }
-    // modos normais de evento: um pouco de ouro, sem troféus
+    // modos normais de evento: um pouco de ouro (e tokens), sem troféus
     const ouro = ganhou ? 60 : r.resultado === 'empate' ? 30 : 15;
     d.ouro += ouro;
+    const tk = ev.tokens ? ganharTokens(ganhou ? 30 + (r.coroas || 0) * 5 : r.resultado === 'empate' ? 15 : 8) : ganhou ? ganharTokens(10) : 0;
     if (ganhou) d.vitorias++; else if (r.resultado === 'derrota') d.derrotas++;
     Estado.salvar();
     UI.modal({
       titulo: ganhou ? `🎉 Vitória no ${esc(ev.nome)}!` : r.resultado === 'empate' ? 'Empate!' : `Derrota no ${esc(ev.nome)}`,
-      html: `<p class="ev-res">${r.coroas} 👑 x ${r.coroasInimigo} 👑<br />+${ouro} 🪙</p>`,
+      html: `<p class="ev-res">${r.coroas} 👑 x ${r.coroasInimigo} 👑<br />+${ouro} de ouro${tk ? `<br /><img class="ev-tk-mini" src="assets/ui/token.svg" alt="" /> +${tk} tokens` : ev.tokens ? '<br /><small>Limite de tokens de hoje atingido</small>' : ''}</p>`,
       botoes: [{ texto: 'OK', classe: 'principal', acao: () => tudo() }],
     });
   }
@@ -233,5 +287,5 @@ const Eventos = (() => {
     conferindo = false;
   }
 
-  return { html, ligar, fim, conferir, MODOS, modosDeHoje, jogarModo, jogarFestival, nino };
+  return { html, ligar, fim, conferir, trocarTokens, ganharTokens, tokensHoje, MODOS, modosDeHoje, jogarModo, jogarFestival, nino };
 })();

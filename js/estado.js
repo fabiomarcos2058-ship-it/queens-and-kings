@@ -82,6 +82,8 @@ const Estado = (() => {
     madeira: { nome: 'Baú de madeira', segundos: 60, ouro: [30, 60], copias: 6, gemas: 0, chanceNova: 0.12 },
     prata: { nome: 'Baú de prata', segundos: 5 * 60, ouro: [80, 140], copias: 15, gemas: 2, chanceNova: 0.3 },
     ouro: { nome: 'Baú de ouro', segundos: 15 * 60, ouro: [250, 400], copias: 40, gemas: 5, chanceNova: 0.75 },
+    // 10 cartas lendárias (pode vir lendária nova!); vendido na loja por 500 gemas
+    lendario: { nome: 'Baú Lendário', segundos: 0, ouro: [400, 700], copias: 10, gemas: 0, lendario: true },
   };
 
   let todas = []; // cartas.json inteiro
@@ -103,6 +105,8 @@ const Estado = (() => {
       semLendaria: 0, // baús seguidos sem lendária nova (garantia)
       vitorias: 0, derrotas: 0,
       torres: { princesa: 1, tropa: 'princesa' },
+      coringas: { universal: 0, comum: 0, rara: 0, epica: 0, lendaria: 0 },
+      tokens: 0,
     };
   }
 
@@ -248,10 +252,20 @@ const Estado = (() => {
     return grupos[rar][Math.floor(Math.random() * grupos[rar].length)];
   }
   function baisAteLendaria() { return Math.max(1, GARANTIA_LENDARIA - (d.semLendaria || 0)); }
+  // cópias que ainda faltam para a carta chegar no nível máximo
+  function faltaParaMax(id) {
+    const col = d.colecao[id];
+    if (!col) return Infinity;
+    let falta = 0;
+    for (let n = col.nivel || 1; n < NIVEL_MAX; n++) falta += COPIAS[n];
+    return Math.max(0, falta - (col.copias || 0));
+  }
+  // carta no máximo (ou com cópias suficientes para chegar lá): não vem mais em baú, passe ou loja
+  const maxada = (id) => tem(id) && faltaParaMax(id) <= 0;
   function sortearCopias(total, chanceNova = 0) {
     const ganhos = {};
     const lista = disponiveis();
-    const minhas = lista.filter((c) => tem(c.id)), outras = lista.filter((c) => !tem(c.id));
+    const minhas = lista.filter((c) => tem(c.id) && !maxada(c.id)), outras = lista.filter((c) => !tem(c.id));
     const lendasFaltando = outras.filter((c) => c.raridade === 'lendaria');
     const garantida = lendasFaltando.length && chanceNova > 0 && (d.semLendaria || 0) + 1 >= GARANTIA_LENDARIA;
     let veioLenda = false;
@@ -262,7 +276,9 @@ const Estado = (() => {
       veioLenda = nova.raridade === 'lendaria';
     }
     if (chanceNova > 0) d.semLendaria = veioLenda || !lendasFaltando.length ? 0 : (d.semLendaria || 0) + 1;
-    const pool = minhas.length ? minhas : lista;
+    const pool = minhas.length ? minhas : outras;
+    // todas as suas cartas estão no máximo: o resto vira ouro
+    if (!pool.length && total > 0) { ganhos._ouro = total * 25; d.ouro += total * 25; total = 0; }
     while (total > 0 && pool.length) {
       const c = pesado(pool);
       const q = Math.min(total, Math.max(1, Math.round(total * (c.raridade === 'comum' ? 0.4 : c.raridade === 'rara' ? 0.3 : 0.15))));
@@ -271,6 +287,7 @@ const Estado = (() => {
     }
     const novas = [];
     for (const id in ganhos) {
+      if (id[0] === '_') continue;
       if (!d.colecao[id].tem) { d.colecao[id].tem = true; novas.push(id); ganhos[id]--; } // a 1ª cópia desbloqueia
       d.colecao[id].copias += ganhos[id];
     }
@@ -296,14 +313,66 @@ const Estado = (() => {
         if (!d.colecao[id].tem) { d.colecao[id].tem = true; novas.push(id); cartas[id] = 0; }
         else { d.colecao[id].copias += 1; cartas[id] = 1; }
       }
+    } else if (b.lendario) {
+      ({ cartas, novas } = sortearLendarias(b.copias));
     } else {
       cartas = sortearCopias(b.copias, b.chanceNova || 0);
       novas = cartas._novas; delete cartas._novas;
     }
+    let ouroExtra = 0;
+    if (cartas._ouro) { ouroExtra = cartas._ouro; delete cartas._ouro; }
+    if (cartas._coringa) { var coringaExtra = cartas._coringa; delete cartas._coringa; }
     encaixarNoDeck(novas);
     d.conquistas.baus++;
     salvar();
-    return { ouro, gemas: b.gemas, cartas, novas };
+    return { ouro: ouro + ouroExtra, gemas: b.gemas, cartas, novas, coringa: coringaExtra || 0 };
+  }
+  // Baú Lendário: 10 cartas lendárias, espalhadas entre lendárias diferentes; primeiro as que você não tem.
+  function sortearLendarias(qtd) {
+    const cartas = {}, novas = [];
+    // qualquer lendária do jogo (mesmo de arena que você ainda não chegou), menos as exclusivas
+    const lendas = catalogo.filter((c) => c.raridade === 'lendaria' && !c.exclusivo && !c.token);
+    const faltam = embaralhar(lendas.filter((c) => !tem(c.id)));
+    const sobem = lendas.filter((c) => tem(c.id) && !maxada(c.id));
+    let sobra = 0;
+    for (let i = 0; i < qtd; i++) {
+      // ~1 lendária nova a cada 4 cartas (enquanto existir alguma que você não tem)
+      const nova = faltam.length && (i === 0 || Math.random() < 0.25 || !sobem.length) ? faltam.shift() : null;
+      if (nova) { d.colecao[nova.id].tem = true; novas.push(nova.id); cartas[nova.id] = 0; sobem.push(nova); continue; }
+      const vivas = sobem.filter((c) => !maxada(c.id));
+      if (!vivas.length) { sobra++; continue; }
+      const c = vivas[Math.floor(Math.random() * vivas.length)];
+      d.colecao[c.id].copias += 1;
+      cartas[c.id] = (cartas[c.id] || 0) + 1;
+    }
+    // lendárias todas no máximo: vira coringa lendário
+    if (sobra) { darCoringa('lendaria', sobra); cartas._coringa = sobra; }
+    return { cartas, novas };
+  }
+
+  // ---------- Coringas e tokens ----------
+  // Coringa = 1 cópia de qualquer carta da raridade dele (o Universal serve em qualquer carta).
+  const CORINGAS = {
+    universal: { nome: 'Coringa Universal', serve: 'qualquer carta' },
+    comum: { nome: 'Coringa Comum', serve: 'cartas comuns' },
+    rara: { nome: 'Coringa Raro', serve: 'cartas raras' },
+    epica: { nome: 'Coringa Épico', serve: 'cartas épicas' },
+    lendaria: { nome: 'Coringa Lendário', serve: 'cartas lendárias' },
+  };
+  function darCoringa(tipo, qtd) {
+    if (!CORINGAS[tipo] || !(qtd > 0)) return;
+    if (!d.coringas) d.coringas = {};
+    d.coringas[tipo] = (d.coringas[tipo] || 0) + Math.round(qtd);
+  }
+  function usarCoringa(tipo, id, qtd) {
+    const c = carta(id);
+    if (!c || !tem(id) || !CORINGAS[tipo] || (tipo !== 'universal' && c.raridade !== tipo)) return 0;
+    const q = Math.min(Math.round(qtd), (d.coringas || {})[tipo] || 0, faltaParaMax(id));
+    if (q <= 0) return 0;
+    d.coringas[tipo] -= q;
+    d.colecao[id].copias += q;
+    salvar();
+    return q;
   }
 
   function tempoRestante(slot) {
@@ -334,7 +403,7 @@ const Estado = (() => {
     const rnd = () => ((semente = (semente * 1103515245 + 12345) >>> 0) % 1000) / 1000;
     const preco = { comum: [10, 100], rara: [4, 300], epica: [1, 800], lendaria: [1, 3000] };
     const lista = [];
-    const pool = disponiveis().filter((c) => tem(c.id)); // a loja só vende cópias de cartas que você já tem
+    const pool = disponiveis().filter((c) => tem(c.id) && !maxada(c.id)); // a loja só vende cópias de cartas que você já tem (e que ainda sobem)
     if (!pool.length) return []; // ainda não abriu os baús iniciais
     const usados = new Set();
     for (let i = 0; i < 6; i++) {
@@ -351,7 +420,7 @@ const Estado = (() => {
 
   return {
     get d() { return d; }, carregar, salvar, apagar, importar, recarregarCatalogo, aoSalvar, carta, stats, catalogo: () => catalogo, tem, liberada, disponiveis, proximaLiberacao, baisAteLendaria,
-    COPIAS, OURO, NIVEL_MAX, BAUS, XP_NIVEL,
+    COPIAS, OURO, NIVEL_MAX, BAUS, XP_NIVEL, CORINGAS, darCoringa, usarCoringa, maxada, faltaParaMax,
     contarUsos, usosRestantes, todasCartas: () => todas.filter((c) => !c.token),
     TORRE_OURO, TROPAS_TORRE, nivelRei, minhasTorres, statsTorre, podeEvoluirTorre, evoluirTorre, escolherTropaTorre,
     ganharXp, podeEvoluir, evoluir, abrirBau, tempoRestante, sortearCopias, ofertasDoDia, presenteDiario, sorteio,

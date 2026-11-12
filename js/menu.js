@@ -42,6 +42,7 @@
       classe: 'modal-bau',
       html: `<img class="bau-aberto" data-asset="ui/bau_${Estado.BAUS[tipo].imagem || tipo}" alt="" />
         <div class="ganhos"><span><img class="ic-img" data-asset="ui/moeda" alt="" /> +${fmt(r.ouro)}</span>${r.gemas ? `<span><i class="ic-gema"></i> +${r.gemas}</span>` : ''}</div>
+        ${r.coringa ? `<p class="aviso-nova"><img class="ic-img" src="assets/ui/coringa_lendaria.svg" alt="" /> +${r.coringa} Coringa Lendário (veja no 🎒 Inventário)</p>` : ''}
         ${r.novas && r.novas.length ? `<p class="aviso-nova">✨ Você desbloqueou ${r.novas.map((id) => Estado.carta(id).nome).join(' e ')}!</p>` : ''}
         ${listaCartasGanhas(r.cartas, r.novas)}`,
       botoes: [{ texto: 'Pegar tudo!', classe: 'principal' }],
@@ -281,6 +282,7 @@
   $('btn-missoes').onclick = () => Missoes.abrir({ mostrarBau, aoMudar: () => { seloMissoes(); tudo(); } });
   $('btn-eventos-ir').onclick = () => irPara('eventos');
   $('btn-tutorial').onclick = () => Tutorial.comecar(fimDeBatalha);
+  $('btn-inventario').onclick = () => Inventario.abrir(() => tudo());
   window.MenuAPI = { tudo: () => tudo(), mostrarBau: (t, r) => mostrarBau(t, r), irPara: (a) => irPara(a) };
   $('btn-x1').onclick = () => x1();
   $('btn-2v2').onclick = () => dupla();
@@ -1063,16 +1065,16 @@
       });
     }));
 
-    const precosBau = { madeira: 10, prata: 40, ouro: 120 };
+    const precosBau = { madeira: 10, prata: 40, ouro: 120, lendario: 500 };
     $('loja-baus').innerHTML = Object.keys(precosBau).map((t) => { const B = Estado.BAUS[t]; return `<button class="item-loja bau-loja b-${t}${t === 'ouro' ? ' destaque' : ''}" data-t="${t}">
-      ${t === 'ouro' ? '<div class="faixa">Melhor oferta</div>' : ''}<img src="assets/ui/bau_${t}.svg" alt="" />
-      <div class="item-nome">${B.nome}</div><small class="bau-info">${B.copias} cartas · ${Math.round(B.chanceNova * 100)}% de carta nova</small><div class="preco"><i class="ic-gema"></i>${precosBau[t]}</div></button>`; }).join('');
+      ${t === 'ouro' ? '<div class="faixa">Melhor oferta</div>' : t === 'lendario' ? '<div class="faixa faixa-lenda">✨ 10 LENDÁRIAS</div>' : ''}<img src="assets/ui/bau_${t}.svg" alt="" />
+      <div class="item-nome">${B.nome}</div><small class="bau-info">${B.lendario ? '10 cartas lendárias · pode vir lendária nova!' : `${B.copias} cartas · ${Math.round(B.chanceNova * 100)}% de carta nova`}</small><div class="preco"><i class="ic-gema"></i>${precosBau[t]}</div></button>`; }).join('');
     { const faltam = Estado.disponiveis().some((c) => c.raridade === 'lendaria' && !Estado.tem(c.id));
       const n = Estado.baisAteLendaria();
       $('loja-baus').insertAdjacentHTML('beforeend', faltam ? `<div class="garantia-lenda">✨ Lendária nova garantida em até <b>${n} ${n === 1 ? 'baú' : 'baús'}</b></div>` : ''); }
     $('loja-baus').querySelectorAll('button').forEach((el) => (el.onclick = () => {
       const t = el.dataset.t, p = precosBau[t], B = Estado.BAUS[t];
-      UI.modal({ titulo: `Comprar ${B.nome.toLowerCase()}?`, html: `<img class="bau-aberto" src="assets/ui/bau_${t}.svg" alt="" /><p>Abre na hora: <b>${B.copias} cartas</b> e até <b>${B.ouro[1]} de ouro</b>.<br><small>${Math.round(B.chanceNova * 100)}% de chance de uma carta nova.</small></p>`,
+      UI.modal({ titulo: `Comprar ${B.nome.toLowerCase()}?`, html: `<img class="bau-aberto" src="assets/ui/bau_${t}.svg" alt="" /><p>Abre na hora: <b>${B.copias} cartas${B.lendario ? ' lendárias' : ''}</b> e até <b>${B.ouro[1]} de ouro</b>.<br><small>${B.lendario ? 'A primeira é uma lendária que você ainda não tem (se faltar alguma)! Lendárias no máximo viram Coringa Lendário.' : `${Math.round(B.chanceNova * 100)}% de chance de uma carta nova.`}</small></p>`,
         botoes: [{ texto: 'Cancelar', classe: 'secundario' }, { texto: `Comprar · ${p} 💎`, classe: 'principal', desativado: d().gemas < p, motivo: 'Gemas insuficientes',
           acao: () => { d().gemas -= p; mostrarBau(t, Estado.abrirBau(t)); } }] });
     }));
@@ -1728,13 +1730,17 @@
       const pego = p.pegos[t].includes(n);
       const pode = Passe.podePegar(t, n);
       const tranc = !Passe.temTrilha(t);
-      return `<button class="premio ${t}${pego ? ' pego' : ''}${pode ? ' pode' : ''}${tranc ? ' trancado' : ''}" data-t="${t}" data-n="${n}">
-        <span class="premio-ic">${pego ? '✔' : Passe.icone(r)}</span><small>${Passe.texto(r)}</small>${tranc ? '<i>🔒</i>' : ''}</button>`;
+      return `<button class="premio ${t} ${Premios.classe(r)}${pego ? ' pego' : ''}${pode ? ' pode' : ''}${tranc ? ' trancado' : ''}${n % 10 === 0 || n === Passe.NIVEIS ? ' grande' : ''}" data-t="${t}" data-n="${n}">
+        <span class="premio-ic">${Passe.icone(r)}</span><small>${Passe.texto(r)}</small>${tranc ? '<i>🔒</i>' : ''}${pego ? '<em class="premio-ok">✔</em>' : ''}</button>`;
     }).join('')}</div>`;
+    const pts = p.pontos % Passe.PONTOS_NIVEL, cheio = nv >= Passe.NIVEIS;
     const m = UI.modal({
       titulo: '🎟️ Passe da Temporada',
-      classe: 'modal-passe',
-      html: `<p class="aviso">Ganhe pontos jogando batalhas (vitória 40, derrota 15, +8 por coroa). Temporada termina em ${Passe.diasRestantes()} dias.</p>
+      classe: 'modal-passe passe-novo',
+      html: `<div class="passe-topo"><div class="pt-nivel"><small>NÍVEL</small><b>${nv}</b></div>
+          <div class="pt-barra"><div><i style="width:${cheio ? 100 : (pts / Passe.PONTOS_NIVEL) * 100}%"></i></div><small>${cheio ? 'Passe completo! 🎉' : `${pts}/${Passe.PONTOS_NIVEL} pontos para o nível ${nv + 1}`}</small></div>
+          <div class="pt-dias">⏳ ${Passe.diasRestantes()}d</div></div>
+        <p class="aviso">Ganhe pontos jogando batalhas (vitória 40, derrota 15, +8 por coroa). Temporada termina em ${Passe.diasRestantes()} dias.</p>
         <p class="vantagem-passe">✨ Plus e Ultra: <b>cor e gradiente no nome</b> (vá no seu perfil). Ultra: estilos <span class="nome-estilo nc-arco-iris">animados</span>!</p>
         <div class="passe-compras">
           <button class="comprar-passe plus${p.plus || p.ultra ? ' tem' : ''}" data-c="plus"><b>PLUS</b><small>${p.plus || p.ultra ? 'Ativo ✔' : `💎 ${Passe.precoAtual('plus')}`}</small></button>
@@ -1753,11 +1759,10 @@
       if (n > Passe.nivel()) return UI.toast(`Chegue ao nível ${n} do passe`);
       const res = Passe.pegar(t, n);
       if (!res) return;
-      b.classList.add('pego'); b.classList.remove('pode'); b.querySelector('.premio-ic').textContent = '✔';
+      b.classList.add('pego', 'pegando'); b.classList.remove('pode'); b.insertAdjacentHTML('beforeend', '<em class="premio-ok">✔</em>');
       topo();
       if (res.extra && res.extra.bau) mostrarBau(res.extra.bau, res.extra.abertura);
-      else if (res.extra && res.extra.carta) UI.toast(`🃏 +${res.extra.qtd} ${res.extra.carta.nome}!`);
-      else UI.toast(`+ ${Passe.texto(res.r)}!`);
+      else Premios.avisar(res.r, res.extra);
     }));
     el.querySelectorAll('[data-c]').forEach((b) => (b.onclick = () => {
       const t = b.dataset.c;

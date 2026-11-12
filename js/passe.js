@@ -6,33 +6,41 @@ const Passe = (() => {
   const PRECO = { plus: 600, ultra: 1500 }; // Ultra já inclui o Plus
   const temporadaAtual = () => new Date().toISOString().slice(0, 7); // AAAA-MM
 
-  // recompensa de cada nível em cada trilha (melhorada)
+  // recompensa de cada nível em cada trilha (bem variada: ouro, gemas, baús, cartas, coringas e tokens)
   function recompensa(trilha, n) {
+    const C = (raridade, qtd) => ({ tipo: 'coringa', raridade, qtd });
     if (trilha === 'free') {
-      if (n === NIVEIS) return { tipo: 'carta', raridade: 'epica', qtd: 2 };
+      if (n === NIVEIS) return C('epica', 6);
+      if (n % 20 === 0) return C('universal', 4);
       if (n % 15 === 0) return { tipo: 'gemas', qtd: 40 };
       if (n % 10 === 0) return { tipo: 'bau', bau: n >= 40 ? 'ouro' : 'prata' };
       if (n % 5 === 0) return { tipo: 'bau', bau: 'madeira' };
-      if (n % 3 === 0) return { tipo: 'ouro', qtd: 80 + n * 6 };
-      return { tipo: 'ouro', qtd: 50 + n * 4 };
+      return [
+        { tipo: 'ouro', qtd: 50 + n * 4 }, C('comum', 6 + Math.floor(n / 6)), { tipo: 'tokens', qtd: 15 + Math.floor(n / 4) },
+        { tipo: 'gemas', qtd: 6 }, C('rara', 2 + Math.floor(n / 15)), { tipo: 'ouro', qtd: 80 + n * 6 },
+      ][n % 6];
     }
     if (trilha === 'plus') {
       if (n === NIVEIS) return { tipo: 'carta', raridade: 'lendaria', qtd: 1 };
-      if (n % 12 === 0) return { tipo: 'carta', raridade: 'epica', qtd: 3 };
+      if (n % 25 === 0) return C('lendaria', 1);
+      if (n % 12 === 0) return C('epica', 4);
       if (n % 10 === 0) return { tipo: 'bau', bau: 'ouro' };
-      if (n % 6 === 0) return { tipo: 'gemas', qtd: 50 };
       if (n % 4 === 0) return { tipo: 'bau', bau: 'prata' };
-      if (n % 3 === 0) return { tipo: 'ouro', qtd: 220 + n * 12 };
-      return { tipo: 'ouro', qtd: 150 + n * 8 };
+      return [
+        { tipo: 'ouro', qtd: 150 + n * 8 }, C('rara', 4 + Math.floor(n / 10)), { tipo: 'gemas', qtd: 20 },
+        C('comum', 15 + Math.floor(n / 4)), { tipo: 'tokens', qtd: 35 }, { tipo: 'carta', raridade: 'epica', qtd: 1 },
+      ][n % 6];
     }
     // ultra
-    if (n === NIVEIS) return { tipo: 'carta', raridade: 'lendaria', qtd: 3 };
-    if (n % 15 === 0) return { tipo: 'carta', raridade: 'lendaria', qtd: 1 };
-    if (n % 10 === 0) return { tipo: 'carta', raridade: 'epica', qtd: 5 };
+    if (n === NIVEIS) return { tipo: 'bau', bau: 'lendario' };
+    if (n === 30) return { tipo: 'bau', bau: 'lendario' };
+    if (n % 15 === 0) return C('lendaria', 2);
+    if (n % 10 === 0) return { tipo: 'carta', raridade: 'lendaria', qtd: 1 };
     if (n % 7 === 0) return { tipo: 'bau', bau: 'ouro' };
-    if (n % 5 === 0) return { tipo: 'gemas', qtd: 60 };
-    if (n % 3 === 0) return { tipo: 'ouro', qtd: 500 + n * 25 };
-    return { tipo: 'gemas', qtd: 25 + Math.floor(n / 4) };
+    return [
+      { tipo: 'gemas', qtd: 30 }, C('epica', 2 + Math.floor(n / 20)), { tipo: 'ouro', qtd: 500 + n * 25 },
+      C('universal', 5), { tipo: 'tokens', qtd: 60 }, { tipo: 'carta', raridade: 'epica', qtd: 3 },
+    ][n % 6];
   }
 
   // Estilos de nome: quem tem o Passe Plus ou Ultra escolhe; os animados são só do Ultra.
@@ -58,13 +66,8 @@ const Passe = (() => {
   // nome com o estilo (o estilo vem de dados públicos, então só aceita os da lista)
   const nomeHtml = (nome, estilo) => (ESTILOS_NOME[estilo] ? `<span class="nome-estilo nc-${estilo}">${escNome(nome)}</span>` : escNome(nome));
 
-  const icone = (r) => ({ ouro: '🪙', gemas: '💎', bau: '🎁', carta: '🃏' }[r.tipo]);
-  function texto(r) {
-    if (r.tipo === 'ouro') return `${UI.fmt(r.qtd)} ouro`;
-    if (r.tipo === 'gemas') return `${r.qtd} gemas`;
-    if (r.tipo === 'bau') return `Baú de ${r.bau}`;
-    return `${r.qtd}x ${r.raridade === 'lendaria' ? 'lendária' : 'épica'}`;
-  }
+  const icone = (r) => Premios.icone(r);
+  const texto = (r) => Premios.texto(r);
 
   // Passes de presente da criadora: { uid: ['AAAA-MM', ...] } (temporadas em que a conta ganha o Ultra)
   const PRESENTES_ULTRA = {
@@ -112,20 +115,7 @@ const Passe = (() => {
     const r = recompensa(t, n);
     const d = Estado.d;
     dados().pegos[t].push(n);
-    let extra = null;
-    if (r.tipo === 'ouro') d.ouro += r.qtd;
-    else if (r.tipo === 'gemas') d.gemas += r.qtd;
-    else if (r.tipo === 'bau') extra = { bau: r.bau, abertura: Estado.abrirBau(r.bau) };
-    else {
-      // cartas novas só saem de baú: o passe dá cópias de uma carta que você já tem
-      const pool = Estado.disponiveis().filter((c) => c.raridade === r.raridade && Estado.tem(c.id));
-      if (!pool.length) extra = { bau: 'ouro', abertura: Estado.abrirBau('ouro') };
-      else {
-        const c = pool[Math.floor(Math.random() * pool.length)];
-        d.colecao[c.id].copias += r.qtd;
-        extra = { carta: c, qtd: r.qtd };
-      }
-    }
+    const extra = Premios.dar(r);
     Estado.salvar();
     return { r, extra };
   }

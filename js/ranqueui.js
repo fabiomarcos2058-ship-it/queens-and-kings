@@ -328,13 +328,16 @@ const RanqueUI = (() => {
     const linha = (n) => `<div class="passe-nv rp-nv${n <= nv ? ' alcancado' : ''}${n === Ranque.PASSE_NIVEIS ? ' final' : ''}"><span class="passe-num">${n}</span>${trilhas.map(([t]) => {
       const rc = Ranque.recompensa(t, n);
       const pego = r.pegos[t].includes(n), pode = Ranque.podePegar(t, n), tranc = !Ranque.temTrilha(t);
-      return `<button class="premio ${t}${pego ? ' pego' : ''}${pode ? ' pode' : ''}${tranc ? ' trancado' : ''}${rc.tipo === 'evolucao' ? ' evolucao' : ''}" data-t="${t}" data-n="${n}">
-        <span class="premio-ic">${pego ? '✔' : Ranque.icone(rc)}</span><small>${Ranque.texto(rc)}</small>${tranc ? '<i>🔒</i>' : ''}</button>`;
+      return `<button class="premio ${t} ${Premios.classe(rc)}${pego ? ' pego' : ''}${pode ? ' pode' : ''}${tranc ? ' trancado' : ''}${rc.tipo === 'evolucao' ? ' evolucao' : ''}${n % 5 === 0 ? ' grande' : ''}" data-t="${t}" data-n="${n}">
+        <span class="premio-ic">${Ranque.icone(rc)}</span><small>${Ranque.texto(rc)}</small>${tranc ? '<i>🔒</i>' : ''}${pego ? '<em class="premio-ok">✔</em>' : ''}</button>`;
     }).join('')}</div>`;
     const m = UI.modal({
       titulo: '💠 Pro Pass da Ranqueada',
-      classe: 'modal-passe modal-propass',
-      html: `<div class="pp-destaque"><div class="pp-carta"><div class="pp-carta-verso">🧬</div></div>
+      classe: 'modal-passe modal-propass passe-novo',
+      html: `<div class="passe-topo"><div class="pt-nivel"><small>NÍVEL</small><b>${nv}</b></div>
+          <div class="pt-barra"><div><i style="width:${nv >= Ranque.PASSE_NIVEIS ? 100 : ((r.xp || 0) % Ranque.PASSE_XP) / Ranque.PASSE_XP * 100}%"></i></div><small>${nv >= Ranque.PASSE_NIVEIS ? 'Pro Pass completo! 🎉' : `${(r.xp || 0) % Ranque.PASSE_XP}/${Ranque.PASSE_XP} XP para o nível ${nv + 1}`}</small></div>
+          <div class="pt-dias">⏳ ${Ranque.diasRestantes()}d</div></div>
+        <div class="pp-destaque"><div class="pp-carta"><div class="pp-carta-verso">🧬</div></div>
           <div><b>🧬 Gojo Satoru · Evolução</b><small>Prêmio final do Pro Pass desta temporada. Infinito, Azul, Vermelho, Vazio Púrpura e, evoluído, a Expansão de Domínio: Vazio Infinito. Só dá pra ganhar aqui!</small></div></div>
         <p class="aviso">Ganhe XP do passe jogando ranqueadas: vitória 60 (+sequência), derrota 25, 2v2 +10. Termina em ${Ranque.diasRestantes()} dias.</p>
         <button class="comprar-passe pro${r.pro ? ' tem' : ''}" id="pp-comprar"><b>PRO PASS</b><small>${r.pro ? 'Ativo ✔' : `💎 ${Ranque.PRECO_PRO}`}</small></button>
@@ -351,12 +354,11 @@ const RanqueUI = (() => {
       if (n > Ranque.nivelPasse()) return UI.toast(`Chegue ao nível ${n} do passe`);
       const res = Ranque.pegar(t, n);
       if (!res) return;
-      b.classList.add('pego'); b.classList.remove('pode'); b.querySelector('.premio-ic').textContent = '✔';
+      b.classList.add('pego', 'pegando'); b.classList.remove('pode'); b.insertAdjacentHTML('beforeend', '<em class="premio-ok">✔</em>');
       M.topo();
       if (res.extra && res.extra.bau) M.mostrarBau(res.extra.bau, res.extra.abertura);
       else if (res.extra && res.extra.evolucao) revelarEvolucao(res.extra.carta);
-      else if (res.extra && res.extra.carta) UI.toast(`🃏 +${res.extra.qtd} ${res.extra.carta.nome}!`);
-      else UI.toast(`+ ${Ranque.texto(res.r)}!`);
+      else Premios.avisar(res.r, res.extra);
     }));
     el.querySelector('#pp-comprar').onclick = () => {
       if (Ranque.dados().pro) return UI.toast('Você já tem o Pro Pass');

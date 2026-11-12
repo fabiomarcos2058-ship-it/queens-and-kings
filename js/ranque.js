@@ -145,28 +145,26 @@ const Ranque = (() => {
   }
   const nivelPasse = () => Math.min(PASSE_NIVEIS, Math.floor((dados().xp || 0) / PASSE_XP));
   function recompensa(trilha, n) {
+    const C = (raridade, qtd) => ({ tipo: 'coringa', raridade, qtd });
     if (trilha === 'free') {
       if (n === PASSE_NIVEIS) return { tipo: 'bau', bau: 'ouro' };
       if (n % 10 === 0) return { tipo: 'gemas', qtd: 30 };
       if (n % 5 === 0) return { tipo: 'bau', bau: n >= 20 ? 'ouro' : 'prata' };
-      if (n % 3 === 0) return { tipo: 'gemas', qtd: 8 };
-      return { tipo: 'ouro', qtd: 60 + n * 6 };
+      return [
+        { tipo: 'ouro', qtd: 60 + n * 6 }, C('comum', 10), { tipo: 'tokens', qtd: 25 }, { tipo: 'gemas', qtd: 8 }, C('rara', 3),
+      ][n % 5];
     }
-    if (n === PASSE_NIVEIS) return { tipo: 'evolucao' };
+    if (n === PASSE_NIVEIS) return { tipo: 'evolucao', nome: 'Gojo Satoru (Evolução)' };
+    if (n === 25) return { tipo: 'bau', bau: 'lendario' };
+    if (n === 15) return C('lendaria', 2);
     if (n % 10 === 0) return { tipo: 'carta', raridade: 'lendaria', qtd: 1 };
     if (n % 5 === 0) return { tipo: 'bau', bau: 'ouro' };
-    if (n % 4 === 0) return { tipo: 'gemas', qtd: 40 };
-    if (n % 3 === 0) return { tipo: 'carta', raridade: 'epica', qtd: 2 };
-    return { tipo: 'ouro', qtd: 220 + n * 18 };
+    return [
+      { tipo: 'ouro', qtd: 220 + n * 18 }, C('epica', 2), { tipo: 'gemas', qtd: 40 }, C('universal', 6), { tipo: 'carta', raridade: 'epica', qtd: 2 }, { tipo: 'tokens', qtd: 60 },
+    ][n % 6];
   }
-  const icone = (r) => ({ ouro: '🪙', gemas: '💎', bau: '🎁', carta: '🃏', evolucao: '🧬' }[r.tipo]);
-  function texto(r) {
-    if (r.tipo === 'ouro') return `${UI.fmt(r.qtd)} ouro`;
-    if (r.tipo === 'gemas') return `${r.qtd} gemas`;
-    if (r.tipo === 'bau') return `Baú de ${r.bau}`;
-    if (r.tipo === 'evolucao') return 'Gojo Satoru (Evolução)';
-    return `${r.qtd}x ${r.raridade === 'lendaria' ? 'lendária' : 'épica'}`;
-  }
+  const icone = (r) => Premios.icone(r);
+  const texto = (r) => Premios.texto(r);
   const temTrilha = (t) => t === 'free' || (t === 'pro' && dados().pro);
   const podePegar = (t, n) => temTrilha(t) && n <= nivelPasse() && !dados().pegos[t].includes(n);
   const pendentes = () => ['free', 'pro'].reduce((s, t) => s + Array.from({ length: PASSE_NIVEIS }, (_, i) => i + 1).filter((n) => podePegar(t, n)).length, 0);
@@ -175,17 +173,10 @@ const Ranque = (() => {
     const r = recompensa(t, n), d = Estado.d;
     dados().pegos[t].push(n);
     let extra = null;
-    if (r.tipo === 'ouro') d.ouro += r.qtd;
-    else if (r.tipo === 'gemas') d.gemas += r.qtd;
-    else if (r.tipo === 'bau') extra = { bau: r.bau, abertura: Estado.abrirBau(r.bau) };
-    else if (r.tipo === 'evolucao') {
+    if (r.tipo === 'evolucao') {
       d.evolucoesGuardadas = [...new Set([...(d.evolucoesGuardadas || []), `ranq-${dados().temporada}`])];
       extra = { evolucao: true, carta: darEvolucao(CARTA_EVOLUCAO) };
-    } else {
-      const pool = Estado.disponiveis().filter((c) => c.raridade === r.raridade && Estado.tem(c.id));
-      if (!pool.length) extra = { bau: 'ouro', abertura: Estado.abrirBau('ouro') };
-      else { const c = pool[Math.floor(Math.random() * pool.length)]; d.colecao[c.id].copias += r.qtd; extra = { carta: c, qtd: r.qtd }; }
-    }
+    } else extra = Premios.dar(r);
     Estado.salvar();
     return { r, extra };
   }

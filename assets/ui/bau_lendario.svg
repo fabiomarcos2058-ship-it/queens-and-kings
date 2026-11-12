@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 180">
+<defs>
+ <linearGradient id="m" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#D6B4FF"/><stop offset="1" stop-color="#8A3FE0"/></linearGradient>
+ <linearGradient id="t" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#D6B4FF"/><stop offset="0.6" stop-color="#8A3FE0"/><stop offset="1" stop-color="#8A3FE0"/></linearGradient>
+ <linearGradient id="f" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F7E8FF"/><stop offset="1" stop-color="#4E1A9A"/></linearGradient>
+ <radialGradient id="j" cx="40%" cy="35%" r="65%"><stop offset="0" stop-color="#ffffff"/><stop offset="0.35" stop-color="#3FE0D0"/><stop offset="1" stop-color="#000" stop-opacity="0.35"/></radialGradient>
+ <radialGradient id="b" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#FF9BEA" stop-opacity="0.55"/><stop offset="1" stop-color="#FF9BEA" stop-opacity="0"/></radialGradient>
+</defs>
+<ellipse cx="100" cy="92" rx="98" ry="88" fill="url(#b)"/>
+<ellipse cx="100" cy="166" rx="74" ry="10" fill="#000" opacity="0.28"/>
+<!-- corpo -->
+<rect x="28" y="84" width="144" height="78" rx="10" fill="url(#m)" stroke="#2a1608" stroke-width="5"/>
+<path d="M34 104 H166 M34 126 H166 M34 148 H166" stroke="#000" stroke-opacity="0.18" stroke-width="3"/>
+<!-- tampa -->
+<path d="M26 88 Q26 30 100 26 Q174 30 174 88 Z" fill="url(#t)" stroke="#2a1608" stroke-width="5" stroke-linejoin="round"/>
+<path d="M40 60 Q100 44 160 60" stroke="#ffffff" stroke-opacity="0.25" stroke-width="5" fill="none" stroke-linecap="round"/>
+<!-- faixas de metal -->
+<rect x="44" y="28" width="20" height="134" rx="4" fill="url(#f)" stroke="#20242c" stroke-width="4"/>
+<rect x="136" y="28" width="20" height="134" rx="4" fill="url(#f)" stroke="#20242c" stroke-width="4"/>
+<rect x="24" y="80" width="152" height="14" rx="5" fill="url(#f)" stroke="#20242c" stroke-width="4"/>
+<circle cx="54" cy="44" r="3" fill="#20242c"/><circle cx="146" cy="44" r="3" fill="#20242c"/><circle cx="54" cy="150" r="3" fill="#20242c"/><circle cx="146" cy="150" r="3" fill="#20242c"/>
+<!-- fechadura -->
+<path d="M84 76 h32 v28 a16 16 0 0 1 -32 0 z" fill="url(#f)" stroke="#20242c" stroke-width="4"/>
+<circle cx="100" cy="98" r="9" fill="url(#j)" stroke="#20242c" stroke-width="3"/>
+<path d="M40 112 L52 108" stroke="#fff" stroke-opacity="0.35" stroke-width="4" stroke-linecap="round"/>
+</svg>
