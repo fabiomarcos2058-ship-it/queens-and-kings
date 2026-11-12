@@ -1,24 +1,19 @@
 # Créditos
 
-Os desenhos em `assets/**/*.svg` foram criados do zero para este jogo.
+## Texturas das arenas
+- **Poly Haven** (https://polyhaven.com) — texturas de grama, pedra, madeira, neve, gelo, lava e terra.
+  Licença **CC0** (domínio público).
 
-Imagens geradas pelo bot a partir de modelos 3D com licença CC0:
+## Ícones dos ataques
+- **game-icons.net** (https://game-icons.net) — licença **CC BY 3.0**
+  (https://creativecommons.org/licenses/by/3.0/).
+  Autores: **Delapouite** (https://delapouite.com), **Lorc** (https://lorcblog.blogspot.com)
+  e **Willdabeast**. Os ícones foram recoloridos para os ataques do jogo
+  (pasta `assets/icones` = originais, `assets/ataques` = versões recoloridas).
 
-| Imagem | Modelo | Pacote | Autor | Licença |
-| --- | --- | --- | --- | --- |
-| `assets/arena/torre_azul.png` | tower-square-base.glb + tower-square-mid-windows.glb + tower-square-top-roof-high.glb | castle-kit | Kenney (kenney.nl) | CC0 |
-| `assets/arena/torre_vermelha.png` | tower-square-base.glb + tower-square-mid-windows.glb + tower-square-top-roof-high.glb | castle-kit | Kenney (kenney.nl) | CC0 |
-| `assets/arena/torre_rei_azul.png` | tower-hexagon-base.glb + tower-hexagon-mid.glb + tower-hexagon-roof.glb | castle-kit | Kenney (kenney.nl) | CC0 |
-| `assets/arena/torre_rei_vermelha.png` | tower-hexagon-base.glb + tower-hexagon-mid.glb + tower-hexagon-roof.glb | castle-kit | Kenney (kenney.nl) | CC0 |
-| `assets/arena/arvore.png` | tree_default.glb | nature-kit | Kenney (kenney.nl) | CC0 |
-| `assets/arena/pedra.png` | stone_smallFlatA.glb | nature-kit | Kenney (kenney.nl) | CC0 |
-| `assets/ui/bau_madeira.png` | chest.glb | pirate-kit | Kenney (kenney.nl) | CC0 |
-| `assets/ui/bau_prata.png` | chest.glb | pirate-kit | Kenney (kenney.nl) | CC0 |
-| `assets/ui/bau_ouro.png` | chest.glb | pirate-kit | Kenney (kenney.nl) | CC0 |
-| `assets/ui/aba_loja.png` | chest.glb | pirate-kit | Kenney (kenney.nl) | CC0 |
-| `assets/ui/aba_eventos.png` | banner.glb | mini-dungeon | Kenney (kenney.nl) | CC0 |
-| `assets/ui/torre_logo.png` | tower-square-base.glb + tower-square-mid-windows.glb + tower-square-top-roof-high.glb | castle-kit | Kenney (kenney.nl) | CC0 |
+## Arenas, baús, orbes de ki e efeitos
+- Feitos para o Queens and Kings (gerados por código em `tools/`).
 
-## Imagens das personagens
-
-As imagens em `assets/cartas/` foram enviadas pela dona do projeto para uso pessoal neste fangame sem fins lucrativos. As personagens e as ilustrações pertencem aos seus autores e editoras originais.
+## Personagens
+- As imagens dos personagens foram enviadas pela criadora do jogo. Queens and Kings é um fangame
+  sem fins lucrativos; os personagens pertencem aos seus respectivos donos.

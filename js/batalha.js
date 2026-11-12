@@ -68,7 +68,7 @@ const Batalha = (() => {
     s = {
       modo, t: 0, prorrogacao: false, acabou: false, pausa: false,
       azul: lado(deck), vermelho: lado(deckIA),
-      ent: torres(minhas, delas), proj: [], efeitos: [], selecionada: null, iaTimer: 2, id: 0,
+      ent: torres(minhas, delas), proj: [], efeitos: [], agenda: [], selecionada: null, iaTimer: 2, id: 0,
       arenaId: Arena.daQtd(Estado.d.recorde).id,
       nivelIA: Math.max(1, Math.min(9, Math.round(deck.reduce((a, id) => a + Estado.d.colecao[id].nivel, 0) / deck.length) - (Mod.deckApelao() ? 0 : 1))),
       rede, niveisV: rede ? rede.convidado.niveis : null, eventos: [], snapTimer: 0,
@@ -302,6 +302,16 @@ const Batalha = (() => {
     piscar(s.arena, forte ? 'tremendo-forte' : 'tremendo');
   }
 
+  // ---------- Agenda (coisas que acontecem um pouco depois, dentro do tempo do jogo) ----------
+  function agendar(seg, fn) { s.agenda.push({ t: s.t + seg, fn }); }
+  function rodarAgenda() {
+    if (!s.agenda.length) return;
+    const agora = s.agenda.filter((a) => a.t <= s.t);
+    if (!agora.length) return;
+    s.agenda = s.agenda.filter((a) => a.t > s.t);
+    for (const a of agora) { try { a.fn(); } catch (e) { console.error(e); } }
+  }
+
   // ---------- Entidades ----------
   function criarTropa(time, c, x, y, f, nivel) {
     const t = {
@@ -311,10 +321,16 @@ const Batalha = (() => {
       alvoTipo: c.alvo || 'tudo', surgir: 1, alvo: null,
       habilidade: c.habilidade || null, recarga: 0, golpesFortes: 0, furia: 0, fenix: 0, nivel, f,
       congelado: 0, adaptacao: 0, adaptTimer: 0, danoBase: Math.round(c.dano * f), velBase: c.velocidade,
+      atk: Ataques.de(c), classe: Ataques.classeDe(c), golpes: 0,
+      atord: 0, lento: 0, lentoPct: 0, queima: 0, queimaDps: 0, queimaAcum: 0, fraco: 0, fracoPct: 0,
+      lentoAtq: 0, lentoAtqPct: 0, marcado: 0, marcaPct: 0, escudo: 0, escudoMax: 0, teleCd: 1.5, investiu: false, buffVel: 0,
     };
+    const m0 = t.atk.m || {};
+    if (m0.escudo) { t.escudo = t.escudoMax = Math.round(t.max * m0.escudo); }
+    t.voo = !!m0.voo;
     if (c.token) t.raio = 8;
     t.el = document.createElement('div');
-    t.el.className = `tropa ${time} surgindo${c.token ? ' mini' : ''}${c.habilidade ? ' campea' : ''}`;
+    t.el.className = `tropa ${time} surgindo${c.token ? ' mini' : ''}${c.habilidade ? ' campea' : ''}${t.escudo ? ' com-escudo' : ''}${t.voo ? ' voando' : ''}`;
     t.el.innerHTML = `${barraHp()}
       <div class="tropa-corpo"><div class="tropa-medalhao"><img src="assets/cartas/${c.id}_medalhao.png" alt="" /><b>${nivel}</b>${c.passiva && c.passiva.tipo === 'adaptar' ? '<i class="selo-adapt"></i>' : ''}</div></div><div class="tropa-sombra"></div>`;
     s.arena.appendChild(t.el);
@@ -322,6 +338,8 @@ const Batalha = (() => {
     posicionar(t);
     efeito(`onda-surgir ${time}`, x, y, 700);
     setTimeout(() => { if (s && !s.acabou) { efeito(`onda-pouso ${time}`, t.x, t.y, 500); particulas(t.x, t.y + 4, '#ffffffcc', 6, 18); } }, 650);
+    if (m0.surgirImpacto) agendar(1, () => { if (t.vida > 0) explosaoArea(t, t, Math.round(t.dano * m0.surgirImpacto[0]), m0.surgirImpacto[1], { visual: 'impacto', cor: t.atk.v.cor, empurrar: 14 }); });
+    return t;
   }
 
   // barril voa da torre do rei, quebra e solta as minis
@@ -384,18 +402,40 @@ const Batalha = (() => {
     for (const e of s.ent) if (!e.torre && e.el) posicionar(e);
   }
 
-  function ferir(e, dano, deTime) {
-    if (e.vida <= 0) return;
-    if (e.torre && e.time === 'azul' && Mod.flag('torresInvenciveis')) return;
+  function ferir(e, dano, deTime, fonte = null, opc = {}) {
+    if (e.vida <= 0) return 0;
+    if (e.torre && e.time === 'azul' && Mod.flag('torresInvenciveis')) return 0;
     // esquiva (Instinto Superior): o golpe erra
-    if (!e.torre && e.carta) {
+    if (!e.torre && e.carta && !opc.semEsquiva) {
       const pv = e.carta.passiva;
       const chance = e.esquiva > 0 ? e.esquivaChance : pv && pv.tipo === 'esquiva' ? pv.chance : 0;
-      if (chance && Math.random() < chance) { esquivou(e); return; }
+      if (chance && Math.random() < chance) {
+        esquivou(e);
+        const me = e.atk && e.atk.m;
+        if (me && me.contraEsquiva && fonte && fonte.vida > 0 && dist(e, fonte) < 90) {
+          golpeVisual(e, fonte, e.atk.v);
+          ferir(fonte, Math.round(e.dano * multClasse(e, fonte)), e.time, null, { semEsquiva: true, semContra: true });
+        }
+        return 0;
+      }
     }
-    if (e.adaptacao && e.carta && e.carta.passiva) dano = Math.round(dano * (1 - e.carta.passiva.defesa * e.adaptacao));
+    if (e.adaptacao && e.carta && e.carta.passiva && e.carta.passiva.tipo === 'adaptar') dano = Math.round(dano * (1 - e.carta.passiva.defesa * e.adaptacao));
+    if (e.marcado > 0) dano = Math.round(dano * (1 + e.marcaPct));
+    // escudo absorve primeiro
+    if (e.escudo > 0) {
+      const abs = Math.min(e.escudo, dano);
+      e.escudo -= abs; dano -= abs;
+      if (e.escudo <= 0) { e.el.classList.remove('com-escudo'); particulas(e.x, e.y, '#BFE8FF', 8, 22); }
+      if (dano <= 0) { numero(e, 0, 'escudo'); return 0; }
+    }
+    // contra-ataque
+    const mc = !e.torre && e.atk && e.atk.m;
+    if (mc && mc.contra && fonte && fonte.vida > 0 && !opc.semContra && dist(e, fonte) < 60 && Math.random() < mc.contra[0]) {
+      golpeVisual(e, fonte, e.atk.v);
+      agendar(0.05, () => ferir(fonte, Math.round(e.dano * mc.contra[1]), e.time, null, { semContra: true }));
+    }
     e.vida -= dano;
-    numero(e, dano);
+    numero(e, dano, opc.crit ? 'critico' : opc.tipo);
     atualizarHp(e);
     piscar(e.el, 'levou');
     if (e.torre) {
@@ -418,16 +458,22 @@ const Batalha = (() => {
       particulas(e.x, e.y, e.time === 'azul' ? '#85B7EB' : '#F09595', 10, 30);
       setTimeout(() => el.remove(), 400);
       s.ent = s.ent.filter((x) => x !== e);
+      // Vegito EX: ao derrotar alguém, se teletransporta para o próximo
+      if (fonte && fonte.vida > 0 && fonte.atk && fonte.atk.m && fonte.atk.m.teleCadeia) {
+        const prox = s.ent.filter((x) => !x.torre && x.time !== fonte.time && x.vida > 0 && dist(x, fonte) < 130).sort((a, b) => dist(a, fonte) - dist(b, fonte))[0];
+        if (prox) agendar(0.15, () => teleportar(fonte, prox));
+      }
     }
+    return dano;
   }
 
-  function numero(e, dano) {
+  function numero(e, dano, tipo = '') {
     if (vivos.numero >= LIMITE.numero) return;
     vivos.numero++;
     setTimeout(() => vivos.numero--, 650);
     const n = document.createElement('div');
-    n.className = `dano-num${dano >= 250 ? ' grande' : ''}`;
-    n.textContent = dano;
+    n.className = `dano-num${dano >= 250 ? ' grande' : ''}${tipo ? ` ${tipo}` : ''}`;
+    n.textContent = tipo === 'critico' ? `${dano}!` : tipo === 'escudo' ? '🛡️' : dano;
     Object.assign(n.style, pct(e.x + (Math.random() * 16 - 8), e.y - 22));
     s.arena.appendChild(n);
     setTimeout(() => n.remove(), 650);
@@ -557,6 +603,7 @@ const Batalha = (() => {
     if (s.rede) s.eventos.push(['g', Math.round(centro.x), Math.round(centro.y), 0]);
     for (const e of s.ent) {
       if (e.torre || e.time === t.time || e.vida <= 0 || dist(e, centro) > raio + e.raio) continue;
+      if (e.atk && e.atk.m && e.atk.m.imune) continue;
       e.congelado = h.duracao || 2.5;
       e.el.classList.add('congelada');
       if (h.dano) ferir(e, Math.round(h.dano * (t.f || 1)), t.time);
@@ -665,14 +712,16 @@ const Batalha = (() => {
     let px = alvo.x, py = alvo.y;
     const meuLado = t.y > PONTE_Y ? 'baixo' : 'cima';
     const ladoAlvo = alvo.y > PONTE_Y ? 'baixo' : 'cima';
-    if (meuLado !== ladoAlvo || (t.y > RIO_TOPO - 4 && t.y < RIO_BASE + 4)) {
+    if (!t.voo && (meuLado !== ladoAlvo || (t.y > RIO_TOPO - 4 && t.y < RIO_BASE + 4))) {
       const bx = PONTES.reduce((a, b) => (Math.abs(b - t.x) < Math.abs(a - t.x) ? b : a));
       if (Math.abs(t.x - bx) > 6 && t.y > RIO_TOPO - 22 && t.y < RIO_BASE + 22) { px = bx; py = t.y; }
       else if (Math.abs(t.x - bx) > 6) { px = bx; py = meuLado === 'baixo' ? RIO_BASE + 14 : RIO_TOPO - 14; }
       else { px = bx; py = ladoAlvo === 'cima' ? RIO_TOPO - 16 : RIO_BASE + 16; }
     }
     const dx = px - t.x, dy = py - t.y, d0 = Math.hypot(dx, dy) || 1;
-    const passo = Math.min(d0, t.vel * (t.furia > 0 ? 1.25 : 1) * dt);
+    const arrancada = t.atk && t.atk.m && t.atk.m.investida && !t.investiu && dist(t, alvo) < 130 ? 2.6 : 1;
+    const passo = Math.min(d0, t.vel * (t.furia > 0 ? 1.25 : 1) * (t.lento > 0 ? 1 - t.lentoPct : 1) * arrancada * dt);
+    if (arrancada > 1 && !t.correndo) { t.correndo = true; t.el.classList.add('arrancada'); }
     let vx = dx / d0, vy = dy / d0;
     // se tem uma torre no caminho (que não é o alvo), desvia pelo lado mais curto
     for (const e of s.ent) {
@@ -697,32 +746,333 @@ const Batalha = (() => {
     evitarTorres(t);
   }
 
-  function danoDe(a) {
-    if (a.torre) return a.dano;
+  // ---------- Ataques únicos ----------
+  // multiplicador de counters (classe contra classe) e dano reduzido nas torres
+  function multClasse(a, alvo) {
+    if (!a || !a.classe) return 1;
+    if (alvo.torre) return a.carta && a.carta.danoTorre != null ? a.carta.danoTorre : Ataques.NA_TORRE[a.classe] || 1;
+    return (Ataques.CONTRA[a.classe] && Ataques.CONTRA[a.classe][alvo.classe]) || 1;
+  }
+
+  // dano de um golpe (com counters, crítico, combo, kaioken, finalização...)
+  function danoDe(a, alvo) {
+    if (a.torre) return { dano: a.dano, crit: false };
+    const m = (a.atk && a.atk.m) || {};
     let d0 = a.dano;
     if (a.furia > 0) d0 *= 1.3;
     if (a.golpesFortes > 0) { d0 *= a.multGolpes || 2.5; a.golpesFortes--; if (!a.golpesFortes) a.el.classList.remove('aura-golpes'); }
-    return Math.round(d0);
+    if (alvo) d0 *= multClasse(a, alvo);
+    a.golpes++;
+    let crit = false;
+    if (m.combo && a.golpes % m.combo === 0) { d0 *= 2; crit = true; }
+    if (m.critico && Math.random() < m.critico[0]) { d0 *= m.critico[1]; crit = true; }
+    if (m.kaioken) { d0 *= 1 + m.kaioken[1]; a.vida = Math.max(1, a.vida - a.max * m.kaioken[0]); atualizarHp(a); }
+    if (m.execucao && alvo && !alvo.torre && alvo.vida / alvo.max < m.execucao[0]) { d0 *= m.execucao[1]; crit = true; }
+    if (m.investida && !a.investiu) { d0 *= m.investida; a.investiu = true; crit = true; }
+    if (a.fraco > 0) d0 *= 1 - a.fracoPct;
+    return { dano: Math.max(1, Math.round(d0)), crit };
   }
 
-  function atacar(atacante, alvo) {
-    if (atacante.alcance > 40 || atacante.torre) {
-      if (!atacante.torre) { piscar(atacante.el, 'atirando'); }
-      const p = document.createElement('div');
-      p.className = `projetil ${atacante.time}${atacante.torre ? ` de-torre${atacante.tropa ? ` t-${atacante.tropa}` : ''}` : ''}`;
-      s.arena.appendChild(p);
-      s.proj.push({ x: atacante.x, y: atacante.y - 14, alvo, dano: danoDe(atacante), area: atacante.area || 0, time: atacante.time, el: p, mudou: true });
+  // efeitos ao acertar (atordoar, empurrar, lentidão, veneno, roubar elixir...)
+  function aplicarGolpe(a, alvo, dano) {
+    const m = (a && a.atk && a.atk.m) || {};
+    if (!a || !alvo) return;
+    const tropa = !alvo.torre && alvo.vida > 0;
+    const imune = tropa && alvo.atk && alvo.atk.m && alvo.atk.m.imune;
+    if (tropa && !imune) {
+      if (m.atordoar && Math.random() < m.atordoar[0]) { alvo.atord = Math.max(alvo.atord, m.atordoar[1]); alvo.el.classList.add('atordoada'); }
+      if (m.lentidao) { alvo.lento = m.lentidao[1]; alvo.lentoPct = m.lentidao[0]; alvo.el.classList.add('lenta'); }
+      if (m.lentoAtaque) { alvo.lentoAtq = m.lentoAtaque[1]; alvo.lentoAtqPct = m.lentoAtaque[0]; alvo.el.classList.add('chakra'); }
+      if (m.empurrar) empurrar(alvo, a, m.empurrar);
+      if (m.puxar) empurrar(alvo, a, -m.puxar);
+    }
+    if (tropa) {
+      if (m.enfraquecer) { alvo.fraco = m.enfraquecer[1]; alvo.fracoPct = m.enfraquecer[0]; alvo.el.classList.add('enfraquecida'); }
+      if (m.marcar) { alvo.marcado = m.marcar[1]; alvo.marcaPct = m.marcar[0]; alvo.el.classList.add('marcada'); }
+    }
+    if (m.queimar && alvo.vida > 0) {
+      const [k, dur, cor, tipo] = m.queimar;
+      alvo.queima = dur; alvo.queimaDps = (dano * k * 10) / dur * (alvo.torre ? 0.5 : 1); alvo.queimaCor = cor; alvo.queimaFonte = a.time;
+      if (!alvo.torre) { alvo.el.classList.add(tipo === 'veneno' ? 'envenenada' : 'queimando'); }
+    }
+    if (m.roubo && Math.random() < m.roubo[0]) {
+      const inimigo = a.time === 'azul' ? 'vermelho' : 'azul';
+      const q = Math.min(m.roubo[1], s[inimigo].elixir);
+      s[inimigo].elixir -= q; s[a.time].elixir = Math.min(10, s[a.time].elixir + q);
+      if (q > 0) { voarSprite('moeda', alvo, a, 0.45, 16); if (a.time === 'azul') numero(a, 0, 'roubou'); }
+    }
+    if (m.vampiro && a.vida > 0) { a.vida = Math.min(a.max, a.vida + dano * m.vampiro); atualizarHp(a); }
+    if (m.regen && a.vida > 0) { a.vida = Math.min(a.max, a.vida + a.max * m.regen); atualizarHp(a); }
+    if (m.recuo && a.vida > 0) empurrar(a, alvo, m.recuo);
+  }
+
+  function empurrar(e, de, forca) {
+    if (e.torre) return;
+    const dx = e.x - de.x, dy = e.y - de.y, d0 = Math.hypot(dx, dy) || 1;
+    e.x = Math.max(10, Math.min(W - 10, e.x + (dx / d0) * forca));
+    e.y = Math.max(10, Math.min(H - 10, e.y + (dy / d0) * forca));
+    // não pode ser empurrado para dentro do rio (fora das pontes)
+    if (!e.voo && e.y > RIO_TOPO - 2 && e.y < RIO_BASE + 2 && !PONTES.some((b) => Math.abs(e.x - b) < 26)) e.y = e.y < PONTE_Y ? RIO_TOPO - 4 : RIO_BASE + 4;
+    evitarTorres(e);
+  }
+
+  function teleportar(t, alvo) {
+    if (!t || t.vida <= 0 || !alvo) return;
+    efeito(`teleporte ${t.time}`, t.x, t.y, 450);
+    const dx = t.x - alvo.x, dy = t.y - alvo.y, d0 = Math.hypot(dx, dy) || 1;
+    const longe = alvo.raio + t.raio + Math.min(t.alcance, 14);
+    t.x = alvo.x + (dx / d0) * longe; t.y = alvo.y + (dy / d0) * longe;
+    evitarTorres(t);
+    efeito(`teleporte ${t.time}`, t.x, t.y, 450);
+    t.cd = Math.min(t.cd, 0.15);
+    if (s.rede) s.eventos.push(['t', Math.round(t.x), Math.round(t.y)]);
+  }
+
+  // dano em área em volta de um ponto
+  function explosaoArea(a, centro, dano, raio, opc = {}) {
+    for (const e of [...s.ent]) {
+      if (e.time === a.time || e.vida <= 0 || dist(e, centro) > raio + e.raio) continue;
+      ferir(e, Math.round(dano * multClasse(a, e)), a.time, a);
+      if (!e.torre && opc.atordoar && !(e.atk && e.atk.m && e.atk.m.imune)) { e.atord = Math.max(e.atord, opc.atordoar); e.el.classList.add('atordoada'); }
+      if (!e.torre && opc.empurrar) empurrar(e, centro, opc.empurrar);
+    }
+    efeitoGolpe(opc.visual || 'impacto', centro, centro, { cor: opc.cor || '#FFD25E', s: opc.s, grande: raio });
+    if (s.rede) s.eventos.push(['x', Math.round(centro.x), Math.round(centro.y), raio, opc.cor || '#FFD25E']);
+    if (raio >= 35) tremer();
+  }
+
+  // ---------- Visuais dos golpes ----------
+  const SPRITES = new Set(['katana', 'pao', 'nota', 'gelo', 'floco', 'bola', 'shuriken', 'cajado', 'leque', 'raio', 'fogo', 'bomba', 'coringa', 'garras', 'explosao', 'punho', 'tornado', 'espada_vegito', 'espada_trunks', 'espada_fp', 'cristal', 'flor', 'onda_fogo', 'moeda', 'onda', 'bala', 'capsula', 'ki_amarelo', 'ki_azul', 'ki_rosa', 'ki_laranja', 'ki_roxo', 'ki_vermelho', 'ki_prata', 'ki_verde']);
+  const spriteUrl = (n) => `assets/ataques/${n}.svg`;
+
+  function fxEl(classe, x, y, ms, estilo = {}) {
+    if (vivos.particula >= LIMITE.particula + 10) return null;
+    vivos.particula++;
+    setTimeout(() => vivos.particula--, ms);
+    return efeito(classe, x, y, ms, estilo);
+  }
+
+  // sprite voando de um ponto a outro (só visual)
+  function voarSprite(nome, de, para, seg = 0.25, tam = 14, opc = {}) {
+    const el = fxEl('fx-voa', de.x, de.y, seg * 1000 + 60, { width: `${(tam / W) * 100}%` });
+    if (!el) return;
+    el.style.backgroundImage = `url(${spriteUrl(nome)})`;
+    const dx = (para.x - de.x) * escala, dy = (para.y - de.y) * escala;
+    const ang = Math.atan2(dy, dx) * 180 / Math.PI;
+    el.animate([
+      { transform: `translate(-50%, -50%) rotate(${opc.mira ? ang : 0}deg) scale(0.7)` },
+      { transform: `translate(calc(-50% + ${dx}px), calc(-50% + ${dy - (opc.arco || 0) * escala}px)) rotate(${opc.mira ? ang : opc.giro || 0}deg) scale(1)`, offset: 0.5 },
+      { transform: `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) rotate(${opc.mira ? ang : (opc.giro || 0) * 2}deg) scale(1)` },
+    ], { duration: seg * 1000, easing: 'linear', fill: 'forwards' });
+  }
+
+  // desenha o golpe; serve para o jogo e para o convidado do x1 (recebe só posições)
+  function efeitoGolpe(tipo, a, alvo, v = {}) {
+    const dx = alvo.x - a.x, dy = alvo.y - a.y, ang = Math.atan2(dy, dx) * 180 / Math.PI;
+    const mx = a.x + dx * 0.62, my = a.y + dy * 0.62;
+    const cor = v.cor || '#ffffff';
+    if (tipo === 'esferas') {
+      const n = v.n || 2;
+      for (let i = 0; i < n; i++) setTimeout(() => s && voarSprite(v.s || 'ki_amarelo', { x: a.x + (i - (n - 1) / 2) * 6, y: a.y - 6 }, alvo, 0.16, 11), i * 70);
+      setTimeout(() => s && fxEl('fx-soco', alvo.x, alvo.y, 320, { '--cor': cor }), 150);
+      return;
+    }
+    if (tipo === 'raio') {
+      const el = fxEl('fx-raio', a.x, a.y, 260);
+      if (!el) return;
+      const L = Math.hypot(dx, dy) * escala;
+      const pts = Array.from({ length: 7 }, (_, i) => `${(i / 6) * L},${i === 0 || i === 6 ? 0 : (Math.random() - 0.5) * 14}`).join(' ');
+      el.innerHTML = `<svg width="${L}" height="20" viewBox="0 -10 ${L} 20" style="overflow:visible"><polyline points="${pts}" fill="none" stroke="${cor}" stroke-width="4" stroke-linejoin="round" opacity="0.6"/><polyline points="${pts}" fill="none" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/></svg>`;
+      el.style.transform = `rotate(${ang}deg)`;
+      fxEl('fx-soco', alvo.x, alvo.y, 260, { '--cor': cor });
+      return;
+    }
+    if (tipo === 'impacto') {
+      const tam = v.grande ? v.grande * 2 : 46;
+      fxEl('fx-impacto', alvo.x, alvo.y, 480, { '--cor': cor, width: `${(tam / W) * 100}%` });
+      if (v.s) { const e2 = fxEl('fx-sprite-pop', alvo.x, alvo.y, 420, { width: `${((v.grande ? tam * 0.6 : 26) / W) * 100}%` }); if (e2) e2.style.backgroundImage = `url(${spriteUrl(v.s)})`; }
+      return;
+    }
+    if (tipo === 'tornado') {
+      const e2 = fxEl('fx-tornado', a.x, a.y, 500, { width: `${(34 / W) * 100}%` });
+      if (e2) e2.style.backgroundImage = `url(${spriteUrl(v.s || 'tornado')})`;
+      fxEl('fx-puxa', alvo.x, alvo.y, 400, { '--cor': cor, '--ang': `${ang + 180}deg` });
+      return;
+    }
+    if (tipo === 'corte') {
+      fxEl('fx-corte', mx, my, 300, { '--cor': cor, '--ang': `${ang}deg` });
+      if (v.s) { const e2 = fxEl('fx-arma', mx, my, 260, { '--ang': `${ang - 45}deg` }); if (e2) e2.style.backgroundImage = `url(${spriteUrl(v.s)})`; }
+      return;
+    }
+    if (tipo === 'giro') {
+      const e2 = fxEl('fx-giro', mx, my, 320, { '--ang': `${ang}deg` });
+      if (e2) e2.style.backgroundImage = `url(${spriteUrl(v.s)})`;
+      fxEl('fx-soco', alvo.x, alvo.y, 260, { '--cor': cor });
+      return;
+    }
+    if (tipo === 'chute') {
+      fxEl('fx-chute', mx, my, 300, { '--cor': cor, '--ang': `${ang}deg` });
+      if (v.s === 'bola') voarSprite('bola', a, alvo, 0.14, 10, { giro: 360 });
+      return;
+    }
+    if (tipo === 'palma') {
+      const e2 = fxEl('fx-palma', alvo.x, alvo.y, 360, { '--cor': cor });
+      if (e2 && v.s) e2.style.backgroundImage = `url(${spriteUrl(v.s)})`;
+      return;
+    }
+    // soco
+    fxEl(`fx-soco${v.pesado ? ' pesado' : ''}`, mx + (alvo.x - mx) * 0.6, my + (alvo.y - my) * 0.6, 300, { '--cor': cor });
+    if (v.pesado) tremer();
+  }
+  function golpeVisual(a, alvo, v) {
+    efeitoGolpe(v.g || 'soco', a, alvo, v);
+    if (s.rede && a.carta) s.eventos.push(['h', Math.round(a.x), Math.round(a.y), Math.round(alvo.x), Math.round(alvo.y), a.carta.id]);
+  }
+
+  // ---------- Projéteis ----------
+  function criarProjetil(a, alvo, dano, v, opc = {}) {
+    const p = document.createElement('div');
+    const sprite = v && v.p && SPRITES.has(v.p) ? v.p : null;
+    p.className = `projetil ${a.time}${a.torre ? ` de-torre${a.tropa ? ` t-${a.tropa}` : ''}` : ''}${sprite ? ' com-sprite' : ''}`;
+    if (sprite) {
+      p.style.backgroundImage = `url(${spriteUrl(sprite)})`;
+      p.style.width = `${((v.tam || 16) / W) * 100}%`;
+      if (v.rastro) p.style.setProperty('--rastro', v.rastro);
+    }
+    s.arena.appendChild(p);
+    const m = (a.atk && a.atk.m) || {};
+    const pj = {
+      x: opc.x != null ? opc.x : a.x, y: opc.y != null ? opc.y : a.y - 14, alvo, dano, area: opc.area != null ? opc.area : a.area || 0, time: a.time, el: p, mudou: true,
+      fonte: a, vel: (v && v.vel) || 300, giroVel: v && typeof v.giro === 'number' ? v.giro : 0, mira: v && v.giro === 'mira', giro: 0,
+      arco: (v && v.arco) || 0, explode: v && v.explode, crit: opc.crit, sprite, semEfeitos: opc.semEfeitos,
+      perfura: !opc.semPerfurar && !!m.perfura, ricochete: opc.ricochete != null ? opc.ricochete : m.ricochete || 0,
+    };
+    pj.x0 = pj.x; pj.y0 = pj.y; pj.total = Math.hypot(alvo.x - pj.x, alvo.y - pj.y) || 1;
+    if (pj.perfura) {
+      const d0 = pj.total;
+      pj.dx = (alvo.x - pj.x) / d0; pj.dy = (alvo.y - pj.y) / d0;
+      pj.resta = (a.alcance || 80) + 60; pj.atingidos = new Set();
+    }
+    s.proj.push(pj);
+    return pj;
+  }
+
+  // raio que cai do céu (Nami Last)
+  function raioDoCeu(a, alvo, dano, crit) {
+    const x = alvo.x, y = alvo.y;
+    fxEl('fx-mira-raio', x, y, 260);
+    agendar(0.22, () => {
+      if (!s) return;
+      const el = fxEl('fx-raio-ceu', x, y, 380);
+      if (el) el.style.backgroundImage = `url(${spriteUrl('raio')})`;
+      if (s.rede) s.eventos.push(['r', Math.round(x), Math.round(y)]);
+      const area = a.area || 30;
+      for (const e of [...s.ent]) {
+        if (e.time === a.time || e.vida <= 0 || dist(e, { x, y }) > area + e.raio) continue;
+        const dd = Math.round(dano * (e === alvo ? 1 : 1) * (multClasse(a, e) / Math.max(0.01, multClasse(a, alvo))));
+        ferir(e, dd, a.time, a, { crit });
+        aplicarGolpe(a, e, dd);
+      }
+      particulas(x, y, '#FFE45C', 8, 26);
+    });
+  }
+
+  function acertarProjetil(p, alvo) {
+    const a = p.fonte;
+    if (p.area) {
+      for (const e of [...s.ent]) {
+        if (e.time === p.time || e.vida <= 0 || dist(e, alvo) > p.area + e.raio) continue;
+        const dd = e === alvo ? p.dano : Math.round(p.dano * (a && !a.torre ? multClasse(a, e) / Math.max(0.01, multClasse(a, alvo)) : 1));
+        ferir(e, dd, p.time, a, { crit: p.crit });
+        if (a && !a.torre && !p.semEfeitos) aplicarGolpe(a, e, dd);
+      }
+      const ex = document.createElement('div');
+      ex.className = `explosao ${p.time}${p.explode ? ' grande' : ''}`;
+      Object.assign(ex.style, pct(alvo.x, alvo.y), { width: `${((p.area * 2) / W) * 100}%` });
+      s.arena.appendChild(ex);
+      setTimeout(() => ex.remove(), 400);
     } else {
-      const dx = alvo.x - atacante.x, dy = alvo.y - atacante.y, d0 = Math.hypot(dx, dy) || 1;
-      atacante.el.style.setProperty('--lx', `${(dx / d0) * 9}px`);
-      atacante.el.style.setProperty('--ly', `${(dy / d0) * 9}px`);
-      piscar(atacante.el, 'atacando');
-      ferir(alvo, danoDe(atacante), atacante.time);
-      const golpe = document.createElement('div');
-      golpe.className = 'golpe';
-      Object.assign(golpe.style, pct((atacante.x + alvo.x) / 2, (atacante.y + alvo.y) / 2));
-      s.arena.appendChild(golpe);
-      setTimeout(() => golpe.remove(), 250);
+      ferir(alvo, p.dano, p.time, a, { crit: p.crit });
+      if (a && !a.torre && !p.semEfeitos) aplicarGolpe(a, alvo, p.dano);
+    }
+    // ricochete (Bulma): quica para outro alvo perto
+    if (p.ricochete && a) {
+      const prox = s.ent.filter((e) => e !== alvo && e.time !== p.time && e.vida > 0 && dist(e, alvo) < 90).sort((x, y) => dist(x, alvo) - dist(y, alvo))[0];
+      if (prox) criarProjetil(a, prox, Math.round(p.dano * p.ricochete), a.atk.v, { x: alvo.x, y: alvo.y, ricochete: 0, area: p.area * 0.7 });
+    }
+  }
+
+  // ---------- Atacar ----------
+  function atacar(atacante, alvo) {
+    if (atacante.torre) {
+      criarProjetil(atacante, alvo, atacante.dano, null);
+      return;
+    }
+    const v = (atacante.atk && atacante.atk.v) || {};
+    const m = (atacante.atk && atacante.atk.m) || {};
+    const { dano, crit } = danoDe(atacante, alvo);
+    const ehEspecial = m.especial && atacante.golpes % m.especial[0] === 0;
+    const ehExtra = m.extra && atacante.golpes % m.extra[0] === 0;
+
+    if (atacante.alcance > 40) {
+      piscar(atacante.el, 'atirando');
+      if (v.ceu) { raioDoCeu(atacante, alvo, dano, crit); return; }
+      const n = m.rajada || 1;
+      for (let i = 0; i < n; i++) {
+        const disparar = () => { if (atacante.vida > 0 && alvo.vida > 0) criarProjetil(atacante, alvo, Math.round(dano / n), v, { crit, x: atacante.x + (i - (n - 1) / 2) * 5 }); };
+        if (i === 0) disparar(); else agendar(i * 0.11, disparar);
+      }
+      return;
+    }
+
+    // corpo a corpo
+    const dx = alvo.x - atacante.x, dy = alvo.y - atacante.y, d0 = Math.hypot(dx, dy) || 1;
+    atacante.el.style.setProperty('--lx', `${(dx / d0) * 9}px`);
+    atacante.el.style.setProperty('--ly', `${(dy / d0) * 9}px`);
+    piscar(atacante.el, 'atacando');
+    golpeVisual(atacante, alvo, v);
+    const n = m.rajada || 1;
+    const bater = (dd, efeitos) => {
+      if (alvo.vida <= 0) return;
+      const feito = ferir(alvo, dd, atacante.time, atacante, { crit });
+      if (efeitos) aplicarGolpe(atacante, alvo, feito || dd);
+    };
+    if (n > 1) { for (let i = 0; i < n; i++) { if (i === 0) bater(Math.round(dano / n), true); else agendar(i * 0.07, () => bater(Math.round(dano / n), false)); } }
+    else bater(dano, true);
+    // dano em área do golpe (ex.: Caulifla SSJ, Gogeta SSJ4)
+    if (atacante.area) {
+      for (const e of [...s.ent]) {
+        if (e === alvo || e.time === atacante.time || e.vida <= 0 || dist(e, alvo) > atacante.area + e.raio) continue;
+        const dd = Math.round(atacante.dano * multClasse(atacante, e) * 0.75);
+        ferir(e, dd, atacante.time, atacante);
+        aplicarGolpe(atacante, e, dd);
+      }
+    }
+    // corte que atravessa (Trunks): acerta também quem está logo atrás
+    if (m.perfura) {
+      const ux = dx / d0, uy = dy / d0;
+      const atras = s.ent.find((e) => e !== alvo && e.time !== atacante.time && !e.torre && e.vida > 0 && Math.hypot(e.x - (alvo.x + ux * 22), e.y - (alvo.y + uy * 22)) < 18);
+      if (atras) { ferir(atras, Math.round(dano * 0.6), atacante.time, atacante); efeitoGolpe('corte', alvo, atras, v); }
+    }
+    // raio em cadeia (Kashimo)
+    if (m.cadeia) {
+      let de = alvo; const ja = new Set([alvo]);
+      for (let i = 0; i < m.cadeia; i++) {
+        const prox = s.ent.filter((e) => !ja.has(e) && e.time !== atacante.time && e.vida > 0 && !e.torre && dist(e, de) < 75).sort((x, y) => dist(x, de) - dist(y, de))[0];
+        if (!prox) break;
+        ja.add(prox);
+        const de0 = de;
+        agendar(0.08 * (i + 1), () => { efeitoGolpe('raio', de0, prox, v); ferir(prox, Math.round(dano * 0.65), atacante.time, atacante); });
+        de = prox;
+      }
+    }
+    if (ehEspecial) {
+      const [, mult, raio, sprite, atord] = m.especial;
+      agendar(0.05, () => explosaoArea(atacante, alvo, Math.round(atacante.dano * mult), raio, { visual: 'impacto', cor: v.cor, s: sprite, atordoar: atord }));
+    }
+    if (ehExtra) {
+      const [, sprite, mult] = m.extra;
+      criarProjetil(atacante, alvo, Math.round(atacante.dano * mult * multClasse(atacante, alvo)), { p: sprite, vel: 320, tam: 20, rastro: v.cor }, { area: 22, semPerfurar: true });
     }
   }
 
@@ -976,8 +1326,8 @@ const Batalha = (() => {
       fila: s.vermelho.fila.slice(0, 5),
       tw: Object.fromEntries(s.ent.filter((e) => e.torre).map((e) => [e.id, Math.round(e.vida)])),
       tr: s.ent.filter((e) => !e.torre).map((e) => [e.id, e.carta.id, e.time === 'azul' ? 0 : 1, Math.round(e.x * 10) / 10, Math.round(e.y * 10) / 10,
-        Math.round(e.vida), e.max, e.nivel, (e.surgir > 0 ? 1 : 0) | (e.furia > 0 ? 2 : 0) | (e.golpesFortes > 0 ? 4 : 0) | (e.fenix > 0 ? 8 : 0) | (e.congelado > 0 ? 16 : 0) | (e.esquiva > 0 ? 32 : 0) | ((e.adaptacao || 0) << 6), e.recarga > 0 ? +e.recarga.toFixed(1) : 0]),
-      pj: s.proj.map((p) => [Math.round(p.x), Math.round(p.y), p.time === 'azul' ? 0 : 1, p.el.classList.contains('de-torre') ? 1 : 0]),
+        Math.round(e.vida), e.max, e.nivel, (e.surgir > 0 ? 1 : 0) | (e.furia > 0 ? 2 : 0) | (e.golpesFortes > 0 ? 4 : 0) | (e.fenix > 0 ? 8 : 0) | (e.congelado > 0 ? 16 : 0) | (e.esquiva > 0 ? 32 : 0) | (e.atord > 0 ? 64 : 0) | (e.lento > 0 ? 128 : 0) | (e.queima > 0 ? 256 : 0) | (e.escudo > 0 ? 512 : 0) | (e.fraco > 0 ? 1024 : 0) | ((e.adaptacao || 0) << 11), e.recarga > 0 ? +e.recarga.toFixed(1) : 0]),
+      pj: s.proj.map((p) => [Math.round(p.x), Math.round(p.y - (p.alt || 0)), p.time === 'azul' ? 0 : 1, p.el.classList.contains('de-torre') ? 1 : 0, p.sprite || 0, Math.round(p.giro || 0)]),
       ev: s.eventos,
     };
   }
@@ -991,7 +1341,7 @@ const Batalha = (() => {
     s = {
       modo: 'x1c', convidado: true, rede, t: 0, prorrogacao: false, acabou: false, pausa: false,
       azul: { elixir: 5, fila: [], coroas: 0 }, vermelho: { elixir: 5, fila: [], coroas: 0 },
-      ent: torres(Estado.minhasTorres(), rede.host.torres || Estado.minhasTorres()), proj: [], efeitos: [], selecionada: null, id: 0, mapa: new Map(), pjEls: [],
+      ent: torres(Estado.minhasTorres(), rede.host.torres || Estado.minhasTorres()), proj: [], efeitos: [], agenda: [], selecionada: null, id: 0, mapa: new Map(), pjEls: [],
       arenaId: rede.host.arena || 'festival',
     };
     montar(`X1 contra ${rede.host.nome}`);
@@ -1038,7 +1388,12 @@ const Batalha = (() => {
       t.el.classList.toggle('aura-fenix', !!(flags & 8));
       t.el.classList.toggle('congelada', !!(flags & 16));
       t.el.classList.toggle('aura-instinto', !!(flags & 32));
-      const ad = flags >> 6, selo = t.el.querySelector('.selo-adapt');
+      t.el.classList.toggle('atordoada', !!(flags & 64));
+      t.el.classList.toggle('lenta', !!(flags & 128));
+      t.el.classList.toggle('queimando', !!(flags & 256));
+      t.el.classList.toggle('com-escudo', !!(flags & 512));
+      t.el.classList.toggle('enfraquecida', !!(flags & 1024));
+      const ad = flags >> 11, selo = t.el.querySelector('.selo-adapt');
       if (selo && String(ad || '') !== selo.textContent) { selo.textContent = ad || ''; t.el.classList.toggle('adaptado', !!(t.carta.passiva && ad >= t.carta.passiva.max)); }
       t.recarga = recarga;
     }
@@ -1054,10 +1409,11 @@ const Batalha = (() => {
 
     // projéteis (redesenhados a cada foto)
     s.pjEls.forEach((el) => el.remove());
-    s.pjEls = (est.pj || []).map(([px, py, timeN, deTorre]) => {
+    s.pjEls = (est.pj || []).map(([px, py, timeN, deTorre, sprite, giro]) => {
       const el = document.createElement('div');
-      el.className = `projetil ${espelhoTime(timeN)}${deTorre ? ' de-torre' : ''}`;
+      el.className = `projetil ${espelhoTime(timeN)}${deTorre ? ' de-torre' : ''}${sprite ? ' com-sprite' : ''}`;
       Object.assign(el.style, pct(W - px, H - py));
+      if (sprite) { el.style.backgroundImage = `url(${spriteUrl(sprite)})`; el.style.width = `${(16 / W) * 100}%`; el.style.transform = `translate(-50%, -50%) rotate(${(giro || 0) + 180}deg)`; }
       s.arena.appendChild(el);
       return el;
     });
@@ -1084,6 +1440,16 @@ const Batalha = (() => {
         efeito(`ativou ${espelhoTime(ev[3])}`, W - ev[1], H - ev[2], 700);      } else if (ev[0] === 'g') {
         efeito('gelo', W - ev[1], H - ev[2], 1000);
         particulas(W - ev[1], H - ev[2], '#DDF3FF', 16, 55);
+      } else if (ev[0] === 'h') {
+        const c = Estado.carta(ev[5]);
+        if (c) { const v = Ataques.de(c).v; efeitoGolpe(v.g || 'soco', { x: W - ev[1], y: H - ev[2] }, { x: W - ev[3], y: H - ev[4] }, v); }
+      } else if (ev[0] === 'x') {
+        efeitoGolpe('impacto', { x: W - ev[1], y: H - ev[2] }, { x: W - ev[1], y: H - ev[2] }, { cor: ev[4], grande: ev[3] });
+      } else if (ev[0] === 'r') {
+        const el = fxEl('fx-raio-ceu', W - ev[1], H - ev[2], 380);
+        if (el) el.style.backgroundImage = `url(${spriteUrl('raio')})`;
+      } else if (ev[0] === 't') {
+        efeito('teleporte', W - ev[1], H - ev[2], 450);
       }
     }
 
@@ -1153,7 +1519,7 @@ const Batalha = (() => {
   // desenha tudo uma vez por quadro (a simulação pode rodar várias vezes por quadro)
   function desenhar() {
     for (const e of s.ent) if (!e.torre && e.el) posicionar(e);
-    for (const p of s.proj) if (p.mudou) { p.el.style.transform = tr(p.x, p.y, p.giro ? `translate(-50%, -50%) rotate(${p.giro}deg)` : 'translate(-50%, -50%)'); p.mudou = false; }
+    for (const p of s.proj) if (p.mudou) { p.el.style.transform = tr(p.x, p.y - (p.alt || 0), p.giro ? `translate(-50%, -50%) rotate(${p.giro.toFixed(0)}deg)` : 'translate(-50%, -50%)'); p.mudou = false; }
     hud();
   }
 
@@ -1196,20 +1562,33 @@ const Batalha = (() => {
     }
     s.habTimer -= dt;
     if (s.habTimer <= 0) { s.habTimer = 0.2; desenharHabilidades(); }
+    rodarAgenda();
+    s.auraTimer = (s.auraTimer || 0) - dt;
+    if (s.auraTimer <= 0) { s.auraTimer = 0.5; auras(); }
+    for (const tw of s.ent) if (tw.torre && tw.queima > 0) queimar(tw, dt);
 
     // tropas
     for (const t of s.ent) {
       if (t.torre || t.vida <= 0) continue;
       if (t.surgir > 0) { t.surgir -= dt; if (t.surgir <= 0) t.el.classList.remove('surgindo'); continue; }
       if (t.carta.passiva && t.carta.passiva.tipo === 'adaptar') adaptar(t, dt);
+      atualizarStatus(t, dt);
+      if (t.vida <= 0) continue;
       if (t.congelado > 0) { if ((t.congelado -= dt) <= 0) t.el.classList.remove('congelada'); continue; }
+      if (t.atord > 0) { if ((t.atord -= dt) <= 0) t.el.classList.remove('atordoada'); continue; }
       if (!t.alvo || t.alvo.vida <= 0 || !s.ent.includes(t.alvo) || Math.random() < 0.02) t.alvo = escolherAlvo(t);
       t.cd -= dt;
+      if (t.teleCd > 0) t.teleCd -= dt;
       if (!t.alvo) continue;
       const alcance = t.alcance + t.alvo.raio + t.raio;
-      if (dist(t, t.alvo) <= alcance) {
-        if (t.cd <= 0) { atacar(t, t.alvo); t.cd = t.cadencia * (t.furia > 0 ? 0.8 : 1); }
+      const d0 = dist(t, t.alvo);
+      if (d0 <= alcance) {
+        if (t.correndo) { t.correndo = false; t.el.classList.remove('arrancada'); }
+        if (t.cd <= 0) { atacar(t, t.alvo); t.cd = t.cadencia * cadenciaMult(t); }
       } else {
+        // Goku: teletransporte quando o alvo está longe
+        const mt = t.atk && t.atk.m;
+        if (mt && mt.teleporte && t.teleCd <= 0 && d0 > alcance + 45 && d0 < 230) { t.teleCd = mt.teleporte; teleportar(t, t.alvo); continue; }
         moverPara(t, t.alvo, dt);
       }
     }
@@ -1240,25 +1619,35 @@ const Batalha = (() => {
 
     // projéteis
     for (const p of [...s.proj]) {
-      const dx = p.alvo.x - p.x, dy = p.alvo.y - p.y, d0 = Math.hypot(dx, dy);
-      const passo = 300 * dt;
-      if (d0 <= passo || p.alvo.vida <= 0) {
-        if (p.alvo.vida > 0) {
-          if (p.area) {
-            for (const e of [...s.ent]) if (e.time !== p.time && dist(e, p.alvo) <= p.area + e.raio) ferir(e, p.dano, p.time);
-            const ex = document.createElement('div');
-            ex.className = `explosao ${p.time}`;
-            Object.assign(ex.style, pct(p.alvo.x, p.alvo.y), { width: `${((p.area * 2) / W) * 100}%` });
-            s.arena.appendChild(ex);
-            setTimeout(() => ex.remove(), 400);
-          } else ferir(p.alvo, p.dano, p.time);
+      const passo = (p.vel || 300) * dt;
+      if (p.giroVel) p.giro = (p.giro + p.giroVel * dt) % 360;
+      // projétil que atravessa: segue reto e acerta todo mundo no caminho
+      if (p.perfura) {
+        p.x += p.dx * passo; p.y += p.dy * passo; p.resta -= passo;
+        if (p.mira) p.giro = Math.atan2(p.dy, p.dx) * 180 / Math.PI;
+        for (const e of s.ent) {
+          if (e.time === p.time || e.vida <= 0 || p.atingidos.has(e) || dist(e, p) > e.raio + 6) continue;
+          p.atingidos.add(e);
+          const dd = e === p.alvo || !p.fonte ? p.dano : Math.round(p.dano * multClasse(p.fonte, e) / Math.max(0.01, multClasse(p.fonte, p.alvo)));
+          ferir(e, dd, p.time, p.fonte, { crit: p.crit });
+          if (p.fonte && !p.fonte.torre) aplicarGolpe(p.fonte, e, dd);
+          if (e.torre) { p.resta = 0; break; }
         }
+        p.mudou = true;
+        if (p.resta <= 0 || p.x < -10 || p.x > W + 10 || p.y < -10 || p.y > H + 10) { p.el.remove(); s.proj = s.proj.filter((x) => x !== p); }
+        continue;
+      }
+      const dx = p.alvo.x - p.x, dy = p.alvo.y - p.y, d0 = Math.hypot(dx, dy);
+      if (d0 <= passo || p.alvo.vida <= 0) {
+        if (p.alvo.vida > 0) acertarProjetil(p, p.alvo);
         p.el.remove();
         s.proj = s.proj.filter((x) => x !== p);
         continue;
       }
       p.x += (dx / d0) * passo;
       p.y += (dy / d0) * passo;
+      if (p.mira) p.giro = Math.atan2(dy, dx) * 180 / Math.PI;
+      if (p.arco) { const t0 = 1 - d0 / p.total; p.alt = Math.sin(Math.max(0, Math.min(1, t0)) * Math.PI) * p.arco; }
       p.mudou = true;
     }
 
@@ -1267,6 +1656,47 @@ const Batalha = (() => {
       f.vida -= dt;
       if (f.vida <= 0) { f.el.remove(); s.efeitos = s.efeitos.filter((x) => x !== f); }
     }
+  }
+
+  // velocidade de ataque: fúria, Punho Gentil, berserk e aura da Hatsune
+  function cadenciaMult(t) {
+    let k = t.furia > 0 ? 0.8 : 1;
+    if (t.lentoAtq > 0) k *= 1 + t.lentoAtqPct;
+    const m = t.atk && t.atk.m;
+    if (m && m.berserk) k *= 1 - m.berserk * (1 - t.vida / t.max);
+    if (t.buffVel > 0) k *= 1 - t.buffVel;
+    return k;
+  }
+
+  function atualizarStatus(t, dt) {
+    if (t.lento > 0 && (t.lento -= dt) <= 0) t.el.classList.remove('lenta');
+    if (t.lentoAtq > 0 && (t.lentoAtq -= dt) <= 0) t.el.classList.remove('chakra');
+    if (t.fraco > 0 && (t.fraco -= dt) <= 0) t.el.classList.remove('enfraquecida');
+    if (t.marcado > 0 && (t.marcado -= dt) <= 0) t.el.classList.remove('marcada');
+    queimar(t, dt);
+  }
+  // veneno / fogo: dano aos poucos (aplicado a cada meio segundo)
+  function queimar(t, dt) {
+    if (!(t.queima > 0)) return;
+    t.queima -= dt;
+    t.queimaAcum += t.queimaDps * dt;
+    if (t.queimaAcum >= t.queimaDps * 0.5 || t.queima <= 0) {
+      const d0 = Math.round(t.queimaAcum);
+      t.queimaAcum = 0;
+      if (d0 > 0) ferir(t, d0, t.queimaFonte, null, { semEsquiva: true, semContra: true, tipo: 'queimadura' });
+    }
+    if (t.queima <= 0 && t.el) t.el.classList.remove('queimando', 'envenenada');
+  }
+  // aura de velocidade (Hatsune Miku), recalculada a cada meio segundo
+  function auras() {
+    const tropas = s.ent.filter((e) => !e.torre && e.vida > 0);
+    for (const t of tropas) t.buffVel = 0;
+    for (const f of tropas) {
+      const a = f.atk && f.atk.m && f.atk.m.auraVel;
+      if (!a) continue;
+      for (const t of tropas) if (t !== f && t.time === f.time && dist(t, f) < a[0]) t.buffVel = Math.max(t.buffVel, a[1]);
+    }
+    for (const t of tropas) if (t.el) t.el.classList.toggle('com-aura', t.buffVel > 0);
   }
 
   // ---------- Fim ----------
@@ -1325,5 +1755,6 @@ const Batalha = (() => {
     return true;
   }
 
-  return { iniciar, iniciarConvidado, receberEstado, comandoRemoto, adversarioSaiu, fechar, vencerAgora, _estado: () => s };
+  // _teste: usado só pelos testes automáticos de balanceamento
+  return { iniciar, iniciarConvidado, receberEstado, comandoRemoto, adversarioSaiu, fechar, vencerAgora, _estado: () => s, _teste: { jogar, criarTropa } };
 })();

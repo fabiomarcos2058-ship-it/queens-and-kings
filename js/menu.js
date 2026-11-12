@@ -210,6 +210,8 @@
     $('trofeus-prox').textContent = prox ? `Próxima arena: ${fmt(prox.trofeus)} · toque para ver` : 'Você chegou na última arena! · toque para ver';
     const card = document.querySelector('.arena-card');
     card.querySelector('.arena-nome').innerHTML = `<span>Arena ${atual.n}</span>${atual.nome}`;
+    card.style.setProperty('--cor-arena', atual.cor);
+    card.style.setProperty('--fundo-arena', `url(${new URL(`assets/arenas/${atual.id}_mini.jpg`, location.href).href})`);
     if ($('arena-mini').dataset.arena !== atual.id) Arena.render($('arena-mini'), { arena: atual, mini: true });
     card.onclick = caminho;
     baus();
@@ -756,57 +758,81 @@
   }
 
   // ---------- Loja ----------
+  const COR_RAR = { comum: '#9FB4C8', rara: '#FFB347', epica: '#C77DFF', lendaria: '#5EE6C8' };
+  function tempoLoja() {
+    const el = $('loja-tempo');
+    if (!el) return;
+    const h = new Date(), fim = new Date(h.getFullYear(), h.getMonth(), h.getDate() + 1);
+    const ms = fim - h, hh = Math.floor(ms / 3600000), mm = Math.floor((ms % 3600000) / 60000), ss = Math.floor((ms % 60000) / 1000);
+    el.textContent = `${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}:${String(ss).padStart(2, '0')}`;
+  }
+  setInterval(tempoLoja, 1000);
+
   function loja() {
+    tempoLoja();
+    // presente grátis do dia
+    const temPresente = Estado.presenteDiario();
+    $('loja-presente').innerHTML = `<button class="presente-diario${temPresente ? ' pronto' : ''}" id="btn-presente">
+        <img src="assets/ui/bau_inicial.svg" alt="" /><div><b>Presente grátis</b><small>${temPresente ? 'Toque para pegar!' : 'Volte amanhã para outro'}</small></div>
+        <span class="selo-gratis">${temPresente ? 'GRÁTIS' : '✓'}</span></button>`;
+    $('btn-presente').onclick = () => {
+      const p = Estado.presenteDiario(true);
+      if (!p) { UI.toast('Você já pegou o presente de hoje!'); return; }
+      if (p.tipo === 'bau') mostrarBau('madeira', p.abertura);
+      else UI.toast(p.tipo === 'ouro' ? `🪙 +${fmt(p.qtd)} de ouro!` : `💎 +${p.qtd} gemas!`);
+      tudo();
+    };
+
     const ofertas = Estado.ofertasDoDia();
     $('ofertas').innerHTML = ofertas.length ? '' : '<p class="aviso" style="grid-column:1/-1">Abra seus baús iniciais para liberar as ofertas!</p>';
     $('ofertas').innerHTML += ofertas.map((o) => {
       const c = Estado.carta(o.id);
       const comprada = d().ofertas.compradas.includes(o.i);
-      return `<button class="item-loja${comprada ? ' comprado' : ''}" data-i="${o.i}">${Cartas.html(c, { mini: true })}
-        <div class="item-nome">${Estado.tem(c.id) ? '' : '<b class="tag-nova">NOVA</b> '}${c.nome} x${o.copias}</div>
-        <div class="preco">${comprada ? 'Comprado' : `<img class="ic-img" data-asset="ui/moeda" alt="" />${fmt(o.preco)}`}</div></button>`;
+      return `<button class="oferta${comprada ? ' comprado' : ''}${o.gratis ? ' gratis' : ''}" style="--rar:${COR_RAR[c.raridade]}" data-i="${o.i}">
+        ${o.gratis ? '<div class="faixa">Grátis</div>' : o.desconto ? '<div class="faixa desconto">-30%</div>' : ''}
+        <div class="oferta-carta">${Cartas.html(c, { mini: true })}<span class="qtd">x${o.copias}</span></div>
+        <div class="item-nome">${c.nome}</div>
+        <div class="preco">${comprada ? 'Comprado' : o.gratis ? 'Pegar' : `<img class="ic-img" data-asset="ui/moeda" alt="" />${fmt(o.preco)}`}</div></button>`;
     }).join('');
     $('ofertas').querySelectorAll('button').forEach((el) => (el.onclick = () => {
       const o = ofertas[+el.dataset.i];
-      if (d().ofertas.compradas.includes(o.i)) return UI.toast('Você já comprou essa oferta hoje');
+      if (d().ofertas.compradas.includes(o.i)) return UI.toast('Você já pegou essa oferta hoje');
       const c = Estado.carta(o.id);
+      const pegar = () => {
+        d().ouro -= o.preco;
+        d().colecao[o.id].copias += o.copias;
+        d().ofertas.compradas.push(o.i); Estado.salvar();
+        UI.toast(`+${o.copias} ${c.nome}!`); tudo();
+      };
+      if (o.gratis) { pegar(); return; }
       UI.modal({
         titulo: 'Comprar oferta?',
         html: `<div class="compra">${Cartas.html(c, { mini: true })}<p><b>${o.copias} cópias</b> de ${c.nome} por ${fmt(o.preco)} de ouro.</p></div>`,
-        botoes: [{ texto: 'Cancelar', classe: 'secundario' }, { texto: 'Comprar', classe: 'principal', desativado: d().ouro < o.preco, motivo: 'Ouro insuficiente',
-          acao: () => {
-            d().ouro -= o.preco;
-            const col = d().colecao[o.id];
-            const nova = !col.tem;
-            if (nova) { col.tem = true; col.copias += o.copias - 1; } else col.copias += o.copias;
-            d().ofertas.compradas.push(o.i); Estado.salvar();
-            UI.toast(nova ? `✨ ${c.nome} desbloqueada!` : `+${o.copias} ${c.nome}!`); tudo();
-          } }],
+        botoes: [{ texto: 'Cancelar', classe: 'secundario' }, { texto: 'Comprar', classe: 'principal', desativado: d().ouro < o.preco, motivo: 'Ouro insuficiente', acao: pegar }],
       });
     }));
 
     const precosBau = { madeira: 10, prata: 40, ouro: 120 };
-    $('loja-baus').innerHTML = Object.keys(precosBau).map((t) => `<button class="item-loja${t === 'ouro' ? ' destaque' : ''}" data-t="${t}">
-      ${t === 'ouro' ? '<div class="faixa">Melhor oferta</div>' : ''}<img data-asset="ui/bau_${t}" alt="" />
-      <div class="item-nome">${Estado.BAUS[t].nome}</div><div class="preco"><i class="ic-gema"></i>${precosBau[t]}</div></button>`).join('');
+    $('loja-baus').innerHTML = Object.keys(precosBau).map((t) => { const B = Estado.BAUS[t]; return `<button class="item-loja bau-loja b-${t}${t === 'ouro' ? ' destaque' : ''}" data-t="${t}">
+      ${t === 'ouro' ? '<div class="faixa">Melhor oferta</div>' : ''}<img src="assets/ui/bau_${t}.svg" alt="" />
+      <div class="item-nome">${B.nome}</div><small class="bau-info">${B.copias} cartas · ${Math.round(B.chanceNova * 100)}% de carta nova</small><div class="preco"><i class="ic-gema"></i>${precosBau[t]}</div></button>`; }).join('');
     $('loja-baus').querySelectorAll('button').forEach((el) => (el.onclick = () => {
-      const t = el.dataset.t, p = precosBau[t];
-      UI.modal({ titulo: `Comprar ${Estado.BAUS[t].nome.toLowerCase()}?`, html: `<img class="bau-aberto" data-asset="ui/bau_${t}" alt="" /><p>Abre na hora. Até ${Estado.BAUS[t].copias} cartas e ${Estado.BAUS[t].ouro[1]} de ouro.</p>`,
+      const t = el.dataset.t, p = precosBau[t], B = Estado.BAUS[t];
+      UI.modal({ titulo: `Comprar ${B.nome.toLowerCase()}?`, html: `<img class="bau-aberto" src="assets/ui/bau_${t}.svg" alt="" /><p>Abre na hora: <b>${B.copias} cartas</b> e até <b>${B.ouro[1]} de ouro</b>.<br><small>${Math.round(B.chanceNova * 100)}% de chance de uma carta nova.</small></p>`,
         botoes: [{ texto: 'Cancelar', classe: 'secundario' }, { texto: `Comprar · ${p} 💎`, classe: 'principal', desativado: d().gemas < p, motivo: 'Gemas insuficientes',
           acao: () => { d().gemas -= p; mostrarBau(t, Estado.abrirBau(t)); } }] });
-      Assets.fill();
     }));
 
     const pacotes = [[500, 20, 1], [2000, 70, 2], [6000, 180, 3]];
-    $('loja-ouro').innerHTML = pacotes.map(([o, g, n], i) => `<button class="item-loja" data-i="${i}"><img data-asset="ui/ouro_${n}" alt="" />
-      <div class="item-nome">${fmt(o)} de ouro</div><div class="preco"><i class="ic-gema"></i>${g}</div></button>`).join('');
+    $('loja-ouro').innerHTML = pacotes.map(([o, g, n], i) => `<button class="item-loja ouro-loja" data-i="${i}"><img data-asset="ui/ouro_${n}" alt="" />
+      <div class="item-nome">${fmt(o)}</div><div class="preco"><i class="ic-gema"></i>${g}</div></button>`).join('');
     $('loja-ouro').querySelectorAll('button').forEach((el) => (el.onclick = () => {
       const [o, g] = pacotes[+el.dataset.i];
       UI.modal({ titulo: 'Comprar ouro?', html: `<p>${fmt(o)} de ouro por ${g} gemas.</p>`,
         botoes: [{ texto: 'Cancelar', classe: 'secundario' }, { texto: 'Comprar', classe: 'principal', desativado: d().gemas < g, motivo: 'Gemas insuficientes',
           acao: () => { d().gemas -= g; d().ouro += o; Estado.salvar(); UI.toast(`+${fmt(o)} de ouro!`); tudo(); } }] });
     }));
-    Assets.fill($('loja-baus').parentElement);
+    Assets.fill($('loja-baus').closest('.tela'));
   }
 
   // ---------- Cartas ----------
@@ -989,10 +1015,24 @@
         <p class="tipo">${c.tipo} · ${c.custo} de elixir</p><p>${c.descricao}</p>
         <p class="aviso">Nível ${col.nivel} · cópias ${col.copias}${col.nivel < Estado.NIVEL_MAX ? `/${Estado.COPIAS[col.nivel]}` : ''}</p></div></div>
         <div class="tabela-stats">${linhas.map(([k, v]) => `<div><span>${k}</span><b>${typeof v === 'number' ? fmt(v) : v}</b></div>`).join('')}</div>
+        ${infoClasse(c)}
         ${c.habilidade ? `<div class="hab-detalhe"><b>⚡ ${c.habilidade.nome}</b> · ${c.habilidade.custo} de elixir<br><small>${c.habilidade.descricao} Durante a batalha, toque no botão da habilidade que aparece na arena.</small></div>` : ''}
         ${c.passiva ? `<div class="hab-detalhe passiva"><b>${c.passiva.tipo === 'esquiva' ? '✨' : '🧩'} ${c.passiva.nome}</b> · passiva (automática)<br><small>${c.passiva.descricao}</small></div>` : ''}`,
       botoes,
     });
+  }
+
+  // classe, counters e ataque especial da carta
+  function infoClasse(c) {
+    const k = Ataques.classeDe(c);
+    if (!k) return '';
+    const C = Ataques.CLASSES, a = Ataques.de(c);
+    const nomes = (l) => l.map((x) => `${C[x].ic} ${C[x].nome}`).join(', ') || '—';
+    return `<div class="info-classe">
+      <div class="ic-classe"><span>${C[k].ic}</span><b>${C[k].nome}</b><small>${C[k].desc}</small></div>
+      <div class="contra"><span class="forte">💪 Forte contra: ${nomes(Ataques.fortes(k))}</span><span class="fraco">⚠️ Fraco contra: ${nomes(Ataques.fracos(k))}</span></div>
+      ${a.d ? `<div class="ataque-unico">🎯 <b>Ataque:</b> ${a.d}</div>` : ''}
+    </div>`;
   }
 
   function cartaEvoluiu(id, antes, depois) {

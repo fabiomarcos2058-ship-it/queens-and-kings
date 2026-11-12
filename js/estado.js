@@ -77,10 +77,11 @@ const Estado = (() => {
   }
 
   const BAUS = {
-    inicial: { nome: 'Baú inicial', segundos: 0, ouro: [20, 30], copias: 0, gemas: 0, imagem: 'madeira' },
-    madeira: { nome: 'Baú de madeira', segundos: 60, ouro: [30, 60], copias: 6, gemas: 0 },
-    prata: { nome: 'Baú de prata', segundos: 5 * 60, ouro: [80, 140], copias: 15, gemas: 2 },
-    ouro: { nome: 'Baú de ouro', segundos: 15 * 60, ouro: [250, 400], copias: 40, gemas: 5 },
+    inicial: { nome: 'Baú inicial', segundos: 0, ouro: [20, 30], copias: 0, gemas: 0, imagem: 'inicial' },
+    // chanceNova: chance de vir uma carta que você ainda não tem (cartas novas só saem de baú!)
+    madeira: { nome: 'Baú de madeira', segundos: 60, ouro: [30, 60], copias: 6, gemas: 0, chanceNova: 0.12 },
+    prata: { nome: 'Baú de prata', segundos: 5 * 60, ouro: [80, 140], copias: 15, gemas: 2, chanceNova: 0.3 },
+    ouro: { nome: 'Baú de ouro', segundos: 15 * 60, ouro: [250, 400], copias: 40, gemas: 5, chanceNova: 0.75 },
   };
 
   let todas = []; // cartas.json inteiro
@@ -225,15 +226,26 @@ const Estado = (() => {
     return { niveis };
   }
 
-  // Distribui cópias entre cartas aleatórias
-  function sortearCopias(total) {
+  // Distribui cópias entre cartas aleatórias.
+  // Quase tudo vai para cartas que você já tem; uma carta nova só aparece com a chance do baú.
+  const PESO = { comum: 6, rara: 3, epica: 1, lendaria: 0.2 };
+  function pesado(lista) {
+    const soma = lista.reduce((a, c) => a + PESO[c.raridade], 0);
+    let r = Math.random() * soma;
+    return lista.find((x) => (r -= PESO[x.raridade]) < 0) || lista[0];
+  }
+  function sortearCopias(total, chanceNova = 0) {
     const ganhos = {};
-    const pesos = { comum: 6, rara: 3, epica: 1.2, lendaria: 0.4 };
     const lista = disponiveis();
-    while (total > 0) {
-      const soma = lista.reduce((s, c) => s + pesos[c.raridade], 0);
-      let r = Math.random() * soma;
-      const c = lista.find((x) => (r -= pesos[x.raridade]) < 0) || lista[0];
+    const minhas = lista.filter((c) => tem(c.id)), outras = lista.filter((c) => !tem(c.id));
+    if (outras.length && (Math.random() < chanceNova || !minhas.length)) {
+      const nova = pesado(outras);
+      ganhos[nova.id] = 1; // a 1ª cópia desbloqueia
+      total -= 1;
+    }
+    const pool = minhas.length ? minhas : lista;
+    while (total > 0 && pool.length) {
+      const c = pesado(pool);
       const q = Math.min(total, Math.max(1, Math.round(total * (c.raridade === 'comum' ? 0.4 : c.raridade === 'rara' ? 0.3 : 0.15))));
       ganhos[c.id] = (ganhos[c.id] || 0) + q;
       total -= q;
@@ -266,7 +278,7 @@ const Estado = (() => {
         else { d.colecao[id].copias += 1; cartas[id] = 1; }
       }
     } else {
-      cartas = sortearCopias(b.copias);
+      cartas = sortearCopias(b.copias, b.chanceNova || 0);
       novas = cartas._novas; delete cartas._novas;
     }
     encaixarNoDeck(novas);
@@ -280,19 +292,40 @@ const Estado = (() => {
     return Math.max(0, slot.inicio + BAUS[slot.tipo].segundos * 1000 - Date.now());
   }
 
+  const hojeLocal = () => { const h = new Date(); return `${h.getFullYear()}-${String(h.getMonth() + 1).padStart(2, '0')}-${String(h.getDate()).padStart(2, '0')}`; };
+  // presente grátis da loja (1 por dia)
+  function presenteDiario(pegar = false) {
+    const hoje = hojeLocal();
+    if (d.presenteDia === hoje) return null;
+    if (!pegar) return true;
+    d.presenteDia = hoje;
+    const r = Math.random();
+    let p;
+    if (r < 0.55) { const q = sorteio(60, 140); d.ouro += q; p = { tipo: 'ouro', qtd: q }; }
+    else if (r < 0.85) { const q = sorteio(4, 10); d.gemas += q; p = { tipo: 'gemas', qtd: q }; }
+    else p = { tipo: 'bau', bau: 'madeira', abertura: abrirBau('madeira') };
+    salvar();
+    return p;
+  }
   function ofertasDoDia() {
-    const hoje = new Date().toISOString().slice(0, 10);
+    const hoje = hojeLocal();
     if (d.ofertas.dia !== hoje) d.ofertas = { dia: hoje, compradas: [] };
     // sorteio fixo por dia
     let semente = [...(hoje + d.id)].reduce((s, ch) => (s * 31 + ch.charCodeAt(0)) >>> 0, 7);
     const rnd = () => ((semente = (semente * 1103515245 + 12345) >>> 0) % 1000) / 1000;
     const preco = { comum: [10, 100], rara: [4, 300], epica: [1, 800], lendaria: [1, 3000] };
     const lista = [];
-    const pool = disponiveis();
-    if (!catalogo.some((c) => tem(c.id))) return []; // ainda não abriu os baús iniciais
-    for (let i = 0; i < 3; i++) {
-      const c = pool[Math.floor(rnd() * pool.length)];
-      lista.push({ i, id: c.id, copias: preco[c.raridade][0], preco: preco[c.raridade][1] });
+    const pool = disponiveis().filter((c) => tem(c.id)); // a loja só vende cópias de cartas que você já tem
+    if (!pool.length) return []; // ainda não abriu os baús iniciais
+    const usados = new Set();
+    for (let i = 0; i < 6; i++) {
+      let c = pool[Math.floor(rnd() * pool.length)];
+      for (let k = 0; k < 6 && usados.has(c.id) && pool.length > usados.size; k++) c = pool[Math.floor(rnd() * pool.length)];
+      usados.add(c.id);
+      if (i === 0) { lista.push({ i, id: c.id, copias: Math.max(1, Math.ceil(preco[c.raridade][0] / 2)), preco: 0, gratis: true }); continue; }
+      // desconto aleatório em algumas ofertas
+      const desconto = rnd() < 0.3 ? 0.7 : 1;
+      lista.push({ i, id: c.id, copias: preco[c.raridade][0], preco: Math.round(preco[c.raridade][1] * desconto), desconto: desconto < 1 });
     }
     return lista;
   }
@@ -302,6 +335,6 @@ const Estado = (() => {
     COPIAS, OURO, NIVEL_MAX, BAUS, XP_NIVEL,
     contarUsos, usosRestantes, todasCartas: () => todas.filter((c) => !c.token),
     TORRE_OURO, TROPAS_TORRE, nivelRei, minhasTorres, statsTorre, podeEvoluirTorre, evoluirTorre, escolherTropaTorre,
-    ganharXp, podeEvoluir, evoluir, abrirBau, tempoRestante, sortearCopias, ofertasDoDia, sorteio,
+    ganharXp, podeEvoluir, evoluir, abrirBau, tempoRestante, sortearCopias, ofertasDoDia, presenteDiario, sorteio,
   };
 })();

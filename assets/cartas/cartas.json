@@ -34,15 +34,16 @@
         0,
         640
       ],
-      "vida": 300,
-      "dano": 120,
+      "vida": 326,
+      "dano": 129,
       "velocidade": 64,
       "alcance": 16,
       "cadencia": 0.8,
       "alvo": "tudo",
       "trofeus": 0,
       "inicial": true,
-      "arena": 1
+      "arena": 1,
+      "danoTorre": 1.0
     },
     {
       "id": "teto",
@@ -63,13 +64,14 @@
         120,
         620
       ],
-      "vida": 310,
-      "dano": 118,
+      "vida": 324,
+      "dano": 123,
       "velocidade": 64,
       "alcance": 16,
       "cadencia": 0.8,
       "alvo": "tudo",
-      "arena": 1
+      "arena": 1,
+      "danoTorre": 1.05
     },
     {
       "id": "chichi",
@@ -88,15 +90,16 @@
         40,
         600
       ],
-      "vida": 700,
-      "dano": 198,
+      "vida": 693,
+      "dano": 196,
       "velocidade": 48,
       "alcance": 16,
       "cadencia": 1.1,
       "alvo": "tudo",
       "trofeus": 0,
       "inicial": true,
-      "arena": 1
+      "arena": 1,
+      "danoTorre": 0.75
     },
     {
       "id": "chuva",
@@ -130,15 +133,16 @@
         20,
         600
       ],
-      "vida": 410,
-      "dano": 139,
+      "vida": 478,
+      "dano": 168,
       "velocidade": 46,
       "alcance": 115,
       "cadencia": 0.9,
       "alvo": "tudo",
       "trofeus": 0,
       "inicial": true,
-      "arena": 1
+      "arena": 1,
+      "danoTorre": 0.25
     },
     {
       "id": "miku_nakano",
@@ -159,13 +163,14 @@
         60,
         620
       ],
-      "vida": 500,
-      "dano": 170,
+      "vida": 512,
+      "dano": 174,
       "velocidade": 46,
       "alcance": 78,
       "cadencia": 1.0,
       "alvo": "tudo",
-      "arena": 1
+      "arena": 1,
+      "danoTorre": 0.88
     },
     {
       "id": "nami_old",
@@ -192,7 +197,8 @@
       "alcance": 16,
       "cadencia": 1.0,
       "alvo": "tudo",
-      "arena": 1
+      "arena": 1,
+      "danoTorre": 0.83
     },
     {
       "id": "shizuku",
@@ -211,7 +217,7 @@
         0,
         600
       ],
-      "vida": 1070,
+      "vida": 1071,
       "dano": 147,
       "velocidade": 40,
       "alcance": 16,
@@ -219,7 +225,8 @@
       "alvo": "tudo",
       "trofeus": 0,
       "inicial": true,
-      "arena": 1
+      "arena": 1,
+      "danoTorre": 1.01
     },
     {
       "id": "itsuki",
@@ -246,7 +253,8 @@
       "alvo": "construcoes",
       "trofeus": 0,
       "inicial": true,
-      "arena": 1
+      "arena": 1,
+      "danoTorre": 0.6
     },
     {
       "id": "lanterna",
@@ -280,8 +288,8 @@
         20,
         600
       ],
-      "vida": 1010,
-      "dano": 332,
+      "vida": 914,
+      "dano": 301,
       "velocidade": 44,
       "alcance": 75,
       "cadencia": 1.6,
@@ -289,7 +297,8 @@
       "area": 38,
       "trofeus": 0,
       "inicial": true,
-      "arena": 1
+      "arena": 1,
+      "danoTorre": 0.91
     },
     {
       "id": "pan_dbh",
@@ -309,13 +318,14 @@
         0,
         620
       ],
-      "vida": 320,
-      "dano": 115,
+      "vida": 337,
+      "dano": 122,
       "velocidade": 62,
       "alcance": 16,
       "cadencia": 0.8,
       "alvo": "tudo",
-      "arena": 1
+      "arena": 1,
+      "danoTorre": 1.04
     },
     {
       "id": "hinata",
@@ -334,8 +344,8 @@
         120,
         600
       ],
-      "vida": 860,
-      "dano": 210,
+      "vida": 836,
+      "dano": 204,
       "velocidade": 54,
       "alcance": 16,
       "cadencia": 0.9,
@@ -348,7 +358,8 @@
         "recarga": 10,
         "descricao": "Recupera metade da vida."
       },
-      "arena": 1
+      "arena": 1,
+      "danoTorre": 0.72
     },
     {
       "id": "nami_last",
@@ -368,14 +379,15 @@
         160,
         500
       ],
-      "vida": 750,
-      "dano": 249,
+      "vida": 712,
+      "dano": 236,
       "velocidade": 44,
       "alcance": 72,
       "cadencia": 1.6,
       "alvo": "tudo",
       "area": 36,
-      "arena": 1
+      "arena": 1,
+      "danoTorre": 1.12
     },
     {
       "id": "trunks_base",
@@ -394,14 +406,15 @@
         380,
         480
       ],
-      "vida": 690,
-      "dano": 168,
+      "vida": 683,
+      "dano": 166,
       "velocidade": 52,
       "alcance": 18,
       "cadencia": 1.0,
       "alvo": "tudo",
       "trofeus": 0,
-      "arena": 1
+      "arena": 1,
+      "danoTorre": 0.77
     },
     {
       "id": "barril",
@@ -436,13 +449,14 @@
         0,
         611
       ],
-      "vida": 490,
-      "dano": 167,
+      "vida": 582,
+      "dano": 198,
       "velocidade": 48,
       "alcance": 76,
       "cadencia": 1.0,
       "alvo": "tudo",
-      "arena": 1
+      "arena": 1,
+      "danoTorre": 0.33
     },
     {
       "id": "hatsune_miku",
@@ -462,14 +476,15 @@
         0,
         620
       ],
-      "vida": 740,
-      "dano": 247,
+      "vida": 699,
+      "dano": 233,
       "velocidade": 46,
       "alcance": 70,
       "cadencia": 1.5,
       "alvo": "tudo",
       "area": 40,
-      "arena": 2
+      "arena": 2,
+      "danoTorre": 1.12
     },
     {
       "id": "akame",
@@ -503,7 +518,8 @@
         "descricao": "Os próximos 3 golpes causam 2,5x de dano.",
         "mult": 2.5
       },
-      "arena": 2
+      "arena": 2,
+      "danoTorre": 0.75
     },
     {
       "id": "trunks_ssj",
@@ -522,14 +538,15 @@
         10,
         620
       ],
-      "vida": 1010,
-      "dano": 241,
+      "vida": 980,
+      "dano": 234,
       "velocidade": 50,
       "alcance": 18,
       "cadencia": 1.0,
       "alvo": "tudo",
       "trofeus": 400,
-      "arena": 2
+      "arena": 2,
+      "danoTorre": 0.46
     },
     {
       "id": "riruka",
@@ -549,13 +566,14 @@
         20,
         480
       ],
-      "vida": 480,
-      "dano": 162,
+      "vida": 532,
+      "dano": 180,
       "velocidade": 50,
       "alcance": 78,
       "cadencia": 0.9,
       "alvo": "tudo",
-      "arena": 2
+      "arena": 2,
+      "danoTorre": 0.81
     },
     {
       "id": "gohan_ssj",
@@ -574,8 +592,8 @@
         200,
         620
       ],
-      "vida": 1000,
-      "dano": 218,
+      "vida": 967,
+      "dano": 211,
       "velocidade": 48,
       "alcance": 16,
       "cadencia": 1.05,
@@ -589,7 +607,8 @@
         "recarga": 12,
         "descricao": "Por 5s ataca mais rápido, anda mais rápido e causa +30% de dano."
       },
-      "arena": 2
+      "arena": 2,
+      "danoTorre": 0.5
     },
     {
       "id": "caulifla",
@@ -609,13 +628,14 @@
         0,
         399
       ],
-      "vida": 1020,
-      "dano": 242,
+      "vida": 990,
+      "dano": 235,
       "velocidade": 50,
       "alcance": 16,
       "cadencia": 1.0,
       "alvo": "tudo",
-      "arena": 2
+      "arena": 2,
+      "danoTorre": 0.47
     },
     {
       "id": "bambietta",
@@ -635,8 +655,8 @@
         0,
         620
       ],
-      "vida": 850,
-      "dano": 346,
+      "vida": 698,
+      "dano": 285,
       "velocidade": 44,
       "alcance": 75,
       "cadencia": 1.7,
@@ -650,7 +670,8 @@
         "recarga": 15,
         "descricao": "Se for derrotada nos próximos 10s, volta com metade da vida."
       },
-      "arena": 3
+      "arena": 3,
+      "danoTorre": 1.01
     },
     {
       "id": "trunks_full_power",
@@ -669,8 +690,8 @@
         0,
         640
       ],
-      "vida": 1310,
-      "dano": 309,
+      "vida": 1253,
+      "dano": 296,
       "velocidade": 50,
       "alcance": 20,
       "cadencia": 1.1,
@@ -684,7 +705,8 @@
         "descricao": "Os próximos 3 golpes causam 2,5x de dano.",
         "mult": 2.5
       },
-      "arena": 3
+      "arena": 3,
+      "danoTorre": 0.56
     },
     {
       "id": "bulma",
@@ -703,15 +725,16 @@
         0,
         600
       ],
-      "vida": 1000,
-      "dano": 418,
+      "vida": 803,
+      "dano": 308,
       "velocidade": 40,
       "alcance": 72,
       "cadencia": 1.8,
       "alvo": "tudo",
-      "area": 40,
+      "area": 32,
       "trofeus": 1000,
-      "arena": 3
+      "arena": 3,
+      "danoTorre": 0.83
     },
     {
       "id": "caulifla_ssj",
@@ -731,8 +754,8 @@
         0,
         446
       ],
-      "vida": 1630,
-      "dano": 375,
+      "vida": 1336,
+      "dano": 307,
       "velocidade": 46,
       "alcance": 18,
       "cadencia": 1.3,
@@ -746,7 +769,8 @@
         "recarga": 12,
         "descricao": "Por 6s ataca mais rápido, anda mais rápido e causa +30% de dano."
       },
-      "arena": 3
+      "arena": 3,
+      "danoTorre": 0.63
     },
     {
       "id": "vegito_ssj",
@@ -765,8 +789,8 @@
         10,
         620
       ],
-      "vida": 1550,
-      "dano": 369,
+      "vida": 1209,
+      "dano": 287,
       "velocidade": 48,
       "alcance": 20,
       "cadencia": 1.2,
@@ -781,7 +805,8 @@
         "recarga": 14,
         "descricao": "Por 6s ataca mais rápido, anda mais rápido e causa +30% de dano."
       },
-      "arena": 3
+      "arena": 3,
+      "danoTorre": 0.3
     },
     {
       "id": "isagi",
@@ -817,7 +842,8 @@
         "defesa": 0.02,
         "descricao": "A cada 1 segundo em campo ganha +5% de dano, +2% de velocidade e 2% de resistência (até 15 vezes: +75% de dano no fim!)."
       },
-      "arena": 2
+      "arena": 2,
+      "danoTorre": 1.05
     },
     {
       "id": "mbappe",
@@ -843,7 +869,8 @@
       "alcance": 18,
       "cadencia": 0.8,
       "alvo": "tudo",
-      "arena": 2
+      "arena": 2,
+      "danoTorre": 1.4
     },
     {
       "id": "kashimo",
@@ -863,8 +890,8 @@
         300,
         640
       ],
-      "vida": 1010,
-      "dano": 266,
+      "vida": 765,
+      "dano": 197,
       "velocidade": 54,
       "alcance": 22,
       "cadencia": 1.0,
@@ -878,7 +905,8 @@
         "duracao": 6,
         "descricao": "Por 6s ataca mais rápido, anda mais rápido e causa +30% de dano."
       },
-      "arena": 3
+      "arena": 3,
+      "danoTorre": 0.82
     },
     {
       "id": "rukia_remake",
@@ -898,8 +926,8 @@
         480,
         600
       ],
-      "vida": 1000,
-      "dano": 283,
+      "vida": 1018,
+      "dano": 288,
       "velocidade": 46,
       "alcance": 75,
       "cadencia": 1.4,
@@ -915,7 +943,8 @@
         "dano": 120,
         "descricao": "Congela as tropas inimigas perto do alvo por 2s (elas não andam nem atacam)."
       },
-      "arena": 3
+      "arena": 3,
+      "danoTorre": 0.95
     },
     {
       "id": "gogeta_ssjz",
@@ -935,8 +964,8 @@
         130,
         620
       ],
-      "vida": 1680,
-      "dano": 386,
+      "vida": 1579,
+      "dano": 363,
       "velocidade": 50,
       "alcance": 20,
       "cadencia": 1.1,
@@ -949,7 +978,8 @@
         "descricao": "Os próximos 3 golpes causam 2,2x de dano.",
         "mult": 2.2
       },
-      "arena": 4
+      "arena": 4,
+      "danoTorre": 0.37
     },
     {
       "id": "gogeta_ssj4",
@@ -969,8 +999,8 @@
         250,
         560
       ],
-      "vida": 2100,
-      "dano": 401,
+      "vida": 1798,
+      "dano": 344,
       "velocidade": 44,
       "alcance": 20,
       "cadencia": 1.25,
@@ -984,7 +1014,8 @@
         "dano": 950,
         "descricao": "Dispara um Kamehameha que atravessa tudo em linha reta (metade do dano nas torres)."
       },
-      "arena": 4
+      "arena": 4,
+      "danoTorre": 0.65
     },
     {
       "id": "vegito_ex",
@@ -1004,8 +1035,8 @@
         60,
         600
       ],
-      "vida": 1550,
-      "dano": 367,
+      "vida": 1475,
+      "dano": 349,
       "velocidade": 54,
       "alcance": 22,
       "cadencia": 1.0,
@@ -1018,7 +1049,8 @@
         "descricao": "Os próximos 3 golpes causam 2,2x de dano.",
         "mult": 2.2
       },
-      "arena": 4
+      "arena": 4,
+      "danoTorre": 0.48
     },
     {
       "id": "gogeta_ultra",
@@ -1038,8 +1070,8 @@
         100,
         620
       ],
-      "vida": 1900,
-      "dano": 427,
+      "vida": 1528,
+      "dano": 344,
       "velocidade": 48,
       "alcance": 20,
       "cadencia": 1.15,
@@ -1053,7 +1085,8 @@
         "duracao": 7,
         "descricao": "Por 7s ataca mais rápido, anda mais rápido e causa +30% de dano."
       },
-      "arena": 4
+      "arena": 4,
+      "danoTorre": 0.42
     },
     {
       "id": "goku_base",
@@ -1079,7 +1112,8 @@
       "alcance": 18,
       "cadencia": 1.0,
       "alvo": "tudo",
-      "arena": 1
+      "arena": 1,
+      "danoTorre": 0.73
     },
     {
       "id": "goku_ssj",
@@ -1099,8 +1133,8 @@
         150,
         600
       ],
-      "vida": 900,
-      "dano": 210,
+      "vida": 889,
+      "dano": 207,
       "velocidade": 52,
       "alcance": 18,
       "cadencia": 1.0,
@@ -1113,7 +1147,8 @@
         "duracao": 5,
         "descricao": "Por 5s ataca mais rápido, anda mais rápido e causa +30% de dano."
       },
-      "arena": 2
+      "arena": 2,
+      "danoTorre": 0.73
     },
     {
       "id": "goku_ssj2",
@@ -1133,8 +1168,8 @@
         120,
         620
       ],
-      "vida": 820,
-      "dano": 221,
+      "vida": 807,
+      "dano": 218,
       "velocidade": 56,
       "alcance": 18,
       "cadencia": 0.9,
@@ -1147,7 +1182,8 @@
         "descricao": "Os próximos 3 golpes causam 2,5x de dano.",
         "mult": 2.5
       },
-      "arena": 2
+      "arena": 2,
+      "danoTorre": 0.76
     },
     {
       "id": "goku_ssj3",
@@ -1167,8 +1203,8 @@
         150,
         620
       ],
-      "vida": 1400,
-      "dano": 261,
+      "vida": 1198,
+      "dano": 223,
       "velocidade": 40,
       "alcance": 18,
       "cadencia": 1.2,
@@ -1182,7 +1218,8 @@
         "dano": 950,
         "descricao": "Dispara um Kamehameha que atravessa tudo em linha reta (metade do dano nas torres)."
       },
-      "arena": 3
+      "arena": 3,
+      "danoTorre": 0.44
     },
     {
       "id": "goku_deus",
@@ -1202,8 +1239,8 @@
         40,
         460
       ],
-      "vida": 1280,
-      "dano": 290,
+      "vida": 1221,
+      "dano": 277,
       "velocidade": 52,
       "alcance": 18,
       "cadencia": 1.0,
@@ -1215,7 +1252,8 @@
         "recarga": 12,
         "descricao": "Recupera metade da vida."
       },
-      "arena": 3
+      "arena": 3,
+      "danoTorre": 0.41
     },
     {
       "id": "goku_ssj4",
@@ -1235,8 +1273,8 @@
         200,
         560
       ],
-      "vida": 1670,
-      "dano": 316,
+      "vida": 1380,
+      "dano": 261,
       "velocidade": 46,
       "alcance": 18,
       "cadencia": 1.15,
@@ -1250,7 +1288,8 @@
         "dano": 950,
         "descricao": "Dispara um Kamehameha que atravessa tudo em linha reta (metade do dano nas torres)."
       },
-      "arena": 3
+      "arena": 3,
+      "danoTorre": 0.65
     },
     {
       "id": "goku_blue",
@@ -1270,8 +1309,8 @@
         80,
         620
       ],
-      "vida": 1600,
-      "dano": 360,
+      "vida": 1549,
+      "dano": 349,
       "velocidade": 52,
       "alcance": 18,
       "cadencia": 1.0,
@@ -1284,7 +1323,8 @@
         "descricao": "Os próximos 3 golpes causam 2,2x de dano.",
         "mult": 2.2
       },
-      "arena": 3
+      "arena": 3,
+      "danoTorre": 0.55
     },
     {
       "id": "goku_blue_kaioken",
@@ -1304,8 +1344,8 @@
         250,
         620
       ],
-      "vida": 1450,
-      "dano": 370,
+      "vida": 1362,
+      "dano": 347,
       "velocidade": 54,
       "alcance": 18,
       "cadencia": 1.0,
@@ -1318,7 +1358,8 @@
         "duracao": 7,
         "descricao": "Por 7s ataca mais rápido, anda mais rápido e causa +30% de dano."
       },
-      "arena": 4
+      "arena": 4,
+      "danoTorre": 0.34
     },
     {
       "id": "goku_blue_lb",
@@ -1338,8 +1379,8 @@
         200,
         640
       ],
-      "vida": 1900,
-      "dano": 399,
+      "vida": 1257,
+      "dano": 264,
       "velocidade": 50,
       "alcance": 18,
       "cadencia": 1.1,
@@ -1353,7 +1394,8 @@
         "duracao": 7,
         "descricao": "Por 7s ataca mais rápido, anda mais rápido e causa +30% de dano."
       },
-      "arena": 4
+      "arena": 4,
+      "danoTorre": 0.6
     },
     {
       "id": "goku_pressagio",
@@ -1373,8 +1415,8 @@
         30,
         620
       ],
-      "vida": 1320,
-      "dano": 336,
+      "vida": 1169,
+      "dano": 298,
       "velocidade": 58,
       "alcance": 18,
       "cadencia": 0.95,
@@ -1385,7 +1427,8 @@
         "chance": 0.25,
         "descricao": "Desvia sozinho de 25% dos ataques (inclusive das torres)."
       },
-      "arena": 4
+      "arena": 4,
+      "danoTorre": 0.35
     },
     {
       "id": "goku_isc",
@@ -1405,8 +1448,8 @@
         60,
         600
       ],
-      "vida": 1630,
-      "dano": 402,
+      "vida": 1546,
+      "dano": 381,
       "velocidade": 60,
       "alcance": 18,
       "cadencia": 0.9,
@@ -1421,7 +1464,8 @@
         "furia": true,
         "descricao": "Por 5s desvia de 80% dos ataques e fica em fúria (+30% de dano e mais rápido)."
       },
-      "arena": 4
+      "arena": 4,
+      "danoTorre": 0.49
     },
     {
       "id": "goku_ui",

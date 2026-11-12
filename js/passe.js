@@ -117,12 +117,14 @@ const Passe = (() => {
     else if (r.tipo === 'gemas') d.gemas += r.qtd;
     else if (r.tipo === 'bau') extra = { bau: r.bau, abertura: Estado.abrirBau(r.bau) };
     else {
-      const lista = Estado.disponiveis().filter((c) => c.raridade === r.raridade);
-      const pool = lista.length ? lista : Estado.catalogo().filter((x) => x.raridade === r.raridade);
-      const c = pool[Math.floor(Math.random() * pool.length)] || Estado.catalogo()[0];
-      const col = d.colecao[c.id];
-      if (!col.tem) { col.tem = true; col.copias += r.qtd - 1; } else col.copias += r.qtd;
-      extra = { carta: c, qtd: r.qtd };
+      // cartas novas só saem de baú: o passe dá cópias de uma carta que você já tem
+      const pool = Estado.disponiveis().filter((c) => c.raridade === r.raridade && Estado.tem(c.id));
+      if (!pool.length) extra = { bau: 'ouro', abertura: Estado.abrirBau('ouro') };
+      else {
+        const c = pool[Math.floor(Math.random() * pool.length)];
+        d.colecao[c.id].copias += r.qtd;
+        extra = { carta: c, qtd: r.qtd };
+      }
     }
     Estado.salvar();
     return { r, extra };

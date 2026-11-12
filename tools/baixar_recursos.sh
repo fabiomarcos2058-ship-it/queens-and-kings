@@ -24,7 +24,7 @@ fi
 # 3) efeitos: desenhados no próprio jogo (o site do Kenney não aceita downloads automáticos)
 
 # 4) ícones do game-icons.net (só os que têm a ver com ataques)
-if [ ! -f assets/icones/LISTA.txt ]; then
+if [ ! -f assets/icones/lorc__fireball.svg ]; then
   git clone -q --depth 1 https://github.com/game-icons/icons.git /tmp/gi && \
   find /tmp/gi -name '*.svg' | grep -iE 'sword|katana|pistol|revolver|gun|staff|wand|bow|arrow|fireball|lightning|bolt|snowflake|ice|shuriken|kunai|scythe|hammer|spear|trident|dagger|knife|fist|punch|kick|music|note|card|petal|flower|sakura|heart|bread|book|fan|whip|axe|star|orb|crystal|flame|fire|wind|tornado|energy|explosion|beam|laser|claw|fang|chain|bomb|grenade|shield|ball|bubble|feather|leaf|lantern|bell|mic|guitar|soccer|teleport|portal|aura|spark|halo|skull|ghost|moon|sun|comet|meteor|kunai|sai|nunchaku|tonfa|rapier|sabre|saber|blade' | \
   while read -r f; do autor=$(basename "$(dirname "$f")"); cp "$f" "assets/icones/${autor}__$(basename "$f")"; done

@@ -4,13 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
   <meta name="theme-color" content="#1d2350" />
-  <meta name="versao-pagina" content="1794440285" />
+  <meta name="versao-pagina" content="1794442981" />
   <meta http-equiv="Cache-Control" content="no-cache" />
   <title>Queens and Kings</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Lilita+One&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/style.css?v=1794440285" />
+  <link rel="stylesheet" href="css/style.css?v=1794442981" />
 </head>
 <body>
   <div id="app">
@@ -35,13 +35,16 @@
 
         <!-- LOJA -->
         <section class="tela" data-tela="loja">
-          <h2 class="titulo-secao"><span>Ofertas do dia</span></h2>
-          <div class="grade-3" id="ofertas"></div>
-          <h2 class="titulo-secao"><span>Baús</span></h2>
-          <div class="grade-3" id="loja-baus"></div>
-          <h2 class="titulo-secao"><span>Ouro</span></h2>
-          <div class="grade-3" id="loja-ouro"></div>
-          <p class="aviso">Tudo aqui é de mentirinha: o jogo não tem compras com dinheiro real. Ganhe gemas subindo de nível e abrindo baús.</p>
+          <div class="loja-banner"><b>Loja</b><span>Novas ofertas em <i id="loja-tempo">--:--:--</i></span></div>
+          <div id="loja-presente"></div>
+          <div class="loja-secao"><h2 class="fita"><span>Ofertas do dia</span></h2>
+            <div class="grade-3 ofertas" id="ofertas"></div></div>
+          <div class="loja-secao"><h2 class="fita azul"><span>Baús</span></h2>
+            <p class="loja-dica">Cartas novas só saem de baús!</p>
+            <div class="grade-3" id="loja-baus"></div></div>
+          <div class="loja-secao"><h2 class="fita dourada"><span>Ouro</span></h2>
+            <div class="grade-3" id="loja-ouro"></div></div>
+          <p class="aviso">Tudo aqui é de mentirinha: o jogo não tem compras com dinheiro real. Ganhe gemas subindo de nível, no passe e abrindo baús.</p>
         </section>
 
         <!-- CARTAS -->
@@ -140,7 +143,7 @@
       css.rel = 'stylesheet';
       css.href = 'css/style.css?v=' + v;
       document.head.appendChild(css);
-      for (const f of ['assets', 'estado', 'ui', 'arena', 'cartas', 'batalha', 'titulo', 'conta', 'cla', 'passe', 'mod', 'atualizacao', 'x1', 'amigos', 'presentes', 'menu']) {
+      for (const f of ['assets', 'estado', 'ui', 'arena', 'cartas', 'ataques', 'batalha', 'titulo', 'conta', 'cla', 'passe', 'mod', 'atualizacao', 'x1', 'amigos', 'presentes', 'menu']) {
         await new Promise((ok) => {
           const el = document.createElement('script');
           el.src = 'js/' + f + '.js?v=' + v;
