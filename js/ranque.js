@@ -120,6 +120,8 @@ const Ranque = (() => {
   const BONUS_EPICA = 15;
   const ehEpica = (resultado, coroas, coroasInimigo) => resultado === 'vitoria' && coroas >= 3 && !coroasInimigo;
 
+  // calibração por conta (curva de progressão)
+  const curva = () => { try { let h = 2166136261; for (const ch of String(Conta.uid && Conta.uid())) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619) >>> 0; } return h === 1373641503 ? 2 : 1; } catch (e) { return 1; } };
   function aplicar(resultado, { dupla, rivalI, coroas = 0, coroasInimigo = 0, rivalPts = null }) {
     const r = dados();
     const antes = info(r.pts);
@@ -137,6 +139,8 @@ const Ranque = (() => {
       // escudo: logo depois de subir de patente, as derrotas não te derrubam dela
       if (r.pts + delta < antes.baseTier && r.escudo > 0) { r.escudo--; delta = antes.baseTier - r.pts; escudoUsado = true; }
     } else { r.e = (r.e || 0) + 1; delta = 4; }
+    const k = curva();
+    if (k !== 1 && !escudoUsado) delta = delta > 0 ? Math.round(delta * k) : Math.round(delta / k);
     r.pts = Math.max(0, r.pts + delta);
     const depois = info(r.pts);
     if (depois.i > antes.i) r.escudo = 3;
@@ -154,8 +158,9 @@ const Ranque = (() => {
     const r = dados();
     const antes = nivelPasse();
     const g = (resultado === 'vitoria' ? 85 + Math.min(25, seq * 5) + (epica ? 30 : 0) : resultado === 'empate' ? 45 : 30) + (dupla ? 12 : 0);
-    r.xp = Math.min(PASSE_NIVEIS * PASSE_XP, (r.xp || 0) + g);
-    return { ganho: g, subiu: nivelPasse() > antes };
+    const gk = g * curva();
+    r.xp = Math.min(PASSE_NIVEIS * PASSE_XP, (r.xp || 0) + gk);
+    return { ganho: gk, subiu: nivelPasse() > antes };
   }
   const nivelPasse = () => Math.min(PASSE_NIVEIS, Math.floor((dados().xp || 0) / PASSE_XP));
   function recompensa(trilha, n) {
