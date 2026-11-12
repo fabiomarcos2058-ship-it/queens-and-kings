@@ -60,6 +60,8 @@ const Conta = (() => {
       // top global (contas que usaram o mod menu ficam de fora, pra ser justo)
       if (!d.modUsado) {
         const r = { nome: d.nome.slice(0, 16), trofeus: Math.max(0, Math.min(99999, Math.round(d.trofeus))), avatar: d.avatar, estiloNome: Passe.estiloNome(), cla: d.cla ? d.cla.nome.slice(0, 20) : '' };
+        // ranqueada da temporada (pro top global da ranqueada)
+        try { const rq = Ranque.dados(); if (rq.v + rq.d + rq.e > 0 || rq.pts > 0) Object.assign(r, { ranque: Math.max(0, Math.round(rq.pts)), rtemp: rq.temporada, rv: rq.v || 0 }); } catch (e) { /* nada */ }
         await gravarSeMudou('ranking', JSON.stringify(r), () => fb.setDoc(fb.doc(fb.db, 'ranking', uid), { ...r, atualizado: fb.serverTimestamp() })).catch(() => {});
       } else {
         await gravarSeMudou('ranking', 'fora', () => fb.deleteDoc(fb.doc(fb.db, 'ranking', uid))).catch(() => {});
@@ -313,6 +315,15 @@ const Conta = (() => {
     return snap.docs.map((x) => ({ uid: x.id, ...x.data() }));
   }
 
+  // top da ranqueada: só quem jogou nesta temporada
+  async function topRanque() {
+    await iniciarFirebase();
+    const q = fb.query(fb.collection(fb.db, 'ranking'), fb.orderBy('ranque', 'desc'), fb.limit(150));
+    const snap = await fb.getDocs(q);
+    const temp = Ranque.temporadaAtual();
+    return snap.docs.map((x) => ({ uid: x.id, ...x.data() })).filter((j) => j.rtemp === temp).slice(0, 50);
+  }
+
   async function sair() {
     try { if (typeof Presentes !== 'undefined') Presentes.parar(); if (typeof Amigos !== 'undefined') Amigos.parar(); await enviarParaNuvem(); await fb.signOut(fb.auth); } catch (e) { /* nada */ }
     usuario = null;
@@ -321,5 +332,5 @@ const Conta = (() => {
     location.reload();
   }
 
-  return { tela, ativo, logado, email, verificarSessao, sair, salvarComGoogle, fb: () => fb, uid: () => (usuario ? usuario.uid : null), salvarAgora: enviarParaNuvem, topGlobal };
+  return { tela, ativo, logado, email, verificarSessao, sair, salvarComGoogle, fb: () => fb, uid: () => (usuario ? usuario.uid : null), salvarAgora: enviarParaNuvem, topGlobal, topRanque };
 })();

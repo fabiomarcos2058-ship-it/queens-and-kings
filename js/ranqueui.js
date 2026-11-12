@@ -67,7 +67,7 @@ const RanqueUI = (() => {
           <div class="trp-final"><span class="trp-evo">🧬</span><span>Nível ${Ranque.PASSE_NIVEIS} do <b>Pro Pass</b>: <b>Gojo Satoru</b>, carta de Evolução exclusiva</span></div>
           ${Ranque.pendentes() ? `<span class="trp-pend">${Ranque.pendentes()} prêmio${Ranque.pendentes() > 1 ? 's' : ''} para pegar!</span>` : ''}
         </button>
-        <div class="tr-linha"><button class="tr-mini" id="tr-patentes">🏅 Patentes</button><button class="tr-mini" id="tr-historico">📜 Histórico</button></div>
+        <div class="tr-linha"><button class="tr-mini" id="tr-patentes">🏅 Patentes</button><button class="tr-mini" id="tr-historico">📜 Histórico</button><button class="tr-mini" id="tr-top">🌍 Top global</button></div>
         <div class="tr-stats">
           <div><b>${r.v}</b><span>Vitórias</span></div><div><b>${r.d}</b><span>Derrotas</span></div>
           <div><b>${total ? Math.round((r.v / total) * 100) : 0}%</b><span>Aproveitamento</span></div><div><b>${r.maiorSeq || 0}</b><span>Maior sequência</span></div>
@@ -82,6 +82,7 @@ const RanqueUI = (() => {
     tela.querySelector('#tr-passe').onclick = passe;
     tela.querySelector('#tr-patentes').onclick = patentes;
     tela.querySelector('#tr-historico').onclick = () => historico();
+    tela.querySelector('#tr-top').onclick = () => { if (window.MenuAPI) MenuAPI.topGlobal('ranque'); };
   }
   function fechar() {
     document.querySelectorAll('.tela-ranque').forEach((t) => { t.classList.remove('aberta'); setTimeout(() => t.remove(), 250); });

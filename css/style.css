@@ -3065,3 +3065,18 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 .leve .tt-raios { display: none; }
 .leve .tt-arte img { animation: ttEntra 1.2s cubic-bezier(0.2, 0.8, 0.3, 1) both; }
 .titulo.com-arte.saindo { transition: opacity 0.4s 0.3s, transform 0.7s; }
+
+/* ===== Top global: abas e ranqueada ===== */
+.top-abas { display: flex; gap: 6px; margin-bottom: 8px; }
+.top-abas button { flex: 1; padding: 8px 6px; border-radius: 10px; border: 2px solid #ffffff22; background: #1d2350; color: #fff; font: 14px 'Lilita One', sans-serif; }
+.top-abas button.ativa { background: linear-gradient(180deg, #FFC94A, #C77A0A); color: #3a1a00; border-color: #FFE9A8; box-shadow: 0 0 10px #FFC94A66; }
+.top-temp { font-size: 11.5px; opacity: 0.8; margin: 0 0 6px; text-align: center; }
+.top-lista.ranque .top-linha { border-left: 4px solid var(--cor, #fff); }
+.top-patente { color: var(--cor, #fff); font-family: 'Lilita One', sans-serif; font-size: 11px; }
+.top-pr { display: flex; align-items: center; gap: 4px; margin-left: auto; font-family: 'Lilita One', 'Fredoka', sans-serif; }
+.top-pr .emblema, .top-eu .emblema { flex: none; }
+.top-eu { position: sticky; bottom: -2px; display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-top: 8px; padding: 8px 10px; border-radius: 12px; background: #534AB7; box-shadow: inset 0 0 0 2px #FAC775, 0 -4px 12px #0006; font-size: 12px; }
+.top-eu > span { display: flex; align-items: center; gap: 5px; }
+.top-eu b { white-space: nowrap; }
+.top-eu-pat { display: flex; flex-direction: column; align-items: flex-start; line-height: 1.1; }
+.top-eu-pat small { font-size: 11px; opacity: 0.85; }

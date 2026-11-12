@@ -300,14 +300,16 @@
   $('loja-summon').onclick = () => Summon.abrir(() => tudo());
   $('btn-som').onclick = () => Som.abrirConfig();
   Som.musica('menu');
-  window.MenuAPI = { tudo: () => tudo(), mostrarBau: (t, r) => mostrarBau(t, r), irPara: (a) => irPara(a) };
+  window.MenuAPI = { tudo: () => tudo(), mostrarBau: (t, r) => mostrarBau(t, r), irPara: (a) => irPara(a), topGlobal: (aba) => topGlobal(aba) };
   $('btn-x1').onclick = () => x1();
   $('btn-2v2').onclick = () => dupla();
-  $('btn-top').onclick = topGlobal;
+  $('btn-top').onclick = () => topGlobal();
 
-  async function topGlobal() {
-    const m = UI.modal({ titulo: '🏆 Top global', classe: 'modal-top', html: '<p class="aviso">Carregando…</p>' });
-    const corpo = m.el.querySelector('.modal-corpo');
+  async function topGlobal(aba = 'trofeus') {
+    const m = UI.modal({ titulo: '🌍 Top global', classe: 'modal-top', html: `<div class="top-abas"><button data-aba="trofeus"${aba === 'trofeus' ? ' class="ativa"' : ''}>🏆 Troféus</button><button data-aba="ranque"${aba === 'ranque' ? ' class="ativa"' : ''}>🏅 Ranqueada</button></div><div class="top-corpo"><p class="aviso">Carregando…</p></div>` });
+    m.el.querySelectorAll('.top-abas button').forEach((b) => (b.onclick = () => { m.fechar(); topGlobal(b.dataset.aba); }));
+    const corpo = m.el.querySelector('.top-corpo');
+    if (aba === 'ranque') return topRanqueada(corpo);
     try {
       const lista = await Conta.topGlobal();
       const eu = Conta.uid();
@@ -317,6 +319,29 @@
           <div class="top-nome"><b>${Passe.nomeHtml(j.nome || 'Jogador', j.estiloNome)}${j.uid === eu ? ' (você)' : ''}</b>${j.cla ? `<small>🛡️ ${esc(j.cla)}</small>` : ''}</div>
           <span class="top-trofeus"><i class="ic-trofeu"></i>${fmt(j.trofeus || 0)}</span></div>`).join('')}</div>`
         : '<p class="aviso">Ainda ninguém no top. Seja o primeiro!</p>')
+        + (eu ? '' : '<p class="aviso">Entre numa conta para aparecer no top global.</p>')
+        + (d().modUsado ? '<p class="aviso">Sua conta usou o mod menu, então não aparece no top.</p>' : '');
+      ligarPerfis(corpo);
+    } catch (e) {
+      corpo.innerHTML = `<p class="aviso">${erroNuvem(e)}</p>`;
+    }
+  }
+  async function topRanqueada(corpo) {
+    try {
+      // salva antes, pra sua posição já vir certinha
+      if (Conta.logado && Conta.logado()) await Promise.race([Conta.salvarAgora().catch(() => {}), new Promise((ok) => setTimeout(ok, 2500))]);
+      const lista = await Conta.topRanque();
+      const eu = Conta.uid();
+      const avatar = (a) => (ICONES.includes(a) ? `assets/avatares/${a}.svg` : a ? `assets/cartas/${a}_medalhao.png` : 'assets/avatares/coroa.svg');
+      const meu = Ranque.dados(), fm = Ranque.info(meu.pts);
+      const minhaPos = lista.findIndex((j) => j.uid === eu);
+      corpo.innerHTML = `<p class="top-temp">Temporada de ${Ranque.nomeTemporada()} · termina em ${Ranque.diasRestantes()}d</p>`
+        + (lista.length ? `<div class="top-lista ranque">${lista.map((j, i) => { const f = Ranque.info(j.ranque || 0); return `<div class="top-linha${j.uid === eu ? ' voce' : ''} pos${i + 1}" data-perfil="${j.uid}" style="--cor:${f.p.cor}">
+            <span class="top-pos">${i < 3 ? ['🥇', '🥈', '🥉'][i] : i + 1}</span><img src="${avatar(j.avatar)}" alt="" />
+            <div class="top-nome"><b>${Passe.nomeHtml(j.nome || 'Jogador', j.estiloNome)}${j.uid === eu ? ' (você)' : ''}</b><small class="top-patente">${esc(f.nome)}</small></div>
+            <span class="top-pr">${RanqueUI.emblema(f.i, 34, { animado: false, raios: false })}<b>${fmt(j.ranque || 0)}</b></span></div>`; }).join('')}</div>`
+          : '<p class="aviso">Ninguém jogou ranqueada nesta temporada ainda. Seja o primeiro!</p>')
+        + `<div class="top-eu"><span><b>${minhaPos >= 0 ? `Você: ${minhaPos + 1}º` : 'Fora do top 50'}</b></span><span>${RanqueUI.emblema(fm.i, 30, { animado: false, raios: false })}<span class="top-eu-pat"><b>${esc(fm.nome)}</b><small>${fmt(meu.pts)} PR</small></span></span></div>`
         + (eu ? '' : '<p class="aviso">Entre numa conta para aparecer no top global.</p>')
         + (d().modUsado ? '<p class="aviso">Sua conta usou o mod menu, então não aparece no top.</p>' : '');
       ligarPerfis(corpo);
