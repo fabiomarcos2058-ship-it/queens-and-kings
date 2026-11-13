@@ -296,8 +296,11 @@ const Batalha = (() => {
     });
   }
 
+  // limite de elixir por lado (10 normal)
+  const maxEl = (quem) => (s && s.fluxo && s.fluxo.includes(quem) ? 15 : 10);
   function atualizarElixir() {
     const e = s.azul.elixir;
+    if (!s.elxEl) { const bar = document.getElementById('barra-elixir'), n = maxEl('azul'); if (bar && bar.children.length !== n) { bar.innerHTML = Array.from({ length: n }, () => '<span></span>').join(''); bar.style.gridTemplateColumns = `repeat(${n}, 1fr)`; } }
     if (!s.elxEl) s.elxEl = { spans: [...document.querySelectorAll('#barra-elixir span')], gota: document.querySelector('.gota') };
     const cheio = Math.floor(e);
     s.elxEl.spans.forEach((sp, i) => {
@@ -2610,7 +2613,7 @@ const Batalha = (() => {
     if (m.roubo && Math.random() < m.roubo[0]) {
       const vit = alvo.torre ? s[alvo.time] : jogadorDe(alvo), meu = jogadorDe(a);
       const q = Math.min(m.roubo[1], vit.elixir);
-      vit.elixir -= q; meu.elixir = Math.min(10, meu.elixir + q);
+      vit.elixir -= q; meu.elixir = Math.max(meu.elixir, Math.min(10, meu.elixir + q));
       if (q > 0) { voarSprite('moeda', alvo, a, 0.45, 16); if (a.dono === 'azul') numero(a, 0, 'roubou'); }
     }
     if (m.vampiro && a.vida > 0) { a.vida = Math.min(a.max, a.vida + dano * m.vampiro); atualizarHp(a); }
@@ -3595,7 +3598,7 @@ const Batalha = (() => {
     const ganho = (dt / ELIXIR_SEG) * (dobro ? 2 : 1) * (s.elixirMult || 1);
     if (typeof Som !== 'undefined' && !s.tutorial) Som.musica(resta <= 60 ? 'final' : 'batalha');
     const acel = s.aceleraTempo && s.t < s.aceleraTempo.ate ? s.aceleraTempo.dono : null; // Made in Heaven
-    for (const quem of LADOS) if (s[quem]) s[quem].elixir = Math.min(10, s[quem].elixir + ganho * (quem === acel ? 1.7 : 1) * (s.fluxo && s.fluxo.includes(quem) ? 2 : 1));
+    for (const quem of LADOS) if (s[quem]) s[quem].elixir = Math.min(maxEl(quem), s[quem].elixir + ganho * (quem === acel ? 1.7 : 1) * (s.fluxo && s.fluxo.includes(quem) ? 3 : 1));
     marcarTempo();
     if (Mod.flag('elixirInfinito')) s.azul.elixir = 10;
 
