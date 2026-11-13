@@ -2158,25 +2158,36 @@
         <span class="premio-ic">${Passe.icone(r)}</span><small>${Passe.texto(r)}</small>${tranc ? '<i>🔒</i>' : ''}${pego ? '<em class="premio-ok">✔</em>' : ''}</button>`;
     }).join('')}</div>`;
     const pts = p.pontos % Passe.PONTOS_NIVEL, cheio = nv >= Passe.NIVEIS;
+    const paraPegar = () => { const l = []; for (let n = 1; n <= Passe.NIVEIS; n++) for (const [t] of trilhas) if (Passe.podePegar(t, n)) l.push([t, n]); return l; };
+    const prontos = paraPegar().length;
     const m = UI.modal({
       titulo: '🎟️ Passe da Temporada',
       classe: 'modal-passe passe-novo',
       html: `<div class="passe-topo"><div class="pt-nivel"><small>NÍVEL</small><b>${nv}</b></div>
           <div class="pt-barra"><div><i style="width:${cheio ? 100 : (pts / Passe.PONTOS_NIVEL) * 100}%"></i></div><small>${cheio ? 'Passe completo! 🎉' : `${pts}/${Passe.PONTOS_NIVEL} pontos para o nível ${nv + 1}`}</small></div>
           <div class="pt-dias">⏳ ${Passe.diasRestantes()}d</div></div>
-        <p class="aviso">Ganhe pontos jogando batalhas (vitória 40, derrota 15, +8 por coroa). Temporada termina em ${Passe.diasRestantes()} dias.</p>
-        <p class="vantagem-passe">✨ Plus e Ultra: <b>cor e gradiente no nome</b> (vá no seu perfil). Ultra: estilos <span class="nome-estilo nc-arco-iris">animados</span>!</p>
-        <div class="passe-compras">
-          <button class="comprar-passe plus${p.plus || p.ultra ? ' tem' : ''}" data-c="plus"><b>PLUS</b><small>${p.plus || p.ultra ? 'Ativo ✔' : `💎 ${Passe.precoAtual('plus')}`}</small></button>
-          <button class="comprar-passe ultra${p.ultra ? ' tem' : ''}" data-c="ultra"><b>ULTRA</b><small>${p.ultra ? 'Ativo ✔' : `💎 ${Passe.precoAtual('ultra')}`}</small></button>
-        </div>
+        <div class="passe-dica"><span>⚔️ Vitória <b>40</b></span><span>💔 Derrota <b>15</b></span><span>👑 Coroa <b>+8</b></span></div>
+        ${prontos ? `<button class="passe-pegar-tudo" id="passe-tudo">🎁 Pegar tudo <i>${prontos}</i></button>` : ''}
+        ${p.ultra ? '' : `<div class="passe-compras compacto">
+          ${p.plus ? '' : `<button class="comprar-passe plus" data-c="plus"><b>PLUS</b><small>💎 ${Passe.precoAtual('plus')}</small></button>`}
+          <button class="comprar-passe ultra" data-c="ultra"><b>ULTRA</b><small>💎 ${Passe.precoAtual('ultra')}</small></button>
+        </div>`}
         <div class="passe-cab"><span>Nv</span><span>Free</span><span>Plus</span><span>Ultra</span></div>
         <div class="passe-trilhas">${Array.from({ length: Passe.NIVEIS }, (_, i) => linha(i + 1)).join('')}</div>`,
       botoes: [{ texto: 'Fechar', classe: 'principal', acao: () => eventos() }],
     });
     const el = m.el;
-    const alvo = el.querySelectorAll('.passe-nv')[Math.max(0, nv - 2)];
-    if (alvo) setTimeout(() => alvo.scrollIntoView({ block: 'center' }), 50);
+    // rola só a lista de níveis (antes a tela inteira rolava e o topo sumia)
+    const lista = el.querySelector('.passe-trilhas'), alvo = el.querySelectorAll('.passe-nv')[Math.max(0, nv - 2)];
+    if (alvo && lista) setTimeout(() => { lista.scrollTop = Math.max(0, alvo.offsetTop - lista.offsetTop - 8); }, 50);
+    const bt = el.querySelector('#passe-tudo');
+    if (bt) bt.onclick = () => {
+      let n = 0;
+      for (const [t, nvl] of paraPegar()) { try { if (Passe.pegar(t, nvl)) n++; } catch (e) { /* segue pros outros */ } }
+      if (!n) return;
+      UI.toast(`🎁 ${n} prêmio${n > 1 ? 's' : ''} do passe pego${n > 1 ? 's' : ''}!`);
+      m.fechar(); topo(); setTimeout(telaPasse, 250);
+    };
     el.querySelectorAll('.premio').forEach((b) => (b.onclick = () => {
       const t = b.dataset.t, n = +b.dataset.n;
       if (!Passe.temTrilha(t)) return UI.toast(`Compre o passe ${t === 'plus' ? 'Plus' : 'Ultra'} para pegar`);
