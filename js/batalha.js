@@ -143,7 +143,8 @@ const Batalha = (() => {
       s.difAjuste = 0;
       if (!evento && Math.random() < Math.max(0.08, (ranque && ranque.chanceSuper) || 0)) {
         s.superIA = true;
-        if (!ranque || ranque.nivelDelta < 0) s.nivelIA = Math.min(9, s.nivelIA + 1); // a super IA tem cartas só 1 nível abaixo (nunca acima das suas)
+        if (ranque) ranque.superIA = true; // a ranqueada paga (e cobra) bem mais contra ela
+        s.nivelIA = Math.min(9, s.nivelIA + 1); // a super IA vem com cartas 1 nível mais fortes
         if (s.niveisIA) s.niveisIA = {};
       }
     }
@@ -264,7 +265,7 @@ const Batalha = (() => {
       const jan = document.querySelector('.arena-grande-janela');
       const b = document.createElement('div');
       b.className = 'aviso-super-ia';
-      b.innerHTML = '<b>🧠 IA SUPER INTELIGENTE</b><small>Essa é rara! Vencer ela vale muito.</small>';
+      b.innerHTML = `<b>🧠 IA SUPER INTELIGENTE</b><small>${ranque ? 'Vencer ela vale MUITOS pontos... e perder custa caro!' : 'Essa é rara! Vencer ela vale muito.'}</small>`;
       jan.appendChild(b);
       setTimeout(() => b.remove(), 3200);
       jan.classList.add('contra-super');

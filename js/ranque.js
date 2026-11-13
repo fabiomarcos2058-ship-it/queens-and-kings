@@ -134,26 +134,34 @@ const Ranque = (() => {
     // cartas dos bots: Papelão/Ferrugem bem abaixo, Ferro/Bronze 1 abaixo, do Prata pra cima no seu nível e do Diamante pra cima às vezes 1 acima
     const nivelDelta = rivalI <= 1 ? -2 : rivalI <= 3 ? -1 : rivalI >= 9 ? (Math.random() < 0.4 ? 2 : 1) : rivalI >= 8 ? 1 : rivalI >= 7 && Math.random() < 0.35 ? 1 : 0;
     const rivalPts = Math.max(...rivais.map((b) => b.pts));
-    return { dupla, rivais, parceiro, rivalI, meuI, dif, nivelDelta, difMin: P.difMin || 0, chanceSuper: P.super || 0, rivalPts };
+    // rival de patente mais alta joga mais forte: IA mais esperta e cartas melhores (vale muito mais pontos)
+    const acima = Math.max(0, rivalI - meuI);
+    const difMin = acima ? Math.max(P.difMin || 0, Math.min(5, 2 + acima)) : P.difMin || 0;
+    const nivelForte = acima ? Math.max(nivelDelta, 0) + (acima >= 2 ? 1 : 0) : nivelDelta;
+    return { dupla, rivais, parceiro, rivalI, meuI, dif: Math.max(dif, difMin), nivelDelta: nivelForte, difMin, chanceSuper: P.super || 0, rivalPts };
   }
 
   // ---------- Pontos ----------
   // rivalPts: pontos do rival mais forte (cada divisão acima de você também vale mais)
-  function previsao(dupla, rivalI, rivalPts = null) {
+  function previsao(dupla, rivalI, rivalPts = null, superIA = false) {
     const r = dados(), meuI = info(r.pts).i, diff = rivalI - meuI;
     const seq = r.seq + 1;
     const divAcima = rivalPts == null ? 0 : Math.max(0, Math.floor((rivalPts - r.pts) / DIV));
-    const bonusRival = Math.min(60, Math.max(0, diff) * 12 + divAcima * 3);
+    // patente mais alta paga MUITO (e sorteado): de bonusRival até bonusRival + sorte; a IA super inteligente soma mais um bônus
+    const bonusRival = diff > 0 ? Math.min(200, 20 + diff * 22 + divAcima * 3) : Math.min(20, divAcima * 3);
+    const bonusSuper = superIA ? 45 : 0;
+    const sorte = (diff > 0 ? 35 : 0) + (superIA ? 35 : 0);
     const bonusSeq = Math.min(16, Math.max(0, seq - 1) * 4);
     // vitória e derrota valem parecido: pra subir tem que ganhar mais do que perde
-    const ganho = (dupla ? 26 : 22) + bonusRival + bonusSeq;
-    let perda = (dupla ? 20 : 22) - Math.max(0, diff) * 5 + Math.max(0, -diff) * 3;
-    if (meuI <= 1) perda = Math.round(perda * 0.5);
+    const ganho = (dupla ? 26 : 22) + bonusRival + bonusSuper + bonusSeq;
+    // derrota: perde bem mais; contra patente mais alta (ou a IA super) a perda é grande e sorteada entre perda e perdaMax
+    let perda = dupla ? 28 : 32, perdaMax = dupla ? 38 : 42;
+    if (diff > 0 || superIA) { perda = 46 + Math.max(0, diff) * 4; perdaMax = perda + 30; }
     // do Mestre pra cima fica MUITO difícil: ganha bem menos e perde bem mais
-    let g = ganho;
-    if (meuI >= 9) { g = Math.round(ganho * 0.45); perda = Math.round(perda * 1.6); }
-    else if (meuI >= 8) { g = Math.round(ganho * 0.6); perda = Math.round(perda * 1.35); }
-    return { ganho: g, perda: Math.max(4, perda), bonusRival, bonusSeq, bonusEpica: BONUS_EPICA + (diff > 0 ? 5 : 0) };
+    let g = ganho, m = 1;
+    if (meuI >= 9) { m = 0.45; g = Math.round(ganho * 0.45); perda = Math.round(perda * 1.6); perdaMax = Math.round(perdaMax * 1.6); }
+    else if (meuI >= 8) { m = 0.6; g = Math.round(ganho * 0.6); perda = Math.round(perda * 1.35); perdaMax = Math.round(perdaMax * 1.35); }
+    return { ganho: g, ganhoMax: g + Math.round(sorte * m), perda: Math.max(4, perda), perdaMax: Math.max(4, perdaMax), bonusRival, bonusSuper, bonusSeq, bonusEpica: BONUS_EPICA + (diff > 0 ? 5 : 0) };
   }
   // Vitória Épica: 3 coroas sem perder nenhuma torre
   const BONUS_EPICA = 15;
@@ -175,20 +183,23 @@ const Ranque = (() => {
       Estado.salvar();
     } catch (e) { /* nada */ }
   }
-  function aplicar(resultado, { dupla, rivalI, coroas = 0, coroasInimigo = 0, rivalPts = null }) {
+  function aplicar(resultado, { dupla, rivalI, coroas = 0, coroasInimigo = 0, rivalPts = null, superIA = false }) {
     const r = dados();
     const antes = info(r.pts);
-    const pv = previsao(dupla, rivalI, rivalPts);
+    const pv = previsao(dupla, rivalI, rivalPts, superIA);
     const epica = ehEpica(resultado, coroas, coroasInimigo);
-    let delta = 0, bonusSeq = 0, bonusRival = 0, bonus3 = 0, bonusEpica = 0, escudoUsado = false;
+    let delta = 0, bonusSeq = 0, bonusRival = 0, bonusSuper = 0, bonus3 = 0, bonusEpica = 0, escudoUsado = false;
     if (resultado === 'vitoria') {
       r.seq++; r.maiorSeq = Math.max(r.maiorSeq || 0, r.seq); r.v++;
-      bonusSeq = pv.bonusSeq; bonusRival = pv.bonusRival;
+      const sorteio = Math.floor(Math.random() * (pv.ganhoMax - pv.ganho + 1));
+      bonusSeq = pv.bonusSeq; bonusSuper = pv.bonusSuper; bonusRival = pv.bonusRival + (pv.bonusRival || !superIA ? sorteio : 0);
+      if (superIA && !pv.bonusRival) bonusSuper += sorteio;
       if (epica) { bonusEpica = pv.bonusEpica; r.epicas = (r.epicas || 0) + 1; r.epicasSempre = (r.epicasSempre || 0) + 1; } else bonus3 = coroas === 3 ? 4 : 0;
-      delta = pv.ganho + bonus3 + bonusEpica;
+      delta = pv.ganho + sorteio + bonus3 + bonusEpica;
     } else if (resultado === 'derrota') {
       r.seq = 0; r.d++;
-      delta = -Math.min(pv.perda, r.pts);
+      const sorteada = pv.perda + Math.floor(Math.random() * (pv.perdaMax - pv.perda + 1));
+      delta = -Math.min(sorteada, r.pts);
       // escudo: logo depois de subir de patente, as derrotas não te derrubam dela
       if (r.pts + delta < antes.baseTier && r.escudo > 0) { r.escudo--; delta = antes.baseTier - r.pts; escudoUsado = true; }
     } else { r.e = (r.e || 0) + 1; delta = 4; }
@@ -207,7 +218,7 @@ const Ranque = (() => {
     r.melhorSempre = Math.max(r.melhorSempre || 0, r.pts);
     const xp = ganharXp(resultado, dupla, r.seq, epica);
     Estado.salvar();
-    return { antes, depois, delta, bonusSeq, bonusRival, bonus3, bonusEpica, epica, seq: r.seq, escudoUsado, escudo: r.escudo, xp,
+    return { antes, depois, delta, bonusSeq, bonusRival, bonusSuper, bonus3, bonusEpica, epica, seq: r.seq, escudoUsado, escudo: r.escudo, xp,
       subiuPatente: depois.i > antes.i, subiuDivisao: depois.i === antes.i && depois.base > antes.base, caiu: depois.base < antes.base };
   }
 

@@ -106,8 +106,8 @@ const RanqueUI = (() => {
           </div>
         </div>
         <div class="tr-jogar">
-          <button class="tr-btn um" id="tr-1v1"><span>⚔️</span><b>Ranqueada 1v1</b><small>Vitória +${pv1.ganho} · derrota -${pv1.perda}</small></button>
-          <button class="tr-btn dois" id="tr-2v2"><span>🤝</span><b>Ranqueada 2v2</b><small>Vale mais! Vitória +${pv2.ganho} · derrota -${pv2.perda}</small></button>
+          <button class="tr-btn um" id="tr-1v1"><span>⚔️</span><b>Ranqueada 1v1</b><small>Vitória +${pv1.ganho} · derrota -${pv1.perda} a -${pv1.perdaMax}</small></button>
+          <button class="tr-btn dois" id="tr-2v2"><span>🤝</span><b>Ranqueada 2v2</b><small>Vale mais! Vitória +${pv2.ganho} · derrota -${pv2.perda} a -${pv2.perdaMax}</small></button>
         </div>
         <p class="tr-dica">Você pode cair contra rivais de <b>patente mais alta</b>: cada patente acima vale <b>+12 PR</b> e cada divisão acima <b>+3 PR</b>, e a derrota pra eles tira menos.</p>
         ${htmlAvisoPasse()}
@@ -153,7 +153,7 @@ const RanqueUI = (() => {
     el.classList.add('achou');
     el.innerHTML = `<div class="pr-raios"></div><div class="vs-tela vs-cartoes${pt.dupla ? ' dupla' : ''}">
         <div class="vs-time rival">${rivais.join('')}</div>
-        <div class="vs-meio"><span>VS</span>${pt.rivalI > meuI ? `<em class="vs-alta">⬆ Rival mais forte! Vitória vale +${pv.ganho} PR</em>` : pv.bonusRival ? `<em class="vs-alta">⬆ Rival acima de você: +${pv.ganho} PR</em>` : `<em>Vitória +${pv.ganho} PR · derrota -${pv.perda}</em>`}</div>
+        <div class="vs-meio"><span>VS</span>${pt.rivalI > meuI ? `<em class="vs-alta">⬆ Rival mais forte! Vitória vale +${pv.ganho} a +${pv.ganhoMax} PR · derrota -${pv.perda} a -${pv.perdaMax}</em>` : pv.bonusRival ? `<em class="vs-alta">⬆ Rival acima de você: +${pv.ganho} PR</em>` : `<em>Vitória +${pv.ganho} PR · derrota -${pv.perda} a -${pv.perdaMax}</em>`}</div>
         <div class="vs-time meu">${time.join('')}</div></div>`;
     try { navigator.vibrate && navigator.vibrate(80); } catch (e) { /* nada */ }
   }
@@ -298,7 +298,7 @@ const RanqueUI = (() => {
   function fim(r) {
     const rq = r.ranque;
     const rivalPts = rq.rivalPts != null ? rq.rivalPts : Math.max(...(rq.rivais || []).map((b) => b.pts || 0), 0);
-    const res = Ranque.aplicar(r.resultado, { dupla: rq.dupla, rivalI: rq.rivalI, coroas: r.coroas, coroasInimigo: r.coroasInimigo, rivalPts });
+    const res = Ranque.aplicar(r.resultado, { dupla: rq.dupla, rivalI: rq.rivalI, coroas: r.coroas, coroasInimigo: r.coroasInimigo, rivalPts, superIA: !!rq.superIA });
     const ouro = Math.round((r.resultado === 'vitoria' ? 20 + r.coroas * 5 + (rq.dupla ? 10 : 0) : 5) * (res.epica ? 1.5 : 1));
     Estado.d.ouro += ouro;
     // XP turbinado na ranqueada (bem mais que na batalha normal)
@@ -319,6 +319,7 @@ const RanqueUI = (() => {
         <div class="rr-pontos ${res.delta >= 0 ? 'mais' : 'menos'}"><span id="rr-num">${res.delta >= 0 ? '+' : ''}0</span> PR</div>
         <div class="rr-detalhes">${[
           res.bonusRival ? `<span>⬆ Patente alta +${res.bonusRival}</span>` : '',
+          res.bonusSuper ? `<span>🧠 IA super inteligente +${res.bonusSuper}</span>` : '',
           res.bonusSeq ? `<span>🔥 Sequência x${res.seq} +${res.bonusSeq}</span>` : '',
           res.bonusEpica ? `<span class="rr-ep">💥 Vitória Épica +${res.bonusEpica}</span>` : '',
           res.bonus3 ? '<span>👑 3 coroas +4</span>' : '',
