@@ -106,10 +106,10 @@ const Estado = (() => {
     inicial: { nome: 'Baú inicial', segundos: 0, ouro: [20, 30], copias: 0, gemas: 0, imagem: 'inicial' },
     // chanceNova: chance de vir uma carta que você ainda não tem (cartas novas só saem de baú!)
     madeira: { nome: 'Baú de madeira', segundos: 60, ouro: [30, 60], copias: 6, gemas: 0, chanceNova: 0.12 },
-    prata: { nome: 'Baú de prata', segundos: 5 * 60, ouro: [80, 140], copias: 15, gemas: 2, chanceNova: 0.3 },
-    ouro: { nome: 'Baú de ouro', segundos: 15 * 60, ouro: [250, 400], copias: 40, gemas: 5, chanceNova: 0.75 },
+    prata: { nome: 'Baú de prata', segundos: 5 * 60, ouro: [80, 140], copias: 15, gemas: 10, chanceNova: 0.3 },
+    ouro: { nome: 'Baú de ouro', segundos: 15 * 60, ouro: [250, 400], copias: 40, gemas: 50, chanceNova: 0.75 },
     // 10 cartas lendárias (pode vir lendária nova!); vendido na loja por 500 gemas
-    lendario: { nome: 'Baú Lendário', segundos: 0, ouro: [400, 700], copias: 10, gemas: 0, lendario: true },
+    lendario: { nome: 'Baú Lendário', segundos: 0, ouro: [400, 700], copias: 10, gemas: 80, lendario: true },
   };
 
   let todas = []; // cartas.json inteiro
