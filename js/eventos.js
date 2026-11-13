@@ -593,6 +593,11 @@ const Eventos = (() => {
         setTimeout(() => { if (!Estado.tem(NINO)) revelarNino(Ranque.darEvolucao(NINO)); }, 900);
       }
       if (typeof Ranque !== 'undefined' && Ranque.acertarRegistro) Ranque.acertarRegistro();
+      // presente pra todo mundo: Goku (Além dos Limites)
+      if (Estado.carta('goku_formas') && !Estado.tem('goku_formas') && !(d.presentesEspeciais || []).includes('goku-formas')) {
+        d.presentesEspeciais = [...(d.presentesEspeciais || []), 'goku-formas'];
+        setTimeout(() => revelarNino(Ranque.darEvolucao('goku_formas'), 'PRESENTE PRA TODO MUNDO', `"Oi, eu sou o Goku! Cada vez que eu cair, eu levanto mais forte. Bora lutar, ${esc(nomeJ())}!"`), 1500);
+      }
       // Adam Smasher (Evolução): exclusivo do Enzo
       if ((Conta.uid && Conta.uid()) === ENZO && !Estado.tem('adam_smasher_evo') && !(d.presentesEspeciais || []).includes('adam-evo-enzo')) {
         d.presentesEspeciais = [...(d.presentesEspeciais || []), 'adam-evo-enzo'];

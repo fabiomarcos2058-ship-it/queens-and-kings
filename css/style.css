@@ -3292,3 +3292,20 @@ html.leve .tropa.hermes .tropa-medalhao { animation: none; }
 .snz-txt small { font: 12px 'Lilita One', sans-serif; letter-spacing: 2px; color: #E3C8FF; text-shadow: 0 1px 2px #000, 0 0 6px #9B3CFF; padding-left: 3px; }
 .leve .snz-txt b { filter: none; text-shadow: none; }
 .leve .snz-emblema { filter: none; animation: none; }
+/* ===== One Piece: Luffy Gear 5 ===== */
+.dano-num.fala-op { font: 13px 'Lilita One', sans-serif; color: #fff; white-space: nowrap; text-shadow: 2px 2px 0 #7B4BFF, -1px -1px 0 #000, 1px 1px 0 #000, 0 0 10px #F3E8FF; }
+.cutin.op_luffy::before { background: radial-gradient(circle at 50% 45%, #ffffff44, #2a1a6acc 75%); }
+.cutin.op_luffy .cutin-faixa { border-color: #fff; box-shadow: 0 0 24px #F3E8FF, 0 0 40px #7B4BFFaa; }
+.cutin.op_luffy .cutin-faixa img { object-position: 50% 32%; }
+.cutin.op_luffy .cutin-legenda { color: #fff; text-shadow: 3px 3px 0 #7B4BFF, -1px -1px 0 #000, 1px 1px 0 #000, 0 0 14px #F3E8FF; }
+.fx-op-punho { position: absolute; pointer-events: none; z-index: 1760; width: 40%; aspect-ratio: 1; transform: translate(-50%, -50%); border-radius: 50%;
+  background: radial-gradient(circle at 50% 50%, #ffffff 0 18%, #F3E8FF 30%, #C8B6FF99 46%, transparent 66%); box-shadow: 0 0 40px #fff; animation: opPunho 1.1s cubic-bezier(0.3, 1.4, 0.5, 1) forwards; }
+@keyframes opPunho { 0% { opacity: 0; transform: translate(-50%, -180%) scale(2.2); } 40% { opacity: 1; transform: translate(-50%, -50%) scale(1); } 70% { opacity: 1; transform: translate(-50%, -50%) scale(1.25); } 100% { opacity: 0; transform: translate(-50%, -50%) scale(1.5); } }
+.fx-op-tambores { position: absolute; pointer-events: none; z-index: 1760; width: 90%; aspect-ratio: 1; transform: translate(-50%, -50%); border-radius: 50%;
+  background: repeating-radial-gradient(circle, transparent 0 9%, #ffffff66 10%, transparent 12%); animation: opTambor 1.6s ease-out forwards; }
+@keyframes opTambor { 0% { opacity: 1; transform: translate(-50%, -50%) scale(0.2); } 100% { opacity: 0; transform: translate(-50%, -50%) scale(1.2); } }
+.tropa.festa-nika .tropa-medalhao { box-shadow: 0 0 0 3px #fff, 0 0 16px 5px #F3E8FF, 0 0 26px 8px #7B4BFF66; }
+.tropa.desenho .tropa-medalhao { filter: saturate(1.8) contrast(1.3); animation: opDesenho 0.3s steps(2) infinite; }
+@keyframes opDesenho { 50% { transform: scale(1.12, 0.88) rotate(-6deg); } }
+.tropa.forma-nova .tropa-medalhao { animation: formaNova 0.8s ease-out; }
+@keyframes formaNova { 0% { transform: scale(1.8); filter: brightness(3); } 100% { transform: none; filter: none; } }

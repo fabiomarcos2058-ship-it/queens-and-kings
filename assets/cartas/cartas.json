@@ -4064,6 +4064,88 @@
         650
       ],
       "summon": true
+    },
+    {
+      "id": "luffy_gear5",
+      "nome": "Luffy Gear 5",
+      "raridade": "lendaria",
+      "custo": 6,
+      "tipo": "One Piece · Gear 5 · Evolução",
+      "descricao": "O Deus Sol Nika. Com a Gomu Gomu despertada, o corpo dele vira borracha de desenho animado e luta do jeito que quiser.",
+      "trofeus": 0,
+      "exclusivo": [],
+      "nivelInicial": 5,
+      "evolucao": {
+        "ciclos": 1,
+        "nome": "Luffy Gear 5 (Evolução)",
+        "descricao": "Depois de jogar o Luffy uma vez, o próximo vem EVOLUÍDO: mais forte e, ao entrar, toca os Tambores da Libertação: os aliados em volta batem mais forte e mais rápido por 6s, e os inimigos em volta viram desenho animado e ficam parados por 2s."
+      },
+      "rosto": [
+        395,
+        440,
+        200
+      ],
+      "arte": [
+        0,
+        150,
+        736
+      ],
+      "vida": 1350,
+      "dano": 230,
+      "velocidade": 70,
+      "alcance": 22,
+      "cadencia": 1.0,
+      "alvo": "tudo",
+      "passiva": {
+        "nome": "Corpo de Borracha",
+        "tipo": "esquiva",
+        "chance": 0.2,
+        "descricao": "20% de chance de o golpe quicar nele sem causar dano. Todo 4º soco causa o dobro e os socos empurram longe."
+      },
+      "habilidade": {
+        "nome": "Bajrang Gun",
+        "tipo": "bajrangGun",
+        "custo": 4,
+        "recarga": 18,
+        "descricao": "Um punho gigante cai do céu onde estão mais inimigos: 3x de dano em área, atordoa por 1s e acerta torres também."
+      },
+      "arena": 1,
+      "danoTorre": 0.55
+    },
+    {
+      "id": "goku_formas",
+      "nome": "Goku (Além dos Limites)",
+      "raridade": "lendaria",
+      "custo": 6,
+      "tipo": "Dragon Ball · Presente pra todos",
+      "descricao": "O Goku de todas as eras. Cada vez que cai, ele se levanta mais forte, numa transformação diferente.",
+      "trofeus": 0,
+      "exclusivo": [],
+      "evento": true,
+      "nivelInicial": 5,
+      "rosto": [
+        512,
+        550,
+        105
+      ],
+      "arte": [
+        176,
+        200,
+        560
+      ],
+      "vida": 1000,
+      "dano": 220,
+      "velocidade": 75,
+      "alcance": 18,
+      "cadencia": 0.95,
+      "alvo": "tudo",
+      "passiva": {
+        "nome": "Além dos Limites",
+        "tipo": "formas",
+        "descricao": "Quando cai, se levanta transformado numa forma aleatória (Super Saiyajin, SSJ2, SSJ3, SSJ4, Deus, Blue, Kaioken ou Instinto Superior) com metade da vida. Acontece até 2 vezes por partida."
+      },
+      "arena": 1,
+      "danoTorre": 0.55
     }
   ]
 }

@@ -130,6 +130,8 @@ const Ataques = (() => {
     gogeta_ultra: { v: { g: 'impacto', cor: '#FFD25E', s: 'explosao' }, m: { especial: [4, 1.5, 40, 'explosao', 0.7] }, d: 'A cada 4 golpes, uma onda que atordoa todos em volta.' },
     goku_base: { v: { g: 'esferas', cor: '#FFC21A', s: 'ki_amarelo', n: 2 }, m: { rajada: 2 }, d: 'Lança duas esferas de ki amarelas.' },
     goku_ssj: { v: { g: 'soco', cor: '#FFD25E' }, m: { teleporte: 6, furiaNamek: true }, d: 'Teletransporte: aparece do lado do alvo (a cada 6s). Passiva: se 2 ou 3 inimigos o pressionarem, ele fica furioso e solta um Super Kamehameha (bem mais forte com 3).' },
+    luffy_gear5: { v: { g: 'soco', cor: '#F3E8FF', pesado: true }, m: { combo: 4, empurrar: 14 }, d: 'Socos de borracha que empurram longe. Às vezes o golpe quica nele.' },
+    goku_formas: { v: { g: 'soco', cor: '#FF8A00' }, m: { combo: 3, renascerForma: 2 }, d: 'Quando cai, volta numa transformação aleatória (até 2 vezes).' },
     gojo: { v: { p: 'ki_azul', vel: 250, tam: 20, rastro: '#4FB4FF', cor: '#A64DFF' }, m: { gojo: true }, d: 'Alterna o Azul (puxa os inimigos pro impacto) e o Vermelho (explode e empurra). Infinito: os primeiros golpes nem encostam nele.' },
     goku_ssj2: { v: { g: 'raio', cor: '#FFE45C' }, m: { atordoar: [0.15, 0.45] }, d: 'Socos eletrizados que podem atordoar.' },
     goku_ssj3: { v: { g: 'impacto', cor: '#FFC21A', s: 'punho', pesado: true }, m: { especial: [4, 2.5, 36, 'punho'] }, d: 'A cada 4 golpes, o Punho do Dragão em área.' },

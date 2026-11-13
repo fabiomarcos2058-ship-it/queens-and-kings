@@ -52,10 +52,40 @@ const Ranque = (() => {
       r.temporada = temporadaAtual();
       r.pts = Math.round(r.pts * 0.55);
       r.melhor = r.pts; r.v = 0; r.d = 0; r.e = 0; r.seq = 0; r.escudo = 0; r.epicas = 0;
-      r.pro = false; r.xp = 0; r.pegos = { free: [], pro: [] };
       Estado.salvar();
     }
+    // o Pro Pass tem as próprias datas (não acompanha o mês da ranqueada)
+    const pa = passeAtual();
+    if (!r.passe) r.passe = pa.id;
+    else if (r.passe !== pa.id) trocarPasse(r, pa);
     return r;
+  }
+  // ---------- Passes (cada um com a sua carta de Evolução) ----------
+  const PASSES = [
+    { id: 'gojo', carta: 'gojo', nome: 'Gojo Satoru', fim: new Date(2026, 10, 13, 9, 10) }, // 13/11/2026 09:10
+    { id: 'luffy', carta: 'luffy_gear5', nome: 'Luffy Gear 5', fim: new Date(2026, 11, 13, 9, 10) }, // 13/12/2026 09:10
+  ];
+  const passeAtual = () => PASSES.find((p) => Date.now() < p.fim.getTime()) || PASSES[PASSES.length - 1];
+  const passeDe = (id) => PASSES.find((p) => p.id === id) || passeAtual();
+  const diasPasse = () => Math.max(0, Math.ceil((passeAtual().fim.getTime() - Date.now()) / 86400000));
+  // passe acabou: entrega o que ficou pra pegar e começa o novo zerado
+  function trocarPasse(r, novo) {
+    const velho = passeDe(r.passe), nv = Math.min(PASSE_NIVEIS, Math.floor((r.xp || 0) / PASSE_XP));
+    let n = 0;
+    try {
+      for (const t of ['free', 'pro']) {
+        if (t === 'pro' && !r.pro) continue;
+        for (let i = 1; i <= nv; i++) {
+          if ((r.pegos[t] || []).includes(i)) continue;
+          const rc = recompensa(t, i, velho);
+          if (rc.tipo === 'evolucao') darEvolucao(velho.carta); else Premios.dar(rc);
+          n++;
+        }
+      }
+    } catch (e) { /* nada */ }
+    if (n) Estado.d.passeEntregue = { nome: velho.nome, n };
+    r.passe = novo.id; r.pro = false; r.xp = 0; r.pegos = { free: [], pro: [] };
+    Estado.salvar();
   }
   function pegarPremioTemporada() {
     const r = dados(), p = r.premioTemporada;
@@ -185,7 +215,7 @@ const Ranque = (() => {
     return { ganho: gk, subiu: nivelPasse() > antes };
   }
   const nivelPasse = () => Math.min(PASSE_NIVEIS, Math.floor((dados().xp || 0) / PASSE_XP));
-  function recompensa(trilha, n) {
+  function recompensa(trilha, n, passe = null) {
     const C = (raridade, qtd) => ({ tipo: 'coringa', raridade, qtd });
     if (trilha === 'free') {
       if (n === PASSE_NIVEIS) return { tipo: 'bau', bau: 'ouro' };
@@ -195,7 +225,7 @@ const Ranque = (() => {
         { tipo: 'ouro', qtd: 60 + n * 6 }, C('comum', 10), { tipo: 'tokens', qtd: 25 }, { tipo: 'gemas', qtd: 8 }, C('rara', 3),
       ][n % 5];
     }
-    if (n === PASSE_NIVEIS) return { tipo: 'evolucao', nome: 'Gojo Satoru (Evolução)' };
+    if (n === PASSE_NIVEIS) return { tipo: 'evolucao', nome: `${(passe || passeAtual()).nome} (Evolução)` };
     if (n === 25) return { tipo: 'bau', bau: 'lendario' };
     if (n === 15) return C('lendaria', 2);
     if (n % 10 === 0) return { tipo: 'carta', raridade: 'lendaria', qtd: 1 };
@@ -215,14 +245,12 @@ const Ranque = (() => {
     dados().pegos[t].push(n);
     let extra = null;
     if (r.tipo === 'evolucao') {
-      d.evolucoesGuardadas = [...new Set([...(d.evolucoesGuardadas || []), `ranq-${dados().temporada}`])];
-      extra = { evolucao: true, carta: darEvolucao(CARTA_EVOLUCAO) };
+      d.evolucoesGuardadas = [...new Set([...(d.evolucoesGuardadas || []), `ranq-${dados().passe}`])];
+      extra = { evolucao: true, carta: darEvolucao(passeAtual().carta) };
     } else extra = Premios.dar(r);
     Estado.salvar();
     return { r, extra };
   }
-  // a carta de evolução exclusiva desta temporada do Pro Pass
-  const CARTA_EVOLUCAO = 'gojo';
   function darEvolucao(id) {
     const d = Estado.d, c0 = Estado.carta(id);
     if (!c0) return null;
@@ -270,6 +298,7 @@ const Ranque = (() => {
   return { ehEpica, BONUS_EPICA,
     PATENTES, info, img, temporadaAtual, nomeTemporada, diasRestantes, dados, pegarPremioTemporada, partida, previsao, aplicar,
     PASSE_NIVEIS, PASSE_XP, PRECO_PRO, nivelPasse, recompensa, icone, texto, temTrilha, podePegar, pendentes, pegar, comprarPro,
-    sequenciaNormal, registrar, historico, publico, acertarRegistro, INICIO_MESTRE, INICIO_PRO, darEvolucao, CARTA_EVOLUCAO,
+    sequenciaNormal, registrar, historico, publico, acertarRegistro, INICIO_MESTRE, INICIO_PRO, darEvolucao, passeAtual, diasPasse,
+    get CARTA_EVOLUCAO() { return passeAtual().carta; },
   };
 })();
