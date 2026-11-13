@@ -46,6 +46,8 @@ const Ranque = (() => {
   };
   const diasRestantes = () => { const h = new Date(); return Math.ceil((new Date(h.getFullYear(), h.getMonth() + 1, 1) - h) / 86400000); };
 
+  // prêmio de fim de temporada pela MELHOR patente que você alcançou nela
+  const premioDe = (i) => ({ gemas: 15 + i * 20, ouro: 300 + i * 250 });
   function dados() {
     const d = Estado.d;
     if (!d.ranque) d.ranque = { temporada: temporadaAtual(), pts: 0, melhor: 0, melhorSempre: 0, v: 0, d: 0, e: 0, seq: 0, maiorSeq: 0, escudo: 0, pro: false, xp: 0, pegos: { free: [], pro: [] } };
@@ -53,7 +55,7 @@ const Ranque = (() => {
     if (r.temporada !== temporadaAtual()) {
       // virada de temporada: prêmio pela melhor patente e "reset suave" dos pontos
       const melhorI = info(r.melhor).i;
-      r.premioTemporada = { temporada: r.temporada, patente: melhorI, gemas: 15 + melhorI * 20, ouro: 300 + melhorI * 250 };
+      r.premioTemporada = { temporada: r.temporada, patente: melhorI, ...premioDe(melhorI) };
       r.temporadasAnteriores = [{ t: r.temporada, melhor: r.melhor }, ...(r.temporadasAnteriores || [])].slice(0, 12);
       r.temporada = temporadaAtual();
       r.pts = Math.round(r.pts * 0.55);
@@ -346,7 +348,7 @@ const Ranque = (() => {
   return { ehEpica, BONUS_EPICA,
     PATENTES, info, img, temporadaAtual, nomeTemporada, diasRestantes, dados, pegarPremioTemporada, partida, previsao, aplicar,
     PASSE_NIVEIS, PASSE_XP, PRECO_PRO, nivelPasse, recompensa, icone, texto, temTrilha, podePegar, pendentes, pegar, comprarPro,
-    sequenciaNormal, registrar, historico, publico, acertarRegistro, INICIO_MESTRE, INICIO_PRO, INICIO_REI, INICIO_DEUS, darEvolucao, passeAtual, diasPasse,
+    premioDe, sequenciaNormal, registrar, historico, publico, acertarRegistro, INICIO_MESTRE, INICIO_PRO, INICIO_REI, INICIO_DEUS, darEvolucao, passeAtual, diasPasse,
     get CARTA_EVOLUCAO() { return passeAtual().carta; },
   };
 })();

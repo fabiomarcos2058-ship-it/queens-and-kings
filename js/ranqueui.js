@@ -109,7 +109,11 @@ const RanqueUI = (() => {
           <button class="tr-btn um" id="tr-1v1"><span>⚔️</span><b>Ranqueada 1v1</b><small>Vitória +${pv1.ganho} · derrota -${pv1.perda} a -${pv1.perdaMax}</small></button>
           <button class="tr-btn dois" id="tr-2v2"><span>🤝</span><b>Ranqueada 2v2</b><small>Vale mais! Vitória +${pv2.ganho} · derrota -${pv2.perda} a -${pv2.perdaMax}</small></button>
         </div>
-        <p class="tr-dica">Você pode cair contra rivais de <b>patente mais alta</b>: cada patente acima vale <b>+12 PR</b> e cada divisão acima <b>+3 PR</b>, e a derrota pra eles tira menos.</p>
+        <p class="tr-dica">Rival de <b>patente mais alta</b> ou com a <b>IA super inteligente</b> paga muito mais PR na vitória, mas a derrota também custa caro.</p>
+        ${(() => { const mi = Ranque.info(r.melhor).i, pm = Ranque.premioDe(mi), prox = mi < Ranque.PATENTES.length - 1 ? Ranque.premioDe(mi + 1) : null;
+          return `<div class="tr-premio"><img src="${Ranque.img(mi, true)}" alt="" /><div><b>🎁 Prêmio da temporada</b>
+            <span>Garantido pela sua melhor patente (<b>${Ranque.PATENTES[mi].nome}</b>): <em>${pm.gemas} 💎 + ${fmt(pm.ouro)} 🪙</em></span>
+            <small>${prox ? `Chegue em ${Ranque.PATENTES[mi + 1].nome} e leve ${prox.gemas} 💎 + ${fmt(prox.ouro)} 🪙 · ` : 'Você está no topo! · '}entrega em ${Ranque.diasRestantes()} dia${Ranque.diasRestantes() === 1 ? '' : 's'}</small></div></div>`; })()}
         ${htmlAvisoPasse()}
         <button class="tr-passe${r.pro ? ' pro' : ''}" id="tr-passe">
           <div class="trp-topo"><b>${r.pro ? '💠 Pro Pass' : '🎫 Passe da Ranqueada'}</b><small>${nv}/${Ranque.PASSE_NIVEIS}</small></div>
@@ -306,7 +310,8 @@ const RanqueUI = (() => {
     const niveis = Estado.ganharXp(xpConta);
     const passe = Passe.ganharPontos(r.resultado, r.coroas);
     Ranque.registrar({ modo: rq.dupla ? 'ranq2v2' : 'ranq', res: r.resultado, cz: [r.coroas, r.coroasInimigo], deck: r.deck, deckRival: r.deckRival, deckParceiro: r.deckParceiro,
-      rival: { nome: rq.rivais.map((b) => b.nome).join(' e '), pat: rq.rivalI }, parceiro: rq.parceiro ? rq.parceiro.nome : null, pts: res.delta, pat: res.depois.i, seq: res.seq, dur: r.duracao });
+      rival: { nome: rq.rivais.map((b) => b.nome).join(' e '), pat: rq.rivalI }, parceiro: rq.parceiro ? rq.parceiro.nome : null, pts: res.delta, pat: res.depois.i, seq: res.seq, dur: r.duracao,
+      bon: { alta: res.bonusRival || 0, sup: res.bonusSuper || 0, ep: res.bonusEpica || 0, seq: res.bonusSeq || 0 } });
     Estado.salvar();
     const f = res.depois, a = res.antes;
     const titulo = { vitoria: 'Vitória ranqueada! 👑', derrota: 'Derrota ranqueada', empate: 'Empate' }[r.resultado];
@@ -479,7 +484,7 @@ const RanqueUI = (() => {
       titulo: '🏅 Patentes',
       classe: 'modal-patentes',
       html: `<div class="lista-patentes">${Ranque.PATENTES.map((p, i) => i).reverse().map((i) => `<div class="lp-item${i === meu ? ' atual' : ''}${i > meu ? ' falta' : ''}" style="--cor:${Ranque.PATENTES[i].cor}">
-          ${emblema(i, 76, { raios: false, animado: i === meu })}<div><b>${Ranque.PATENTES[i].nome}</b><small>${faixa(i)}</small></div>${i === meu ? '<em>Você está aqui</em>' : ''}</div>`).join('')}</div>`,
+          ${emblema(i, 76, { raios: false, animado: i === meu })}<div><b>${Ranque.PATENTES[i].nome}</b><small>${faixa(i)}</small><small class="lp-premio">🎁 Fim da temporada: ${Ranque.premioDe(i).gemas} 💎 + ${fmt(Ranque.premioDe(i).ouro)} 🪙</small></div>${i === meu ? '<em>Você está aqui</em>' : ''}</div>`).join('')}</div>`,
       botoes: [{ texto: 'Fechar', classe: 'principal' }],
     });
   }
@@ -500,22 +505,29 @@ const RanqueUI = (() => {
     const h = Ranque.historico();
     const item = (e) => {
       const ganhou = e.res === 'vitoria', perdeu = e.res === 'derrota';
-      return `<div class="hist ${e.res}">
+      return `<div class="hist ${e.res}${e.pts !== undefined && e.pts !== null ? ' eh-ranq' : ''}">
         <div class="hist-topo"><span class="hist-modo">${MODOS[e.modo] || e.modo}</span><b>${ganhou ? 'Vitória' : perdeu ? 'Derrota' : 'Empate'} ${e.cz ? `${e.cz[0]}-${e.cz[1]}` : ''}</b><small>${quando(e.t)}</small></div>
-        <div class="hist-chips">${e.trof !== undefined && e.trof !== null ? `<span>🏆 ${e.trof >= 0 ? '+' : ''}${e.trof}</span>` : ''}${e.pts !== undefined && e.pts !== null ? `<span class="pr">PR ${e.pts >= 0 ? '+' : ''}${e.pts}</span>` : ''}${e.seq >= 2 ? `<span>🔥${e.seq}</span>` : ''}${e.pat !== undefined && e.pat !== null ? `<span class="hist-pat"><img src="${Ranque.img(e.pat, true)}" alt="" />${Ranque.PATENTES[e.pat].nome}</span>` : ''}${e.dur ? `<span>⏱ ${Math.floor(e.dur / 60)}:${String(e.dur % 60).padStart(2, '0')}</span>` : ''}</div>
+        <div class="hist-chips">${e.trof !== undefined && e.trof !== null ? `<span>🏆 ${e.trof >= 0 ? '+' : ''}${e.trof}</span>` : ''}${e.pts !== undefined && e.pts !== null ? `<span class="pr">PR ${e.pts >= 0 ? '+' : ''}${e.pts}</span>` : ''}${e.seq >= 2 ? `<span>🔥${e.seq}</span>` : ''}${e.bon && e.bon.alta ? `<span class="pr">⬆ Patente alta +${e.bon.alta}</span>` : ''}${e.bon && e.bon.sup ? `<span class="pr">🧠 IA super +${e.bon.sup}</span>` : ''}${e.bon && e.bon.ep ? `<span class="pr">💥 Épica +${e.bon.ep}</span>` : ''}${e.pat !== undefined && e.pat !== null ? `<span class="hist-pat"><img src="${Ranque.img(e.pat, true)}" alt="" />${Ranque.PATENTES[e.pat].nome}</span>` : ''}${e.dur ? `<span>⏱ ${Math.floor(e.dur / 60)}:${String(e.dur % 60).padStart(2, '0')}</span>` : ''}</div>
         <div class="hist-decks">
           <div><small>Você${e.parceiro ? ` + ${esc(e.parceiro)}` : ''}</small><div class="hist-meds">${meds(e.deck)}</div></div>
           ${e.deckRival && e.deckRival.length ? `<div><small>vs ${e.rival && e.rival.nome ? esc(e.rival.nome) : 'Adversário'}${e.rival && e.rival.pat !== undefined && e.rival.pat !== null ? ` <img class="hist-pat-mini" src="${Ranque.img(e.rival.pat, true)}" alt="" />` : ''}</small><div class="hist-meds rival">${meds(e.deckRival)}</div></div>` : ''}
         </div></div>`;
     };
     const v = h.filter((e) => e.res === 'vitoria').length;
-    UI.modal({
+    const rq = h.filter((e) => e.pts !== undefined && e.pts !== null), saldo = rq.reduce((a, e) => a + e.pts, 0);
+    const mm = UI.modal({
       titulo: '📜 Histórico de batalhas',
       classe: 'modal-historico',
-      html: h.length ? `<p class="hist-resumo">Últimas ${h.length} batalhas · <b>${v}</b> vitórias · <b>${h.length - v}</b> outras</p><div class="lista-hist">${h.map(item).join('')}</div>`
+      html: h.length ? `<p class="hist-resumo">Últimas ${h.length} batalhas · <b>${v}</b> vitórias · <b>${h.length - v}</b> outras</p>
+        ${rq.length ? `<div class="hist-filtro"><button class="ativa" data-hf="todas">Todas</button><button data-hf="ranq">Só ranqueadas (${rq.length})</button><span class="${saldo >= 0 ? 'sobe' : 'desce'}">Saldo: ${saldo >= 0 ? '+' : ''}${saldo} PR</span></div>` : ''}
+        <div class="lista-hist">${h.map(item).join('')}</div>`
         : '<p class="aviso">Você ainda não tem batalhas no histórico. Jogue uma partida! ⚔️</p>',
       botoes: [{ texto: 'Fechar', classe: 'principal' }],
     });
+    if (mm && mm.el) mm.el.querySelectorAll('[data-hf]').forEach((b) => (b.onclick = () => {
+      mm.el.querySelectorAll('[data-hf]').forEach((x) => x.classList.toggle('ativa', x === b));
+      mm.el.querySelector('.lista-hist').classList.toggle('so-ranq', b.dataset.hf === 'ranq');
+    }));
   }
 
   // tela de "Evolução desbloqueada"

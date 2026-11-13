@@ -3601,3 +3601,19 @@ html.leve .passe-pegar-tudo { animation: none; }
 .passe-compras.compacto .comprar-passe b { font-size: 15px; }
 .passe-compras.compacto .comprar-passe small { font-size: 11px; opacity: .95; }
 .passe-novo .passe-trilhas { max-height: 52vh; }
+
+/* ===== ranqueada: prêmio da temporada à vista + filtro do histórico ===== */
+.tr-premio { display: flex; align-items: center; gap: 10px; text-align: left; margin: 8px 0; padding: 10px 12px; border-radius: 14px; background: linear-gradient(120deg, #3a2a08, #5a3c0c 60%, #3a1a4a); border: 1.5px solid #FFD25E88; box-shadow: 0 3px 10px #0005; }
+.tr-premio img { width: 46px; height: 46px; object-fit: contain; flex: none; }
+.tr-premio > div > b { display: block; font: 15px 'Lilita One', 'Fredoka', sans-serif; color: #FFE39A; }
+.tr-premio span b { color: #FFE39A; }
+.tr-premio span { display: block; font-size: 12.5px; margin-top: 2px; }
+.tr-premio em { font-style: normal; font-weight: 700; color: #fff; white-space: nowrap; }
+.tr-premio small { display: block; font-size: 11px; opacity: .8; margin-top: 2px; }
+.lp-premio { display: block; color: #FFE39A; opacity: .95; }
+.hist-filtro { display: flex; align-items: center; gap: 6px; margin: 0 0 8px; flex-wrap: wrap; }
+.hist-filtro button { padding: 5px 10px; border-radius: 99px; border: 1px solid #ffffff2a; background: #00000033; color: #ffffffc0; font: 12px 'Fredoka', sans-serif; font-weight: 600; cursor: pointer; }
+.hist-filtro button.ativa { background: #7c5cff; color: #fff; border-color: #a893ff; }
+.hist-filtro span { margin-left: auto; font: 13px 'Lilita One', sans-serif; }
+.hist-filtro .sobe { color: #7CFFB0; } .hist-filtro .desce { color: #FF8A8A; }
+.lista-hist.so-ranq .hist:not(.eh-ranq) { display: none; }
