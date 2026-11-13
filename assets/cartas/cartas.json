@@ -3193,7 +3193,7 @@
         "custo": 4,
         "recarga": 22,
         "mult": 2.2,
-        "descricao": "Uma foice de ki corta tudo em volta (2,2x de dano) e surgem 2 clones do Black que lutam por 8s."
+        "descricao": "Uma foice de ki corta tudo em volta (2,2x de dano) e surgem 2 clones do Black que lutam por 6s."
       },
       "trofeus": 0,
       "exclusivo": [],
@@ -4142,7 +4142,7 @@
       "passiva": {
         "nome": "Além dos Limites",
         "tipo": "formas",
-        "descricao": "Quando cai, se levanta transformado numa forma aleatória (Super Saiyajin, SSJ2, SSJ3, SSJ4, Deus, Blue, Kaioken ou Instinto Superior) com metade da vida. Acontece até 2 vezes por partida."
+        "descricao": "Quando cai, se levanta transformado numa forma aleatória (Super Saiyajin, SSJ2, SSJ3, SSJ4, Deus, Blue, Kaioken ou Instinto Superior) com 45% da vida na primeira vez e 35% na segunda. Acontece até 2 vezes por partida."
       },
       "arena": 1,
       "danoTorre": 0.55

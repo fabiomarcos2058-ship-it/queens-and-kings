@@ -984,6 +984,8 @@
       const host = await X1.entrarSala(codigo, {
         aoComecar: (h, info) => {
           espera.fechar();
+          // quem foi convidado estava na tela da ranqueada: ela ficava por cima da batalha
+          try { RanqueUI.fechar(); } catch (e) { /* nada */ }
           if (!info) { X1.assistir(h, fimDeBatalha); return; }
           // 2v2: descobre quem é meu parceiro e quem são os rivais
           const par = { azul: 'azul2', azul2: 'azul', vermelho: 'vermelho2', vermelho2: 'vermelho' }[info.meuLado];

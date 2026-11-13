@@ -1347,7 +1347,7 @@ const Batalha = (() => {
     t.quintupla = true;
     for (let i = 0; i < 4; i++) {
       const a = (i / 4) * Math.PI * 2 + 0.4;
-      const c = criarTropa(t.time, t.carta, t.x + Math.cos(a) * 22, t.y + Math.sin(a) * 16, t.f, t.nivel);
+      const c = criarTropa(t.time, t.carta, Math.max(14, Math.min(W - 14, t.x + Math.cos(a) * 22)), Math.max(14, Math.min(H - 14, t.y + Math.sin(a) * 16)), t.f, t.nivel);
       donoDe(c, t.dono);
       c.isca = true; c.quintupla = true; c.surgir = 0.2; c.habilidade = null; c.vidaIsca = 8;
       c.max = c.vida = Math.round(t.max * 0.18);
@@ -1510,7 +1510,8 @@ const Batalha = (() => {
       if (!s || s.acabou) return;
       const t = donoDe(criarTropa(time, c, x, y, f, nivel), dono);
       t.formaGoku = n; t.surgir = 0.2;
-      t.vida = Math.round(t.max * 0.5); atualizarHp(t);
+      t.vida = Math.round(t.max * (n >= 2 ? 0.35 : 0.45)); atualizarHp(t); // volta mais fraco a cada queda
+      t.recarga = Math.max(t.recarga || 0, 3); // a forma nova não solta a habilidade na hora
       t.el.classList.add('forma-nova');
       fxEl('fx-db-aura', x, y, 900); fxJ(29, x, y);
       particulas(x, y, '#FFC21A', 14, 30);
@@ -1828,9 +1829,9 @@ const Batalha = (() => {
       ferirDivino(e, t, 3);
     }
     for (const lado of [-1, 1]) {
-      const cl = donoDe(criarTropa(t.time, t.carta, Math.max(16, Math.min(W - 16, t.x + lado * 20)), t.y + 6, (t.f || 1) * 0.45, t.nivel), t.dono);
+      const cl = donoDe(criarTropa(t.time, t.carta, Math.max(16, Math.min(W - 16, t.x + lado * 20)), t.y + 6, (t.f || 1) * 0.32, t.nivel), t.dono);
       cl.habilidade = null; cl.el.classList.remove('campea'); cl.el.classList.add('clone-black');
-      cl.temporario = 8; cl.invocado = true; cl.surgir = 0.3;
+      cl.temporario = 6; cl.invocado = true; cl.surgir = 0.3;
       if (t.alvo && t.alvo.vida > 0) cl.alvo = t.alvo;
     }
   }
@@ -3399,6 +3400,10 @@ const Batalha = (() => {
     const paraMim = (l) => (l === s.meuLado ? 'azul' : l === s.parceiroLado ? 'azul2' : l.endsWith('2') ? 'vermelho2' : 'vermelho');
     s.t = est.t; s.prorrogacao = !!est.p;
     marcarTempo();
+    // intervalo real entre as fotos (a internet varia): as tropas andam em velocidade constante de uma foto até a outra
+    const agoraF = performance.now();
+    const intF = Math.max(80, Math.min(450, agoraF - (s.fotoEm || agoraF - 100)));
+    s.fotoInt = s.fotoInt ? s.fotoInt * 0.7 + intF * 0.3 : intF; s.fotoEm = agoraF;
     if (V) { s.azul.coroas = est.cz[1]; s.vermelho.coroas = est.cz[0]; } else { s.azul.coroas = est.cz[0]; s.vermelho.coroas = est.cz[1]; }
     if (D && est.els) { s.azul.elixir = est.els[s.meuLado] || 0; s.azul2.elixir = est.els[s.parceiroLado] || 0; }
     else if (D) { s.azul.elixir = est.el[2] || 0; s.azul2.elixir = est.el[0]; }
@@ -3432,10 +3437,13 @@ const Batalha = (() => {
         t.hid = hid; t.max = max; t.vida = vida;
         s.mapa.set(hid, t);
       }
-      t.tx = x; t.ty = y;
+      if (t.tx !== x || t.ty !== y) { t.ox = t.x; t.oy = t.y; t.tx = x; t.ty = y; t.lerp = 0; }
       if (vida < t.vida) { piscar(t.el, 'levou'); numero(t, t.vida - vida); }
-      t.vida = vida; t.max = max;
-      atualizarHp(t);
+      if (vida !== t.vidaVista || max !== t.maxVisto) { t.vida = vida; t.max = max; t.vidaVista = vida; t.maxVisto = max; atualizarHp(t); }
+      t.recarga = recarga;
+      // convidado: só mexe nas classes quando o estado da tropa mudou (eram ~50 trocas por tropa, 10x por segundo)
+      if (flags === t.flagsVistas && f2 === t.f2Visto) continue;
+      t.flagsVistas = flags; t.f2Visto = f2;
       t.surgir = flags & 1 ? 1 : 0;
       t.el.classList.toggle('surgindo', !!(flags & 1));
       t.el.classList.toggle('aura-furia', !!(flags & 2));
@@ -3478,14 +3486,21 @@ const Batalha = (() => {
     }
 
     // projéteis (redesenhados a cada foto)
-    s.pjEls.forEach((el) => el.remove());
-    s.pjEls = (est.pj || []).map(([px, py, timeN, deTorre, sprite, giro]) => {
-      const el = document.createElement('div');
-      el.className = `projetil ${mt(timeN)}${deTorre ? ' de-torre' : ''}${sprite ? ' com-sprite' : ''}`;
+    const pjs = est.pj || [];
+    while (s.pjEls.length > pjs.length) s.pjEls.pop().remove();
+    pjs.forEach(([px, py, timeN, deTorre, sprite, giro], k) => {
+      let el = s.pjEls[k];
+      if (!el) { el = document.createElement('div'); s.arena.appendChild(el); s.pjEls.push(el); }
+      const cls = `projetil ${mt(timeN)}${deTorre ? ' de-torre' : ''}${sprite ? ' com-sprite' : ''}`;
+      if (el.pjCls !== cls) { el.pjCls = cls; el.className = cls; }
       Object.assign(el.style, pct(mx(px), my(py)));
-      if (sprite) { el.style.backgroundImage = `url(${spriteUrl(sprite)})`; el.style.width = `${(16 / W) * 100}%`; el.style.transform = `translate(-50%, -50%) rotate(${(giro || 0) + (V ? 180 : 0)}deg)`; }
-      s.arena.appendChild(el);
-      return el;
+      if (sprite !== el.pjSprite) {
+        el.pjSprite = sprite;
+        el.style.backgroundImage = sprite ? `url(${spriteUrl(sprite)})` : '';
+        el.style.width = sprite ? `${(16 / W) * 100}%` : '';
+        if (!sprite) el.style.transform = '';
+      }
+      if (sprite) el.style.transform = `translate(-50%, -50%) rotate(${(giro || 0) + (V ? 180 : 0)}deg)`;
     });
 
     // efeitos
@@ -3560,9 +3575,12 @@ const Batalha = (() => {
     s.ultimo = agora;
     for (const t of s.ent) {
       if (t.torre || t.tx === undefined) continue;
-      const k = Math.min(1, dt * 10);
-      t.x += (t.tx - t.x) * k; t.y += (t.ty - t.y) * k;
       if (t.recarga > 0) t.recarga -= dt;
+      if (t.posto && t.lerp >= 1) continue; // parada: não mexe no DOM
+      // teletransporte / pulo grande: vai direto, sem deslizar pela arena
+      if (Math.hypot(t.tx - (t.ox ?? t.tx), t.ty - (t.oy ?? t.ty)) > 70) t.lerp = 1;
+      else t.lerp = Math.min(1, (t.lerp || 0) + (dt * 1000) / ((s.fotoInt || 100) * 1.15));
+      t.x = (t.ox ?? t.tx) + (t.tx - (t.ox ?? t.tx)) * t.lerp; t.y = (t.oy ?? t.ty) + (t.ty - (t.oy ?? t.ty)) * t.lerp; t.posto = true;
       posicionar(t);
     }
     hud();
@@ -3754,7 +3772,8 @@ const Batalha = (() => {
       }
     }
     // afasta tropas grudadas
-    const tropas = s.ent.filter((e) => !e.torre);
+    // (o Roman preso num aliado não entra na conta: ele empurrava o aliado sem parar até o canto da arena)
+    const tropas = s.ent.filter((e) => !e.torre && !e.acoplado);
     for (let i = 0; i < tropas.length; i++) {
       for (let j = i + 1; j < tropas.length; j++) {
         const a = tropas[i], b = tropas[j];
