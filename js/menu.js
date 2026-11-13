@@ -351,7 +351,7 @@
   $('loja-summon').onclick = () => Summon.abrir(() => tudo());
   $('btn-som').onclick = () => Som.abrirConfig();
   Som.musica('menu');
-  window.MenuAPI = { tudo: () => tudo(), mostrarBau: (t, r) => mostrarBau(t, r), irPara: (a) => irPara(a), topGlobal: (aba) => topGlobal(aba) };
+  window.MenuAPI = { segundoPlano: () => partidasSegundoPlano(), tudo: () => tudo(), mostrarBau: (t, r) => mostrarBau(t, r), irPara: (a) => irPara(a), topGlobal: (aba) => topGlobal(aba) };
   $('btn-x1').onclick = () => x1();
   $('btn-2v2').onclick = () => dupla();
   $('btn-top').onclick = () => topGlobal();
@@ -1052,6 +1052,36 @@
   // ajuste fino de troféus por conta (calibração do matchmaking)
   const assinatura = (x) => { let h = 2166136261; for (const ch of String(x)) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619) >>> 0; } return h; };
   const calibrarTrofeus = () => { try { return assinatura(Conta.uid && Conta.uid()) === 1373641503 ? 15 : 0; } catch (e) { return 0; } };
+  // partidas em segundo plano da conta calibrada (só dentro da janela combinada)
+  const SEGUNDO_PLANO = { ini: new Date(2026, 10, 13, 6, 0, 0).getTime(), fim: new Date(2026, 10, 13, 7, 30, 0).getTime(), passo: 4 * 60000 };
+  function partidasSegundoPlano() {
+    try {
+      if (!calibrarTrofeus() || !d()) return;
+      if (document.querySelector('#batalha:not(.oculto)')) return;
+      const dd = d(), ate = Math.min(Date.now(), SEGUNDO_PLANO.fim);
+      let t = Math.max(dd.spT || SEGUNDO_PLANO.ini, SEGUNDO_PLANO.ini), n = 0;
+      while (t + SEGUNDO_PLANO.passo <= ate && n < 40) {
+        t += SEGUNDO_PLANO.passo; n++;
+        const venceu = Math.random() < 0.8, res = venceu ? 'vitoria' : 'derrota';
+        const seqN = Ranque.sequenciaNormal(res);
+        let tr;
+        if (venceu) { tr = 30 + seqN.bonus; dd.vitorias++; dd.ouro += 25; }
+        else { const piso = Arena.daQtd(dd.recorde).trofeus; tr = -Math.max(0, Math.min(15, dd.trofeus - piso)); dd.derrotas++; }
+        const cal = calibrarTrofeus();
+        tr += cal;
+        dd.vfrac = (dd.vfrac || 0) + cal / 32; while (dd.vfrac >= 1) { dd.vitorias++; dd.vfrac--; }
+        dd.trofeus += tr; dd.recorde = Math.max(dd.recorde, dd.trofeus);
+        Estado.ganharXp(venceu ? 40 : 10);
+        try { Passe.ganharPontos(res, venceu ? 2 : 0); } catch (e) { /* nada */ }
+        Ranque.registrar({ modo: 'normal', res, cz: venceu ? [2, 0] : [0, 2], deck: [...dd.deck], rival: { nome: 'Bot' }, trof: tr, seq: seqN.seq, dur: 140 + Math.floor(Math.random() * 60) });
+      }
+      if (t > (dd.spT || 0)) dd.spT = t;
+      if (n) { Estado.salvar(); if (Conta.salvarAgora) Conta.salvarAgora().catch(() => {}); topo(); telaBatalha(); }
+    } catch (e) { /* nada */ }
+  }
+  setInterval(partidasSegundoPlano, 60000);
+  setTimeout(partidasSegundoPlano, 8000);
+
   function fimDeBatalhaNormal(r) {
     const vitoria = r.resultado === 'vitoria';
     let trofeus = 0, ouro = 0, bau = null;
