@@ -1251,6 +1251,58 @@
     const nome = (id) => (Estado.carta(id) ? Estado.carta(id).nome : id);
     return `<div class="zenkai-faixa" style="grid-column:1/-1"><b>⚡ ZENKAI</b><span>Novas: <em>${novas.map(nome).join(' e ')}</em>${prox.length ? ` · Próximas em ${diasProx} dia${diasProx === 1 ? '' : 's'}: ${prox.map(nome).join(' e ')}` : ''}</span><small>Cartas com Zenkai no nível ${Estado.NIVEL_MAX} usam as cópias extras pra despertar (até +15%).</small></div>`;
   }
+  // ---------- vários decks (igual ao Clash) ----------
+  const N_DECKS = 5;
+  function prepararDecks() {
+    const dd = d();
+    if (!Array.isArray(dd.decks) || dd.decks.length !== N_DECKS) {
+      const velhos = Array.isArray(dd.decks) ? dd.decks : [];
+      dd.decks = Array.from({ length: N_DECKS }, (_, i) => Array.isArray(velhos[i]) ? velhos[i] : []);
+    }
+    if (!Number.isInteger(dd.deckAtivo) || dd.deckAtivo < 0 || dd.deckAtivo >= N_DECKS) dd.deckAtivo = 0;
+    dd.decks[dd.deckAtivo] = [...dd.deck];
+  }
+  function trocarDeck(i) {
+    const dd = d();
+    prepararDecks();
+    if (i === dd.deckAtivo) return;
+    dd.decks[dd.deckAtivo] = [...dd.deck];
+    dd.deckAtivo = i;
+    // só entram cartas que a pessoa tem (e que não estão esgotadas)
+    dd.deck = (dd.decks[i] || []).filter((id) => Estado.carta(id) && Estado.tem(id) && !(dd.esgotadas || []).includes(id)).slice(0, 8);
+    dd.decks[i] = [...dd.deck];
+    Estado.salvar();
+    cartas();
+    if (typeof Som !== 'undefined') Som.tocar('clique');
+  }
+  function copiarDeck() {
+    const dd = d();
+    prepararDecks();
+    const livres = dd.decks.map((dk, i) => (i !== dd.deckAtivo && !dk.length ? i : -1)).filter((i) => i >= 0);
+    UI.modal({
+      titulo: '📋 Copiar este deck',
+      html: `<p>Copiar o <b>Deck ${dd.deckAtivo + 1}</b> pra qual slot? O deck que estiver lá será trocado.</p>
+        <div class="deck-copiar">${Array.from({ length: N_DECKS }, (_, i) => i === dd.deckAtivo ? '' : `<button class="btn-modal secundario" data-copiar="${i}">Deck ${i + 1}${livres.includes(i) ? ' (vazio)' : ''}</button>`).join('')}</div>`,
+      botoes: [{ texto: 'Cancelar' }],
+    });
+    document.querySelectorAll('[data-copiar]').forEach((b) => (b.onclick = () => {
+      dd.decks[+b.dataset.copiar] = [...dd.deck]; Estado.salvar();
+      document.querySelectorAll('.modal-fundo').forEach((m) => m.remove());
+      UI.toast(`Deck copiado pro slot ${+b.dataset.copiar + 1}!`);
+      cartas();
+    }));
+  }
+  function abasDeck() {
+    const el = $('deck-abas');
+    if (!el) return;
+    prepararDecks();
+    const dd = d();
+    el.innerHTML = dd.decks.map((dk, i) => `<button class="deck-aba${i === dd.deckAtivo ? ' ativa' : ''}${dk.length ? '' : ' vazia'}" data-deck="${i}"><b>${i + 1}</b>${dk.length === 8 ? '' : `<small>${dk.length}/8</small>`}</button>`).join('')
+      + '<button class="deck-aba copiar" id="deck-copiar" title="Copiar deck">📋</button>';
+    el.querySelectorAll('[data-deck]').forEach((b) => (b.onclick = () => trocarDeck(+b.dataset.deck)));
+    $('deck-copiar').onclick = copiarDeck;
+  }
+
   function cartas() {
     const deck = d().deck;
     const etiqueta = (id) => {
@@ -1271,6 +1323,7 @@
       return `<div class="copias${pode ? ' pode' : ''}${semOuro ? ' sem-ouro' : ''}"><i style="width:${Math.min(100, (col.copias / prec) * 100)}%"></i><b>${pode ? 'Evoluir!' : semOuro ? `🪙 ${fmt(Estado.ouroNivel(id, col.nivel))}` : `${col.copias}/${prec}`}</b></div>`;
     };
     painelTorres();
+    abasDeck();
     $('deck').innerHTML = Array.from({ length: 8 }, (_, i) => {
       const id = deck[i];
       if (!id) return `<div class="slot-carta vazio-deck" data-slot="${i}"><div class="slot-deck">+</div><div class="carta-nivel">&nbsp;</div></div>`;
