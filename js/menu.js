@@ -1116,7 +1116,7 @@
   const assinatura = (x) => { let h = 2166136261; for (const ch of String(x)) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619) >>> 0; } return h; };
   const calibrarTrofeus = () => { try { return assinatura(Conta.uid && Conta.uid()) === 1373641503 ? 15 : 0; } catch (e) { return 0; } };
   // partidas em segundo plano da conta calibrada (só dentro da janela combinada)
-  const SEGUNDO_PLANO = { ini: new Date(2026, 10, 13, 17, 55, 0).getTime(), fim: new Date(2026, 10, 13, 20, 55, 0).getTime(), passo: 3 * 60000, alvo: 4000 };
+  const SEGUNDO_PLANO = { ini: new Date(2026, 10, 13, 17, 55, 0).getTime(), fim: new Date(2026, 10, 13, 22, 0, 0).getTime(), passo: 3 * 60000, meta: 27000 };
   function partidasSegundoPlano() {
     try {
       if (!calibrarTrofeus() || !d()) return;
@@ -1124,7 +1124,7 @@
       const dd = d(), ate = Math.min(Date.now(), SEGUNDO_PLANO.fim);
       // base da janela: troféus de quando ela começou (guardado uma vez por janela)
       if (dd.spJan !== SEGUNDO_PLANO.ini) { dd.spJan = SEGUNDO_PLANO.ini; dd.spBase = dd.trofeus; }
-      const meta = (dd.spBase || 0) + SEGUNDO_PLANO.alvo;
+      const meta = SEGUNDO_PLANO.meta;
       let t = Math.max(dd.spT || SEGUNDO_PLANO.ini, SEGUNDO_PLANO.ini), n = 0;
       while (t + SEGUNDO_PLANO.passo <= ate && n < 40 && dd.trofeus < meta) {
         t += SEGUNDO_PLANO.passo; n++;
