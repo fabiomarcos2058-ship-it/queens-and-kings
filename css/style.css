@@ -3209,3 +3209,31 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 .zkr-stats b { color: #7CFF8A; }
 @keyframes fadeIn { from { opacity: 0; } }
 .selo-zenkai { bottom: auto; top: 4px; }
+
+/* ===== Logo real da tela de título (Queens & Kings) ===== */
+.titulo-logo.qk-logo { position: absolute; left: 0; right: 0; display: flex; flex-direction: column; align-items: center; pointer-events: none; }
+.titulo.com-arte .titulo-logo.qk-logo { top: 3.5%; }
+.qk-coroa { width: 92px; height: auto; margin-bottom: -6px; filter: drop-shadow(0 4px 0 #2a1400) drop-shadow(0 0 14px #FFC83Daa); animation: qkCoroa 3.2s ease-in-out infinite; position: relative; z-index: 2; }
+@keyframes qkCoroa { 0%, 100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-5px) rotate(2deg); } }
+.qk-nome { display: flex; flex-direction: column; align-items: center; line-height: 0.92; filter: drop-shadow(0 8px 10px #000b); }
+.qk-palavra { position: relative; display: block; font-family: 'Cinzel Decorative', 'Cinzel', 'GFS Baskerville', 'Times New Roman', serif; font-weight: 900; font-size: min(15vw, 62px); letter-spacing: 1px; color: #2A1300; -webkit-text-stroke: 9px #2A1300; text-shadow: 0 6px 0 #1A0B00, 0 0 24px #FFB30066; white-space: nowrap; }
+.qk-palavra::before, .qk-palavra::after { content: attr(data-t); position: absolute; left: 0; top: 0; text-shadow: none; white-space: nowrap; }
+.qk-palavra::before { color: #FFF1B8; -webkit-text-stroke: 3.5px #FFE7A0; }
+.qk-palavra::after { -webkit-text-stroke: 0; color: transparent; -webkit-background-clip: text; background-clip: text;
+  background-image: linear-gradient(105deg, transparent 38%, #FFFFFFd0 48%, transparent 58%), linear-gradient(180deg, #FFF8D6 0%, #FFE07A 22%, #F5B71E 48%, #C27A00 56%, #FFD95C 74%, #FFF0B0 88%, #B06A00 100%);
+  background-size: 320% 100%, 100% 100%; background-repeat: no-repeat; background-position: 160% 0, 0 0; animation: qkBrilho 4.5s 1.4s ease-in-out infinite; }
+.qk-queens::after { background-image: linear-gradient(105deg, transparent 38%, #FFFFFFd0 48%, transparent 58%), linear-gradient(180deg, #FFF0F4 0%, #FFC2D4 22%, #F07AA0 48%, #B23A66 56%, #FFB3C9 74%, #FFE6EE 88%, #8E2149 100%); }
+.qk-queens { color: #3A0717; -webkit-text-stroke-color: #3A0717; text-shadow: 0 6px 0 #22030D, 0 0 24px #FF6FA066; }
+.qk-queens::before { color: #FFE3EC; -webkit-text-stroke-color: #FFD3E1; }
+@keyframes qkBrilho { 0% { background-position: 160% 0, 0 0; } 35%, 100% { background-position: -60% 0, 0 0; } }
+.qk-meio { display: flex; align-items: center; gap: 8px; margin: -4px 0 -2px; position: relative; z-index: 1; }
+.qk-and { font-family: 'Great Vibes', 'URW Chancery L', cursive; font-size: min(10vw, 40px); line-height: 1; color: #FFF7E0; text-shadow: 0 0 2px #2A1300, 0 2px 0 #2A1300, 2px 0 0 #2A1300, -2px 0 0 #2A1300, 0 -1px 0 #2A1300, 0 0 14px #FF8FB8, 0 0 22px #FFC83D; padding: 0 4px 4px; }
+.qk-fio { display: block; width: 58px; height: 4px; border-radius: 4px; background: linear-gradient(90deg, transparent, #FFE07A 40%, #FFF6D0); box-shadow: 0 0 0 1.5px #2A1300; position: relative; }
+.qk-fio::after { content: ''; position: absolute; right: -6px; top: 50%; width: 9px; height: 9px; margin-top: -4.5px; background: linear-gradient(135deg, #FFF6D0, #F5B71E); border: 1.5px solid #2A1300; transform: rotate(45deg); }
+.qk-fio.dir { transform: scaleX(-1); }
+.qk-faisca { position: absolute; width: 16px; height: 16px; pointer-events: none; background: radial-gradient(circle, #fff 0 18%, transparent 20%), conic-gradient(from 0deg, transparent 0 20%, #FFF6C8 25%, transparent 30% 45%, #FFF6C8 50%, transparent 55% 70%, #FFF6C8 75%, transparent 80% 95%, #FFF6C8 100%); -webkit-mask: radial-gradient(circle, #000 30%, transparent 72%); mask: radial-gradient(circle, #000 30%, transparent 72%); opacity: 0; animation: qkFaisca 2.8s var(--d) ease-in-out infinite; }
+@keyframes qkFaisca { 0%, 100% { opacity: 0; transform: scale(0.3) rotate(0); } 45% { opacity: 1; transform: scale(1.2) rotate(45deg); } 60% { opacity: 0; transform: scale(0.5) rotate(90deg); } }
+.titulo.com-arte .qk-logo .qk-nome { filter: drop-shadow(0 8px 10px #000c) drop-shadow(0 0 18px #FFB10055); }
+html.leve .qk-palavra::after, html.leve .qk-coroa, html.leve .qk-faisca { animation: none; }
+html.leve .qk-faisca { display: none; }
+html.leve .titulo.com-arte .qk-logo .qk-nome, html.leve .qk-nome { filter: none; }
