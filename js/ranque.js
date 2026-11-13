@@ -147,7 +147,9 @@ const Ranque = (() => {
     const acima = Math.max(0, rivalI - meuI);
     const difMin = acima ? Math.max(P.difMin || 0, Math.min(5, 2 + acima)) : P.difMin || 0;
     const nivelForte = acima ? Math.max(nivelDelta, 0) + (acima >= 2 ? 1 : 0) : nivelDelta;
-    return { dupla, rivais, parceiro, rivalI, meuI, dif: Math.max(dif, difMin), nivelDelta: nivelForte, difMin, chanceSuper: P.super || 0, rivalPts };
+    // a ranqueada sorteia uma das arenas de artes marciais (todo mundo vê, com qualquer quantidade de troféus)
+    const arena = ['torneio', 'canion', 'ilha'][Math.floor(Math.random() * 3)];
+    return { arena, dupla, rivais, parceiro, rivalI, meuI, dif: Math.max(dif, difMin), nivelDelta: nivelForte, difMin, chanceSuper: P.super || 0, rivalPts };
   }
 
   // ---------- Pontos ----------

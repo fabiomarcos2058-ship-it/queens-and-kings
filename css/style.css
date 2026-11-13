@@ -3557,3 +3557,7 @@ body.em-batalha .tela-ranque { display: none !important; }
 .cartao-batalha.t11 .cb-frame { filter: hue-rotate(212deg) saturate(1.25) brightness(1.08) drop-shadow(0 0 10px #3FA8FF) drop-shadow(0 0 3px #FFFFFF); overflow: visible; }
 .cartao-batalha.t11 .cb-faixa { background: linear-gradient(180deg, #FFFFFF, #3FA8FF 50%, #06103A); box-shadow: 0 0 14px #3FA8FF; }
 .leve .cartao-batalha.t11 .cb-frame { filter: hue-rotate(212deg) saturate(1.25); }
+
+/* partículas leves das arenas novas */
+.amb-poeira i { width: 4px; height: 4px; background: #E8C99A; border-radius: 50%; opacity: 0.55; }
+.amb-brisa i { width: 5px; height: 3px; background: #EFFFFB; border-radius: 50%; opacity: 0.6; }

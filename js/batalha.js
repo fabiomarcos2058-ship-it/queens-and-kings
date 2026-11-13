@@ -81,7 +81,7 @@ const Batalha = (() => {
       modo, t: 0, prorrogacao: false, acabou: false, pausa: false,
       azul: lado(deck), vermelho: lado(deckIA),
       ent: torres(minhas, delas), proj: [], efeitos: [], agenda: [], selecionada: null, iaTimer: 2, id: 0,
-      arenaId: (evento && evento.arena) || Arena.daQtd(Estado.d.recorde).id,
+      arenaId: (evento && evento.arena) || (ranque && ranque.arena) || Arena.daQtd(Estado.d.recorde).id,
       nivelIA: (evento && evento.nivel) || (tutorial && 1) || Math.max(1, Math.min(9, Math.round(deck.reduce((a, id) => a + ((Estado.d.colecao[id] || {}).nivel || 1), 0) / deck.length) - (Mod.deckApelao() ? 0 : 2))),
       rede, niveisV: x1 ? rede.convidado.niveis : null, eventos: [], snapTimer: 0,
       zenkais: x1 ? { vermelho: rede.convidado.zenkai || null } : {},
@@ -3344,7 +3344,7 @@ const Batalha = (() => {
       modo: 'x1c', convidado: true, rede, t: 0, prorrogacao: false, acabou: false, pausa: false,
       azul: { elixir: 5, fila: [], coroas: 0 }, vermelho: { elixir: 5, fila: [], coroas: 0 },
       ent: torres(Estado.minhasTorres(), rede.host.torres || Estado.minhasTorres()), proj: [], efeitos: [], agenda: [], selecionada: null, id: 0, mapa: new Map(), pjEls: [],
-      arenaId: rede.host.arena || 'festival',
+      arenaId: (rede.ranque && rede.ranque.arena) || rede.host.arena || 'festival',
     };
     if (dupla) s.azul2 = { elixir: 5 };
     if (rede.ranque) s.ranque = rede.ranque;

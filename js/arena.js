@@ -10,6 +10,9 @@ const Arena = (() => {
     { n: 2, id: 'sakura', nome: 'Bosque das Cerejeiras', trofeus: 400, ambiente: 'petala', cor: '#F4A6C6', desc: 'Pétalas caindo, pontes vermelhas e carpas no rio.' },
     { n: 3, id: 'gelo', nome: 'Vila Congelada', trofeus: 1000, ambiente: 'neve', cor: '#9ED4F5', desc: 'Neve fofa, pinheiros e um rio completamente congelado.' },
     { n: 4, id: 'vulcao', nome: 'Templo Vulcânico', trofeus: 1800, ambiente: 'brasa', cor: '#F07A2A', desc: 'Um templo antigo cortado por um rio de lava.' },
+    { n: 5, id: 'torneio', nome: 'Grande Torneio', trofeus: 2400, ambiente: 'confete', cor: '#E8C46A', desc: 'O ringue de pedra do torneio de artes marciais, com a plateia em volta.' },
+    { n: 6, id: 'canion', nome: 'Cânion dos Guerreiros', trofeus: 3000, ambiente: 'poeira', cor: '#D98A4A', desc: 'Um deserto de rochas marcado pelas crateras de lutas antigas.' },
+    { n: 7, id: 'ilha', nome: 'Ilha do Velho Mestre', trofeus: 3600, ambiente: 'brisa', cor: '#4FD0C8', desc: 'Uma ilhota de areia e palmeiras no meio do mar, perfeita pra treinar.' },
   ];
   const daQtd = (trofeus) => [...ARENAS].reverse().find((a) => (trofeus || 0) >= a.trofeus) || ARENAS[0];
   // arenas só de evento (não entram no caminho de troféus)

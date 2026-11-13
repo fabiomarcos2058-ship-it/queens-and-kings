@@ -612,6 +612,105 @@ def enfeites_celestial(img, rng):
     return img
 
 
+# ---------------------------------------------------------------- arenas de artes marciais (cenários originais)
+def cratera(base, cx, cy, r, semente):
+    """Marca de impacto no chão: buraco escuro com a borda levantada e rachaduras."""
+    m = mascara(lambda dr: blob(dr, u(cx), u(cy), u(r), semente, 10, 0.2), borrar=u(1.2))
+    aro = ndimage.gaussian_filter(borda(m, u(2.2)), 1.5)
+    base = base * (1 - m[..., None] * 0.34)
+    base = brilho_aditivo(base, aro * (1 - m), (1.0, 0.9, 0.75), 0.28)
+    rng = random.Random(semente)
+    rach = Image.new('L', (W, H), 0)
+    dr = ImageDraw.Draw(rach)
+    for _ in range(6):
+        a = rng.uniform(0, math.tau)
+        x, y = u(cx) + math.cos(a) * u(r) * 0.8, u(cy) + math.sin(a) * u(r) * 0.8
+        pts = [(x, y)]
+        for _k in range(3):
+            a += rng.uniform(-0.5, 0.5)
+            x += math.cos(a) * u(r) * rng.uniform(0.25, 0.45); y += math.sin(a) * u(r) * rng.uniform(0.25, 0.45)
+            pts.append((x, y))
+        dr.line(pts, fill=255, width=3)
+    rc = np.asarray(rach.filter(ImageFilter.GaussianBlur(1)), np.float32) / 255
+    return base * (1 - rc[..., None] * 0.5)
+
+
+def palmeira(base, cx, cy, r, semente):
+    """Palmeira vista de cima: folhas compridas em estrela e um coco no meio."""
+    rng = random.Random(semente)
+    folhas = []
+    n = 8
+    for i in range(n):
+        a = i / n * math.tau + rng.uniform(-0.2, 0.2)
+        comp = u(r) * rng.uniform(0.85, 1.1)
+        larg = u(r) * 0.2
+        px, py = math.cos(a), math.sin(a)
+        nx, ny = -py, px
+        folhas.append([(u(cx) + nx * larg * 0.3, u(cy) + ny * larg * 0.3),
+                       (u(cx) + px * comp * 0.5 + nx * larg, u(cy) + py * comp * 0.5 + ny * larg),
+                       (u(cx) + px * comp, u(cy) + py * comp),
+                       (u(cx) + px * comp * 0.5 - nx * larg, u(cy) + py * comp * 0.5 - ny * larg),
+                       (u(cx) - nx * larg * 0.3, u(cy) - ny * larg * 0.3)])
+    m = mascara(lambda dr: [dr.polygon(f, fill=255) for f in folhas], borrar=1.2)
+    base = sombra(base, m, dx=u(6), dy=u(9), borrar=u(3), forca=0.5)
+    yy, xx = np.mgrid[0:H, 0:W]
+    d = np.hypot(xx - u(cx), yy - u(cy)) / u(r)
+    verde = np.array([0.16, 0.5, 0.2], np.float32) * (0.75 + ruido(W, H, 5, 2, semente)[..., None] * 0.5)
+    verde = verde * np.clip(1.25 - d * 0.5, 0.6, 1.25)[..., None]
+    veio = mascara(lambda dr: [dr.line([f[0], f[2]], fill=255, width=2) for f in folhas])
+    verde = verde * (1 - veio[..., None] * 0.35)
+    base = misturar(base, np.clip(verde, 0, 1), m)
+    coco = mascara(lambda dr: dr.ellipse([u(cx) - u(r) * 0.16, u(cy) - u(r) * 0.16, u(cx) + u(r) * 0.16, u(cy) + u(r) * 0.16], fill=255), borrar=1)
+    return misturar(base, np.broadcast_to(np.array([0.36, 0.24, 0.12], np.float32), base.shape), coco)
+
+
+def enfeites_torneio(img, rng):
+    telha = textura('clay_roof_tiles', u(26), 81)
+    marmore = ajustar(textura('marble_01', u(30), 82), brilho=1.1, saturacao=0.5)
+    # arquibancadas nos quatro cantos (telhados de templo)
+    for (x0, y0, x1, y1) in [(4, 6, 70, 40), (290, 6, 356, 40), (4, 580, 70, 614), (290, 580, 356, 614)]:
+        img = telhado(img, x0, y0, x1, y1, telha, tom=(1.25, 0.72, 0.42))
+    # muretas dos lados e pilares
+    for (x, y) in [(14, 150), (346, 150), (14, 250), (346, 250), (14, 370), (346, 370), (14, 470), (346, 470)]:
+        img = pilar(img, x, y, 9, marmore)
+    # anel do ringue pintado no chão
+    for (x, y) in [(180, 190), (180, 430)]:
+        an = mascara(lambda dr: dr.ellipse([u(x - 62), u(y - 44), u(x + 62), u(y + 44)], outline=255, width=u(2.4)), borrar=1)
+        img = misturar(img, np.broadcast_to(np.array([0.78, 0.2, 0.16], np.float32), img.shape), an * 0.7)
+    img = varal(img, 140, 30, 330, [(0.95, 0.75, 0.2), (0.9, 0.25, 0.2), (1.0, 0.95, 0.9)], 15)
+    img = varal(img, 476, 30, 330, [(0.95, 0.75, 0.2), (0.9, 0.25, 0.2), (1.0, 0.95, 0.9)], 16)
+    for (x, y) in [(40, 270), (320, 270), (40, 350), (320, 350)]:
+        img = lanterna(img, x, y, (1.0, 0.8, 0.3), 5)
+    return img
+
+
+def enfeites_canion(img, rng):
+    rocha = textura('seaside_rock', u(44), 91)
+    for (x, y, r) in [(18, 30, 26), (342, 36, 24), (16, 590, 24), (344, 584, 27), (12, 200, 20), (348, 214, 21), (14, 410, 21), (346, 420, 20),
+                      (46, 256, 11), (318, 366, 12), (178, 222, 10), (184, 398, 10), (60, 150, 8), (300, 470, 8)]:
+        img = pedra(img, x, y, r, int(x * 5 + y), rocha, cor=(2.3, 1.45, 0.95))
+    for (x, y, r) in [(130, 200, 15), (236, 240, 11), (120, 420, 12), (238, 392, 16), (52, 500, 10), (310, 120, 10)]:
+        img = cratera(img, x, y, r, int(x * 3 + y))
+    return img
+
+
+def enfeites_ilha(img, rng):
+    rocha = textura('seaside_rock', u(40), 101)
+    for (x, y, r) in [(20, 34, 24), (340, 30, 22), (18, 586, 23), (342, 590, 25), (14, 196, 20), (346, 206, 21), (16, 416, 21), (344, 424, 20),
+                      (176, 224, 14), (184, 396, 14), (50, 250, 13), (312, 372, 13)]:
+        img = palmeira(img, x, y, r, int(x * 7 + y))
+    for (x, y, r) in [(62, 300, 6), (296, 320, 6), (150, 296, 4), (220, 326, 5), (40, 130, 6), (322, 496, 6)]:
+        img = pedra(img, x, y, r, int(x + y), rocha, cor=(2.2, 2.05, 1.85))
+    # conchas e estrelas-do-mar na areia
+    for (x, y) in [(36, 160), (326, 150), (140, 250), (224, 372), (44, 470), (318, 460), (128, 518), (236, 100)]:
+        for _k in range(5):
+            fx, fy = x + rng.uniform(-9, 9), y + rng.uniform(-7, 7)
+            cor = rng.choice([(1, 0.93, 0.85), (1, 0.62, 0.5), (0.98, 0.8, 0.55)])
+            fm = mascara(lambda dr: dr.ellipse([u(fx) - 4, u(fy) - 3, u(fx) + 4, u(fy) + 3], fill=255), borrar=1)
+            img = misturar(img, np.broadcast_to(np.array(cor, np.float32), img.shape), fm * 0.9)
+    return img
+
+
 ARENAS = {
     'festival': dict(
         semente=1, chao='rocky_terrain_02', chao2='leafy_grass', ladrilho_chao=95,
@@ -648,6 +747,27 @@ ARENAS = {
         margem='snow_field_aerial', ajuste_margem=dict(brilho=1.15, saturacao=0.3, tom=(0.98, 0.96, 1.08)),
         fluido=lambda: nebulosa(51), escurecer_borda=False, brilho_rio=(0.55, 0.35, 1.0),
         tabua='castle_brick_02_white', ponte_pedra='marble_01', corrimao=(0.9, 0.72, 0.32), tom_ponte=(1.08, 1.04, 1.14), enfeitar=enfeites_celestial),
+    'torneio': dict(
+        semente=6, chao='aerial_beach_01', chao2='coast_sand_rocks_02', ladrilho_chao=110, quadriculado=0.02,
+        ajuste_chao=dict(brilho=1.02, saturacao=1.05, tom=(1.08, 0.98, 0.8), contraste=1.05),
+        trilha='stone_tiles_03', ajuste_trilha=dict(brilho=1.3, saturacao=0.5, contraste=1.1, tom=(1.04, 1.0, 0.94)), ladrilho_trilha=44, borda_trilha=(0.62, 0.2, 0.14),
+        margem='stone_tiles_03', ajuste_margem=dict(brilho=1.1, saturacao=0.5),
+        fluido=lambda: agua(61, [(0.36, 0.74, 0.86), (0.12, 0.44, 0.68)]), espuma=True,
+        tabua='hinoki_planks', corrimao=(0.72, 0.16, 0.12), tom_ponte=(1.0, 0.94, 0.86), enfeitar=enfeites_torneio),
+    'canion': dict(
+        semente=7, chao='coast_sand_rocks_02', chao2='rocky_terrain_02', ladrilho_chao=100, quadriculado=0.022,
+        ajuste_chao=dict(brilho=1.5, saturacao=0.95, tom=(1.28, 0.95, 0.66), contraste=1.05),
+        trilha='large_sandstone_blocks_01', ajuste_trilha=dict(brilho=1.02, tom=(1.18, 0.96, 0.74), contraste=1.15), ladrilho_trilha=58, borda_trilha=(0.42, 0.22, 0.12),
+        margem='rocky_gravel', ajuste_margem=dict(brilho=0.8, saturacao=0.9, tom=(1.25, 0.9, 0.66)),
+        fluido=lambda: agua(71, [(0.22, 0.6, 0.62), (0.06, 0.3, 0.38)]), espuma=True,
+        tabua='brown_planks_03', corrimao=(0.36, 0.2, 0.1), enfeitar=enfeites_canion),
+    'ilha': dict(
+        semente=8, chao='aerial_beach_01', chao2='leafy_grass', ladrilho_chao=115, quadriculado=0.02,
+        ajuste_chao=dict(brilho=1.1, saturacao=1.15, tom=(1.06, 1.0, 0.82), contraste=1.02),
+        trilha='oak_wood_planks', ajuste_trilha=dict(brilho=1.05, saturacao=0.9, contraste=1.1, tom=(1.05, 0.95, 0.8)), ladrilho_trilha=50, borda_trilha=(0.4, 0.26, 0.14),
+        margem='aerial_beach_01', ajuste_margem=dict(brilho=1.2, tom=(1.05, 1.02, 0.9)),
+        fluido=lambda: agua(81, [(0.3, 0.86, 0.84), (0.06, 0.52, 0.7)]), espuma=True,
+        tabua='oak_wood_planks', corrimao=(0.5, 0.32, 0.16), enfeitar=enfeites_ilha),
 }
 
 if __name__ == '__main__':
