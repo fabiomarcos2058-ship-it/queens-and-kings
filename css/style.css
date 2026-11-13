@@ -3488,3 +3488,15 @@ html.leve .i2-gifts.tem .i2-ic { animation: none; }
 .topbar .moeda { background: #0b0826aa; border: 1px solid #ffffff22; border-radius: 999px; }
 .btn-som { background: #ffffff14 !important; border: 1px solid #ffffff26 !important; border-radius: 50% !important; }
 .gift-item > div { text-align: left; }
+/* ===== Princesa Moranguinho sentada na torre ===== */
+.princesa-torre { position: absolute; width: 12.5%; height: auto; transform: translate(-50%, -100%); z-index: 4; pointer-events: none; transform-origin: 50% 100%;
+  filter: drop-shadow(0 3px 2px #0007); animation: princesaBalanca 3.2s ease-in-out infinite; }
+.princesa-torre.vermelho { animation-delay: -1.6s; }
+@keyframes princesaBalanca { 0%, 100% { transform: translate(-50%, -100%) rotate(-2deg); } 50% { transform: translate(-50%, -102%) rotate(2deg); } }
+.princesa-torre.caindo { animation: princesaCai 0.9s ease-in forwards; }
+@keyframes princesaCai { 0% { transform: translate(-50%, -100%) rotate(0); opacity: 1; } 30% { transform: translate(-50%, -130%) rotate(-15deg); } 100% { transform: translate(-50%, 40%) rotate(60deg); opacity: 0; } }
+html.leve .princesa-torre { animation: none; filter: none; }
+html.leve .princesa-torre.caindo { animation: princesaCai 0.9s ease-in forwards; }
+.projetil.de-torre.t-moranguinho { width: 10px; height: 11px; border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%; background: radial-gradient(circle at 50% 30%, #FF9AB8, #E8336A 60%, #B0174A); box-shadow: 0 -3px 0 -1px #5DCA6A, 0 0 6px 1px #FF6FA0aa; }
+.tropa-img { width: 34px; height: 34px; object-fit: contain; object-position: 50% 20%; }
+.mini-tropa .tropa-img { width: 40px; height: 40px; }

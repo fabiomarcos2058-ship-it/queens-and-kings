@@ -41,6 +41,7 @@ const Estado = (() => {
     princesa: { nome: 'Arqueira Real', emoji: '🏹', rei: 1, desc: 'Equilibrada: bom alcance e tiros constantes.', vida: 1, dano: 65, cadencia: 0.8, alcance: 120 },
     canhoneiro: { nome: 'Canhoneira', emoji: '💣', rei: 4, desc: 'Tiros lentos e muito fortes. Ótima contra tanques.', vida: 1.05, dano: 165, cadencia: 1.8, alcance: 108 },
     duquesa: { nome: 'Duquesa das Adagas', emoji: '🗡️', rei: 7, desc: 'Joga adagas sem parar. Destrói tropas pequenas, mas tem menos vida.', vida: 0.88, dano: 30, cadencia: 0.28, alcance: 100 },
+    moranguinho: { nome: 'Princesa Moranguinho', emoji: '🍓', img: 'assets/torres/moranguinho.png', rei: 1, desc: 'Uma princesa de verdade, sentadinha em cima da sua torre! Joga morangos certeiros.', vida: 1, dano: 62, cadencia: 0.8, alcance: 118 },
   };
   // vida parecida com a do Clash: tropa barata leva ~20s para derrubar uma torre, tropa pesada ~8s
   const BASE_TORRE = { princesa: { vida: 3000 }, rei: { vida: 5000, dano: 90, cadencia: 1, alcance: 125 } };

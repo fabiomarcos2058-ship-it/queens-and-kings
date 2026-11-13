@@ -1218,7 +1218,7 @@
     const pode = Estado.podeEvoluirTorre();
     $('painel-torres').innerHTML = `<div class="torre-mini rei"><img data-asset="arena/torre_rei_azul" alt="" /><span class="nv-torre-grande">${m.rei}</span><b>Torre do Rei</b></div>
       <div class="torre-mini"><img data-asset="arena/torre_azul" alt="" /><span class="nv-torre-grande">${m.princesa}</span><b>Princesas</b></div>
-      <div class="torre-mini mini-tropa"><span class="tropa-emoji">${tropa.emoji}</span><b>${tropa.nome}</b></div>
+      <div class="torre-mini mini-tropa"><span class="tropa-emoji">${tropa.img ? `<img class="tropa-img" src="${tropa.img}" alt="" />` : tropa.emoji}</span><b>${tropa.nome}</b></div>
       <div class="torre-acao${pode.ok ? ' pode' : ''}">${pode.ok ? `Evoluir<small><img class="ic-img" data-asset="ui/moeda" alt="" /> ${fmt(pode.preco)}</small>` : 'Ver torres'}</div>`;
     $('painel-torres').onclick = telaTorres;
     Assets.fill();
@@ -1255,7 +1255,7 @@
         <div class="tropas-torre">${Object.entries(Estado.TROPAS_TORRE).map(([id, t]) => {
           const livre = m.rei >= t.rei, st = Estado.statsTorre('princesa', { ...m, tropa: id });
           return `<button class="tropa-torre${id === m.tropa ? ' escolhida' : ''}${livre ? '' : ' trancada'}" data-tropa="${id}">
-            <span class="tropa-emoji">${livre ? t.emoji : '🔒'}</span><b>${t.nome}</b>
+            <span class="tropa-emoji">${!livre ? '🔒' : t.img ? `<img class="tropa-img" src="${t.img}" alt="" />` : t.emoji}</span><b>${t.nome}</b>
             <small>${livre ? t.desc : `Libera no nível de rei ${t.rei}`}</small>
             ${livre ? `<span class="tropa-num">❤️ ${fmt(st.vida)} · ⚔️ ${fmt(st.dano)} · 🔥 ${Math.round(st.dano / st.cadencia)}/s</span>` : ''}
             ${id === m.tropa ? '<i class="tag-escolhida">Em uso</i>' : ''}</button>`;

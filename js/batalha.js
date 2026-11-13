@@ -229,6 +229,15 @@ const Batalha = (() => {
       const emoji = t.tipo === 'rei' ? '👑' : (Estado.TROPAS_TORRE[t.tropa] || Estado.TROPAS_TORRE.princesa).emoji;
       t.el.innerHTML = `<span class="nv-torre">${t.nivel}</span><span class="hp-icone">${emoji}</span>${barraHp()}<b>${t.vida}</b>`;
       arena.appendChild(t.el);
+      // princesa de verdade sentada em cima da torre
+      const tp = t.tipo !== 'rei' && Estado.TROPAS_TORRE[t.tropa];
+      if (tp && tp.img) {
+        t.princesaEl = document.createElement('img');
+        t.princesaEl.className = `princesa-torre ${t.time}`;
+        t.princesaEl.src = tp.img; t.princesaEl.alt = ''; t.princesaEl.draggable = false;
+        Object.assign(t.princesaEl.style, pct(t.x, t.y - 14));
+        arena.appendChild(t.princesaEl);
+      }
     }
     s.zona = document.createElement('div');
     s.zona.className = 'zona-proibida';
@@ -828,6 +837,7 @@ const Batalha = (() => {
     const img = s.arena.querySelector(`[data-torre="${t.id}"]`);
     if (img) img.classList.add('destruida');
     t.el.remove();
+    if (t.princesaEl) { const pe = t.princesaEl; pe.classList.add('caindo'); setTimeout(() => pe.remove(), 900); t.princesaEl = null; }
     s.ent = s.ent.filter((x) => x !== t);
     efeito('explosao-torre', t.x, t.y, 900);
     particulas(t.x, t.y, '#B4B2A9', 16, 50);

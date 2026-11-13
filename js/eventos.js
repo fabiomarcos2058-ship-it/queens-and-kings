@@ -620,6 +620,11 @@ const Eventos = (() => {
         setTimeout(() => { if (!Estado.tem(NINO)) revelarNino(Ranque.darEvolucao(NINO)); }, 900);
       }
       if (typeof Ranque !== 'undefined' && Ranque.acertarRegistro) Ranque.acertarRegistro();
+      // novidade: Princesa Moranguinho como tropa de torre
+      if (!(d.presentesEspeciais || []).includes('aviso-moranguinho')) {
+        d.presentesEspeciais = [...(d.presentesEspeciais || []), 'aviso-moranguinho'];
+        setTimeout(() => UI.toast('🍓 Nova princesa! Escolha a Princesa Moranguinho em Cartas › Torres e ela senta na sua torre!'), 6000);
+      }
       // presente pra todo mundo: Goku (Além dos Limites)
       if (Estado.carta('goku_formas') && !Estado.tem('goku_formas') && !(d.presentesEspeciais || []).includes('goku-formas')) {
         d.presentesEspeciais = [...(d.presentesEspeciais || []), 'goku-formas'];
