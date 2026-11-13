@@ -11,7 +11,10 @@ const Atualizacao = (() => {
 
   const emBatalha = () => {
     const b = document.getElementById('batalha');
-    return b && !b.classList.contains('oculto');
+    if (b && !b.classList.contains('oculto')) return true;
+    // Tower Defense (solo ou co-op) também conta como partida: não atualiza no meio
+    try { if (typeof TD !== 'undefined' && TD.ativo && TD.ativo()) return true; } catch (e) {}
+    return !!document.querySelector('.td-tela:not(.oculto)');
   };
   const minha = () => String(window.VERSAO_JOGO || '');
   const maisNova = (a, b) => /^\d+$/.test(a) && /^\d+$/.test(b) && +a > +b; // a é mais nova que b?
@@ -131,7 +134,7 @@ const Atualizacao = (() => {
     if (!b) {
       b = document.createElement('div');
       b.id = 'aviso-atualizacao';
-      b.textContent = '✨ Nova versão! O jogo atualiza quando a batalha acabar';
+      b.textContent = '✨ Nova versão! O jogo atualiza quando a partida acabar';
       document.getElementById('app').appendChild(b);
     }
   }

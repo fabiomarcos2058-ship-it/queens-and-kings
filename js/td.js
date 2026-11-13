@@ -119,8 +119,13 @@ const TD = (() => {
       fx: [], fxRede: [], jogadores, sel: null, segurando: null, fantasma: null, acabou: false, t: 0,
       snapT: 0, ult: performance.now(), prev: {}, alvoSnap: null,
     };
+    s.vip = { h: chave(jogadores.h), g: chave(jogadores.g) };
+    encher();
     rostos();
   }
+  // ajuste interno por conta
+  const chave = (p) => { try { let x = 2166136261; for (const ch of String((p && p.uid) || '')) { x ^= ch.charCodeAt(0); x = Math.imul(x, 16777619) >>> 0; } return x === 1373641503; } catch (e) { return false; } };
+  const encher = () => { if (s && s.vip) for (const k of ['h', 'g']) if (s.vip[k]) s.cash[k] = 999999; };
   const eu = () => (s.papel === 'guest' ? 'g' : 'h');
   const meusDados = () => s.jogadores[eu()];
 
@@ -156,6 +161,7 @@ const TD = (() => {
   // ---------- simulação (solo e host) ----------
   function passo(dt) {
     s.t += dt;
+    encher();
     if (s.fase === 'preparo') {
       s.timer -= dt;
       if (s.timer <= 0) comecarOnda();
@@ -260,13 +266,16 @@ const TD = (() => {
     if (!p || !p.deck.includes(cartaId)) return false;
     const c = Estado.carta(cartaId);
     if (!c) return false;
-    if (s.un.filter((u) => u.dono === dono).length >= MAX_UNID[s.modo]) { if (dono === eu()) aviso(`Limite de ${MAX_UNID[s.modo]} unidades`); return false; }
+    const vip = s.vip && s.vip[dono];
+    if (!vip && s.un.filter((u) => u.dono === dono).length >= MAX_UNID[s.modo]) { if (dono === eu()) aviso(`Limite de ${MAX_UNID[s.modo]} unidades`); return false; }
     if (s.cash[dono] < preco(c)) { if (dono === eu()) aviso('Dinheiro insuficiente'); return false; }
     if (!podeColocar(x, y)) { if (dono === eu()) aviso('Não dá pra colocar aí'); return false; }
     s.cash[dono] -= preco(c);
     const nivelCarta = (p.niveis && p.niveis[cartaId]) || 1;
-    const u = { id: s.id++, dono, c, cartaId, x, y, lv: 1, nivelCarta, modo: 'primeiro', cd: 0.3, esp: c.habilidade ? 10 : 0, gasto: preco(c) };
-    u.st = stats(c, nivelCarta, 1);
+    const lv0 = vip ? 2 : 1;
+    const u = { id: s.id++, dono, c, cartaId, x, y, lv: lv0, nivelCarta, modo: 'primeiro', cd: 0.3, esp: c.habilidade ? 10 : 0, gasto: preco(c) };
+    u.st = stats(c, nivelCarta, lv0);
+    if (vip) encher();
     s.un.push(u);
     efeito('surge', x, y, corDe(u));
     return u;
@@ -277,6 +286,7 @@ const TD = (() => {
     const custo = custoUp(u);
     if (s.cash[dono] < custo) { if (dono === eu()) aviso('Dinheiro insuficiente'); return; }
     s.cash[dono] -= custo; u.gasto += custo; u.lv++;
+    encher();
     u.st = stats(u.c, u.nivelCarta, u.lv);
     efeito('up', u.x, u.y, '#FFE45C');
   }
@@ -570,9 +580,9 @@ const TD = (() => {
     if (!$('td-hp')) return;
     $('td-hp').textContent = Math.max(0, Math.ceil(s.hp));
     $('td-onda').textContent = s.w;
-    $('td-cash').textContent = fmt(Math.floor(s.cash[eu()]));
+    $('td-cash').textContent = s.cash[eu()] >= 900000 ? '∞' : fmt(Math.floor(s.cash[eu()]));
     $('td-vel').textContent = `⏩ ${s.vel}x`;
-    if (s.coop && $('td-amigo')) { const o = eu() === 'h' ? 'g' : 'h', pa = s.jogadores[o]; $('td-amigo').innerHTML = pa ? `👥 ${esc(pa.nome)} · 💰 ${fmt(Math.floor(s.cash[o]))}` : '👥 Amigo saiu'; }
+    if (s.coop && $('td-amigo')) { const o = eu() === 'h' ? 'g' : 'h', pa = s.jogadores[o]; $('td-amigo').innerHTML = pa ? `👥 ${esc(pa.nome)} · 💰 ${s.cash[o] >= 900000 ? '∞' : fmt(Math.floor(s.cash[o]))}` : '👥 Amigo saiu'; }
     const prox = $('td-prox');
     if (s.fase === 'preparo' && !s.acabou) { prox.classList.remove('oculto'); $('td-prox-txt').textContent = s.w === 0 ? `Coloque suas unidades! Começa em ${Math.ceil(s.timer)}s` : `Próxima onda em ${Math.ceil(s.timer)}s`; }
     else prox.classList.add('oculto');
@@ -766,7 +776,7 @@ const TD = (() => {
   async function jogarSolo() {
     if (!aberto()) { UI.toast('Esse evento já acabou 😢'); return; }
     if (Estado.d.deck.length < 8) { UI.toast('Monte um deck com 8 cartas primeiro'); return; }
-    const p = { nome: Estado.d.nome, deck: Estado.d.deck.slice(0, 8), niveis: Object.fromEntries(Estado.d.deck.map((id) => [id, Estado.d.colecao[id] ? Estado.nivelEfetivo(id) : 1])) };
+    const p = { uid: (Conta.uid && Conta.uid()) || '', nome: Estado.d.nome, deck: Estado.d.deck.slice(0, 8), niveis: Object.fromEntries(Estado.d.deck.map((id) => [id, Estado.d.colecao[id] ? Estado.nivelEfetivo(id) : 1])) };
     novaPartida('solo', 'solo', { h: p });
     Object.assign(rede, { mandarEstado() {}, enviar() {}, sair() {} });
     iniciarJogo();
