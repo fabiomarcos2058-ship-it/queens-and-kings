@@ -417,7 +417,9 @@ const Batalha = (() => {
     if (c.custo > s.azul.elixir) { UI.toast('Elixir insuficiente'); return; }
     contarCarta(c);
     if (s.convidado) {
-      s.rede.enviarComando({ tipo: 'carta', i: s.selecionada, x: Math.round(x), y: Math.round(y), lado: s.dupla ? s.meuLado : undefined }); // o host espelha
+      s.rede.enviarComando({ tipo: 'carta', i: s.selecionada, id, x: Math.round(x), y: Math.round(y), lado: s.dupla ? s.meuLado : undefined }); // o host espelha
+      // a mão já roda aqui (sem esperar o host) e as fotos atrasadas não desfazem isso por um instante
+      s.azul.fila.splice(s.selecionada, 1); s.azul.fila.push(id); s.travaMao = performance.now() + 600;
       efeito('onda-surgir azul', x, y, 700); // retorno imediato enquanto o host confirma
       if (c.evolucao) { if (!s.evoCarga) s.evoCarga = {}; const k = `azul:${c.id}`; s.evoCarga[k] = (s.evoCarga[k] || 0) >= c.evolucao.ciclos ? 0 : (s.evoCarga[k] || 0) + 1; }
       s.azul.elixir -= c.custo;
@@ -3405,13 +3407,18 @@ const Batalha = (() => {
     const intF = Math.max(80, Math.min(450, agoraF - (s.fotoEm || agoraF - 100)));
     s.fotoInt = s.fotoInt ? s.fotoInt * 0.7 + intF * 0.3 : intF; s.fotoEm = agoraF;
     if (V) { s.azul.coroas = est.cz[1]; s.vermelho.coroas = est.cz[0]; } else { s.azul.coroas = est.cz[0]; s.vermelho.coroas = est.cz[1]; }
+    const travado = s.travaMao && performance.now() < s.travaMao; // acabei de jogar uma carta: essa foto pode ser de antes
+    const meuEl = s.azul.elixir;
     if (D && est.els) { s.azul.elixir = est.els[s.meuLado] || 0; s.azul2.elixir = est.els[s.parceiroLado] || 0; }
     else if (D) { s.azul.elixir = est.el[2] || 0; s.azul2.elixir = est.el[0]; }
     else { s.azul.elixir = est.el[1]; s.vermelho.elixir = est.el[0]; }
+    if (travado) s.azul.elixir = Math.min(s.azul.elixir, meuEl + 0.3);
     const minhaFila = D && est.filas && est.filas[s.meuLado] ? est.filas[s.meuLado] : est.fila || [];
-    const filaMudou = minhaFila.join() !== s.azul.fila.join();
-    s.azul.fila = minhaFila;
-    if (filaMudou) desenharMao();
+    if (!travado) {
+      const filaMudou = minhaFila.join() !== s.azul.fila.join();
+      s.azul.fila = minhaFila;
+      if (filaMudou) desenharMao();
+    }
     atualizarPlacar();
 
     // torres
@@ -3604,12 +3611,25 @@ const Batalha = (() => {
     const x = vira ? W - cmd.x : cmd.x, y = vira ? H - cmd.y : cmd.y;
     if (cmd.tipo === 'emote') { emote(quem, cmd.id); return; }
     if (cmd.tipo === 'carta') {
-      const id = s[quem].fila[cmd.i];
-      if (!id || cmd.i > 3) return;
+      // a carta vem pelo id (a posição na mão pode ter mudado no caminho por causa do atraso)
+      let i = cmd.i;
+      if (cmd.id) { i = s[quem].fila.slice(0, 4).indexOf(cmd.id); if (i < 0) return; }
+      const id = s[quem].fila[i];
+      if (!id || i > 3) return;
       const c = Estado.carta(id);
-      if (c.custo > s[quem].elixir) return;
-      if (!c.feitico && !c.barril && !podeColocar(time, x, y)) return;
-      jogar(quem, cmd.i, x, y);
+      if (c.custo > s[quem].elixir) {
+        // faltou um pouquinho de elixir por causa do atraso: tenta de novo por até 1,5s em vez de engolir a carta
+        if (c.custo <= s[quem].elixir + 1.5 && (cmd.tent || 0) < 6) setTimeout(() => comandoRemoto({ ...cmd, tent: (cmd.tent || 0) + 1 }), 250);
+        return;
+      }
+      if (!c.feitico && !c.barril && !podeColocar(time, x, y)) {
+        // a torre caiu/voltou no caminho: coloca no ponto válido mais perto em vez de sumir com a carta
+        let ok = null;
+        for (let k = 1; k <= 14 && !ok; k++) { const yy = time === 'vermelho' ? y - k * 12 : y + k * 12; if (yy > 14 && yy < H - 14 && podeColocar(time, x, yy)) ok = yy; }
+        if (ok == null) return;
+        jogar(quem, i, x, ok); return;
+      }
+      jogar(quem, i, x, y);
     } else if (cmd.tipo === 'hab') {
       const t = s.ent.find((e) => e.id === cmd.id && (e.dono || e.time) === quem);
       if (t) ativarHabilidade(t);
@@ -3635,13 +3655,19 @@ const Batalha = (() => {
   function loop(agora) {
     if (!s || s.acabou) return;
     if (s.convidado) { assistir(agora); requestAnimationFrame(loop); return; }
-    const dt = Math.min(0.05, (agora - s.ultimo) / 1000);
+    // celular lento (menos de 20 quadros por segundo): a batalha não fica mais em câmera lenta,
+    // a simulação dá passos extras pra acompanhar o tempo de verdade (até 0,25s por quadro)
+    const total = Math.min(0.25, Math.max(0, (agora - s.ultimo) / 1000));
+    const dt = Math.min(0.05, total);
     s.ultimo = agora;
-    if (!s.pausa) for (let i = 0; i < VEL * Mod.vel(); i++) {
-      if (s.acabou) break;
-      try { passo(dt); } catch (e) { console.error('Erro na batalha (o jogo continua):', e); }
+    if (!s.pausa) for (let resto = total; resto > 0.0005 && !s.acabou; resto -= 0.05) {
+      const dtp = Math.min(0.05, resto);
+      for (let i = 0; i < VEL * Mod.vel(); i++) {
+        if (s.acabou) break;
+        try { passo(dtp); } catch (e) { console.error('Erro na batalha (o jogo continua):', e); }
+      }
     }
-    if (s.rede && !s.acabou && (s.snapTimer -= dt) <= 0) { s.snapTimer = 0.1; s.rede.enviarEstado(foto()); s.eventos = []; }
+    if (s.rede && !s.acabou && (s.snapTimer -= total) <= 0) { s.snapTimer = 0.1; s.rede.enviarEstado(foto()); s.eventos = []; }
     else if (!s.rede && s.aoVivo && !s.acabou && (s.vivoTimer = (s.vivoTimer || 0) - dt) <= 0) { s.vivoTimer = 0.2; AoVivo.publicar(foto()); s.eventos = []; }
     if (s && !s.acabou) desenhar();
     requestAnimationFrame(loop);
