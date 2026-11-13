@@ -265,7 +265,7 @@ const Batalha = (() => {
       const jan = document.querySelector('.arena-grande-janela');
       const b = document.createElement('div');
       b.className = 'aviso-super-ia';
-      b.innerHTML = `<b>🧠 IA SUPER INTELIGENTE</b><small>${ranque ? 'Vencer ela vale MUITOS pontos... e perder custa caro!' : 'Essa é rara! Vencer ela vale muito.'}</small>`;
+      b.innerHTML = `<b>🧠 IA SUPER INTELIGENTE</b><small>${s.ranque ? 'Vencer ela vale MUITOS pontos... e perder custa caro!' : 'Essa é rara! Vencer ela vale muito.'}</small>`;
       jan.appendChild(b);
       setTimeout(() => b.remove(), 3200);
       jan.classList.add('contra-super');
@@ -3201,7 +3201,9 @@ const Batalha = (() => {
     }
 
     const torresAzuis = ents.filter((e) => e.torre && e.time === 'azul');
-    const inimigos = ents.filter((e) => !e.torre && e.time === 'azul' && e.vida > 0);
+    // sem "predict": a IA só enxerga a tropa depois que ela termina de surgir e passa o tempo de reação (como um jogador de verdade)
+    const reacaoIA = { 1: 1.8, 2: 1.6, 3: 1.4, 4: 1.3, 5: 1.2 }[dif] || 1.15;
+    const inimigos = ents.filter((e) => !e.torre && e.time === 'azul' && e.vida > 0 && !(e.surgir > 0) && (e.nasceu == null || s.t - e.nasceu >= reacaoIA));
     const meus = ents.filter((e) => !e.torre && e.time === 'vermelho' && e.vida > 0);
     const resta = DURACAO + (s.prorrogacao ? PRORROGACAO : 0) - s.t;
     const dobro = s.modo === 'elixir2x' || s.prorrogacao || resta <= 60;
