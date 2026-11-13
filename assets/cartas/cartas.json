@@ -3637,14 +3637,14 @@
       "arena": 1,
       "nivelInicial": 5,
       "rosto": [
-        240,
-        270,
+        272,
+        190,
         150
       ],
       "arte": [
         0,
-        0,
-        736
+        24,
+        488
       ]
     },
     {
@@ -3747,9 +3747,9 @@
       "cadencia": 0.95,
       "danoTorre": 0.6,
       "passiva": {
-        "nome": "Chassi Militar",
+        "nome": "Protocolo de Combate",
         "tipo": "chassi",
-        "descricao": "Recebe 25% menos dano e não pode ser atordoado nem desacelerado."
+        "descricao": "Recebe 25% menos dano e não pode ser atordoado nem desacelerado. Quando chega a 15% de vida, dispara sozinho os Mísseis + Sandevistan, sem gastar elixir (uma vez por partida)."
       },
       "habilidade": {
         "nome": "Mísseis + Sandevistan",
@@ -3770,14 +3770,14 @@
       "intransferivel": true,
       "nivelInicial": 6,
       "rosto": [
-        200,
-        150,
-        120
+        520,
+        370,
+        170
       ],
       "arte": [
         0,
-        0,
-        488
+        90,
+        719
       ]
     },
     {

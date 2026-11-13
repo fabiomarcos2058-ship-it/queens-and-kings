@@ -28,7 +28,7 @@ const Eventos = (() => {
     if (!d.festivalNino) d.festivalNino = { v: 0, l: 0, tentativas: 0, ativo: false };
     return d.festivalNino;
   }
-  const txtPremio = (p) => p.ouro ? `${p.ouro} 🪙` : p.gemas ? `${p.gemas} 💎` : p.bau ? `Baú de ${p.bau}` : p.carta ? 'NINO!' : '';
+  const txtPremio = (p) => p.ouro && p.gemas ? `${p.gemas} 💎 + ${p.ouro} 🪙` : p.ouro ? `${p.ouro} 🪙` : p.gemas ? `${p.gemas} 💎` : p.bau ? `Baú de ${p.bau}` : p.carta ? 'NINO!' : '';
 
   // ---------- montar o deck de cada modo ----------
   const embaralhar = (a) => { const b = [...a]; for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [b[i], b[j]] = [b[j], b[i]]; } return b; };
@@ -238,7 +238,7 @@ const Eventos = (() => {
   const FAMILIA_SONIC = ['sonic', 'shadow', 'super_sonic', 'dark_sonic', 'sonic_excalibur', 'hyper_sonic'];
   const FIM_DESAFIOS = new Date(2026, 11, 14, 23, 59, 59); // 14/12/2026
   const FIM_CYBER = new Date(2027, 0, 15, 23, 59, 59); // 15/01/2027
-  const CYBER = ['roman_cyber', 'agente_rubi', 'lucy_kushinada', 'david_martinez', 'adam_smasher'];
+  const CYBER = ['roman_cyber', 'agente_rubi', 'lucy_kushinada', 'david_martinez'];
   const fimDe = (k) => (DESAFIOS[k] && DESAFIOS[k].fim) || FIM_DESAFIOS;
   const aberto = (k) => Date.now() < fimDe(k).getTime();
   const desafiosAbertos = () => Object.keys(DESAFIOS).some(aberto);
@@ -262,14 +262,14 @@ const Eventos = (() => {
     cyber: {
       nome: 'Noite em Night City', vidas: 3, preco: 20, fim: FIM_CYBER,
       falas: { roman_cyber: '"Tá gravando? Tá gravando! Eu vou junto, {n}."', agente_rubi: '"MaxTac. Fica atrás de mim, {n}."', lucy_kushinada: '"Eu sempre quis ir pra Lua... mas pode ser do seu lado, {n}."', david_martinez: '"Eu vou chegar no topo de Night City, {n}. Vem comigo."', adam_smasher: '"Carne fraca. Mas você venceu, {n}."' },
-      premios: [{ carta: 'roman_cyber' }, { carta: 'agente_rubi' }, { ouro: 600 }, { carta: 'lucy_kushinada' }, { carta: 'david_martinez' }, { carta: 'adam_smasher' }],
+      premios: [{ carta: 'roman_cyber' }, { carta: 'agente_rubi' }, { ouro: 600 }, { carta: 'lucy_kushinada' }, { carta: 'david_martinez' }, { gemas: 80, ouro: 1500 }],
       etapas: [
         { nome: 'Ruas de Night City', ic: '🌃', desc: 'Uma batalha normal pra aquecer. Prêmio: Roman.', cfg: { dif: 2 } },
         { nome: 'Sobrecarga', ic: '⚡', desc: 'Elixir 2x mais rápido. Prêmio: Agente Rubi.', cfg: { elixirMult: 2, dif: 3 } },
         { nome: 'Netrunner', ic: '💻', desc: 'Suas cartas ficam viradas pra baixo (você só vê o custo). Lembre do seu deck!', cfg: { cartasViradas: true, dif: 3 } },
         { nome: 'Sandevistan', ic: '⏩', desc: 'Todas as tropas andam e atacam muito mais rápido. Prêmio: Lucy.', cfg: { turbo: true, dif: 4 } },
         { nome: 'MaxTac', ic: '🚨', desc: '2 minutos e a primeira torre derrubada vence. Prêmio: David.', cfg: { subita: true, dif: 5 } },
-        { nome: 'Adam Smasher', ic: '🤖', desc: 'O chefe: a IA mais esperta, com o Adam Smasher no deck e cartas 2 níveis acima. Vença e o Adam é seu!', cfg: { dif: 6, cartaIA: 'adam_smasher', nivelIAMais: 2 } },
+        { nome: 'Adam Smasher', ic: '🤖', desc: 'O chefe: a IA mais esperta, com o Adam Smasher no deck e cartas 2 níveis acima. Derrote ele e leve 80 gemas + 1500 de ouro!', cfg: { dif: 6, cartaIA: 'adam_smasher', nivelIAMais: 2 } },
       ],
     },
     sonic: {
@@ -401,7 +401,7 @@ const Eventos = (() => {
     const faltam = CYBER.filter((id) => !Estado.tem(id)).length;
     const botao = `<button class="selo botao" data-desafio="cyber">${f.ativo ? `Jogar: ${prox.nome}` : f.tentativas ? `De novo · ${D.preco} 💎` : 'Começar (grátis)'}</button>`;
     return `<div class="desafio-caixa cyber"><div class="cyber-fundo">${CYBER.map((id) => `<img src="assets/cartas/${id}.jpg" alt="" />`).join('')}</div><div class="mc-conteudo">
-      <b>🌃 ${D.nome}</b><span>${faltam ? `${total} missões com regras diferentes. Cada personagem vem numa missão, e o <b>Adam Smasher</b> é o chefe final! · ${dias} dias` : 'Você já tem todo mundo de Night City! Jogue pelos prêmios.'}</span>
+      <b>🌃 ${D.nome}</b><span>${faltam ? `${total} missões com regras diferentes. Cada personagem vem numa missão, e no fim você enfrenta o <b>Adam Smasher</b> como chefe! · ${dias} dias` : 'Você já tem todo mundo de Night City! Jogue pelos prêmios.'}</span>
       <div class="fn-pips">${pips}</div><div class="fn-linha"><div class="fn-vidas">${vidas}</div>${botao}</div>
       <button class="fn-ver" data-ver-cyber="1">Ver os personagens</button></div></div>`;
   }

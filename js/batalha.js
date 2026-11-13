@@ -714,6 +714,17 @@ const Batalha = (() => {
     if (e.postura && emEgo(e) && dano > 0) e.ego = Math.min(15, (e.ego || 0) + 1);
     e.vida -= dano;
     numero(e, dano, opc.crit ? 'critico' : opc.tipo);
+    // Adam Smasher (Evolução): com 15% de vida dispara sozinho Mísseis + Sandevistan, sem gastar elixir (uma vez)
+    if (!e.torre && e.vida > 0 && !e.protocoloAdam && e.carta && e.carta.id === 'adam_smasher_evo' && e.habilidade && e.vida <= e.max * 0.15) {
+      e.protocoloAdam = true;
+      agendar(0.05, () => {
+        if (e.vida <= 0 || !s || s.acabou) return;
+        falar(e, 'Protocolo de combate: ativado.', 'fala-cyber');
+        efeito(`ativou ${e.time}`, e.x, e.y, 700);
+        if (s.rede || s.aoVivo) s.eventos.push(['a', Math.round(e.x), Math.round(e.y), e.time === 'azul' ? 0 : 1]);
+        smasherTotal(e, e.habilidade);
+      });
+    }
     // Vegeta Ultra Ego: o ego não deixa ele cair (uma vez)
     if (e.vida <= 0 && !e.torre && !e.egoRevivido && e.atk && e.atk.m && e.atk.m.ultraEgo) {
       e.egoRevivido = true; e.egoDesperto = true;
