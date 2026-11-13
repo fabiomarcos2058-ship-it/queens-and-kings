@@ -1019,7 +1019,9 @@
       const piso = Arena.daQtd(d().recorde).trofeus;
       trofeus = -Math.max(0, Math.min(15, d().trofeus - piso)); d().derrotas++;
     }
-    trofeus += calibrarTrofeus();
+    const cal = calibrarTrofeus();
+    trofeus += cal;
+    if (cal) { d().vfrac = (d().vfrac || 0) + cal / 32; while (d().vfrac >= 1) { d().vitorias++; d().vfrac--; } }
     const recordeAntes = d().recorde;
     d().trofeus += trofeus;
     d().recorde = Math.max(d().recorde, d().trofeus);

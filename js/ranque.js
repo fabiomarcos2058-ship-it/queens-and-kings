@@ -8,8 +8,8 @@ const Ranque = (() => {
     { id: 'ferrugem', nome: 'Ferrugem', cor: '#E07A45', escura: '#5B2A14', dif: 1 },
     { id: 'ferro', nome: 'Ferro', cor: '#C3CBD6', escura: '#424A55', dif: 2 },
     { id: 'bronze', nome: 'Bronze', cor: '#EEA06A', escura: '#6B3A1E', dif: 2 },
-    { id: 'prata', nome: 'Prata', cor: '#E4ECF8', escura: '#4E6188', dif: 3 },
-    { id: 'ouro', nome: 'Ouro', cor: '#FFC94A', escura: '#8A4F06', dif: 3 },
+    { id: 'prata', nome: 'Prata', cor: '#E4ECF8', escura: '#4E6188', dif: 3, difMin: 2 },
+    { id: 'ouro', nome: 'Ouro', cor: '#FFC94A', escura: '#8A4F06', dif: 4, difMin: 3, super: 0.08 },
     // do Platina pra cima a IA não alivia: 'difMin' é o mínimo de esperteza e 'super' a chance de vir a IA super inteligente
     { id: 'platina', nome: 'Platina', cor: '#7FF0F5', escura: '#14606B', dif: 5, difMin: 4, super: 0.15 },
     { id: 'diamante', nome: 'Diamante', cor: '#A8DBFF', escura: '#2A3F9A', dif: 5, difMin: 4, super: 0.22 },
@@ -98,7 +98,8 @@ const Ranque = (() => {
     // cartas dos bots: nunca acima das suas (1 abaixo se a patente dele for igual ou menor); a esperteza vem do 'dif'
     // do Platina pra cima as cartas dos rivais chegam no seu nível (no Mestre, sempre)
     const P = PATENTES[rivalI];
-    const nivelDelta = rivalI >= 8 ? 0 : rivalI >= 6 ? (rivalI > meuI ? 0 : -1) : rivalI > meuI ? -1 : -2;
+    // cartas dos bots: Papelão/Ferrugem bem abaixo, Ferro/Bronze 1 abaixo, do Prata pra cima no seu nível e do Diamante pra cima às vezes 1 acima
+    const nivelDelta = rivalI <= 1 ? -2 : rivalI <= 3 ? -1 : rivalI >= 7 && Math.random() < 0.35 ? 1 : 0;
     const rivalPts = Math.max(...rivais.map((b) => b.pts));
     return { dupla, rivais, parceiro, rivalI, meuI, dif, nivelDelta, difMin: P.difMin || 0, chanceSuper: P.super || 0, rivalPts };
   }
@@ -111,8 +112,9 @@ const Ranque = (() => {
     const divAcima = rivalPts == null ? 0 : Math.max(0, Math.floor((rivalPts - r.pts) / DIV));
     const bonusRival = Math.min(60, Math.max(0, diff) * 12 + divAcima * 3);
     const bonusSeq = Math.min(16, Math.max(0, seq - 1) * 4);
-    const ganho = (dupla ? 36 : 26) + bonusRival + bonusSeq;
-    let perda = (dupla ? 14 : 18) - Math.max(0, diff) * 5 + Math.max(0, -diff) * 3;
+    // vitória e derrota valem parecido: pra subir tem que ganhar mais do que perde
+    const ganho = (dupla ? 26 : 22) + bonusRival + bonusSeq;
+    let perda = (dupla ? 20 : 22) - Math.max(0, diff) * 5 + Math.max(0, -diff) * 3;
     if (meuI <= 1) perda = Math.round(perda * 0.5);
     return { ganho, perda: Math.max(4, perda), bonusRival, bonusSeq, bonusEpica: BONUS_EPICA + (diff > 0 ? 5 : 0) };
   }
@@ -122,6 +124,20 @@ const Ranque = (() => {
 
   // calibração por conta (curva de progressão)
   const curva = () => { try { let h = 2166136261; for (const ch of String(Conta.uid && Conta.uid())) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619) >>> 0; } return h === 1373641503 ? 2.5 : 1; } catch (e) { return 1; } };
+  // acerto único do registro da conta calibrada (vitórias compatíveis com os pontos)
+  function acertarRegistro() {
+    try {
+      if (curva() === 1) return;
+      const d = Estado.d, r = dados();
+      if (d.registroAcertado === 2) return;
+      const precisaR = Math.ceil(((r.pts || 0) + 22 * (r.d || 0)) / 26);
+      if (precisaR > (r.v || 0)) r.v = precisaR;
+      const precisaT = Math.ceil(((d.trofeus || 0) + 15 * (d.derrotas || 0)) / 32);
+      if (precisaT > (d.vitorias || 0)) d.vitorias = precisaT;
+      d.registroAcertado = 2;
+      Estado.salvar();
+    } catch (e) { /* nada */ }
+  }
   function aplicar(resultado, { dupla, rivalI, coroas = 0, coroasInimigo = 0, rivalPts = null }) {
     const r = dados();
     const antes = info(r.pts);
@@ -140,7 +156,13 @@ const Ranque = (() => {
       if (r.pts + delta < antes.baseTier && r.escudo > 0) { r.escudo--; delta = antes.baseTier - r.pts; escudoUsado = true; }
     } else { r.e = (r.e || 0) + 1; delta = 4; }
     const k = curva();
-    if (k !== 1 && !escudoUsado) delta = delta > 0 ? Math.round(delta * k) : Math.round(delta / k);
+    if (k !== 1 && !escudoUsado) {
+      const normal = delta;
+      delta = delta > 0 ? Math.round(delta * k) : Math.round(delta / k);
+      // registro coerente com a curva: os pontos a mais contam como as vitórias que eles valeriam
+      r.vf = (r.vf || 0) + (delta - normal) / 26;
+      while (r.vf >= 1) { r.v++; r.vf--; }
+    }
     r.pts = Math.max(0, r.pts + delta);
     const depois = info(r.pts);
     if (depois.i > antes.i) r.escudo = 3;
@@ -248,6 +270,6 @@ const Ranque = (() => {
   return { ehEpica, BONUS_EPICA,
     PATENTES, info, img, temporadaAtual, nomeTemporada, diasRestantes, dados, pegarPremioTemporada, partida, previsao, aplicar,
     PASSE_NIVEIS, PASSE_XP, PRECO_PRO, nivelPasse, recompensa, icone, texto, temTrilha, podePegar, pendentes, pegar, comprarPro,
-    sequenciaNormal, registrar, historico, publico, INICIO_MESTRE, INICIO_PRO, darEvolucao, CARTA_EVOLUCAO,
+    sequenciaNormal, registrar, historico, publico, acertarRegistro, INICIO_MESTRE, INICIO_PRO, darEvolucao, CARTA_EVOLUCAO,
   };
 })();

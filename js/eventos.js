@@ -592,6 +592,7 @@ const Eventos = (() => {
         f.completo = true; f.ativo = false;
         setTimeout(() => { if (!Estado.tem(NINO)) revelarNino(Ranque.darEvolucao(NINO)); }, 900);
       }
+      if (typeof Ranque !== 'undefined' && Ranque.acertarRegistro) Ranque.acertarRegistro();
       // Adam Smasher (Evolução): exclusivo do Enzo
       if ((Conta.uid && Conta.uid()) === ENZO && !Estado.tem('adam_smasher_evo') && !(d.presentesEspeciais || []).includes('adam-evo-enzo')) {
         d.presentesEspeciais = [...(d.presentesEspeciais || []), 'adam-evo-enzo'];
