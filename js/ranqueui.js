@@ -19,7 +19,7 @@ const RanqueUI = (() => {
   // ---------- aviso: passe acabando ----------
   function restaPasse() {
     const pa = Ranque.passeAtual(), ms = pa.fim.getTime() - Date.now();
-    if (ms <= 0 || ms > 3 * 86400000) return null;
+    if (ms <= 0 || ms > 86400000) return null; // o passe dura 7 dias: avisa só no último
     const h = Math.floor(ms / 3600000), m = Math.floor(ms / 60000) % 60;
     return { pa, ms, txt: h >= 24 ? `${Math.floor(h / 24)}d ${h % 24}h` : `${h}h ${String(m).padStart(2, '0')}min` };
   }
@@ -28,7 +28,7 @@ const RanqueUI = (() => {
     if (!a) return '';
     const pend = Ranque.pendentes();
     return `<button class="aviso-passe" data-aviso-passe="1"><i class="ap-relogio">⏳</i><span><b>O PASSE DO ${esc(a.pa.nome.split(' ')[0].toUpperCase())} ESTÁ ACABANDO!</b>
-      <small>Termina em <em class="ap-tempo">${a.txt}</em>${pend ? ` · ${pend} prêmio${pend > 1 ? 's' : ''} pra pegar` : ' · corre pro nível 30!'}</small></span><i class="ap-seta">›</i></button>`;
+      <small>Termina em <em class="ap-tempo">${a.txt}</em>${pend ? ` · ${pend} prêmio${pend > 1 ? 's' : ''} pra pegar` : ` · corre pro nível ${Ranque.PASSE_NIVEIS}!`}</small></span><i class="ap-seta">›</i></button>`;
   }
   function ligarAvisoPasse(raiz) {
     raiz.querySelectorAll('[data-aviso-passe]').forEach((x) => (x.onclick = () => { if (!document.querySelector('.tela-ranque')) abrir(); passe(); }));
@@ -423,16 +423,30 @@ const RanqueUI = (() => {
           <div class="pt-barra"><div><i style="width:${nv >= Ranque.PASSE_NIVEIS ? 100 : ((r.xp || 0) % Ranque.PASSE_XP) / Ranque.PASSE_XP * 100}%"></i></div><small>${nv >= Ranque.PASSE_NIVEIS ? 'Pro Pass completo! 🎉' : `${(r.xp || 0) % Ranque.PASSE_XP}/${Ranque.PASSE_XP} XP para o nível ${nv + 1}`}</small></div>
           <div class="pt-dias">⏳ ${Ranque.diasPasse()}d</div></div>
         <div class="pp-destaque"><div class="pp-carta"><div class="pp-carta-verso">🧬</div></div>
-          <div><b>🧬 ${Ranque.passeAtual().nome} · Evolução</b><small>${Ranque.passeAtual().id === 'luffy' ? 'Prêmio final deste Pro Pass. Corpo de borracha, Bajrang Gun e, evoluído, os Tambores da Libertação. Só dá pra ganhar aqui!' : 'Prêmio final deste Pro Pass. Infinito, Azul, Vermelho, Vazio Púrpura e, evoluído, a Expansão de Domínio: Vazio Infinito. Só dá pra ganhar aqui!'}</small></div></div>
-        <p class="aviso">Ganhe XP do passe jogando ranqueadas: vitória 60 (+sequência), derrota 25, 2v2 +10. Termina em ${Ranque.diasPasse()} dia${Ranque.diasPasse() === 1 ? '' : 's'}.</p>
+          <div><b>🧬 ${Ranque.passeAtual().nome} · Evolução</b><small>${Ranque.passeAtual().carta === 'luffy_gear5' ? 'Prêmio final deste Pro Pass. Corpo de borracha, Bajrang Gun e, evoluído, os Tambores da Libertação. Só dá pra ganhar aqui!' : 'Prêmio final deste Pro Pass. Infinito, Azul, Vermelho, Vazio Púrpura e, evoluído, a Expansão de Domínio: Vazio Infinito. Só dá pra ganhar aqui!'}</small></div></div>
+        <p class="aviso">Cada carta fica <b>7 dias</b> aqui e depois troca. Ganhe XP jogando ranqueadas: vitória 85 (+sequência), derrota 30, 2v2 +12. O Pro devolve mais de <b>1.600 💎</b>. Termina em ${Ranque.diasPasse()} dia${Ranque.diasPasse() === 1 ? '' : 's'}.</p>
+        ${Ranque.pendentes() ? `<button class="passe-pegar-tudo" id="pp-tudo">🎁 Pegar tudo <i>${Ranque.pendentes()}</i></button>` : ''}
         <button class="comprar-passe pro${r.pro ? ' tem' : ''}" id="pp-comprar"><b>PRO PASS</b><small>${r.pro ? 'Ativo ✔' : `💎 ${Ranque.PRECO_PRO}`}</small></button>
         <div class="passe-cab rp-cab"><span>Nv</span><span>Grátis</span><span>Pro</span></div>
         <div class="passe-trilhas">${Array.from({ length: Ranque.PASSE_NIVEIS }, (_, i) => linha(i + 1)).join('')}</div>`,
       botoes: [{ texto: 'Fechar', classe: 'principal', acao: () => { if (document.querySelector('.tela-ranque')) abrir(); } }],
     });
     const el = m.el;
+    const ppt = el.querySelector('#pp-tudo');
+    if (ppt) ppt.onclick = () => {
+      let q = 0, evo = null, troca = 0;
+      for (const t of ['free', 'pro']) for (let n = 1; n <= Ranque.PASSE_NIVEIS; n++) {
+        if (!Ranque.podePegar(t, n)) continue;
+        try { const res = Ranque.pegar(t, n); if (res) { q++; if (res.extra && res.extra.evolucao) evo = res.extra.carta; if (res.extra && res.extra.gemasNoLugar) troca = res.extra.gemasNoLugar; } } catch (e) { /* segue */ }
+      }
+      if (!q) return;
+      UI.toast(`🎁 ${q} prêmio${q > 1 ? 's' : ''} do passe pego${q > 1 ? 's' : ''}!${troca ? ` (+${troca} 💎 pela Evolução repetida)` : ''}`);
+      m.fechar(); M.topo();
+      if (evo) revelarEvolucao(evo); else setTimeout(passe, 250);
+    };
     const alvo = el.querySelectorAll('.passe-nv')[Math.max(0, nv - 2)];
-    if (alvo) setTimeout(() => alvo.scrollIntoView({ block: 'center' }), 50);
+    const listaPP = el.querySelector('.passe-trilhas');
+    if (alvo && listaPP) setTimeout(() => { listaPP.scrollTop = Math.max(0, alvo.offsetTop - listaPP.offsetTop - 8); }, 50); // rola só a lista (o topo não some)
     el.querySelectorAll('.premio').forEach((b) => (b.onclick = () => {
       const t = b.dataset.t, n = +b.dataset.n;
       if (!Ranque.temTrilha(t)) return UI.toast('Compre o Pro Pass para pegar');
@@ -442,6 +456,7 @@ const RanqueUI = (() => {
       b.classList.add('pego', 'pegando'); b.classList.remove('pode'); b.insertAdjacentHTML('beforeend', '<em class="premio-ok">✔</em>');
       M.topo();
       if (res.extra && res.extra.bau) M.mostrarBau(res.extra.bau, res.extra.abertura);
+      else if (res.extra && res.extra.gemasNoLugar) UI.toast(`Você já tem essa Evolução: +${res.extra.gemasNoLugar} 💎 no lugar!`);
       else if (res.extra && res.extra.evolucao) revelarEvolucao(res.extra.carta);
       else Premios.avisar(res.r, res.extra);
     }));
@@ -525,8 +540,8 @@ const RanqueUI = (() => {
     // quem pegou o prêmio do Pro Pass antes da carta existir recebe ela agora
     const dd = Estado.d;
     const guard = dd.evolucoesGuardadas || [];
-    if (guard.some((k) => /^ranq-20\d\d-/.test(k) || k === 'ranq-gojo') && !Estado.tem('gojo')) setTimeout(() => revelarEvolucao(Ranque.darEvolucao('gojo')), 1200);
-    else if (guard.includes('ranq-luffy') && !Estado.tem('luffy_gear5')) setTimeout(() => revelarEvolucao(Ranque.darEvolucao('luffy_gear5')), 1200);
+    if (guard.some((k) => /^ranq-20\d\d-/.test(k) || k.startsWith('ranq-gojo')) && !Estado.tem('gojo')) setTimeout(() => revelarEvolucao(Ranque.darEvolucao('gojo')), 1200);
+    else if (guard.some((k) => k.startsWith('ranq-luffy')) && !Estado.tem('luffy_gear5')) setTimeout(() => revelarEvolucao(Ranque.darEvolucao('luffy_gear5')), 1200);
     try { Ranque.dados(); } catch (e) { /* nada */ }
     if (dd.passeEntregue) { const pe = dd.passeEntregue; dd.passeEntregue = null; Estado.salvar(); setTimeout(() => UI.toast(`🎁 O Passe do ${pe.nome} acabou: ${pe.n} prêmio${pe.n > 1 ? 's' : ''} que faltava${pe.n > 1 ? 'm' : ''} já foi${pe.n > 1 ? 'ram' : ''} pro seu inventário!`), 2500); }
     const b = $('btn-ranq');

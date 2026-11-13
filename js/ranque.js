@@ -67,12 +67,23 @@ const Ranque = (() => {
     return r;
   }
   // ---------- Passes (cada um com a sua carta de Evolução) ----------
-  const PASSES = [
-    { id: 'gojo', carta: 'gojo', nome: 'Gojo Satoru', fim: new Date(2026, 10, 13, 9, 10) }, // 13/11/2026 09:10
-    { id: 'luffy', carta: 'luffy_gear5', nome: 'Luffy Gear 5', fim: new Date(2026, 11, 13, 9, 10) }, // 13/12/2026 09:10
-  ];
-  const passeAtual = () => PASSES.find((p) => Date.now() < p.fim.getTime()) || PASSES[PASSES.length - 1];
-  const passeDe = (id) => PASSES.find((p) => p.id === id) || passeAtual();
+  // cada carta de Evolução fica 7 dias no Pro Pass e depois troca (as cartas se revezam)
+  const CARTAS_PASSE = [{ carta: 'luffy_gear5', nome: 'Luffy Gear 5', curto: 'luffy' }, { carta: 'gojo', nome: 'Gojo Satoru', curto: 'gojo' }];
+  const INICIO_PASSES = new Date(2026, 10, 13, 9, 10).getTime(); // 13/11/2026 09:10 (começo do passe do Luffy)
+  const SEMANA_MS = 7 * 86400000;
+  function passeDaSemana(k) {
+    if (k < 0) return { id: 'gojo', carta: 'gojo', nome: 'Gojo Satoru', fim: new Date(INICIO_PASSES) };
+    const c = CARTAS_PASSE[k % CARTAS_PASSE.length];
+    // a primeira semana mantém o id 'luffy' pra ninguém perder o progresso que já tinha
+    return { id: k === 0 ? 'luffy' : `${c.curto}-${k}`, carta: c.carta, nome: c.nome, fim: new Date(INICIO_PASSES + (k + 1) * SEMANA_MS) };
+  }
+  const passeAtual = () => passeDaSemana(Math.floor((Date.now() - INICIO_PASSES) / SEMANA_MS));
+  function passeDe(id) {
+    if (id === 'gojo') return passeDaSemana(-1);
+    if (id === 'luffy') return passeDaSemana(0);
+    const k = +String(id).split('-')[1];
+    return Number.isFinite(k) ? passeDaSemana(k) : passeAtual();
+  }
   const diasPasse = () => Math.max(0, Math.ceil((passeAtual().fim.getTime() - Date.now()) / 86400000));
   // passe acabou: entrega o que ficou pra pegar e começa o novo zerado
   function trocarPasse(r, novo) {
@@ -84,7 +95,7 @@ const Ranque = (() => {
         for (let i = 1; i <= nv; i++) {
           if ((r.pegos[t] || []).includes(i)) continue;
           const rc = recompensa(t, i, velho);
-          if (rc.tipo === 'evolucao') darEvolucao(velho.carta); else Premios.dar(rc);
+          if (rc.tipo === 'evolucao') { if (Estado.tem(velho.carta)) Estado.d.gemas += GEMAS_EVO_REPETIDA; else darEvolucao(velho.carta); } else Premios.dar(rc);
           n++;
         }
       }
@@ -236,7 +247,8 @@ const Ranque = (() => {
   }
 
   // ---------- Pro Pass da ranqueada ----------
-  const PASSE_NIVEIS = 30, PASSE_XP = 100, PRECO_PRO = 900;
+  const PASSE_NIVEIS = 60, PASSE_XP = 60, PRECO_PRO = 900; // 60 níveis em 7 dias: cada nível pede menos XP
+  const GEMAS_EVO_REPETIDA = 400;
   function ganharXp(resultado, dupla, seq, epica = false) {
     const r = dados();
     const antes = nivelPasse();
@@ -256,13 +268,14 @@ const Ranque = (() => {
         { tipo: 'ouro', qtd: 60 + n * 6 }, C('comum', 10), { tipo: 'tokens', qtd: 25 }, { tipo: 'gemas', qtd: 8 }, C('rara', 3),
       ][n % 5];
     }
+    // trilha Pro: custa 900 gemas e devolve bem mais que isso (cerca de 1900 no total)
     if (n === PASSE_NIVEIS) return { tipo: 'evolucao', nome: `${(passe || passeAtual()).nome} (Evolução)` };
-    if (n === 25) return { tipo: 'bau', bau: 'lendario' };
-    if (n === 15) return C('lendaria', 2);
-    if (n % 10 === 0) return { tipo: 'carta', raridade: 'lendaria', qtd: 1 };
-    if (n % 5 === 0) return { tipo: 'bau', bau: 'ouro' };
+    if (n % 20 === 0) return { tipo: 'bau', bau: 'lendario' };
+    if (n % 10 === 0) return { tipo: 'gemas', qtd: 200 };
+    if (n === 15 || n === 45) return C('lendaria', 2);
+    if (n % 5 === 0) return { tipo: 'gemas', qtd: 100 };
     return [
-      { tipo: 'ouro', qtd: 220 + n * 18 }, C('epica', 2), { tipo: 'gemas', qtd: 40 }, C('universal', 6), { tipo: 'carta', raridade: 'epica', qtd: 2 }, { tipo: 'tokens', qtd: 60 },
+      { tipo: 'gemas', qtd: 40 }, { tipo: 'ouro', qtd: 220 + n * 12 }, C('epica', 2), { tipo: 'gemas', qtd: 40 }, { tipo: 'carta', raridade: 'epica', qtd: 2 }, C('universal', 6),
     ][n % 6];
   }
   const icone = (r) => Premios.icone(r);
@@ -275,7 +288,11 @@ const Ranque = (() => {
     const r = recompensa(t, n), d = Estado.d;
     dados().pegos[t].push(n);
     let extra = null;
-    if (r.tipo === 'evolucao') {
+    if (r.tipo === 'evolucao' && Estado.tem(passeAtual().carta)) {
+      // as cartas se revezam toda semana: quem já tem essa Evolução leva gemas no lugar
+      d.gemas += GEMAS_EVO_REPETIDA;
+      extra = { gemasNoLugar: GEMAS_EVO_REPETIDA };
+    } else if (r.tipo === 'evolucao') {
       d.evolucoesGuardadas = [...new Set([...(d.evolucoesGuardadas || []), `ranq-${dados().passe}`])];
       extra = { evolucao: true, carta: darEvolucao(passeAtual().carta) };
     } else extra = Premios.dar(r);
