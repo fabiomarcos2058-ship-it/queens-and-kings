@@ -3547,3 +3547,6 @@ html.leve .zk-faisca:nth-child(2n) { display: none; }
 
 /* a tela da ranqueada nunca fica por cima de uma batalha (acontecia com quem era convidado pra dupla) */
 body.em-batalha .tela-ranque { display: none !important; }
+/* início mais enxuto: arena menor (Batalha e Ranqueada aparecem sem rolar) e sem botão repetido de Eventos (já fica na barra de baixo) */
+.inicio2 .arena-mini { height: min(26vh, 220px); }
+.inicio2 #btn-eventos-ir { display: none; }
