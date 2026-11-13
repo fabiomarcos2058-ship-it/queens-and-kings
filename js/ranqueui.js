@@ -16,9 +16,58 @@ const RanqueUI = (() => {
   }
 
   // ---------- botão na tela de batalha ----------
+  // ---------- aviso: passe acabando ----------
+  function restaPasse() {
+    const pa = Ranque.passeAtual(), ms = pa.fim.getTime() - Date.now();
+    if (ms <= 0 || ms > 3 * 86400000) return null;
+    const h = Math.floor(ms / 3600000), m = Math.floor(ms / 60000) % 60;
+    return { pa, ms, txt: h >= 24 ? `${Math.floor(h / 24)}d ${h % 24}h` : `${h}h ${String(m).padStart(2, '0')}min` };
+  }
+  function htmlAvisoPasse() {
+    const a = restaPasse();
+    if (!a) return '';
+    const pend = Ranque.pendentes();
+    return `<button class="aviso-passe" data-aviso-passe="1"><i class="ap-relogio">⏳</i><span><b>O PASSE DO ${esc(a.pa.nome.split(' ')[0].toUpperCase())} ESTÁ ACABANDO!</b>
+      <small>Termina em <em class="ap-tempo">${a.txt}</em>${pend ? ` · ${pend} prêmio${pend > 1 ? 's' : ''} pra pegar` : ' · corre pro nível 30!'}</small></span><i class="ap-seta">›</i></button>`;
+  }
+  function ligarAvisoPasse(raiz) {
+    raiz.querySelectorAll('[data-aviso-passe]').forEach((x) => (x.onclick = () => { if (!document.querySelector('.tela-ranque')) abrir(); passe(); }));
+  }
+  function avisoNoMenu() {
+    const b = $('btn-ranq');
+    if (!b) return;
+    let w = $('aviso-passe-menu');
+    const html = htmlAvisoPasse();
+    if (!html) { if (w) w.remove(); return; }
+    if (!w) { w = document.createElement('div'); w.id = 'aviso-passe-menu'; const ref = document.querySelector('.linha-social') || b; ref.parentNode.insertBefore(w, ref); }
+    w.innerHTML = html; ligarAvisoPasse(w);
+  }
+  setInterval(() => {
+    const a = restaPasse();
+    document.querySelectorAll('.ap-tempo').forEach((x) => { if (a) x.textContent = a.txt; });
+    if (!a && $('aviso-passe-menu')) $('aviso-passe-menu').remove();
+  }, 30000);
+  // janela grande uma vez por dia
+  function avisoGrandePasse() {
+    const a = restaPasse(), d = Estado.d;
+    if (!a) return;
+    const chave = `${a.pa.id}-${new Date().toDateString()}`;
+    if (d.avisoPasseVisto === chave) return;
+    d.avisoPasseVisto = chave; Estado.salvar();
+    const pend = Ranque.pendentes();
+    UI.modal({
+      titulo: '⏳ Últimas horas!',
+      classe: 'modal-aviso-passe',
+      html: `<div class="map-relogio">⏳</div><p class="map-titulo">O Passe do <b>${esc(a.pa.nome)}</b> acaba em</p><p class="map-tempo ap-tempo">${a.txt}</p>
+        <p class="map-txt">${pend ? `Você tem <b>${pend} prêmio${pend > 1 ? 's' : ''}</b> esperando! ` : ''}Quem chegar no <b>nível 30 do Pro Pass</b> leva o <b>${esc(a.pa.nome)}</b> (Evolução). Depois disso ele some do passe!</p>`,
+      botoes: [{ texto: 'Depois' }, { texto: 'Ver o passe', classe: 'principal', acao: () => { abrir(); passe(); } }],
+    });
+  }
+
   function atualizarBotao() {
     const b = $('btn-ranq');
     if (!b) return;
+    avisoNoMenu();
     const r = Ranque.dados(), f = Ranque.info(r.pts);
     const pend = Ranque.pendentes() + (r.premioTemporada ? 1 : 0);
     b.style.setProperty('--cor', f.p.cor);
@@ -61,6 +110,7 @@ const RanqueUI = (() => {
           <button class="tr-btn dois" id="tr-2v2"><span>🤝</span><b>Ranqueada 2v2</b><small>Vale mais! Vitória +${pv2.ganho} · derrota -${pv2.perda}</small></button>
         </div>
         <p class="tr-dica">Você pode cair contra rivais de <b>patente mais alta</b>: cada patente acima vale <b>+12 PR</b> e cada divisão acima <b>+3 PR</b>, e a derrota pra eles tira menos.</p>
+        ${htmlAvisoPasse()}
         <button class="tr-passe${r.pro ? ' pro' : ''}" id="tr-passe">
           <div class="trp-topo"><b>${r.pro ? '💠 Pro Pass' : '🎫 Passe da Ranqueada'}</b><small>${nv}/${Ranque.PASSE_NIVEIS}</small></div>
           <div class="trp-barra"><i style="width:${nv >= Ranque.PASSE_NIVEIS ? 100 : ((r.xp % Ranque.PASSE_XP) / Ranque.PASSE_XP) * 100}%"></i></div>
@@ -80,6 +130,7 @@ const RanqueUI = (() => {
     tela.querySelector('#tr-1v1').onclick = () => procurar(false);
     tela.querySelector('#tr-2v2').onclick = escolher2v2;
     tela.querySelector('#tr-passe').onclick = passe;
+    ligarAvisoPasse(tela);
     tela.querySelector('#tr-patentes').onclick = patentes;
     tela.querySelector('#tr-historico').onclick = () => historico();
     tela.querySelector('#tr-top').onclick = () => { if (window.MenuAPI) MenuAPI.topGlobal('ranque'); };
@@ -480,6 +531,8 @@ const RanqueUI = (() => {
     const b = $('btn-ranq');
     if (b) b.onclick = abrir;
     atualizarBotao();
+    const tentar = () => { if (document.querySelector('.titulo, .tela-conta, .modal-fundo, .revela-evo, #batalha:not(.oculto), #summon-tela, .td-tela')) return setTimeout(tentar, 2500); avisoGrandePasse(); };
+    setTimeout(tentar, 3500);
   }
 
   return { init, abrir, fechar, fim, atualizarBotao, historico, patentes, passe, emblema, promocao, procurandoConvidado, revelarEvolucao };

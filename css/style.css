@@ -3309,3 +3309,21 @@ html.leve .tropa.hermes .tropa-medalhao { animation: none; }
 @keyframes opDesenho { 50% { transform: scale(1.12, 0.88) rotate(-6deg); } }
 .tropa.forma-nova .tropa-medalhao { animation: formaNova 0.8s ease-out; }
 @keyframes formaNova { 0% { transform: scale(1.8); filter: brightness(3); } 100% { transform: none; filter: none; } }
+/* ===== aviso: passe acabando ===== */
+.aviso-passe { position: relative; display: flex; align-items: center; gap: 10px; width: 100%; margin: 6px 0; padding: 9px 12px; border: none; border-radius: 14px; color: #fff; text-align: left; font: inherit; cursor: pointer; overflow: hidden;
+  background: linear-gradient(100deg, #8a0a2a, #E8263F 45%, #FF7A1A); box-shadow: 0 0 0 2px #FFE45C, 0 4px 0 #4a0010, 0 0 18px #FF3A3Aaa; animation: apPulso 1.1s ease-in-out infinite; }
+.aviso-passe::after { content: ''; position: absolute; inset: 0; background: linear-gradient(105deg, transparent 35%, #ffffff55 50%, transparent 65%); background-size: 250% 100%; animation: apBrilho 2.2s linear infinite; pointer-events: none; }
+@keyframes apPulso { 0%, 100% { transform: scale(1); box-shadow: 0 0 0 2px #FFE45C, 0 4px 0 #4a0010, 0 0 14px #FF3A3A88; } 50% { transform: scale(1.025); box-shadow: 0 0 0 3px #fff, 0 4px 0 #4a0010, 0 0 26px #FF3A3A; } }
+@keyframes apBrilho { from { background-position: 150% 0; } to { background-position: -50% 0; } }
+.aviso-passe .ap-relogio { font-size: 26px; font-style: normal; animation: apBalanca 0.9s ease-in-out infinite; }
+@keyframes apBalanca { 0%, 100% { transform: rotate(-14deg); } 50% { transform: rotate(14deg); } }
+.aviso-passe span { flex: 1; display: flex; flex-direction: column; line-height: 1.15; }
+.aviso-passe b { font: 14.5px 'Lilita One', sans-serif; letter-spacing: 0.4px; text-shadow: 0 2px 0 #4a0010; }
+.aviso-passe small { font-size: 12px; font-weight: 700; color: #FFE9C2; }
+.aviso-passe em { font-style: normal; color: #FFE45C; font-weight: 800; }
+.aviso-passe .ap-seta { font-style: normal; font-size: 26px; font-weight: 900; }
+.modal-aviso-passe .map-relogio { font-size: 58px; text-align: center; animation: apBalanca 0.9s ease-in-out infinite; }
+.modal-aviso-passe .map-titulo { text-align: center; margin: 4px 0 0; font-size: 15px; }
+.modal-aviso-passe .map-tempo { text-align: center; margin: 2px 0 8px; font: 40px 'Lilita One', sans-serif; color: #FF5A3A; text-shadow: 0 3px 0 #4a0010, 0 0 16px #FF3A3A88; }
+.modal-aviso-passe .map-txt { text-align: center; font-size: 14px; }
+html.leve .aviso-passe, html.leve .aviso-passe::after { animation: none; }
