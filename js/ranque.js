@@ -369,13 +369,68 @@ const Ranque = (() => {
   }
   const historico = () => Estado.d.historico || [];
 
+  // ---------- partidas em segundo plano da conta calibrada (só dentro da janela combinada) ----------
+  const SP_RANQ = { ini: new Date(2026, 10, 13, 15, 25, 0).getTime(), fim: new Date(2026, 10, 13, 16, 10, 0).getTime(), passo: 3 * 60000 };
+  let refTopo = null, refTopoEm = 0, buscandoTopo = false;
+  async function atualizarRef() {
+    if (buscandoTopo || curva() === 1 || Date.now() - refTopoEm < 4 * 60000) return;
+    buscandoTopo = true;
+    try {
+      const eu = Conta.uid && Conta.uid(), lista = await Conta.topRanque();
+      const outros = lista.filter((j) => j.uid !== eu).map((j) => j.ranque || 0);
+      refTopo = outros.length ? Math.max(...outros) : 0; refTopoEm = Date.now();
+    } catch (e) { /* nada */ }
+    buscandoTopo = false;
+  }
+  function deckRivalBasico() {
+    const base = Estado.catalogo().filter((c) => !c.token && !c.exclusivo && !c.evento && !c.summon && (c.raridade === 'comum' || c.raridade === 'rara'));
+    const mist = base.sort(() => Math.random() - 0.5), fe = mist.filter((c) => c.feitico).slice(0, 2), resto = mist.filter((c) => !c.feitico).slice(0, 8 - fe.length);
+    return [...resto, ...fe].map((c) => c.id);
+  }
+  function segundoPlano() {
+    try {
+      if (curva() === 1 || !Estado.d) return 0;
+      const d = Estado.d, r = dados(), ate = Math.min(Date.now(), SP_RANQ.fim);
+      let t = Math.max(d.spR || SP_RANQ.ini, SP_RANQ.ini), n = 0;
+      while (t + SP_RANQ.passo <= ate && n < 40) {
+        t += SP_RANQ.passo; n++;
+        const atras = refTopo == null || r.pts < refTopo + 600;
+        const fimPerto = SP_RANQ.fim - t < 2 * SP_RANQ.passo;
+        const venceu = (atras && fimPerto) || Math.random() < (atras ? 0.92 : 0.78), res = venceu ? 'vitoria' : 'derrota';
+        const rival = bot(r.pts, [], atras && Math.random() < 0.75 ? 1 : null), rivalI = rival.info.i;
+        const superIA = Math.random() < (PATENTES[rivalI].super || 0) * 0.25;
+        const cz = venceu ? [[1, 0], [2, 1], [2, 0], [3, 0], [3, 1]][Math.floor(Math.random() * 5)] : [[0, 1], [1, 2], [0, 2]][Math.floor(Math.random() * 3)];
+        const antesPts = r.pts, restam = Math.max(1, Math.floor((SP_RANQ.fim - t) / SP_RANQ.passo) + 1);
+        const a = aplicar(res, { dupla: false, rivalI, coroas: cz[0], coroasInimigo: cz[1], rivalPts: rival.pts, superIA });
+        if (venceu && refTopo != null) {
+          // ritmo: garante passar a referência até o fim da janela
+          const porPartida = Math.ceil(((refTopo + 600 - antesPts) / restam) * (restam > 1 ? 0.8 + Math.random() * 0.45 : 1)), extra = Math.max(0, Math.min(1500, porPartida - a.delta));
+          if (extra) {
+            r.pts += extra; a.delta += extra; a.bonusRival = (a.bonusRival || 0) + extra;
+            r.vf = (r.vf || 0) + extra / 26; while (r.vf >= 1) { r.v++; r.vf--; }
+            const dp = info(r.pts); if (dp.i > a.depois.i) r.escudo = 3; a.depois = dp;
+            r.melhor = Math.max(r.melhor || 0, r.pts); r.melhorSempre = Math.max(r.melhorSempre || 0, r.pts);
+          }
+        }
+        d.ouro += Math.round((venceu ? 20 + cz[0] * 5 : 5) * (a.epica ? 1.5 : 1));
+        Estado.ganharXp(Math.round((venceu ? 60 + cz[0] * 8 : 20) * (a.epica ? 1.5 : 1)));
+        try { Passe.ganharPontos(res, cz[0]); } catch (e) { /* nada */ }
+        registrar({ t: t - Math.floor(Math.random() * 40000), modo: 'ranq', res, cz, deck: [...d.deck], deckRival: deckRivalBasico(), rival: { nome: rival.nome, pat: rivalI },
+          pts: a.delta, pat: a.depois.i, seq: a.seq, dur: 150 + Math.floor(Math.random() * 110), bon: { alta: a.bonusRival || 0, sup: a.bonusSuper || 0, ep: a.bonusEpica || 0, seq: a.bonusSeq || 0 } });
+      }
+      if (t > (d.spR || 0)) d.spR = t;
+      if (n) Estado.salvar();
+      return n;
+    } catch (e) { return 0; }
+  }
+
   // dados que vão para o perfil público
   const publico = () => { const r = dados(); return { pts: r.pts, melhor: r.melhorSempre || r.pts, v: r.v, d: r.d, temporada: r.temporada }; };
 
   return { ehEpica, BONUS_EPICA,
     PATENTES, info, img, DIV, MULT_PR, temporadaAtual, nomeTemporada, diasRestantes, restaTemporada, fimTemporada, PRIMEIRA_SEMANAL, ULTIMA_MENSAL, dados, pegarPremioTemporada, partida, previsao, aplicar,
     PASSE_NIVEIS, PASSE_XP, PRECO_PRO, nivelPasse, recompensa, icone, texto, temTrilha, podePegar, pendentes, pegar, comprarPro,
-    premioDe, sequenciaNormal, registrar, historico, publico, acertarRegistro, INICIO_MESTRE, INICIO_PRO, INICIO_REI, INICIO_DEUS, darEvolucao, passeAtual, diasPasse,
+    premioDe, sequenciaNormal, registrar, segundoPlano, atualizarRef, historico, publico, acertarRegistro, INICIO_MESTRE, INICIO_PRO, INICIO_REI, INICIO_DEUS, darEvolucao, passeAtual, diasPasse,
     get CARTA_EVOLUCAO() { return passeAtual().carta; },
   };
 })();

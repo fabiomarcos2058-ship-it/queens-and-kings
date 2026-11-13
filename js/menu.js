@@ -403,7 +403,7 @@
   $('loja-summon').onclick = () => Summon.abrir(() => tudo());
   $('btn-som').onclick = () => Som.abrirConfig();
   Som.musica('menu');
-  window.MenuAPI = { segundoPlano: () => partidasSegundoPlano(), tudo: () => tudo(), mostrarBau: (t, r) => mostrarBau(t, r), irPara: (a) => irPara(a), topGlobal: (aba) => topGlobal(aba) };
+  window.MenuAPI = { segundoPlano: () => partidasSegundoPlano(), ranqueSP: () => ranqueSegundoPlano(), tudo: () => tudo(), mostrarBau: (t, r) => mostrarBau(t, r), irPara: (a) => irPara(a), topGlobal: (aba) => topGlobal(aba) };
   $('btn-x1').onclick = () => x1();
   $('btn-2v2').onclick = () => dupla();
   $('btn-top').onclick = () => topGlobal();
@@ -1142,8 +1142,19 @@
       if (n) { Estado.salvar(); if (Conta.salvarAgora) Conta.salvarAgora().catch(() => {}); topo(); telaBatalha(); }
     } catch (e) { /* nada */ }
   }
+  // mesma coisa na ranqueada (janela própria, definida no Ranque)
+  async function ranqueSegundoPlano() {
+    try {
+      if (!calibrarTrofeus() || !d()) return;
+      if (document.querySelector('#batalha:not(.oculto)')) return;
+      await Ranque.atualizarRef();
+      if (Ranque.segundoPlano()) { if (Conta.salvarAgora) Conta.salvarAgora().catch(() => {}); topo(); telaBatalha(); try { RanqueUI.atualizarBotao(); } catch (e) { /* nada */ } }
+    } catch (e) { /* nada */ }
+  }
   setInterval(partidasSegundoPlano, 60000);
   setTimeout(partidasSegundoPlano, 8000);
+  setInterval(ranqueSegundoPlano, 60000);
+  setTimeout(ranqueSegundoPlano, 9000);
 
   function fimDeBatalhaNormal(r) {
     const vitoria = r.resultado === 'vitoria';
