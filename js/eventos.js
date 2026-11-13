@@ -621,6 +621,18 @@ const Eventos = (() => {
       }
       if (typeof Ranque !== 'undefined' && Ranque.acertarRegistro) Ranque.acertarRegistro();
       if (typeof Summon !== 'undefined' && Summon.premiosChegada) Summon.premiosChegada();
+      // desculpa pelas atualizações constantes: 350 gemas pra todo mundo (uma vez)
+      if (!(d.presentesEspeciais || []).includes('desculpa-atualizacoes')) {
+        d.presentesEspeciais = [...(d.presentesEspeciais || []), 'desculpa-atualizacoes'];
+        d.gemas += 350; Estado.salvar();
+        if (Conta.salvarAgora) Conta.salvarAgora().catch(() => {});
+        const mostrar = () => {
+          if (document.querySelector('.titulo, .tela-conta, .modal-fundo, .revela-evo, #batalha:not(.oculto), .td-tela')) return setTimeout(mostrar, 2500);
+          UI.modal({ titulo: '💌 Um presente pra você', html: '<p style="text-align:center">O jogo anda atualizando toda hora, e a gente sabe que às vezes atrapalha. Obrigada pela paciência!</p><div style="text-align:center;font:44px \'Lilita One\',sans-serif;color:#7FE9FF;text-shadow:0 3px 0 #0b2a4a,0 0 18px #5CE1FF">💎 +350</div>', botoes: [{ texto: 'Oba!', classe: 'principal' }] });
+          if (typeof MenuAPI !== 'undefined' && MenuAPI.tudo) MenuAPI.tudo();
+        };
+        setTimeout(mostrar, 3000);
+      }
       // novidade: Princesa Moranguinho como tropa de torre
       if (!(d.presentesEspeciais || []).includes('aviso-moranguinho')) {
         d.presentesEspeciais = [...(d.presentesEspeciais || []), 'aviso-moranguinho'];
