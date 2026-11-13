@@ -28,8 +28,12 @@ def painel(cid):
     return im.crop((int(x0), int(y0), int(x0 + cw), int(y0 + ch))).resize((PW, H), Image.LANCZOS)
 
 
-def capa(k):
-    a, b = ORDEM[2 * k], ORDEM[2 * k + 1]
+RARAS = ['nami_last', 'goku_ssj', 'mai', 'mbappe', 'miku_nakano', 'pan_gt', 'shizuku', 'goku_base', 'trunks_base', 'itsuki']
+
+
+def capa(k, lista=None, prefixo='zenkai_'):
+    lista = lista or ORDEM
+    a, b = lista[2 * k], lista[2 * k + 1]
     rng = random.Random(k * 7 + 3)
     can = Image.new('RGB', (W, H), (20, 2, 4))
     mL = Image.new('L', (W, H), 0); ImageDraw.Draw(mL).polygon([(0, 0), (610, 0), (470, H), (0, H)], fill=255)
@@ -66,11 +70,15 @@ def capa(k):
         dv.line([(0, y), (W, y)], fill=int(max(0, (y - H * 0.58) / (H * 0.42)) * 235))
     can = Image.composite(Image.new('RGB', (W, H), (25, 2, 4)), can, v)
     can = ImageEnhance.Contrast(can).enhance(1.06)
-    can.save(os.path.join(SAIDA, f'zenkai_{k}.jpg'), quality=88)
-    can.crop((240, 40, 840, 540)).resize((360, 300), Image.LANCZOS).save(os.path.join(SAIDA, f'zenkai_{k}_mini.jpg'), quality=86)
+    can.save(os.path.join(SAIDA, f'{prefixo}{k}.jpg'), quality=88)
+    can.crop((240, 40, 840, 540)).resize((360, 300), Image.LANCZOS).save(os.path.join(SAIDA, f'{prefixo}{k}_mini.jpg'), quality=86)
     print('capa', k, a, b)
 
 
 if __name__ == '__main__':
-    for k in ([int(x) for x in sys.argv[1:]] or range(len(ORDEM) // 2)):
-        capa(k)
+    if sys.argv[1:2] == ['raras']:
+        for k in range(len(RARAS) // 2):
+            capa(k, RARAS, 'zenkai_r_')
+    else:
+        for k in ([int(x) for x in sys.argv[1:]] or range(len(ORDEM) // 2)):
+            capa(k)

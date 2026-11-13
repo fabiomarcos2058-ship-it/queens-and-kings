@@ -1397,7 +1397,8 @@
     const novas = ordem.slice(Math.max(0, lib - 2), lib), prox = ordem.slice(lib, lib + 2);
     const diasProx = Math.ceil(((Estado.ZENKAI_INICIO + Math.ceil(lib / 2) * 3 * 86400000) - Date.now()) / 86400000);
     const nome = (id) => (Estado.carta(id) ? Estado.carta(id).nome : id);
-    return `<div class="zenkai-faixa" style="grid-column:1/-1"><b>⚡ ZENKAI</b><span>Novas: <em>${novas.map(nome).join(' e ')}</em>${prox.length ? ` · Próximas em ${diasProx} dia${diasProx === 1 ? '' : 's'}: ${prox.map(nome).join(' e ')}` : ''}</span><small>Cartas com Zenkai no nível ${Estado.NIVEL_MAX} usam as cópias extras pra despertar (até +15%).</small></div>`;
+    const libR = Estado.zenkaiRarasLiberadas(), rr = Estado.ZENKAI_RARAS, novasR = rr.slice(Math.max(0, libR - 2), libR);
+    return `<div class="zenkai-faixa" style="grid-column:1/-1"><b>⚡ ZENKAI</b><span>Novas: <em>${novas.map(nome).join(' e ')}</em>${prox.length ? ` · Próximas em ${diasProx} dia${diasProx === 1 ? '' : 's'}: ${prox.map(nome).join(' e ')}` : ''}</span><span>Raras novas: <em>${novasR.map(nome).join(' e ')}</em></span><small>Cartas com Zenkai no nível ${Estado.NIVEL_MAX} usam as cópias extras pra despertar (até +15%).</small></div>`;
   }
   // ---------- vários decks (igual ao Clash) ----------
   const N_DECKS = 5;

@@ -244,10 +244,14 @@ const Estado = (() => {
     'sonic', 'johnny', 'trunks_ssj', 'hinata', 'kurona', 'caulifla', 'goku_ssj2', 'vegeta_ssj', 'mark_prisioneiro', 'mark_flaxan', 'vegeta_base', 'roman_cyber'];
   const ZENKAI_INICIO = new Date(2026, 10, 12, 0, 0, 0).getTime();
   const ZENKAI_MAX = 7;
-  const ZENKAI_COPIAS = { comum: [20, 30, 40, 60, 80, 100, 120], epica: [2, 3, 4, 5, 6, 8, 10] };
+  const ZENKAI_COPIAS = { comum: [20, 30, 40, 60, 80, 100, 120], rara: [8, 12, 16, 24, 32, 40, 50], epica: [2, 3, 4, 5, 6, 8, 10] };
+  // raras também despertam: 2 a cada 3 dias, começando pelas mais fracas (a partir de 13/11)
+  const ZENKAI_RARAS = ['nami_last', 'goku_ssj', 'mai', 'mbappe', 'miku_nakano', 'pan_gt', 'shizuku', 'goku_base', 'trunks_base', 'itsuki'];
+  const ZENKAI_RARAS_INICIO = new Date(2026, 10, 13, 0, 0, 0).getTime();
   const ZENKAI_OURO = [500, 1000, 1500, 2000, 3000, 4000, 5000];
   const zenkaiLiberadas = () => Math.min(ZENKAI_ORDEM.length, 2 * (Math.floor(Math.max(0, Date.now() - ZENKAI_INICIO) / (3 * 86400000)) + 1));
-  const zenkaiAtivo = (id) => { const i = ZENKAI_ORDEM.indexOf(id); return i >= 0 && i < zenkaiLiberadas(); };
+  const zenkaiRarasLiberadas = () => Math.min(ZENKAI_RARAS.length, 2 * (Math.floor(Math.max(0, Date.now() - ZENKAI_RARAS_INICIO) / (3 * 86400000)) + 1));
+  const zenkaiAtivo = (id) => { const i = ZENKAI_ORDEM.indexOf(id); if (i >= 0) return i < zenkaiLiberadas(); const j = ZENKAI_RARAS.indexOf(id); return j >= 0 && j < zenkaiRarasLiberadas(); };
   // bônus de vida e dano: +2% por estágio, +15% no Zenkai 7
   const zenkaiBonus = (z) => (z >= 7 ? 0.15 : 0.02 * (z || 0));
   function zenkai(id) {
@@ -551,7 +555,7 @@ const Estado = (() => {
 
   return {
     get d() { return d; }, carregar, salvar, apagar, importar, recarregarCatalogo, aoSalvar, carta, stats, catalogo: () => catalogo, tem, liberada, disponiveis, proximaLiberacao, baisAteLendaria,
-    zenkai, zenkaiAtivo, zenkaiBonus, despertarZenkai, ZENKAI_ORDEM, zenkaiLiberadas, ZENKAI_INICIO,
+    zenkai, zenkaiAtivo, zenkaiBonus, despertarZenkai, ZENKAI_ORDEM, zenkaiLiberadas, ZENKAI_INICIO, ZENKAI_RARAS, zenkaiRarasLiberadas, ZENKAI_RARAS_INICIO,
     mitaAfeto, ganharAfeto, habilidade, ajustarHabilidade, registrarUsoVigiado, cansaco, nivelEfetivo, COPIAS, COPIAS_RAR, copiasNivel, OURO, OURO_RAR, ouroNivel, NIVEL_MAX, BAUS, XP_NIVEL, CORINGAS, darCoringa, usarCoringa, maxada, faltaParaMax,
     contarUsos, usosRestantes, todasCartas: () => todas.filter((c) => !c.token),
     TORRE_OURO, TROPAS_TORRE, nivelRei, minhasTorres, statsTorre, podeEvoluirTorre, evoluirTorre, escolherTropaTorre,

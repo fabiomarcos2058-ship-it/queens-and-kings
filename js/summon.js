@@ -30,7 +30,7 @@ const Summon = (() => {
   // ---------- Summon Zenkai: um banner pra cada dupla que recebe Zenkai (dura até a próxima dupla chegar) ----------
   // mais caro, mas cada carta vem com MUITAS cópias; só as 2 cartas da dupla
   const ZK_PRECO1 = 90, ZK_PRECO10 = 800;
-  const ZK_COPIAS = { comum: 25, epica: 3 };
+  const ZK_COPIAS = { comum: 25, rara: 10, epica: 3 };
   const ZK_ORDEM = ['bra', 'nami_old', 'chichi', 'pan_dbh', 'teto', 'hatsune_miku', 'isagi', 'goku_ssj3', 'rukia', 'gohan_ssj', 'gyro', 'riruka',
     'sonic', 'johnny', 'trunks_ssj', 'hinata', 'kurona', 'caulifla', 'goku_ssj2', 'vegeta_ssj', 'mark_prisioneiro', 'mark_flaxan', 'vegeta_base', 'roman_cyber'];
   const ZK_INICIO = new Date(2026, 10, 12, 0, 0, 0).getTime(), DIAS3 = 3 * 86400000;
@@ -48,8 +48,24 @@ const Summon = (() => {
       chances: { epica: 0.5, comum: 0.5 },
     };
   });
+  // banners das raras (uma dupla nova a cada 3 dias, a partir de 13/11)
+  const ZK_RARAS = ['nami_last', 'goku_ssj', 'mai', 'mbappe', 'miku_nakano', 'pan_gt', 'shizuku', 'goku_base', 'trunks_base', 'itsuki'];
+  const ZK_R_INICIO = new Date(2026, 10, 13, 0, 0, 0).getTime();
+  const BANNERS_ZENKAI_RARAS = Array.from({ length: ZK_RARAS.length / 2 }, (_, k) => {
+    const ids = [ZK_RARAS[2 * k], ZK_RARAS[2 * k + 1]];
+    return {
+      id: `zenkai-r-${k}`, nome: 'ZENKAI RARAS', tema: 'zk', logo: 'zk', zenkai: true, raras: true, ids,
+      inicio: new Date(k === 0 ? Date.UTC(2026, 10, 13, 9, 20, 0) : ZK_R_INICIO + k * DIAS3),
+      fim: new Date(ZK_R_INICIO + (k + 1) * DIAS3 - 1000),
+      arte: `assets/summon/zenkai_r_${k}.jpg`, mini: `assets/summon/zenkai_r_${k}_mini.jpg`,
+      get sub() { return ids.map((id) => (typeof Estado !== 'undefined' && Estado.carta(id) ? Estado.carta(id).nome : id)).join(' & '); },
+      destaque: ids,
+      get pool() { return { rara: ids.filter((id) => Estado.carta(id)) }; },
+      chances: { rara: 1 },
+    };
+  });
   const idsZenkai = () => banner().ids || [];
-  const BANNERS = [...BANNERS_ZENKAI, {
+  const BANNERS = [...BANNERS_ZENKAI, ...BANNERS_ZENKAI_RARAS, {
     id: 'ultras-blue-lock',
     nome: 'Fenda do Multiverso',
     sub: 'Ultras: Prodígios do Campo',
@@ -194,8 +210,8 @@ const Summon = (() => {
   function sortearZenkai(n) {
     const ds = dados(), p = pool(), res = [];
     for (let i = 0; i < n; i++) {
-      let rar = Math.random() < 0.5 ? 'epica' : 'comum';
-      if (!p[rar].length) rar = rar === 'epica' ? 'comum' : 'epica';
+      let rar = (p.rara || []).length ? 'rara' : Math.random() < 0.5 ? 'epica' : 'comum';
+      if (!(p[rar] || []).length) rar = rar === 'epica' ? 'comum' : 'epica';
       const id = escolher(p[rar]);
       ds.total++;
       res.push({ id, raridade: rar, ...receber(id, ZK_COPIAS[rar]) });
@@ -277,7 +293,7 @@ const Summon = (() => {
     const abas = lista.map((x, i) => `<button class="sm-aba${i === iAtual ? ' ativa' : ''}${x.tema ? ` t-${x.tema}` : ''}" data-b="${i}">
         <img src="${x.mini || Cartas.arte(Estado.carta(x.centro || x.destaque[0]) || {})}" alt="" />${i === lista.length - 1 ? '<em>NOVO</em>' : ''}
         <span>${esc(x.nome)}</span><small>⏳ ${tempo(x)}</small></button>`).join('');
-    const titulo = b.logo === 'zk' ? `<div class="smb-logo-zk"><b>ZENKAI</b><small>${esc(b.sub)}</small></div>` : b.logo === 'nz' ? logoNazarick(b) : b.logo === 'db' ? logoSaiyajin(b) : b.logo ? logoInvencivel(b) : `<div class="smb-titulo"><em>NOVA RARIDADE</em><b>${esc(b.nome)}</b><small>${esc(b.sub)}</small></div>`;
+    const titulo = b.logo === 'zk' ? `<div class="smb-logo-zk"><b>ZENKAI</b><small>${b.raras ? '✦ RARAS ✦ ' : ''}${esc(b.sub)}</small></div>` : b.logo === 'nz' ? logoNazarick(b) : b.logo === 'db' ? logoSaiyajin(b) : b.logo ? logoInvencivel(b) : `<div class="smb-titulo"><em>NOVA RARIDADE</em><b>${esc(b.nome)}</b><small>${esc(b.sub)}</small></div>`;
     // personagens em destaque (estilo vitrine)
     const destaques = b.destaque.filter((id) => Estado.carta(id)).map((id) => {
       const c = Estado.carta(id);
@@ -297,7 +313,7 @@ const Summon = (() => {
           </div>
         </div>
         <div class="sm-destaques"><small>✦ PERSONAGENS EM DESTAQUE ✦</small><div>${destaques}</div></div>
-        ${b.zenkai ? `<div class="sm-pity zk"><div><b>🔥 Cada carta vem com +${ZK_COPIAS.comum} cópias (comum) ou +${ZK_COPIAS.epica} (épica)</b><small>Só ${esc(b.sub)}, a dupla que acabou de ganhar Zenkai · troca quando a próxima dupla chegar</small></div></div>` : `<div class="sm-pity"><div><b>Ultra garantido em ${faltaPity()}</b><small>A chance sobe a partir da invocação ${SUAVE}</small></div><i><i style="width:${pct}%"></i></i></div>`}
+        ${b.zenkai ? `<div class="sm-pity zk"><div><b>🔥 ${b.raras ? `Cada carta vem com +${ZK_COPIAS.rara} cópias (rara)` : `Cada carta vem com +${ZK_COPIAS.comum} cópias (comum) ou +${ZK_COPIAS.epica} (épica)`}</b><small>Só ${esc(b.sub)}, a dupla que acabou de ganhar Zenkai · troca quando a próxima dupla chegar</small></div></div>` : `<div class="sm-pity"><div><b>Ultra garantido em ${faltaPity()}</b><small>A chance sobe a partir da invocação ${SUAVE}</small></div><i><i style="width:${pct}%"></i></i></div>`}
         ${b.centro && Estado.carta(b.centro) ? `<div class="sm-pity destaque"><div><b>${esc(Estado.carta(b.centro).nome)} garantido em ${faltaDestaque()}</b><small>Super raro: só ${(chances().ultra * 100 * (b.pesos[b.centro] / Object.values(b.pesos).reduce((a, v) => a + v, 0))).toFixed(2).replace('.', ',')}% por invocação</small></div><i><i style="width:${Math.round(((b.pityDestaque - faltaDestaque()) / b.pityDestaque) * 100)}%"></i></i></div>` : ''}
         <div class="sm-botoes">
           <button class="sm-btn um" id="sm-1"><small>INVOCAÇÃO</small><b>1x</b><span>💎 ${precoDe(1)}</span></button>
