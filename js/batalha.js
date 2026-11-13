@@ -3074,7 +3074,9 @@ const Batalha = (() => {
   }
 
   // melhor ponto para um feitiço: soma o dano útil em tropas e torres
-  function melhorFeitico(m, nivel, inimigos, torres) {
+  // chip = pode jogar feitiço só na torre (fim de jogo sem estar ganhando). Antes a IA jogava todo feitiço
+  // direto nas torres (às vezes pegando duas de uma vez) e somava milhares de dano por partida.
+  function melhorFeitico(m, nivel, inimigos, torres, chip = false) {
     const dano = m.c.dano * nivel;
     const area = m.c.area;
     let melhor = null;
@@ -3093,7 +3095,7 @@ const Batalha = (() => {
       for (const t of torres) {
         if (Math.hypot(t.x - p.x, t.y - p.y) > area + t.raio) continue;
         const dt0 = dano * 0.35;
-        v += t.vida <= dt0 ? 5000 : dt0 * 0.8;
+        v += t.vida <= dt0 ? 5000 : chip ? dt0 * 0.8 : acertos ? dt0 * 0.2 : 0;
       }
       if (!melhor || v > melhor.v) melhor = { ...p, v };
     }
@@ -3226,7 +3228,7 @@ const Batalha = (() => {
     const vistos = inimigos.filter((e) => s.t - (e.nasceu || 0) >= reacao + ((e.id * 7) % 10) / 15);
     if (!s.iaFeitCd) s.iaFeitCd = {};
     if (s.t >= (s.iaFeitCd[quem] || 0)) for (const m of pode.filter((x) => x.c.feitico)) {
-      const p = melhorFeitico(m, nivel, vistos, torresAzuis);
+      const p = melhorFeitico(m, nivel, vistos, torresAzuis, resta < 30 && !ganhando);
       const baseMin = perdendo && resta < 45 ? 90 : 165;
       // fácil/médio exige valor bem maior → quase nunca joga feitiço no momento certo
       const multDif = { 1: 2.4, 2: 1.7, 3: 1.25, 4: 1.05, 5: 0.9, 6: 0.8 }[dif] || 1;
