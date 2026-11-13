@@ -620,6 +620,7 @@ const Eventos = (() => {
         setTimeout(() => { if (!Estado.tem(NINO)) revelarNino(Ranque.darEvolucao(NINO)); }, 900);
       }
       if (typeof Ranque !== 'undefined' && Ranque.acertarRegistro) Ranque.acertarRegistro();
+      if (typeof Summon !== 'undefined' && Summon.premiosChegada) Summon.premiosChegada();
       // novidade: Princesa Moranguinho como tropa de torre
       if (!(d.presentesEspeciais || []).includes('aviso-moranguinho')) {
         d.presentesEspeciais = [...(d.presentesEspeciais || []), 'aviso-moranguinho'];

@@ -575,11 +575,40 @@ const Summon = (() => {
       <span class="bsm-txt"><b>🌀 Summon</b><small>${esc(b.sub)} · ${tempo(b)}</small></span><em class="bsm-novo">ULTRA</em>`;
   }
 
+  // ---------- presente de chegada: banner Ultra novo = 1500 💎 pra todo mundo, banner Zenkai novo = 400 💎 ----------
+  // (os banners que já estavam abertos quando isso foi criado não contam)
+  const JA_ESTAVAM = ['ultras-blue-lock', 'invencivel', 'saiyajins', 'nazarick'];
+  const PREMIO_CHEGADA = { ultra: 1500, zenkai: 400 };
+  function premiosChegada() {
+    const d = Estado.d;
+    if (!d) return;
+    const pegos = d.bannersPremiados || (d.bannersPremiados = []);
+    const novos = ativos().filter((b) => b.id && !JA_ESTAVAM.includes(b.id) && !pegos.includes(b.id));
+    if (!novos.length) return;
+    let total = 0;
+    for (const b of novos) { pegos.push(b.id); total += b.zenkai ? PREMIO_CHEGADA.zenkai : PREMIO_CHEGADA.ultra; }
+    d.gemas += total;
+    Estado.salvar();
+    if (typeof Conta !== 'undefined' && Conta.salvarAgora) Conta.salvarAgora().catch(() => {});
+    const nomes = novos.map((b) => (b.zenkai ? `🔥 Zenkai: ${b.sub}` : `🌀 ${b.nome}`)).join('<br>');
+    const mostrar = () => {
+      if (document.querySelector('.titulo, .tela-conta, .revela-evo, #batalha:not(.oculto), .td-tela')) return setTimeout(mostrar, 2500);
+      UI.modal({
+        titulo: '🎉 Banner novo chegou!',
+        classe: 'modal-chegada',
+        html: `<p class="mch-nomes">${nomes}</p><div class="mch-gemas">💎 +${fmt(total)}</div><p>Presente pra todo mundo invocar! Corre no Summon 😊</p>`,
+        botoes: [{ texto: 'Depois' }, { texto: 'Ir pro Summon', classe: 'principal', acao: () => abrir() }],
+      });
+      if (typeof MenuAPI !== 'undefined' && MenuAPI.tudo) MenuAPI.tudo();
+    };
+    setTimeout(mostrar, 1200);
+  }
+
   // banner principal pra tela de título (o mais novo que tem arte grande)
   function tituloAtual() {
     const b = ativos().filter((x) => x.titulo).pop();
     return b ? { arte: b.titulo, nome: b.nome, sub: b.sub, tempo: tempo(b) } : null;
   }
 
-  return { abrir, fechar, invocar, info, htmlBotao, tituloAtual, dados, chances, pool, sortear, banner, PRECO1, PRECO10, PITY };
+  return { abrir, fechar, invocar, info, htmlBotao, tituloAtual, premiosChegada, dados, chances, pool, sortear, banner, PRECO1, PRECO10, PITY };
 })();

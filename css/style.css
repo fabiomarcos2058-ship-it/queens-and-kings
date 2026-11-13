@@ -3513,3 +3513,7 @@ html.leve .princesa-torre.caindo { animation: princesaCai 0.9s ease-in forwards;
 .sm-pity.zk { border-color: #FF3A3A88; background: linear-gradient(90deg, #3a0606cc, #120202cc); }
 .sm-pity.zk b { color: #FFE07A; }
 .sm-banner.t-zk .smb-painel span { display: none; }
+/* presente de banner novo */
+.modal-chegada .mch-nomes { text-align: center; font-weight: 700; line-height: 1.5; }
+.modal-chegada .mch-gemas { text-align: center; font: 44px 'Lilita One', sans-serif; color: #7FE9FF; text-shadow: 0 3px 0 #0b2a4a, 0 0 18px #5CE1FF; margin: 6px 0; }
+.modal-chegada p { text-align: center; }
