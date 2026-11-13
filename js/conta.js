@@ -321,7 +321,7 @@ const Conta = (() => {
     const q = fb.query(fb.collection(fb.db, 'ranking'), fb.orderBy('ranque', 'desc'), fb.limit(150));
     const snap = await fb.getDocs(q);
     const temp = Ranque.temporadaAtual();
-    return snap.docs.map((x) => ({ uid: x.id, ...x.data() })).filter((j) => j.rtemp === temp).slice(0, 50);
+    return snap.docs.map((x) => ({ uid: x.id, ...x.data() })).filter((j) => j.rtemp === temp || (temp === Ranque.PRIMEIRA_SEMANAL && j.rtemp === Ranque.ULTIMA_MENSAL)).slice(0, 50); // quem ainda não atualizou continua aparecendo nesta semana
   }
 
   async function sair() {

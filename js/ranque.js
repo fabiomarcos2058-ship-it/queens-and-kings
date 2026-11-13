@@ -39,26 +39,45 @@ const Ranque = (() => {
   const img = (i, mini = false) => `assets/patentes/${PATENTES[i].id}${mini ? '_mini' : ''}.${PATENTES[i].ext || 'png'}`;
 
   // ---------- Temporada ----------
-  const temporadaAtual = () => new Date().toISOString().slice(0, 7);
+  // a temporada é semanal: acaba todo domingo às 15h (horário do aparelho) e outra começa na hora
+  const p2 = (n) => String(n).padStart(2, '0');
+  function fimTemporada(agora = Date.now()) {
+    const f = new Date(agora);
+    f.setHours(15, 0, 0, 0);
+    f.setDate(f.getDate() + ((7 - f.getDay()) % 7));
+    if (f.getTime() <= agora) f.setDate(f.getDate() + 7);
+    return f;
+  }
+  const temporadaAtual = () => { const f = fimTemporada(); return `s${f.getFullYear()}-${p2(f.getMonth() + 1)}-${p2(f.getDate())}`; };
+  const PRIMEIRA_SEMANAL = 's2026-11-15', ULTIMA_MENSAL = '2026-11'; // a temporada de novembro virou a primeira semanal (sem zerar ninguém)
   const nomeTemporada = (t = temporadaAtual()) => {
+    if (t[0] === 's') { const [, m, d] = t.slice(1).split('-'); return `da semana até ${d}/${m}`; }
     const [a, m] = t.split('-');
-    return `${['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'][+m - 1]} ${a}`;
+    return `de ${['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'][+m - 1]} ${a}`;
   };
-  const diasRestantes = () => { const h = new Date(); return Math.ceil((new Date(h.getFullYear(), h.getMonth() + 1, 1) - h) / 86400000); };
+  const diasRestantes = () => Math.max(1, Math.ceil((fimTemporada().getTime() - Date.now()) / 86400000));
+  // "2d 3h" ou "4h 20min" até o fim da temporada
+  function restaTemporada() {
+    const ms = Math.max(0, fimTemporada().getTime() - Date.now()), h = Math.floor(ms / 3600000), m = Math.floor(ms / 60000) % 60;
+    return h >= 24 ? `${Math.floor(h / 24)}d ${h % 24}h` : `${h}h ${p2(m)}min`;
+  }
 
   // prêmio de fim de temporada pela MELHOR patente que você alcançou nela
-  const premioDe = (i) => ({ gemas: 15 + i * 20, ouro: 300 + i * 250 });
+  // (subir é difícil, então as patentes altas pagam bem: Mestre 400 💎, Deus da Aura 1000 💎)
+  const GEMAS_TEMPORADA = [15, 30, 50, 75, 100, 140, 190, 250, 400, 550, 750, 1000];
+  const premioDe = (i) => ({ gemas: GEMAS_TEMPORADA[Math.min(i, GEMAS_TEMPORADA.length - 1)], ouro: 300 + i * 400 });
   function dados() {
     const d = Estado.d;
     if (!d.ranque) d.ranque = { temporada: temporadaAtual(), pts: 0, melhor: 0, melhorSempre: 0, v: 0, d: 0, e: 0, seq: 0, maiorSeq: 0, escudo: 0, pro: false, xp: 0, pegos: { free: [], pro: [] } };
     const r = d.ranque;
+    if (r.temporada === ULTIMA_MENSAL) r.temporada = PRIMEIRA_SEMANAL;
     if (r.temporada !== temporadaAtual()) {
       // virada de temporada: prêmio pela melhor patente e "reset suave" dos pontos
       const melhorI = info(r.melhor).i;
       r.premioTemporada = { temporada: r.temporada, patente: melhorI, ...premioDe(melhorI) };
       r.temporadasAnteriores = [{ t: r.temporada, melhor: r.melhor }, ...(r.temporadasAnteriores || [])].slice(0, 12);
       r.temporada = temporadaAtual();
-      r.pts = Math.round(r.pts * 0.55);
+      r.pts = Math.round(r.pts * 0.8); // temporada semanal: o ajuste é leve (guarda 80% dos pontos)
       r.melhor = r.pts; r.v = 0; r.d = 0; r.e = 0; r.seq = 0; r.escudo = 0; r.epicas = 0;
       Estado.salvar();
     }
@@ -346,7 +365,7 @@ const Ranque = (() => {
   const publico = () => { const r = dados(); return { pts: r.pts, melhor: r.melhorSempre || r.pts, v: r.v, d: r.d, temporada: r.temporada }; };
 
   return { ehEpica, BONUS_EPICA,
-    PATENTES, info, img, temporadaAtual, nomeTemporada, diasRestantes, dados, pegarPremioTemporada, partida, previsao, aplicar,
+    PATENTES, info, img, temporadaAtual, nomeTemporada, diasRestantes, restaTemporada, fimTemporada, PRIMEIRA_SEMANAL, ULTIMA_MENSAL, dados, pegarPremioTemporada, partida, previsao, aplicar,
     PASSE_NIVEIS, PASSE_XP, PRECO_PRO, nivelPasse, recompensa, icone, texto, temTrilha, podePegar, pendentes, pegar, comprarPro,
     premioDe, sequenciaNormal, registrar, historico, publico, acertarRegistro, INICIO_MESTRE, INICIO_PRO, INICIO_REI, INICIO_DEUS, darEvolucao, passeAtual, diasPasse,
     get CARTA_EVOLUCAO() { return passeAtual().carta; },

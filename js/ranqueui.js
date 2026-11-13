@@ -90,7 +90,7 @@ const RanqueUI = (() => {
     const nv = Ranque.nivelPasse();
     tela.innerHTML = `
       <div class="tr-fundo"></div>
-      <div class="tr-topo"><button class="tr-voltar" id="tr-voltar">‹</button><div><b>Ranqueada</b><small>Temporada de ${Ranque.nomeTemporada()} · termina em ${Ranque.diasRestantes()} dia${Ranque.diasRestantes() > 1 ? 's' : ''}</small></div></div>
+      <div class="tr-topo"><button class="tr-voltar" id="tr-voltar">‹</button><div><b>Ranqueada</b><small>Temporada semanal · acaba domingo às 15h (em ${Ranque.restaTemporada()})</small></div></div>
       <div class="tr-rolagem">
         <div class="tr-heroi">
           ${emblema(f.i, 190)}
@@ -113,7 +113,7 @@ const RanqueUI = (() => {
         ${(() => { const mi = Ranque.info(r.melhor).i, pm = Ranque.premioDe(mi), prox = mi < Ranque.PATENTES.length - 1 ? Ranque.premioDe(mi + 1) : null;
           return `<div class="tr-premio"><img src="${Ranque.img(mi, true)}" alt="" /><div><b>🎁 Prêmio da temporada</b>
             <span>Garantido pela sua melhor patente (<b>${Ranque.PATENTES[mi].nome}</b>): <em>${pm.gemas} 💎 + ${fmt(pm.ouro)} 🪙</em></span>
-            <small>${prox ? `Chegue em ${Ranque.PATENTES[mi + 1].nome} e leve ${prox.gemas} 💎 + ${fmt(prox.ouro)} 🪙 · ` : 'Você está no topo! · '}entrega em ${Ranque.diasRestantes()} dia${Ranque.diasRestantes() === 1 ? '' : 's'}</small></div></div>`; })()}
+            <small>${prox ? `Chegue em ${Ranque.PATENTES[mi + 1].nome} e leve ${prox.gemas} 💎 + ${fmt(prox.ouro)} 🪙 · ` : 'Você está no topo! · '}entrega domingo às 15h (em ${Ranque.restaTemporada()})</small></div></div>`; })()}
         ${htmlAvisoPasse()}
         <button class="tr-passe${r.pro ? ' pro' : ''}" id="tr-passe">
           <div class="trp-topo"><b>${r.pro ? '💠 Pro Pass' : '🎫 Passe da Ranqueada'}</b><small>${nv}/${Ranque.PASSE_NIVEIS}</small></div>
@@ -401,11 +401,11 @@ const RanqueUI = (() => {
     const p = Ranque.dados().premioTemporada;
     if (!p) return depois && depois();
     UI.modal({
-      titulo: `🏁 Fim da temporada de ${Ranque.nomeTemporada(p.temporada)}`,
+      titulo: `🏁 Fim da temporada ${Ranque.nomeTemporada(p.temporada)}`,
       classe: 'modal-ranq',
       html: `<div class="rr-emblema">${emblema(p.patente, 130)}<b>Sua melhor patente: ${Ranque.PATENTES[p.patente].nome}</b></div>
         <div class="ganhos"><span>💎 +${p.gemas}</span><span><img class="ic-img" data-asset="ui/moeda" alt="" /> +${fmt(p.ouro)}</span></div>
-        <p class="aviso">Começou uma nova temporada! Seus pontos foram ajustados e o Passe da Ranqueada recomeçou.</p>`,
+        <p class="aviso">Começou uma nova temporada! Você guarda 80% dos seus pontos e a próxima acaba no domingo às 15h.</p>`,
       botoes: [{ texto: 'Pegar prêmio', classe: 'principal', acao: () => { Ranque.pegarPremioTemporada(); M.topo(); atualizarBotao(); setTimeout(() => depois && depois(), 250); } }],
     });
     Assets.fill();
@@ -484,7 +484,7 @@ const RanqueUI = (() => {
       titulo: '🏅 Patentes',
       classe: 'modal-patentes',
       html: `<div class="lista-patentes">${Ranque.PATENTES.map((p, i) => i).reverse().map((i) => `<div class="lp-item${i === meu ? ' atual' : ''}${i > meu ? ' falta' : ''}" style="--cor:${Ranque.PATENTES[i].cor}">
-          ${emblema(i, 76, { raios: false, animado: i === meu })}<div><b>${Ranque.PATENTES[i].nome}</b><small>${faixa(i)}</small><small class="lp-premio">🎁 Fim da temporada: ${Ranque.premioDe(i).gemas} 💎 + ${fmt(Ranque.premioDe(i).ouro)} 🪙</small></div>${i === meu ? '<em>Você está aqui</em>' : ''}</div>`).join('')}</div>`,
+          ${emblema(i, 76, { raios: false, animado: i === meu })}<div><b>${Ranque.PATENTES[i].nome}</b><small>${faixa(i)}</small><small class="lp-premio">🎁 Toda semana: ${Ranque.premioDe(i).gemas} 💎 + ${fmt(Ranque.premioDe(i).ouro)} 🪙</small></div>${i === meu ? '<em>Você está aqui</em>' : ''}</div>`).join('')}</div>`,
       botoes: [{ texto: 'Fechar', classe: 'principal' }],
     });
   }

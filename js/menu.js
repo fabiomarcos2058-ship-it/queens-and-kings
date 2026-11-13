@@ -438,7 +438,7 @@
       const avatar = (a) => (ICONES.includes(a) ? `assets/avatares/${a}.svg` : a ? `assets/cartas/${a}_medalhao.png` : 'assets/avatares/coroa.svg');
       const meu = Ranque.dados(), fm = Ranque.info(meu.pts);
       const minhaPos = lista.findIndex((j) => j.uid === eu);
-      corpo.innerHTML = `<p class="top-temp">Temporada de ${Ranque.nomeTemporada()} · termina em ${Ranque.diasRestantes()}d</p>`
+      corpo.innerHTML = `<p class="top-temp">Temporada semanal · acaba domingo às 15h (em ${Ranque.restaTemporada()})</p>`
         + (lista.length ? `<div class="top-lista ranque">${lista.map((j, i) => { const f = Ranque.info(j.ranque || 0); return `<div class="top-linha${j.uid === eu ? ' voce' : ''} pos${i + 1}" data-perfil="${j.uid}" style="--cor:${f.p.cor}">
             <span class="top-pos">${i < 3 ? ['🥇', '🥈', '🥉'][i] : i + 1}</span><img src="${avatar(j.avatar)}" alt="" />
             <div class="top-nome"><b>${Passe.nomeHtml(j.nome || 'Jogador', j.estiloNome)}${j.uid === eu ? ' (você)' : ''}</b><small class="top-patente">${esc(f.nome)}</small></div>
