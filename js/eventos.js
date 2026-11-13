@@ -244,7 +244,22 @@ const Eventos = (() => {
   const desafiosAbertos = () => Object.keys(DESAFIOS).some(aberto);
   const diasDesafios = () => Math.max(0, Math.ceil((FIM_DESAFIOS.getTime() - Date.now()) / 86400000));
   const lendariasRival = () => embaralhar(pool((c) => c.raridade === 'lendaria')).slice(0, 8).map((c) => c.id);
+  const FIM_CELESTIAL = new Date(2026, 10, 30, 23, 59, 59); // 30/11/2026
+  const ultrasRival = () => embaralhar(pool((c) => c.raridade === 'ultra')).slice(0, 8).map((c) => c.id);
   const DESAFIOS = {
+    celestial: {
+      nome: 'Ascensão Celestial', vidas: 2, preco: 40, fim: FIM_CELESTIAL, arena: 'celestial',
+      premios: [{ ouro: 500 }, { gemas: 25 }, { bau: 'ouro' }, { gemas: 50 }, { ouro: 1500 }, { bau: 'ouro' }, { gemas: 1000 }],
+      etapas: [
+        { nome: 'Portões do Céu', ic: '🚪', desc: 'O guardião dos portões joga sério e com as cartas 1 nível acima das suas.', cfg: { dif: 4, nivelIAMais: 1 } },
+        { nome: 'Vento Divino', ic: '🌪️', desc: 'Todas as tropas andam e atacam muito mais rápido. Pensa rápido!', cfg: { turbo: true, dif: 5 } },
+        { nome: 'Chuva de Estrelas', ic: '🌠', desc: 'Elixir 2x mais rápido, e o rival só joga com lendárias.', montar: (ev) => { ev.deckIA = lendariasRival(); }, cfg: { elixirMult: 2, dif: 5 } },
+        { nome: 'Espelho Celestial', ic: '🪞', desc: 'O rival joga com o SEU deck, 1 nível acima. Você contra você mesmo.', montar: (ev) => { ev.deckIA = [...Estado.d.deck]; }, cfg: { dif: 5, nivelIAMais: 1 } },
+        { nome: 'Eclipse', ic: '🌑', desc: 'Suas cartas ficam viradas: você só vê o custo. Lembre do seu deck!', cfg: { cartasViradas: true, dif: 5 } },
+        { nome: 'Julgamento', ic: '⚖️', desc: '2 minutos, tropas turbo e a primeira torre derrubada decide tudo.', cfg: { subita: true, turbo: true, dif: 6 } },
+        { nome: 'O Guardião Celestial', ic: '👼', desc: 'O chefe final: a IA mais esperta do jogo, só com Ultras e 2 níveis acima. Vença e leve 1000 gemas!', montar: (ev) => { ev.deckIA = ultrasRival(); }, cfg: { dif: 6, nivelIAMais: 2 } },
+      ],
+    },
     yugi: {
       nome: 'Duelo do Faraó', vidas: 2, preco: 30, carta: YUGI,
       premios: [{ ouro: 500 }, { gemas: 30 }, { bau: 'ouro' }, { gemas: 60 }, { ouro: 1000 }, { carta: YUGI }],
@@ -292,6 +307,7 @@ const Eventos = (() => {
   function jogarDesafio(k, iniciar) {
     const D = DESAFIOS[k], f = dadosDesafio(k);
     if (!aberto(k)) { UI.toast('Esse evento já acabou 😢'); return; }
+    if (k === 'celestial' && f.completo && !f.ativo) { UI.toast('Você já completou a Ascensão Celestial! 💎'); return; }
     if (!f.ativo) {
       if (f.tentativas > 0) {
         if (Estado.d.gemas < D.preco) { UI.toast(`Precisa de ${D.preco} gemas para tentar de novo`); return; }
@@ -312,7 +328,7 @@ const Eventos = (() => {
   }
   function comecarDesafio(k, E, iniciar) {
     const D = DESAFIOS[k], f = dadosDesafio(k);
-    const ev = { id: `desafio-${k}`, nome: `${D.nome} · ${E.nome}`, desafio: k, ...(E.cfg || {}) };
+    const ev = { id: `desafio-${k}`, nome: `${D.nome} · ${E.nome}`, desafio: k, ...(D.arena ? { arena: D.arena } : {}), ...(E.cfg || {}) };
     if (E.montar) E.montar(ev);
     const ir = () => {
       // a vida já sai antes da batalha: sair no meio conta como derrota (volta se vencer/empatar)
@@ -371,7 +387,7 @@ const Eventos = (() => {
       if (f.v >= total) { f.ativo = false; f.completo = true; }
       Estado.salvar();
       const txt = premio.escolha ? 'Escolha um Sonic!' : premio.carta ? `${esc(Estado.carta(premio.carta).nome)}!` : txtPremio(premio);
-      UI.modal({ titulo: k === 'yugi' ? '🃏 Você venceu o duelo!' : k === 'cyber' ? '🌃 Missão cumprida!' : '💨 Venceu!', html: `<p class="ev-res">${f.v >= total ? `${D.nome} completo!` : `Vitória ${f.v}/${total}! Você ganhou <b>${txt}</b>`}</p>`, botoes: [{ texto: 'Oba!', classe: 'principal' }] });
+      UI.modal({ titulo: k === 'yugi' ? '🃏 Você venceu o duelo!' : k === 'cyber' ? '🌃 Missão cumprida!' : k === 'celestial' ? '👼 Mais um degrau!' : '💨 Venceu!', html: `<p class="ev-res">${f.v >= total ? `${D.nome} completo!` : `Vitória ${f.v}/${total}! Você ganhou <b>${txt}</b>`}</p>`, botoes: [{ texto: 'Oba!', classe: 'principal' }] });
       setTimeout(() => {
         if (premio.escolha) escolherSonic(tudo);
         else if (premio.carta) {
@@ -405,12 +421,23 @@ const Eventos = (() => {
       <div class="fn-pips">${pips}</div><div class="fn-linha"><div class="fn-vidas">${vidas}</div>${botao}</div>
       <button class="fn-ver" data-ver-cyber="1">Ver os personagens</button></div></div>`;
   }
+  function caixaCelestial(D, f, total) {
+    const pips = D.etapas.map((E, i) => `<span class="fn-pip${i < f.v ? ' ok' : ''}${i === total - 1 ? ' final' : ''}" title="${esc(E.nome)}">${i === total - 1 ? '💎' : E.ic}</span>`).join('');
+    const vidas = Array.from({ length: D.vidas }, (_, i) => `<i class="${i < D.vidas - f.l ? '' : 'perdida'}">🪽</i>`).join('');
+    const prox = D.etapas[Math.min(f.v, total - 1)];
+    const dias = Math.max(0, Math.ceil((D.fim.getTime() - Date.now()) / 86400000));
+    const botao = f.completo && !f.ativo ? '<div class="selo">Completo! 💎</div>' : `<button class="selo botao" data-desafio="celestial">${f.ativo ? `Jogar: ${prox.nome}` : f.tentativas ? `De novo · ${D.preco} 💎` : 'Começar (grátis)'}</button>`;
+    return `<div class="desafio-caixa celestial"><div class="cel-fundo"><img src="assets/arenas/celestial_mini.jpg" alt="" /><i class="cel-luz"></i></div><div class="mc-conteudo">
+      <b class="cel-titulo">👼 ${D.nome}</b><span>${f.completo ? 'Você subiu até o topo do céu e levou as 1000 gemas! 🎉' : `${total} batalhas difíceis no <b>Santuário Celestial</b>, uma arena nova. Só ${D.vidas} vidas! Vença o Guardião no final e leve <b class="cel-gemas">1000 💎</b> · ${dias} dias`}</span>
+      <div class="fn-pips">${pips}</div><div class="fn-linha"><div class="fn-vidas">${vidas}</div>${botao}</div></div></div>`;
+  }
   function htmlDesafios() {
     if (!desafiosAbertos()) return '';
     const caixa = (k) => {
       if (!aberto(k)) return '';
       const D = DESAFIOS[k], f = dadosDesafio(k), total = D.etapas.length;
       if (k === 'cyber') return caixaCyber(D, f, total);
+      if (k === 'celestial') return caixaCelestial(D, f, total);
       const pips = D.etapas.map((E, i) => `<span class="fn-pip${i < f.v ? ' ok' : ''}${i === total - 1 ? ' final' : ''}" title="${esc(E.nome)}">${i === total - 1 ? (k === 'yugi' ? `<img src="assets/cartas/${YUGI}_medalhao.png" alt="" />` : '<img src="assets/cartas/sonic_medalhao.png" alt="" />') : E.ic}</span>`).join('');
       const vidas = Array.from({ length: D.vidas }, (_, i) => `<i class="${i < D.vidas - f.l ? '' : 'perdida'}">${k === 'yugi' ? '🃏' : '💍'}</i>`).join('');
       const prox = D.etapas[Math.min(f.v, total - 1)];
@@ -424,7 +451,7 @@ const Eventos = (() => {
         <div class="fn-pips">${pips}</div><div class="fn-linha"><div class="fn-vidas">${vidas}</div>${botao}</div>
         ${k === 'yugi' ? `<button class="fn-ver" data-ver="${YUGI}">Ver a carta</button>` : '<button class="fn-ver" data-ver-sonic="1">Ver os Sonics</button>'}</div></div>`;
     };
-    return `<div class="desafios-evento"><div class="mitas-cab"><small>EVENTOS NOVOS</small><b>⚔️ Desafios Lendários</b></div>${caixa('cyber')}${caixa('yugi')}${caixa('sonic')}</div>`;
+    return `<div class="desafios-evento"><div class="mitas-cab"><small>EVENTOS NOVOS</small><b>⚔️ Desafios Lendários</b></div>${caixa('celestial')}${caixa('cyber')}${caixa('yugi')}${caixa('sonic')}</div>`;
   }
 
   // ---------- tela (dentro da aba Eventos) ----------

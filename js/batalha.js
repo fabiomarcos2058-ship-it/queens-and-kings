@@ -81,7 +81,7 @@ const Batalha = (() => {
       modo, t: 0, prorrogacao: false, acabou: false, pausa: false,
       azul: lado(deck), vermelho: lado(deckIA),
       ent: torres(minhas, delas), proj: [], efeitos: [], agenda: [], selecionada: null, iaTimer: 2, id: 0,
-      arenaId: Arena.daQtd(Estado.d.recorde).id,
+      arenaId: (evento && evento.arena) || Arena.daQtd(Estado.d.recorde).id,
       nivelIA: (evento && evento.nivel) || (tutorial && 1) || Math.max(1, Math.min(9, Math.round(deck.reduce((a, id) => a + ((Estado.d.colecao[id] || {}).nivel || 1), 0) / deck.length) - (Mod.deckApelao() ? 0 : 2))),
       rede, niveisV: x1 ? rede.convidado.niveis : null, eventos: [], snapTimer: 0,
       zenkais: x1 ? { vermelho: rede.convidado.zenkai || null } : {},

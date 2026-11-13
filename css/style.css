@@ -3375,3 +3375,15 @@ html.leve .tropa:not(.surgindo) .tropa-medalhao { animation: none; }
 .leve .cb-lingua, .leve .cb-brilho-rei, .leve .cb-brasa { animation: none; opacity: 1; }
 .leve .cb-asa-rei.e, .leve .cb-asa-rei.d { animation-duration: 2.4s; }
 .leve .cartao-batalha.t10 .cb-frame { filter: none; }
+/* ===== Ascensão Celestial (evento das 1000 gemas) ===== */
+.desafio-caixa.celestial { border-color: #E9D8FF; box-shadow: 0 0 16px #B89BFF99, 0 0 30px #FFD25E44; }
+.desafio-caixa.celestial::after { background: linear-gradient(90deg, #120a2af2 0%, #1a0f3acc 55%, #2a1a5a33 100%); }
+.cel-fundo { position: absolute; inset: 0; overflow: hidden; }
+.cel-fundo img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 48%; transform: scale(1.4); }
+.cel-luz { position: absolute; inset: 0; background: radial-gradient(circle at 80% 30%, #FFE9A055, transparent 45%); }
+.desafio-caixa.celestial .cel-titulo { background: linear-gradient(180deg, #fff, #E9D8FF 50%, #FFD25E); -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 2px 0 #2a1a5a); font-size: 19px; }
+.cel-gemas { color: #7FE9FF !important; -webkit-text-fill-color: #7FE9FF; text-shadow: 0 0 8px #5CE1FF; }
+.desafio-caixa.celestial .fn-pip.final { background: linear-gradient(135deg, #5CE1FF, #B15CFF); box-shadow: 0 0 10px #5CE1FF; }
+.amb-estrela i { width: 5px; height: 5px; background: #fff; border-radius: 50%; box-shadow: 0 0 6px 2px #C9B8FFcc, 0 0 12px 4px #8A6CFF55; top: auto; bottom: -4%; animation-name: ambSubir; }
+.amb-estrela i:nth-child(3n) { background: #FFE9A0; box-shadow: 0 0 6px 2px #FFD25Ecc; }
+.modal-desafio.celestial .modal-caixa, .modal-desafio.celestial { --cor-modal: #B89BFF; }

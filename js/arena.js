@@ -12,7 +12,11 @@ const Arena = (() => {
     { n: 4, id: 'vulcao', nome: 'Templo Vulcânico', trofeus: 1800, ambiente: 'brasa', cor: '#F07A2A', desc: 'Um templo antigo cortado por um rio de lava.' },
   ];
   const daQtd = (trofeus) => [...ARENAS].reverse().find((a) => (trofeus || 0) >= a.trofeus) || ARENAS[0];
-  const porId = (id) => ARENAS.find((a) => a.id === id) || ARENAS[0];
+  // arenas só de evento (não entram no caminho de troféus)
+  const ESPECIAIS = [
+    { id: 'celestial', nome: 'Santuário Celestial', ambiente: 'estrela', cor: '#B89BFF', desc: 'Um templo de mármore flutuando acima das nuvens, cortado por um abismo de estrelas.' },
+  ];
+  const porId = (id) => ARENAS.find((a) => a.id === id) || ESPECIAIS.find((a) => a.id === id) || ARENAS[0];
 
   const torres = [
     ['arena/torre_rei_vermelha', 180, 64, 88, 119, 'rei-vermelho'],

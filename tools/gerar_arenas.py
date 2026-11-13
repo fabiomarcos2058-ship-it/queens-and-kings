@@ -558,6 +558,60 @@ def enfeites_vulcao(img, rng):
     return img
 
 
+def nebulosa(semente):
+    """Abismo de estrelas: nebulosa roxa/azul/rosa com estrelas e poeira brilhante."""
+    n1 = ruido(W, H, 120, 5, semente, esticar=(2.5, 1))
+    n2 = ruido(W, H, 60, 4, semente + 3, esticar=(3, 1))
+    base = np.zeros((H, W, 3), np.float32) + np.array([0.04, 0.02, 0.10], np.float32)
+    roxo, azul, rosa = np.array([0.42, 0.16, 0.78]), np.array([0.12, 0.30, 0.85]), np.array([0.95, 0.32, 0.72])
+    base = brilho_aditivo(base, np.clip((n1 - 0.4) * 2.2, 0, 1), roxo, 0.9)
+    base = brilho_aditivo(base, np.clip((n2 - 0.5) * 2.5, 0, 1), azul, 0.7)
+    base = brilho_aditivo(base, np.clip((n1 * n2 - 0.32) * 4, 0, 1), rosa, 0.6)
+    rng = np.random.default_rng(semente)
+    est = (rng.random((H, W)) > 0.9965).astype(np.float32)
+    est = ndimage.gaussian_filter(est, 0.8) * 4
+    grandes = (rng.random((H, W)) > 0.99975).astype(np.float32)
+    grandes = ndimage.gaussian_filter(grandes, 2.2) * 30
+    base = brilho_aditivo(base, np.clip(est, 0, 1), (1, 1, 1), 0.9)
+    base = brilho_aditivo(base, np.clip(grandes, 0, 1), (0.85, 0.9, 1.0), 1.0)
+    return np.clip(base, 0, 1)
+
+
+def orbe(base, cx, cy, cor=(0.55, 0.85, 1.0), r=6):
+    gl = mascara(lambda dr: dr.ellipse([u(cx - r * 4), u(cy - r * 4), u(cx + r * 4), u(cy + r * 4)], fill=255), borrar=u(6))
+    base = brilho_aditivo(base, gl, cor, 0.45)
+    m = mascara(lambda dr: dr.ellipse([u(cx - r), u(cy - r), u(cx + r), u(cy + r)], fill=255), borrar=u(0.8))
+    base = sombra(base, m, dx=u(3), dy=u(8), borrar=u(3), forca=0.35)
+    yy, xx = np.mgrid[0:H, 0:W]
+    luz = np.clip(1.5 - np.hypot(xx - u(cx - r * 0.35), yy - u(cy - r * 0.35)) / u(r * 1.3), 0.5, 1.6)[..., None]
+    return misturar(base, np.clip(np.array(cor, np.float32) * luz, 0, 1), m)
+
+
+def enfeites_celestial(img, rng):
+    marmore = ajustar(textura('marble_01', u(30), 71), brilho=1.15, saturacao=0.4, tom=(1.02, 0.98, 1.08))
+    ouro = ajustar(textura('marble_01', u(24), 72), brilho=1.25, saturacao=0.2, tom=(1.25, 0.98, 0.5), contraste=1.1)
+    for (x, y) in [(22, 24), (338, 24), (22, 596), (338, 596), (18, 200), (342, 200), (18, 420), (342, 420)]:
+        img = pilar(img, x, y, 12, marmore)
+        img = pilar(img, x, y, 5, ouro)
+    for (x, y, c) in [(56, 160, (0.55, 0.85, 1.0)), (304, 160, (1.0, 0.6, 0.9)), (56, 460, (1.0, 0.6, 0.9)), (304, 460, (0.55, 0.85, 1.0)), (180, 236, (1.0, 0.9, 0.55)), (180, 384, (1.0, 0.9, 0.55))]:
+        img = orbe(img, x, y, c, 5.5)
+    # anéis dourados no chão em volta das torres do rei
+    for (x, y) in [(180, 64), (180, 540)]:
+        an = mascara(lambda dr: dr.ellipse([u(x - 58), u(y - 40), u(x + 58), u(y + 40)], outline=255, width=u(2)), borrar=1)
+        img = brilho_aditivo(img * (1 - an[..., None] * 0.15), ndimage.gaussian_filter(an, 3), (1.0, 0.82, 0.4), 0.6)
+    # runas de luz espalhadas
+    rm = Image.new('L', (W, H), 0)
+    dr = ImageDraw.Draw(rm)
+    for _ in range(26):
+        x, y = rng.uniform(u(30), W - u(30)), rng.choice([rng.uniform(u(150), u(262)), rng.uniform(u(362), u(470))])
+        r = rng.uniform(u(3), u(6))
+        dr.line([(x - r, y), (x + r, y)], fill=200, width=2)
+        dr.line([(x, y - r), (x, y + r)], fill=200, width=2)
+    r = np.asarray(rm.filter(ImageFilter.GaussianBlur(1)), np.float32) / 255
+    img = brilho_aditivo(img, ndimage.gaussian_filter(r, 3), (0.7, 0.6, 1.0), 0.6)
+    return img
+
+
 ARENAS = {
     'festival': dict(
         semente=1, chao='rocky_terrain_02', chao2='leafy_grass', ladrilho_chao=95,
@@ -587,6 +641,13 @@ ARENAS = {
         margem='rocky_gravel', ajuste_margem=dict(brilho=0.55, saturacao=0.6),
         fluido=lambda: lava(41), escurecer_borda=False, brilho_rio=(1.0, 0.45, 0.08),
         tabua='castle_brick_02_white', ponte_pedra='castle_brick_02_white', corrimao=(0.35, 0.32, 0.30), enfeitar=enfeites_vulcao),
+    'celestial': dict(
+        semente=5, chao='marble_tiles', chao2='marble_01', ladrilho_chao=100, quadriculado=0.02,
+        ajuste_chao=dict(brilho=1.16, saturacao=0.55, tom=(0.94, 0.9, 1.12), contraste=1.0),
+        trilha='marble_tiles', ajuste_trilha=dict(brilho=1.22, saturacao=0.45, tom=(1.1, 1.02, 0.86), contraste=1.0), ladrilho_trilha=70, borda_trilha=(0.85, 0.66, 0.26),
+        margem='snow_field_aerial', ajuste_margem=dict(brilho=1.15, saturacao=0.3, tom=(0.98, 0.96, 1.08)),
+        fluido=lambda: nebulosa(51), escurecer_borda=False, brilho_rio=(0.55, 0.35, 1.0),
+        tabua='castle_brick_02_white', ponte_pedra='marble_01', corrimao=(0.9, 0.72, 0.32), tom_ponte=(1.08, 1.04, 1.14), enfeitar=enfeites_celestial),
 }
 
 if __name__ == '__main__':
