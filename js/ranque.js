@@ -16,16 +16,19 @@ const Ranque = (() => {
     { id: 'mestre', nome: 'Mestre', cor: '#C99BFF', escura: '#43177C', dif: 5, difMin: 5, super: 0.55 },
     { id: 'mestre_pro', nome: 'Mestre Pro', cor: '#FF7AC0', escura: '#7A1040', dif: 5, difMin: 5, super: 0.8 },
     { id: 'rei_aura', nome: 'Rei da Aura', cor: '#FF5A1A', escura: '#3A0010', dif: 5, difMin: 5, super: 0.95, ext: 'svg' },
+    { id: 'deus_aura', nome: 'Deus da Aura', cor: '#5CC8FF', escura: '#06103A', dif: 5, difMin: 5, super: 1, ext: 'svg' },
   ];
   const DIV = 100, COM_DIV = 8;
   const INICIO_MESTRE = COM_DIV * 3 * DIV; // 2400
   const INICIO_PRO = 3600;
   const INICIO_REI = 6000;
+  const INICIO_DEUS = 9000;
   const ROMANO = ['III', 'II', 'I'];
 
   function info(pts) {
     pts = Math.max(0, Math.floor(pts || 0));
-    if (pts >= INICIO_REI) return { i: 10, p: PATENTES[10], div: '', nome: 'Rei da Aura', base: INICIO_REI, prox: null, prog: 1, pts, baseTier: INICIO_REI };
+    if (pts >= INICIO_DEUS) return { i: 11, p: PATENTES[11], div: '', nome: 'Deus da Aura', base: INICIO_DEUS, prox: null, prog: 1, pts, baseTier: INICIO_DEUS };
+    if (pts >= INICIO_REI) return { i: 10, p: PATENTES[10], div: '', nome: 'Rei da Aura', base: INICIO_REI, prox: INICIO_DEUS, prog: (pts - INICIO_REI) / (INICIO_DEUS - INICIO_REI), pts, baseTier: INICIO_REI };
     if (pts >= INICIO_PRO) return { i: 9, p: PATENTES[9], div: '', nome: 'Mestre Pro', base: INICIO_PRO, prox: INICIO_REI, prog: (pts - INICIO_PRO) / (INICIO_REI - INICIO_PRO), pts, baseTier: INICIO_PRO };
     if (pts >= INICIO_MESTRE) return { i: 8, p: PATENTES[8], div: '', nome: 'Mestre', base: INICIO_MESTRE, prox: INICIO_PRO, prog: (pts - INICIO_MESTRE) / (INICIO_PRO - INICIO_MESTRE), pts, baseTier: INICIO_MESTRE };
     const i = Math.floor(pts / (3 * DIV));
@@ -111,12 +114,12 @@ const Ranque = (() => {
   function bot(pts, usados = [], subir = null) {
     const x = Math.random();
     const passo = subir !== null ? subir : x < 0.3 ? 1 : x < 0.38 ? 2 : x < 0.85 ? 0 : -1;
-    let alvo = Math.max(0, Math.min(INICIO_REI + 900, pts + passo * 300 + Math.round((Math.random() - 0.5) * 120)));
+    let alvo = Math.max(0, Math.min(INICIO_DEUS + 1500, pts + passo * 300 + Math.round((Math.random() - 0.5) * 120)));
     // do Mestre pra cima as patentes são bem mais largas: "rival de patente acima" cai direto na próxima (Mestre Pro, Rei da Aura)
     const eu = info(pts).i;
     if (eu >= 8 && passo > 0) {
-      const sobe = Math.min(10, eu + passo);
-      alvo = sobe > eu ? [INICIO_PRO, INICIO_REI][sobe - 9] + Math.round(Math.random() * 400) : pts + 100 + Math.round(Math.random() * 300);
+      const sobe = Math.min(11, eu + passo);
+      alvo = sobe > eu ? [INICIO_PRO, INICIO_REI, INICIO_DEUS][sobe - 9] + Math.round(Math.random() * 400) : pts + 100 + Math.round(Math.random() * 300);
     } else if (eu >= 8 && passo < 0) alvo = Math.max(INICIO_MESTRE - 250, pts - 150 - Math.round(Math.random() * 250));
     return { nome: nomeBot(usados), avatar: AVATARES[Math.floor(Math.random() * AVATARES.length)], pts: alvo, info: info(alvo) };
   }
@@ -166,7 +169,8 @@ const Ranque = (() => {
     // do Mestre pra cima fica MUITO difícil: ganha bem menos e perde bem mais
     // (o desconto do Mestre vale só pra vitória comum: o bônus de patente alta e de IA super vem inteiro)
     let g = ganho, m = 1; const cheio = (diff > 0 ? bonusRival : 0) + bonusSuper;
-    if (meuI >= 9) { m = 0.45; g = Math.round((ganho - cheio) * 0.45) + cheio; perda = Math.round(perda * 1.6); perdaMax = Math.round(perdaMax * 1.6); }
+    if (meuI >= 11) { m = 0.35; g = Math.round((ganho - cheio) * 0.35) + cheio; perda = Math.round(perda * 1.8); perdaMax = Math.round(perdaMax * 1.8); }
+    else if (meuI >= 9) { m = 0.45; g = Math.round((ganho - cheio) * 0.45) + cheio; perda = Math.round(perda * 1.6); perdaMax = Math.round(perdaMax * 1.6); }
     else if (meuI >= 8) { m = 0.6; g = Math.round((ganho - cheio) * 0.6) + cheio; perda = Math.round(perda * 1.35); perdaMax = Math.round(perdaMax * 1.35); }
     return { ganho: g, ganhoMax: g + sorte, perda: Math.max(4, perda), perdaMax: Math.max(4, perdaMax), bonusRival, bonusSuper, bonusSeq, bonusEpica: BONUS_EPICA + (diff > 0 ? 5 : 0) };
   }
@@ -323,7 +327,7 @@ const Ranque = (() => {
   return { ehEpica, BONUS_EPICA,
     PATENTES, info, img, temporadaAtual, nomeTemporada, diasRestantes, dados, pegarPremioTemporada, partida, previsao, aplicar,
     PASSE_NIVEIS, PASSE_XP, PRECO_PRO, nivelPasse, recompensa, icone, texto, temTrilha, podePegar, pendentes, pegar, comprarPro,
-    sequenciaNormal, registrar, historico, publico, acertarRegistro, INICIO_MESTRE, INICIO_PRO, INICIO_REI, darEvolucao, passeAtual, diasPasse,
+    sequenciaNormal, registrar, historico, publico, acertarRegistro, INICIO_MESTRE, INICIO_PRO, INICIO_REI, INICIO_DEUS, darEvolucao, passeAtual, diasPasse,
     get CARTA_EVOLUCAO() { return passeAtual().carta; },
   };
 })();

@@ -89,7 +89,7 @@
       ['arena2', '🌸', 'Bosque das Cerejeiras', 'Chegue a 400 troféus (arena 2)', d().recorde, 400, 50],
       ['arena3', '❄️', 'Vila Congelada', 'Chegue a 1000 troféus (arena 3)', d().recorde, 1000, 100],
       ['arena4', '🌋', 'Templo Vulcânico', 'Chegue a 1800 troféus (arena 4)', d().recorde, 1800, 200],
-      pat(3, 30), pat(4, 50), pat(5, 80), pat(6, 120), pat(7, 160), pat(8, 250), pat(9, 400), pat(10, 800),
+      pat(3, 30), pat(4, 50), pat(5, 80), pat(6, 120), pat(7, 160), pat(8, 250), pat(9, 400), pat(10, 800), pat(11, 1600),
       ['cla', '🤝', 'Em equipe', 'Entre num clã', d().cla && d().cla.id ? 1 : 0, 1, 25],
       ['colecao', '📚', 'Colecionadora', 'Tenha cópias de todas as cartas', temCartas, total, 300],
     ];

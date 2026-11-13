@@ -3550,3 +3550,10 @@ body.em-batalha .tela-ranque { display: none !important; }
 /* início mais enxuto: arena menor (Batalha e Ranqueada aparecem sem rolar) e sem botão repetido de Eventos (já fica na barra de baixo) */
 .inicio2 .arena-mini { height: min(26vh, 220px); }
 .inicio2 #btn-eventos-ir { display: none; }
+
+/* ===== patente Deus da Aura: os enfeites do Rei em chama azul divina ===== */
+.cartao-batalha.t11 .cb-moldura { background: conic-gradient(from var(--ang), #1A6BFF, #E6F7FF, #06103A, #3FA8FF, #FFFFFF, #2A1A8A, #1A6BFF); animation: girarAng 2.4s linear infinite; box-shadow: inset 0 0 0 1.5px #CFEFFF, 0 0 22px #3FA8FFcc; }
+.cartao-batalha.t11 .cb-frame image { filter: hue-rotate(-212deg); }
+.cartao-batalha.t11 .cb-frame { filter: hue-rotate(212deg) saturate(1.25) brightness(1.08) drop-shadow(0 0 10px #3FA8FF) drop-shadow(0 0 3px #FFFFFF); overflow: visible; }
+.cartao-batalha.t11 .cb-faixa { background: linear-gradient(180deg, #FFFFFF, #3FA8FF 50%, #06103A); box-shadow: 0 0 14px #3FA8FF; }
+.leve .cartao-batalha.t11 .cb-frame { filter: hue-rotate(212deg) saturate(1.25); }
