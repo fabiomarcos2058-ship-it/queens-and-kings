@@ -237,11 +237,51 @@ const Estado = (() => {
   const proximaLiberacao = () => catalogo.filter((c) => !liberada(c.id)).sort((a, b) => a.trofeus - b.trofeus)[0] || null;
   const sorteio = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
 
-  // Estatísticas com o nível aplicado (+10% por nível)
+  // ---------- Zenkai (despertar das cartas fracas, estilo Legends) ----------
+  // Só comuns e épicas, das mais fracas pras mais fortes. A cada 3 dias, mais 2 cartas ganham Zenkai.
+  const ZENKAI_ORDEM = ['bra', 'nami_old', 'chichi', 'pan_dbh', 'teto', 'hatsune_miku', 'isagi', 'goku_ssj3', 'rukia', 'gohan_ssj', 'gyro', 'riruka',
+    'sonic', 'johnny', 'trunks_ssj', 'hinata', 'kurona', 'caulifla', 'goku_ssj2', 'vegeta_ssj', 'mark_prisioneiro', 'mark_flaxan', 'vegeta_base', 'roman_cyber'];
+  const ZENKAI_INICIO = new Date(2026, 10, 12, 0, 0, 0).getTime();
+  const ZENKAI_MAX = 7;
+  const ZENKAI_COPIAS = { comum: [20, 30, 40, 60, 80, 100, 120], epica: [2, 3, 4, 5, 6, 8, 10] };
+  const ZENKAI_OURO = [500, 1000, 1500, 2000, 3000, 4000, 5000];
+  const zenkaiLiberadas = () => Math.min(ZENKAI_ORDEM.length, 2 * (Math.floor(Math.max(0, Date.now() - ZENKAI_INICIO) / (3 * 86400000)) + 1));
+  const zenkaiAtivo = (id) => { const i = ZENKAI_ORDEM.indexOf(id); return i >= 0 && i < zenkaiLiberadas(); };
+  // bônus de vida e dano: +2% por estágio, +15% no Zenkai 7
+  const zenkaiBonus = (z) => (z >= 7 ? 0.15 : 0.02 * (z || 0));
+  function zenkai(id) {
+    const c = carta(id), col = d && d.colecao[id];
+    const z = (col && col.z) || 0;
+    return { ativo: zenkaiAtivo(id), z, max: ZENKAI_MAX, bonus: zenkaiBonus(z),
+      copias: z < ZENKAI_MAX && c ? (ZENKAI_COPIAS[c.raridade] || ZENKAI_COPIAS.epica)[z] : 0, ouro: z < ZENKAI_MAX ? ZENKAI_OURO[z] : 0 };
+  }
+  // cópias que ainda faltam pra fechar o Zenkai (a partir do estágio atual)
+  function zenkaiRestante(id) {
+    const c = carta(id), col = d.colecao[id];
+    if (!zenkaiAtivo(id) || !c) return 0;
+    const tab = ZENKAI_COPIAS[c.raridade] || ZENKAI_COPIAS.epica;
+    let t = 0;
+    for (let z = (col && col.z) || 0; z < ZENKAI_MAX; z++) t += tab[z];
+    return t;
+  }
+  function despertarZenkai(id) {
+    const col = d.colecao[id], zk = zenkai(id);
+    if (!col || !col.tem) return { ok: false, motivo: 'Você não tem essa carta' };
+    if (!zk.ativo) return { ok: false, motivo: 'Essa carta ainda não tem Zenkai' };
+    if ((col.nivel || 1) < NIVEL_MAX) return { ok: false, motivo: `Chegue no nível ${NIVEL_MAX} primeiro` };
+    if (zk.z >= ZENKAI_MAX) return { ok: false, motivo: 'Zenkai no máximo!' };
+    if ((col.copias || 0) < zk.copias) return { ok: false, motivo: `Faltam cópias (${col.copias || 0}/${zk.copias})` };
+    if (d.ouro < zk.ouro) return { ok: false, motivo: `Falta ouro (${zk.ouro})` };
+    col.copias -= zk.copias; d.ouro -= zk.ouro; col.z = zk.z + 1;
+    salvar();
+    return { ok: true, z: col.z };
+  }
+
+  // Estatísticas com o nível aplicado (+10% por nível) e o Zenkai
   function stats(id, nivelForcado) {
     const c = carta(id);
     const n = nivelForcado || (d.colecao[id] ? d.colecao[id].nivel : 1);
-    const f = Math.pow(1.1, n - 1);
+    const f = Math.pow(1.1, n - 1) * (nivelForcado ? 1 : 1 + zenkaiBonus(d.colecao[id] && d.colecao[id].z));
     return { ...c, nivel: n, vida: c.vida ? Math.round(c.vida * f) : 0, dano: c.dano ? Math.round(c.dano * f) : 0 };
   }
 
@@ -304,7 +344,7 @@ const Estado = (() => {
     if (!col) return Infinity;
     let falta = 0;
     for (let n = col.nivel || 1; n < NIVEL_MAX; n++) falta += copiasNivel(id, n);
-    return Math.max(0, falta - (col.copias || 0));
+    return Math.max(0, falta + zenkaiRestante(id) - (col.copias || 0)); // com Zenkai, as cópias continuam servindo depois do nível máximo
   }
   // carta no máximo (ou com cópias suficientes para chegar lá): não vem mais em baú, passe ou loja
   const maxada = (id) => tem(id) && faltaParaMax(id) <= 0;
@@ -510,6 +550,7 @@ const Estado = (() => {
 
   return {
     get d() { return d; }, carregar, salvar, apagar, importar, recarregarCatalogo, aoSalvar, carta, stats, catalogo: () => catalogo, tem, liberada, disponiveis, proximaLiberacao, baisAteLendaria,
+    zenkai, zenkaiAtivo, zenkaiBonus, despertarZenkai, ZENKAI_ORDEM, zenkaiLiberadas, ZENKAI_INICIO,
     mitaAfeto, ganharAfeto, habilidade, ajustarHabilidade, registrarUsoVigiado, cansaco, nivelEfetivo, COPIAS, COPIAS_RAR, copiasNivel, OURO, OURO_RAR, ouroNivel, NIVEL_MAX, BAUS, XP_NIVEL, CORINGAS, darCoringa, usarCoringa, maxada, faltaParaMax,
     contarUsos, usosRestantes, todasCartas: () => todas.filter((c) => !c.token),
     TORRE_OURO, TROPAS_TORRE, nivelRei, minhasTorres, statsTorre, podeEvoluirTorre, evoluirTorre, escolherTropaTorre,

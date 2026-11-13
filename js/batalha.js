@@ -84,6 +84,7 @@ const Batalha = (() => {
       arenaId: Arena.daQtd(Estado.d.recorde).id,
       nivelIA: (evento && evento.nivel) || (tutorial && 1) || Math.max(1, Math.min(9, Math.round(deck.reduce((a, id) => a + ((Estado.d.colecao[id] || {}).nivel || 1), 0) / deck.length) - (Mod.deckApelao() ? 0 : 2))),
       rede, niveisV: x1 ? rede.convidado.niveis : null, eventos: [], snapTimer: 0,
+      zenkais: x1 ? { vermelho: rede.convidado.zenkai || null } : {},
       ias: x1 ? [] : ['vermelho'],
     };
     // fluxo de elixir por conta
@@ -122,6 +123,7 @@ const Batalha = (() => {
       s.vermelho2 = lado(jog.vermelho2 ? jog.vermelho2.deck : deckAleatorioIA());
       s.niveis = { azul2: jog.azul2 && jog.azul2.niveis, vermelho: jog.vermelho && jog.vermelho.niveis, vermelho2: jog.vermelho2 && jog.vermelho2.niveis };
       s.niveisAzul2 = s.niveis.azul2 || null;
+      s.zenkais = { azul2: jog.azul2 && jog.azul2.zenkai, vermelho: jog.vermelho && jog.vermelho.zenkai, vermelho2: jog.vermelho2 && jog.vermelho2.zenkai };
       s.ias = ['vermelho', 'vermelho2', 'azul2'].filter((l) => !jog[l]);
       s.nomes = { azul: Estado.d.nome, azul2: jog.azul2 ? jog.azul2.nome : null, vermelho: jog.vermelho ? jog.vermelho.nome : null, vermelho2: jog.vermelho2 ? jog.vermelho2.nome : null };
       s.nomeParceiro = jog.azul2 ? jog.azul2.nome : ranque && ranque.parceiro ? ranque.parceiro.nome : 'Parceiro IA';
@@ -428,7 +430,8 @@ const Batalha = (() => {
       : s.niveis && s.niveis[quem] ? (s.niveis[quem][id] || 1)
       : quem === 'azul2' && s.niveisAzul2 ? (s.niveisAzul2[id] || 1)
       : s.niveisV ? (s.niveisV[id] || 1) : nivelCartaIA(id);
-    const f = Math.pow(1.1, nivel - 1) * (quem === 'azul' && Mod.flag('danoX5') ? 5 : 1) * (quem === 'azul' && id === 'mita_gentil' && !s.convidado ? 1 + Estado.mitaAfeto() / 400 : 1);
+    const zk = s.nivelFixo ? 0 : quem === 'azul' ? ((Estado.d.colecao[id] && Estado.d.colecao[id].z) || 0) : ((s.zenkais && s.zenkais[quem] && s.zenkais[quem][id]) || 0);
+    const f = Math.pow(1.1, nivel - 1) * (1 + Estado.zenkaiBonus(zk)) * (quem === 'azul' && Mod.flag('danoX5') ? 5 : 1) * (quem === 'azul' && id === 'mita_gentil' && !s.convidado ? 1 + Estado.mitaAfeto() / 400 : 1);
     if (c.feitico) {
       lancarFeitico(time, c, x, y, Math.round(c.dano * f));
     } else if (c.barril) {
@@ -445,6 +448,7 @@ const Batalha = (() => {
         s.evoCarga[k] = evo ? 0 : (s.evoCarga[k] || 0) + 1;
       }
       const t = donoDe(criarTropa(time, c, x, y, evo ? f * 1.2 : f, nivel, { evo }), quem);
+      if (zk) { t.zk = zk; t.el.classList.add('zenkai'); }
       if (evo) agendar(1.05, () => { if (t.vida > 0) expansaoDominio(t); });
     }
   }
@@ -3585,6 +3589,7 @@ const Batalha = (() => {
     if (t.seguidos) k *= 1 - 0.07 * t.seguidos;
     if (t.kaio) k *= 1 - 0.04 * t.kaio;
     if (t.furiaFusao) k *= 0.75;
+    if (t.zk >= 7) k *= 0.9; // Zenkai 7: ataca 10% mais rápido
     if (t.cameraBuff) k *= 0.8;
     if (t.sande > 0) k *= 0.25;
     if (t.psico > 0) k *= 0.67;

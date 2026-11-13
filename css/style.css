@@ -3180,3 +3180,32 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 .td-chefe { top: 46px; }
 .td-chefe:not(.oculto) ~ .td-aviso { top: 84px; }
 .td-area { background: #3E8E3A; }
+
+/* ===== Zenkai ===== */
+.carta.zenkai { box-shadow: 0 0 0 2px #FF3A3A, 0 0 12px #FF3A3Aaa; }
+.zenkai-borda { position: absolute; inset: 0; z-index: 3; pointer-events: none; border-radius: inherit; box-shadow: inset 0 0 0 2px #FF3A3A, inset 0 0 14px #FF3A3A88;
+  background: linear-gradient(115deg, transparent 40%, #ff6a6a44 50%, transparent 60%); background-size: 250% 100%; animation: brilhoBanner 3.2s linear infinite; }
+.selo-zenkai { position: absolute; left: 50%; bottom: 3px; transform: translateX(-50%); z-index: 4; display: flex; flex-direction: column; align-items: center; line-height: 1;
+  font: 9px 'Lilita One', sans-serif; letter-spacing: 1px; padding: 2px 6px; border-radius: 6px; color: #fff; background: linear-gradient(180deg, #FF5A3A, #A00010); box-shadow: 0 0 6px #FF3A3A; white-space: nowrap; }
+.selo-zenkai b { font-size: 7px; color: #FFE45C; letter-spacing: 0; }
+.zenkai-detalhe { margin-top: 8px; padding: 9px 10px; border-radius: 12px; text-align: left; background: linear-gradient(90deg, #4a0008cc, #1a0010cc); border: 1px solid #FF3A3A; box-shadow: 0 0 10px #FF3A3A55; }
+.zenkai-detalhe b { color: #FF7A5A; font: 14px 'Lilita One', sans-serif; letter-spacing: 1px; }
+.zk-estrelas { margin-left: 8px; } .zk-estrelas i { font-style: normal; color: #ffffff33; font-size: 15px; } .zk-estrelas i.ok { color: #FFE45C; text-shadow: 0 0 6px #FF8A00; }
+.zenkai-detalhe small { display: block; margin-top: 3px; font-size: 11.5px; opacity: 0.9; }
+.btn-modal.zenkai-btn { background: linear-gradient(180deg, #FF7A5A, #C0101E); color: #fff; box-shadow: 0 4px 0 #6a0008, 0 0 12px #FF3A3A88; }
+.zenkai-faixa { display: flex; flex-direction: column; gap: 2px; padding: 8px 10px; margin-bottom: 4px; border-radius: 12px; text-align: left; background: linear-gradient(90deg, #5a000c, #1a0614); border: 1px solid #FF3A3A; }
+.zenkai-faixa b { font: 13px 'Lilita One', sans-serif; letter-spacing: 2px; color: #FF7A5A; }
+.zenkai-faixa span { font-size: 11.5px; } .zenkai-faixa em { font-style: normal; color: #FFE45C; }
+.zenkai-faixa small { font-size: 10.5px; opacity: 0.75; }
+.tropa.zenkai .tropa-medalhao { box-shadow: 0 0 0 2px #FF3A3A, 0 0 10px 3px #FF3A3A99; }
+.zenkai-revela { position: absolute; inset: 0; z-index: 300; display: grid; place-items: center; background: radial-gradient(circle, #5a000ccc, #0a0004f2); animation: fadeIn 0.3s; }
+.zenkai-revela.sumir { opacity: 0; transition: opacity 0.25s; }
+.zkr-raios { position: absolute; left: 50%; top: 45%; width: 200vmax; height: 200vmax; margin: -100vmax; background: repeating-conic-gradient(#FF3A3A00 0 8deg, #FF5A3A44 9deg 12deg, #FF3A3A00 13deg 20deg); animation: ttRaios 20s linear infinite; }
+.zkr-conteudo { position: relative; display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; color: #fff; padding: 20px; }
+.zkr-conteudo small { font: 12px 'Lilita One', sans-serif; letter-spacing: 3px; color: #FF9A7A; }
+.zkr-titulo { font: 44px 'Lilita One', sans-serif; line-height: 1; background: linear-gradient(180deg, #FFF6C8, #FF5A3A 60%, #A00010); -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 4px 0 #3a0004) drop-shadow(0 0 16px #FF3A3A); animation: ttLogo 0.7s cubic-bezier(0.25, 1.7, 0.5, 1) both; }
+.zkr-carta { width: 130px; animation: ttLogo 0.8s 0.2s cubic-bezier(0.25, 1.7, 0.5, 1) both; filter: drop-shadow(0 0 18px #FF3A3A); }
+.zkr-stats { display: flex; flex-direction: column; gap: 3px; font-size: 13px; }
+.zkr-stats b { color: #7CFF8A; }
+@keyframes fadeIn { from { opacity: 0; } }
+.selo-zenkai { bottom: auto; top: 4px; }

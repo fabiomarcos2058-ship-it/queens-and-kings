@@ -1240,6 +1240,14 @@
     fundo.querySelector('button').onclick = () => { fundo.classList.add('sumir'); setTimeout(() => fundo.remove(), 250); };
   }
 
+  // faixa do Zenkai na coleção: quem já despertou e quando chegam as próximas
+  function zenkaiAviso() {
+    const lib = Estado.zenkaiLiberadas(), ordem = Estado.ZENKAI_ORDEM;
+    const novas = ordem.slice(Math.max(0, lib - 2), lib), prox = ordem.slice(lib, lib + 2);
+    const diasProx = Math.ceil(((Estado.ZENKAI_INICIO + Math.ceil(lib / 2) * 3 * 86400000) - Date.now()) / 86400000);
+    const nome = (id) => (Estado.carta(id) ? Estado.carta(id).nome : id);
+    return `<div class="zenkai-faixa" style="grid-column:1/-1"><b>⚡ ZENKAI</b><span>Novas: <em>${novas.map(nome).join(' e ')}</em>${prox.length ? ` · Próximas em ${diasProx} dia${diasProx === 1 ? '' : 's'}: ${prox.map(nome).join(' e ')}` : ''}</span><small>Cartas com Zenkai no nível ${Estado.NIVEL_MAX} usam as cópias extras pra despertar (até +15%).</small></div>`;
+  }
   function cartas() {
     const deck = d().deck;
     const etiqueta = (id) => {
@@ -1271,7 +1279,7 @@
     const fora = Estado.catalogo().filter((c) => !deck.includes(c.id) && Estado.tem(c.id));
     const aDescobrir = Estado.catalogo().filter((c) => !Estado.tem(c.id));
     const temTotal = Estado.catalogo().filter((c) => Estado.tem(c.id)).length;
-    $('colecao').innerHTML = (fora.length
+    $('colecao').innerHTML = zenkaiAviso() + (fora.length
       ? fora.map((c) => Cartas.html(c, { nivel: etiqueta(c.id), extra: barraCopias(c.id) })).join('')
       : '<p class="aviso" style="grid-column:1/-1">Todas as suas cartas desbloqueadas estão no deck.</p>')
       + (aDescobrir.length ? `<div class="divisor-colecao">A descobrir · ${temTotal}/${Estado.catalogo().length} desbloqueadas</div>` : '')
@@ -1431,6 +1439,12 @@
       if (d().deck.length < 8) { d().deck.push(id); Estado.salvar(); cartas(); UI.toast('Carta adicionada ao deck!'); }
       else { trocando = id; cartas(); irPara('cartas'); }
     } });
+    const zk = Estado.zenkai(id);
+    if (zk.ativo && col.nivel >= Estado.NIVEL_MAX && zk.z < zk.max) {
+      const pode = (col.copias || 0) >= zk.copias && d().ouro >= zk.ouro;
+      botoes.push({ texto: `⚡ Zenkai ${zk.z + 1} · ${fmt(zk.ouro)} ouro`, classe: 'principal zenkai-btn', desativado: !pode, motivo: (col.copias || 0) < zk.copias ? `Faltam cópias (${col.copias || 0}/${zk.copias})` : `Falta ouro (${fmt(zk.ouro)})`,
+        acao: () => { const antes = Estado.stats(id); const r = Estado.despertarZenkai(id); if (!r.ok) { UI.toast(r.motivo); return; } tudo(); zenkaiDespertou(id, antes, r.z); } });
+    }
     if (col.nivel < Estado.NIVEL_MAX) botoes.push({ texto: `Evoluir · ${fmt(Estado.ouroNivel(id, col.nivel))} ouro`, classe: 'principal', desativado: !ev.ok, motivo: ev.motivo,
       acao: () => {
         const antes = Estado.stats(id);
@@ -1449,9 +1463,24 @@
         ${infoClasse(c)}
         ${c.evolucao ? `<div class="hab-detalhe evo-detalhe"><b>🧬 ${c.evolucao.nome}</b><br><small>${c.evolucao.descricao}</small></div>` : ''}
         ${c.habilidade ? `<div class="hab-detalhe"><b>⚡ ${c.habilidade.nome}</b> · ${c.habilidade.custo} de elixir<br><small>${c.habilidade.descricao} Durante a batalha, toque no botão da habilidade que aparece na arena.</small></div>` : ''}
-        ${c.passiva ? `<div class="hab-detalhe passiva"><b>${c.passiva.tipo === 'esquiva' ? '✨' : '🧩'} ${c.passiva.nome}</b> · passiva (automática)<br><small>${c.passiva.descricao}</small></div>` : ''}`,
+        ${c.passiva ? `<div class="hab-detalhe passiva"><b>${c.passiva.tipo === 'esquiva' ? '✨' : '🧩'} ${c.passiva.nome}</b> · passiva (automática)<br><small>${c.passiva.descricao}</small></div>` : ''}
+        ${zk.ativo ? `<div class="zenkai-detalhe"><b>⚡ ZENKAI</b><span class="zk-estrelas">${Array.from({ length: zk.max }, (_, i) => `<i class="${i < zk.z ? 'ok' : ''}">★</i>`).join('')}</span>
+          <small>${zk.z >= zk.max ? 'Zenkai máximo! +15% de vida e dano e ataca 10% mais rápido.' : col.nivel < Estado.NIVEL_MAX ? `Chegue no nível ${Estado.NIVEL_MAX} pra despertar o Zenkai. Cada estágio dá +2% de vida e dano; no Zenkai 7, +15% e ataque mais rápido.` : `Próximo estágio: ${zk.copias} cópias + ${fmt(zk.ouro)} ouro (você tem ${col.copias || 0} cópias). Bônus atual: +${Math.round(zk.bonus * 100)}%.`}</small></div>` : ''}`,
       botoes,
     });
+  }
+  function zenkaiDespertou(id, antes, z) {
+    const c = Estado.stats(id);
+    const el = document.createElement('div');
+    el.className = 'zenkai-revela';
+    el.innerHTML = `<div class="zkr-raios"></div><div class="zkr-conteudo"><small>DESPERTAR ZENKAI</small><b class="zkr-titulo">ZENKAI ${z}</b>
+      <div class="zkr-carta">${Cartas.html(c, { mini: true })}</div>
+      <p>${esc(c.nome)}${z >= 7 ? ' chegou no Zenkai máximo!' : ' despertou!'}</p>
+      <div class="zkr-stats"><span>❤️ ${fmt(antes.vida)} → <b>${fmt(c.vida)}</b></span><span>⚔️ ${fmt(antes.dano)} → <b>${fmt(c.dano)}</b></span>${z >= 7 ? '<span>⚡ Ataque 10% mais rápido</span>' : ''}</div>
+      <button class="btn-modal principal">Incrível!</button></div>`;
+    document.getElementById('app').appendChild(el);
+    if (typeof Som !== 'undefined') Som.tocar('patente');
+    el.querySelector('button').onclick = () => { el.classList.add('sumir'); setTimeout(() => el.remove(), 250); };
   }
 
   // classe, counters e ataque especial da carta
