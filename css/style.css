@@ -3561,3 +3561,27 @@ body.em-batalha .tela-ranque { display: none !important; }
 /* partículas leves das arenas novas */
 .amb-poeira i { width: 4px; height: 4px; background: #E8C99A; border-radius: 50%; opacity: 0.55; }
 .amb-brisa i { width: 5px; height: 3px; background: #EFFFFB; border-radius: 50%; opacity: 0.6; }
+
+/* ===== Eventos em abas (Gemas, Desafios, Modos) + Caça às Gemas ===== */
+.ev-abas { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 10px 0 12px; padding: 4px; border-radius: 16px; background: #0b0826aa; border: 1px solid #ffffff1c; position: sticky; top: 0; z-index: 6; }
+.ev-aba { position: relative; padding: 9px 4px; border: none; border-radius: 12px; background: none; color: #ffffffb0; font: 14px 'Lilita One', 'Fredoka', sans-serif; cursor: pointer; }
+.ev-aba.ativa { background: linear-gradient(180deg, #8a6cff, #5b3fd0); color: #fff; box-shadow: 0 3px 0 #2a1a78, inset 0 1px 0 #ffffff40; }
+.ev-aba i { position: absolute; top: -5px; right: 2px; min-width: 18px; height: 18px; padding: 0 4px; border-radius: 99px; display: grid; place-items: center; font: 11px 'Lilita One', sans-serif; font-style: normal; color: #fff; background: #FF2A4A; border: 2px solid #1a1442; }
+#eventos-lista[data-aba="gemas"] .ev-sec:not([data-sec="gemas"]), #eventos-lista[data-aba="desafios"] .ev-sec:not([data-sec="desafios"]), #eventos-lista[data-aba="modos"] .ev-sec:not([data-sec="modos"]) { display: none; }
+.caca-gemas { border-radius: 16px; padding: 12px; margin-bottom: 10px; text-align: left; border: 2px solid #7fe6ff55; background: linear-gradient(160deg, #1d3a8a, #2a1a6a 60%, #401a6a); box-shadow: 0 4px 12px #0006; }
+.cg-topo { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.cg-topo b { font: 18px 'Lilita One', 'Fredoka', sans-serif; text-shadow: 0 2px 0 #0006; }
+.cg-topo small { opacity: .8; font-size: 11.5px; white-space: nowrap; }
+.cg-desc { display: block; font-size: 12.5px; opacity: .9; margin: 4px 0 8px; }
+.cg-linha { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 7px 9px; margin-top: 6px; border-radius: 12px; background: #00000033; border: 1px solid #ffffff14; }
+.cg-linha > div { flex: 1; min-width: 0; }
+.cg-linha b { font-size: 13px; display: block; margin-bottom: 4px; }
+.cg-linha .ev-barra { margin: 0; }
+.cg-linha.pronta { border-color: #7fe6ffaa; background: #7fe6ff1c; }
+.cg-linha.pega { opacity: .5; }
+.cg-premio { font: 13px 'Lilita One', sans-serif; white-space: nowrap; opacity: .9; }
+.cg-ok { font-size: 18px; color: #7CFFB0; padding: 0 8px; }
+.cg-linha .selo.botao { white-space: nowrap; }
+.evento.ev-fds { background-color: #5a2a10; justify-content: flex-start; gap: 10px; text-align: left; }
+.evento.ev-fds.ativo { background-color: #b0461a; border-color: #FFB13A; box-shadow: 0 0 14px #FF7A1A88; }
+.evento.ev-fds > div { flex: 1; }

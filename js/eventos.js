@@ -454,6 +454,76 @@ const Eventos = (() => {
     return `<div class="desafios-evento"><div class="mitas-cab"><small>EVENTOS NOVOS</small><b>⚔️ Desafios Lendários</b></div>${caixa('celestial')}${caixa('cyber')}${caixa('yugi')}${caixa('sonic')}</div>`;
   }
 
+  // ---------- eventos de gemas ----------
+  // Caça às Gemas: missões da semana que pagam só gemas (zera toda segunda)
+  const CACA = [
+    { tipo: 'vitorias', alvo: 5, txt: 'Vença 5 batalhas', g: 30 },
+    { tipo: 'coroas', alvo: 15, txt: 'Ganhe 15 coroas', g: 30 },
+    { tipo: 'ranqueada', alvo: 3, txt: 'Vença 3 ranqueadas', g: 40 },
+    { tipo: 'dupla', alvo: 3, txt: 'Jogue 3 batalhas 2v2', g: 25 },
+    { tipo: 'evento', alvo: 4, txt: 'Jogue 4 batalhas de evento', g: 25 },
+    { tipo: 'habilidades', alvo: 12, txt: 'Use 12 habilidades especiais', g: 20 },
+  ];
+  const CACA_BONUS = 80;
+  const dois = (n) => String(n).padStart(2, '0');
+  const diaTxt = (t = new Date()) => `${t.getFullYear()}-${dois(t.getMonth() + 1)}-${dois(t.getDate())}`;
+  const semanaTxt = () => { const t = new Date(); t.setDate(t.getDate() - ((t.getDay() + 6) % 7)); return diaTxt(t); };
+  const diasAteSegunda = () => ((8 - new Date().getDay()) % 7) || 7;
+  function dadosCaca() {
+    const d = Estado.d;
+    if (!d.cacaGemas || d.cacaGemas.semana !== semanaTxt()) d.cacaGemas = { semana: semanaTxt(), prog: CACA.map(() => 0), pego: CACA.map(() => false), bonus: false };
+    return d.cacaGemas;
+  }
+  function contarGemas(tipo, n = 1) {
+    try {
+      if (!Estado.d || !n) return;
+      const c = dadosCaca();
+      CACA.forEach((m, i) => { if (m.tipo === tipo && c.prog[i] < m.alvo) c.prog[i] = Math.min(m.alvo, c.prog[i] + n); });
+    } catch (e) { /* nunca quebra a batalha */ }
+  }
+  const cacaProntas = () => { const c = dadosCaca(); return CACA.filter((m, i) => c.prog[i] >= m.alvo && !c.pego[i]).length; };
+  function pegarCaca(i) {
+    const c = dadosCaca(), m = CACA[i];
+    if (!m || c.pego[i] || c.prog[i] < m.alvo) return 0;
+    c.pego[i] = true;
+    let g = m.g;
+    if (!c.bonus && c.pego.every(Boolean)) { c.bonus = true; g += CACA_BONUS; }
+    Estado.d.gemas += g; Estado.salvar();
+    return g;
+  }
+  // Fim de Semana de Gemas: sábado e domingo, as 3 primeiras vitórias do dia pagam gemas extras
+  const FDS_GEMAS = 20, FDS_VITORIAS = 3;
+  const ehFds = () => [0, 6].includes(new Date().getDay());
+  function dadosFds() {
+    const d = Estado.d;
+    if (!d.fdsGemas || d.fdsGemas.dia !== diaTxt()) d.fdsGemas = { dia: diaTxt(), n: 0 };
+    return d.fdsGemas;
+  }
+  // chamada a cada vitória: devolve as gemas ganhas (0 fora do fim de semana ou depois da 3ª)
+  function vitoriaFds() {
+    if (!ehFds()) return 0;
+    const f = dadosFds();
+    if (f.n >= FDS_VITORIAS) return 0;
+    f.n++; Estado.d.gemas += FDS_GEMAS; Estado.salvar();
+    return FDS_GEMAS;
+  }
+  function htmlGemas() {
+    const c = dadosCaca();
+    const total = CACA.reduce((a, m) => a + m.g, 0) + CACA_BONUS;
+    const feitas = c.pego.filter(Boolean).length;
+    const linhas = CACA.map((m, i) => {
+      const pronto = c.prog[i] >= m.alvo;
+      return `<div class="cg-linha${c.pego[i] ? ' pega' : pronto ? ' pronta' : ''}"><div><b>${m.txt}</b><div class="ev-barra"><i style="width:${(c.prog[i] / m.alvo) * 100}%"></i><small>${c.prog[i]}/${m.alvo}</small></div></div>
+        ${c.pego[i] ? '<span class="cg-ok">✓</span>' : pronto ? `<button class="selo botao" data-caca="${i}">+${m.g} 💎</button>` : `<span class="cg-premio">${m.g} 💎</span>`}</div>`;
+    }).join('');
+    const f = dadosFds();
+    const fds = ehFds()
+      ? `<div class="evento ev-fds ativo"><span class="modo-ic">🔥</span><div><b>Fim de Semana de Gemas</b><span>Hoje as ${FDS_VITORIAS} primeiras vitórias pagam <b>+${FDS_GEMAS} 💎</b> cada, em qualquer modo.</span><div class="ev-barra"><i style="width:${(f.n / FDS_VITORIAS) * 100}%"></i><small>${f.n}/${FDS_VITORIAS} hoje</small></div></div></div>`
+      : `<div class="evento ev-fds"><span class="modo-ic">🔥</span><div><b>Fim de Semana de Gemas</b><span>Sábado e domingo, as ${FDS_VITORIAS} primeiras vitórias do dia pagam +${FDS_GEMAS} 💎 cada.</span><small class="modo-tempo">Volta no sábado</small></div></div>`;
+    return `<div class="caca-gemas"><div class="cg-topo"><b>💎 Caça às Gemas</b><small>${feitas}/${CACA.length} · zera em ${diasAteSegunda()} dia${diasAteSegunda() === 1 ? '' : 's'}</small></div>
+      <span class="cg-desc">Missões da semana que pagam só gemas: até <b>${total} 💎</b>. Completou todas? Bônus de <b>+${CACA_BONUS} 💎</b>${c.bonus ? ' (pego ✓)' : ''}.</span>${linhas}</div>${fds}`;
+  }
+
   // ---------- tela (dentro da aba Eventos) ----------
   function html() {
     const f = nino();
@@ -482,10 +552,14 @@ const Eventos = (() => {
         <div class="ev-barra"><i style="width:${(h.qtd / LIMITE_TOKENS_DIA) * 100}%"></i><small>${h.qtd}/${LIMITE_TOKENS_DIA} hoje</small></div>
         <small class="modo-tempo">Você tem <b>${UI.fmt(Estado.d.tokens || 0)}</b> tokens</small></div>
         <div class="ev-tk-botoes"><button class="selo botao" id="tk-jogar">Jogar</button><button class="selo botao tk-trocar" id="tk-trocar">Trocar</button></div></div>`;
-    return `${typeof TD !== 'undefined' ? TD.htmlEvento() : ''}${htmlDesafios()}${htmlMitas()}${festival}${tokens}<div class="eventos-cab">🎪 Modos de hoje</div>${modos}`;
+    // três abas pra tela não virar uma lista sem fim: Gemas, Desafios e Modos
+    return `<div class="ev-sec" data-sec="gemas">${htmlGemas()}${tokens}</div>
+      <div class="ev-sec" data-sec="desafios">${htmlDesafios()}${htmlMitas()}${festival}</div>
+      <div class="ev-sec" data-sec="modos">${typeof TD !== 'undefined' ? TD.htmlEvento() : ''}<div class="eventos-cab">🎪 Modos de hoje</div>${modos}</div>`;
   }
   function ligar(raiz, { iniciar, verCarta }) {
     if (typeof TD !== 'undefined') TD.ligar(raiz);
+    raiz.querySelectorAll('[data-caca]').forEach((b) => (b.onclick = () => { const g = pegarCaca(+b.dataset.caca); if (g) { UI.toast(`+${g} 💎`); if (window.MenuAPI) window.MenuAPI.tudo(); } }));
     raiz.querySelectorAll('[data-modo]').forEach((b) => (b.onclick = () => jogarModo(b.dataset.modo, iniciar)));
     const j = raiz.querySelector('#fn-jogar');
     if (j) j.onclick = () => jogarFestival(iniciar);
@@ -790,5 +864,5 @@ const Eventos = (() => {
     conferindo = false;
   }
 
-  return { html, ligar, fim, conferir, trocarTokens, ganharTokens, tokensHoje, MODOS, modosDeHoje, jogarModo, jogarFestival, nino };
+  return { contarGemas, cacaProntas, vitoriaFds, html, ligar, fim, conferir, trocarTokens, ganharTokens, tokensHoje, MODOS, modosDeHoje, jogarModo, jogarFestival, nino };
 })();

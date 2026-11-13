@@ -1056,6 +1056,10 @@
       d().primeiraVitoria = hojeTxt(); d().gemas += 20; Estado.salvar();
       setTimeout(() => UI.toast('☀️ Primeira vitória do dia: +20 💎'), 1600);
     }
+    if (r.resultado === 'vitoria' && !r.tutorial) {
+      const gf = Eventos.vitoriaFds();
+      if (gf) setTimeout(() => UI.toast(`🔥 Fim de Semana de Gemas: +${gf} 💎`), 2600);
+    }
     if (!(r.evento && r.evento.deck) && !r.tutorial) esgotadas = esgotadas.concat(Estado.contarUsos());
     // Mita Gentil lembra de cada partida com você
     if (!r.tutorial && (r.deck || []).includes('mita_gentil')) Estado.ganharAfeto(r.resultado === 'vitoria' ? 5 : 2);
@@ -1858,17 +1862,26 @@
     const p = Passe.dados();
     const nv = Passe.nivel();
     const pend = Passe.pendentes();
-    $('eventos-lista').innerHTML = `<div id="eventos-novos">${Eventos.html()}</div><div class="eventos-cab">🎟️ Passe e desafios</div>` +
-      `<button class="cartao-passe${p.ultra ? ' ultra' : p.plus ? ' plus' : ''}" id="abrir-passe">
+    const abaEv = ['gemas', 'desafios', 'modos'].includes(window.abaEventos) ? window.abaEventos : 'gemas';
+    const prontasG = Eventos.cacaProntas() + (ev.sequencia >= 3 && !ev.desafioPremio ? 1 : 0) + (ev.coroas >= 30 && !ev.torneioPremio ? 1 : 0);
+    $('eventos-lista').dataset.aba = abaEv;
+    $('eventos-lista').innerHTML = `<button class="cartao-passe${p.ultra ? ' ultra' : p.plus ? ' plus' : ''}" id="abrir-passe">
         <div class="passe-topo"><b>🎟️ Passe da Temporada</b><small>${Passe.diasRestantes()} dias restantes</small></div>
         <div class="passe-linha"><span class="passe-nivel">${nv}</span><div class="ev-barra passe-barra"><i style="width:${nv >= Passe.NIVEIS ? 100 : ((p.pontos % Passe.PONTOS_NIVEL) / Passe.PONTOS_NIVEL) * 100}%"></i><small>${nv >= Passe.NIVEIS ? 'Completo!' : `${p.pontos % Passe.PONTOS_NIVEL}/${Passe.PONTOS_NIVEL}`}</small></div><span class="passe-tipo">${p.ultra ? 'ULTRA' : p.plus ? 'PLUS' : 'FREE'}</span></div>
         ${pend ? `<span class="passe-pendente">${pend} prêmio${pend > 1 ? 's' : ''} para pegar!</span>` : ''}
       </button>` +
+      `<div class="ev-abas">${[['gemas', '💎 Gemas', prontasG], ['desafios', '⚔️ Desafios', 0], ['modos', '🎮 Modos', 0]].map(([k, t, n]) => `<button class="ev-aba${k === abaEv ? ' ativa' : ''}" data-aba-ev="${k}">${t}${n ? `<i>${n}</i>` : ''}</button>`).join('')}</div>` +
+      `<div id="eventos-novos">${Eventos.html()}</div><div class="ev-sec" data-sec="gemas">` +
       item('ev1', 'Desafio do Festival', 'Vença 3 batalhas seguidas · prêmio: baú de ouro', barra(ev.sequencia, 3), btnPremio(ev.sequencia >= 3, ev.desafioPremio, 'desafio')) +
-      item('ev2', 'Torneio das Coroas', 'Junte 30 coroas · prêmio: 100 gemas', barra(ev.coroas, 30), btnPremio(ev.coroas >= 30, ev.torneioPremio, 'torneio')) +
+      item('ev2', 'Torneio das Coroas', 'Junte 30 coroas · prêmio: 100 gemas', barra(ev.coroas, 30), btnPremio(ev.coroas >= 30, ev.torneioPremio, 'torneio')) + '</div><div class="ev-sec" data-sec="modos">' +
       item('ev4', 'Elixir em dobro', 'A batalha inteira com elixir rápido', '', '<button class="selo botao" data-jogar="elixir2x">Jogar</button>') +
-      item('ev3', 'Batalha em dupla', 'Você + parceiro (amigo ou IA) contra uma dupla', '', '<button class="selo botao" id="ev-dupla">Jogar</button>');
+      item('ev3', 'Batalha em dupla', 'Você + parceiro (amigo ou IA) contra uma dupla', '', '<button class="selo botao" id="ev-dupla">Jogar</button>') + '</div>';
     $('abrir-passe').onclick = telaPasse;
+    $('eventos-lista').querySelectorAll('[data-aba-ev]').forEach((b) => (b.onclick = () => {
+      window.abaEventos = b.dataset.abaEv; $('eventos-lista').dataset.aba = b.dataset.abaEv;
+      $('eventos-lista').querySelectorAll('[data-aba-ev]').forEach((x) => x.classList.toggle('ativa', x === b));
+      const tl = $('eventos-lista').closest('.tela'); if (tl) tl.scrollTop = 0;
+    }));
     Eventos.ligar($('eventos-novos'), { iniciar: jogarEvento, verCarta: (c) => Estado.tem(c.id) ? detalhes(c.id) : UI.modal({ titulo: c.nome, classe: 'modal-carta', html: `<div class="detalhe-carta">${Cartas.html(c, { mini: true, vivo: true })}<div><span class="raridade-tag ${c.raridade}">${Cartas.NOMES_RARIDADE[c.raridade]} · só de evento</span><p class="tipo">${c.tipo} · ${c.custo} de elixir</p><p>${c.descricao}</p>${c.passiva ? `<p><b>🧩 ${c.passiva.nome}:</b> ${c.passiva.descricao}</p>` : ''}${c.habilidade ? `<p><b>⚡ ${c.habilidade.nome}:</b> ${c.habilidade.descricao}</p>` : ''}</div></div>`, botoes: [{ texto: 'Quero ela!', classe: 'principal' }] }) });
     $('ev-dupla').onclick = dupla;
     $('eventos-lista').querySelectorAll('[data-jogar]').forEach((b) => (b.onclick = () => jogar(b.dataset.jogar)));

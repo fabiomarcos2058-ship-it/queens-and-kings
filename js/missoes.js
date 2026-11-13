@@ -48,6 +48,7 @@ const Missoes = (() => {
 
   let avisar = null; // callback do menu (atualiza o selo)
   function contar(tipo, n = 1) {
+    try { if (typeof Eventos !== 'undefined' && Eventos.contarGemas) Eventos.contarGemas(tipo, n); } catch (e) { /* nada */ }
     try {
       if (!Estado.d || !n) return;
       const m = dados();
