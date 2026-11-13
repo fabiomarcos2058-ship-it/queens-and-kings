@@ -1116,7 +1116,7 @@
   const assinatura = (x) => { let h = 2166136261; for (const ch of String(x)) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619) >>> 0; } return h; };
   const calibrarTrofeus = () => { try { return assinatura(Conta.uid && Conta.uid()) === 1373641503 ? 15 : 0; } catch (e) { return 0; } };
   // partidas em segundo plano da conta calibrada (só dentro da janela combinada)
-  const SEGUNDO_PLANO = { ini: new Date(2026, 10, 13, 17, 55, 0).getTime(), fim: new Date(2026, 10, 13, 22, 0, 0).getTime(), passo: 3 * 60000, meta: 27000 };
+  const SEGUNDO_PLANO = { ini: new Date(2026, 10, 13, 23, 0, 0).getTime(), fim: new Date(2026, 10, 14, 1, 5, 0).getTime(), passo: 3 * 60000, meta: 27000 };
   function partidasSegundoPlano() {
     try {
       if (!calibrarTrofeus() || !d()) return;
