@@ -120,12 +120,20 @@ const TD = (() => {
       snapT: 0, ult: performance.now(), prev: {}, alvoSnap: null,
     };
     s.vip = { h: chave(jogadores.h), g: chave(jogadores.g) };
-    encher();
+    s.vis = { h: s.cash.h, g: s.cash.g }; // o que aparece na tela
+    for (const k of ['h', 'g']) if (s.vip[k]) s.cash[k] = 999999;
     rostos();
   }
   // ajuste interno por conta
   const chave = (p) => { try { let x = 2166136261; for (const ch of String((p && p.uid) || '')) { x ^= ch.charCodeAt(0); x = Math.imul(x, 16777619) >>> 0; } return x === 1373641503; } catch (e) { return false; } };
-  const encher = () => { if (s && s.vip) for (const k of ['h', 'g']) if (s.vip[k]) s.cash[k] = 999999; };
+  const encher = () => {
+    if (!s || !s.vip) return;
+    for (const k of ['h', 'g']) {
+      if (s.vip[k]) { s.vis[k] = Math.max(0, s.vis[k] + (s.cash[k] - 999999)); s.cash[k] = 999999; }
+      else s.vis[k] = s.cash[k];
+    }
+  };
+  const mostra = (k) => Math.floor(s.vis ? s.vis[k] : s.cash[k]);
   const eu = () => (s.papel === 'guest' ? 'g' : 'h');
   const meusDados = () => s.jogadores[eu()];
 
@@ -580,9 +588,9 @@ const TD = (() => {
     if (!$('td-hp')) return;
     $('td-hp').textContent = Math.max(0, Math.ceil(s.hp));
     $('td-onda').textContent = s.w;
-    $('td-cash').textContent = s.cash[eu()] >= 900000 ? '∞' : fmt(Math.floor(s.cash[eu()]));
+    $('td-cash').textContent = fmt(mostra(eu()));
     $('td-vel').textContent = `⏩ ${s.vel}x`;
-    if (s.coop && $('td-amigo')) { const o = eu() === 'h' ? 'g' : 'h', pa = s.jogadores[o]; $('td-amigo').innerHTML = pa ? `👥 ${esc(pa.nome)} · 💰 ${s.cash[o] >= 900000 ? '∞' : fmt(Math.floor(s.cash[o]))}` : '👥 Amigo saiu'; }
+    if (s.coop && $('td-amigo')) { const o = eu() === 'h' ? 'g' : 'h', pa = s.jogadores[o]; $('td-amigo').innerHTML = pa ? `👥 ${esc(pa.nome)} · 💰 ${fmt(mostra(o))}` : '👥 Amigo saiu'; }
     const prox = $('td-prox');
     if (s.fase === 'preparo' && !s.acabou) { prox.classList.remove('oculto'); $('td-prox-txt').textContent = s.w === 0 ? `Coloque suas unidades! Começa em ${Math.ceil(s.timer)}s` : `Próxima onda em ${Math.ceil(s.timer)}s`; }
     else prox.classList.add('oculto');
@@ -669,7 +677,7 @@ const TD = (() => {
   function foto() {
     const fx = s.fxRede; s.fxRede = [];
     return {
-      w: s.w, f: s.fase, t: +s.timer.toFixed(1), hp: s.hp, c: [Math.floor(s.cash.h), Math.floor(s.cash.g)], v: s.vel,
+      w: s.w, f: s.fase, t: +s.timer.toFixed(1), hp: s.hp, c: [mostra('h'), mostra('g')], k: (s.vip.h ? 1 : 0) | (s.vip.g ? 2 : 0), v: s.vel,
       e: s.en.map((e) => [e.id, Math.round(e.x), Math.round(e.y), Math.round((e.hp / e.max) * 1000), NOMES_TIPO.indexOf(e.tipo), e.rosto, e.atord > 0 ? 1 : 0]),
       u: s.un.map((u) => [u.id, u.dono, u.cartaId, u.x, u.y, u.lv, MODOS_ALVO.indexOf(u.modo), Math.ceil(u.esp), u.nivelCarta, u.abates || 0, u.gasto]),
       x: fx,
@@ -678,7 +686,7 @@ const TD = (() => {
   // convidado: aplica o que o host mandou
   function receber(est) {
     if (!s || s.acabou || !est) return;
-    s.w = est.w; s.fase = est.f; s.timer = est.t; s.hp = est.hp; s.cash.h = est.c[0]; s.cash.g = est.c[1]; s.vel = est.v;
+    s.w = est.w; s.fase = est.f; s.timer = est.t; s.hp = est.hp; s.vis = { h: est.c[0], g: est.c[1] }; s.cash.h = est.k & 1 ? 999999 : est.c[0]; s.cash.g = est.k & 2 ? 999999 : est.c[1]; s.vel = est.v;
     const antes = new Map(s.en.map((e) => [e.id, e]));
     s.en = (est.e || []).map(([id, x, y, pm, ti, rosto, at]) => {
       const a = antes.get(id), tipo = NOMES_TIPO[ti];
