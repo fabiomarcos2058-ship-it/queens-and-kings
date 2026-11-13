@@ -34,6 +34,7 @@ const Summon = (() => {
   const idsZenkai = () => (typeof Estado !== 'undefined' && Estado.ZENKAI_ORDEM ? Estado.ZENKAI_ORDEM.filter((id) => Estado.carta(id)) : []);
   const BANNER_ZENKAI = {
     id: 'zenkai', nome: 'ZENKAI', sub: 'Muitas cópias pra despertar', tema: 'zk', logo: 'zk', zenkai: true,
+    arte: 'assets/summon/zenkai.jpg', mini: 'assets/summon/zenkai_mini.jpg',
     fim: new Date(2026, 11, 31, 23, 59, 59),
     get destaque() { const l = typeof Estado !== 'undefined' && Estado.zenkaiLiberadas ? Estado.zenkaiLiberadas() : 2; const ids = idsZenkai(); return [...ids.slice(0, l).slice(-3), ...ids.slice(l, l + 3)].slice(0, 6); },
     get pool() { const ids = idsZenkai(); return { comum: ids.filter((id) => Estado.carta(id).raridade === 'comum'), epica: ids.filter((id) => Estado.carta(id).raridade === 'epica') }; },
