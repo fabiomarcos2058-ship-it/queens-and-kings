@@ -139,6 +139,7 @@ const Titulos = (() => {
     { a: '#F4FAFF', b: '#78BEFF', c: '#22348C' }, // diamante
     { a: '#F3E0FF', b: '#A45CFF', c: '#3A1270' }, // mestre
     { a: '#FFE8F3', b: '#FF5CA8', c: '#6E0E3A' }, // mestre pro
+    { a: '#FFD9A0', b: '#FF4A1A', c: '#2A0008' }, // rei da aura
   ];
   let idMold = 0;
   function moldura(i) {
@@ -186,13 +187,28 @@ const Titulos = (() => {
       atras += `<g transform="translate(150 20) scale(.9 .62) translate(-150 -44)">${asa(-1) + asa(1)}</g>`;
       extra += cantos.map(([x, y]) => `<path d="M${x} ${y - 10} L${x + 9} ${y} L${x} ${y + 10} L${x - 9} ${y} Z" fill="${m.b}" stroke="${ouro}" stroke-width="2"/><circle cx="${x}" cy="${y}" r="3" fill="#fff"/>`).join('');
     }
+    if (i === 10) { // rei da aura: fogo em volta, asas de demônio batendo e brilhos dentro e fora
+      const lingua = (x, y, h, r, d) => `<path class="cb-lingua" style="animation-delay:${d}s" d="M${x - 9} ${y} q-2 ${-h * 0.5} 9 ${-h} q11 ${h * 0.5} 9 ${h} Z" fill="url(#${k}fa)" transform="rotate(${r} ${x} ${y})"/>`;
+      const fogo = [];
+      for (let n = 0; n < 9; n++) fogo.push(lingua(40 + n * 27.5, 18, 20 + (n % 3) * 9, 0, (n % 4) * 0.12));
+      for (let n = 0; n < 12; n++) { fogo.push(lingua(6, 60 + n * 30, 16 + (n % 3) * 7, -90, (n % 5) * 0.1)); fogo.push(lingua(294, 60 + n * 30, 16 + ((n + 1) % 3) * 7, 90, (n % 4) * 0.13)); }
+      for (let n = 0; n < 9; n++) fogo.push(lingua(40 + n * 27.5, 418, 14 + (n % 2) * 8, 180, (n % 3) * 0.11));
+      atras += `<g class="cb-fogo-rei">${fogo.join('')}</g>`;
+      const asa = (s0) => `<g class="cb-asa-rei ${s0 < 0 ? 'e' : 'd'}"><path d="M${150 + s0 * 30} 40 C${150 + s0 * 60} 4 ${150 + s0 * 110} -16 ${150 + s0 * 146} -12 C${150 + s0 * 132} -2 ${150 + s0 * 128} 8 ${150 + s0 * 130} 18 C${150 + s0 * 116} 14 ${150 + s0 * 108} 20 ${150 + s0 * 106} 30 C${150 + s0 * 120} 32 ${150 + s0 * 128} 46 ${150 + s0 * 128} 58 C${150 + s0 * 114} 50 ${150 + s0 * 100} 52 ${150 + s0 * 92} 62 C${150 + s0 * 92} 70 ${150 + s0 * 86} 78 ${150 + s0 * 78} 82 C${150 + s0 * 72} 66 ${150 + s0 * 56} 56 ${150 + s0 * 38} 56 Z" fill="url(#${k}mb)" stroke="#12000a" stroke-width="2.5" stroke-linejoin="round"/>
+        <path d="M${150 + s0 * 30} 42 L${150 + s0 * 146} -12 M${150 + s0 * 34} 46 L${150 + s0 * 130} 18 M${150 + s0 * 36} 50 L${150 + s0 * 128} 58 M${150 + s0 * 38} 54 L${150 + s0 * 78} 82" stroke="#12000a" stroke-width="3" stroke-linecap="round" fill="none"/></g>`;
+      atras += asa(-1) + asa(1);
+      atras += `<g class="cb-raios-pro"><circle cx="150" cy="20" r="70" fill="url(#${k}ra)"/></g>`;
+      const est = (x, y, r, d) => `<path class="cb-brilho-rei" style="animation-delay:${d}s" d="M${x} ${y - r} L${x + r * 0.28} ${y - r * 0.28} L${x + r} ${y} L${x + r * 0.28} ${y + r * 0.28} L${x} ${y + r} L${x - r * 0.28} ${y + r * 0.28} L${x - r} ${y} L${x - r * 0.28} ${y - r * 0.28} Z" fill="#FFF6C0"/>`;
+      extra += [[30, 110, 7, 0], [270, 160, 8, 0.6], [44, 300, 6, 1.1], [258, 360, 7, 0.3], [150, 400, 6, 0.9], [-6, 220, 9, 0.5], [306, 90, 8, 1.3], [96, 432, 6, 0.2], [210, -4, 7, 1.0]].map(([x, y, r, d]) => est(x, y, r, d)).join('');
+      extra += cantos.map(([x, y]) => `<path d="M${x} ${y - 11} L${x + 9} ${y} L${x} ${y + 11} L${x - 9} ${y} Z" fill="#14020a" stroke="#FFB13A" stroke-width="2"/><circle class="cb-brasa" cx="${x}" cy="${y}" r="3.5" fill="#FF7A1A"/>`).join('');
+    }
     // brasão no topo (segura o emblema da patente)
     const brasao = i >= 8
       ? 'M150 -2 L196 10 L204 46 L150 84 L96 46 L104 10 Z'
       : i >= 5 ? 'M150 0 L192 12 L198 44 L150 78 L102 44 L108 12 Z'
       : 'M150 2 L188 12 L192 42 L150 72 L108 42 L112 12 Z';
-    const coroa = i === 9 ? `<path d="M128 6 L134 -12 L142 0 L150 -16 L158 0 L166 -12 L172 6 Z" fill="url(#${k}o)" stroke="#7A4204" stroke-width="1.8"/><circle cx="150" cy="-12" r="3" fill="#FF5CA8"/>` : '';
-    const borda = i === 9 ? ouro : m.a;
+    const coroa = i === 10 ? `<path d="M120 10 C112 0 110 -10 114 -20 C118 -10 124 -4 132 2 Z M180 10 C188 0 190 -10 186 -20 C182 -10 176 -4 168 2 Z" fill="url(#${k}o)" stroke="#2A0E00" stroke-width="1.6"/><path d="M134 6 L138 -10 L145 0 L150 -16 L155 0 L162 -10 L166 6 Z" fill="url(#${k}o)" stroke="#2A0E00" stroke-width="1.6"/><circle cx="150" cy="-10" r="3.2" fill="#FF2A1A"/>` : i === 9 ? `<path d="M128 6 L134 -12 L142 0 L150 -16 L158 0 L166 -12 L172 6 Z" fill="url(#${k}o)" stroke="#7A4204" stroke-width="1.8"/><circle cx="150" cy="-12" r="3" fill="#FF5CA8"/>` : '';
+    const borda = i === 9 ? ouro : i === 10 ? '#FFB13A' : m.a;
     return `<svg class="cb-frame" viewBox="0 -20 300 445" preserveAspectRatio="none" aria-hidden="true">
       <defs>
         <linearGradient id="${k}g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${m.a}"/><stop offset=".3" stop-color="${m.b}"/><stop offset=".55" stop-color="${m.c}"/><stop offset=".8" stop-color="${m.b}"/><stop offset="1" stop-color="${m.a}"/></linearGradient>
@@ -201,13 +217,16 @@ const Titulos = (() => {
         <linearGradient id="${k}f" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#7A1FD0"/><stop offset=".6" stop-color="#C77CFF"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
         <radialGradient id="${k}r" cx=".35" cy=".35" r=".7"><stop offset="0" stop-color="#fff"/><stop offset=".5" stop-color="${m.b}"/><stop offset="1" stop-color="${m.c}"/></radialGradient>
         <radialGradient id="${k}rp"><stop offset="0" stop-color="#FFE45C" stop-opacity=".9"/><stop offset=".6" stop-color="#FF5CA8" stop-opacity=".35"/><stop offset="1" stop-color="#FF5CA8" stop-opacity="0"/></radialGradient>
+        <linearGradient id="${k}fa" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#FF2A00"/><stop offset=".5" stop-color="#FF8A1A"/><stop offset=".85" stop-color="#FFE07A"/><stop offset="1" stop-color="#FFF6C0" stop-opacity="0"/></linearGradient>
+        <linearGradient id="${k}mb" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#E0204A"/><stop offset=".55" stop-color="#7A0020"/><stop offset="1" stop-color="#1a0006"/></linearGradient>
+        <radialGradient id="${k}ra"><stop offset="0" stop-color="#FFB13A" stop-opacity=".9"/><stop offset=".55" stop-color="#FF2A1A" stop-opacity=".4"/><stop offset="1" stop-color="#FF2A1A" stop-opacity="0"/></radialGradient>
       </defs>
       ${atras}
       <path d="${fora} ${dentro}" fill-rule="evenodd" fill="url(#${k}g)" stroke="${m.c}" stroke-width="3"/>
       <path d="${dentro}" fill="none" stroke="${borda}" stroke-width="2.2"/>
       <path d="${fora}" fill="none" stroke="${borda}" stroke-opacity=".7" stroke-width="1.5" transform="translate(150 217.5) scale(.985) translate(-150 -217.5)"/>
       ${extra}
-      <path d="${brasao}" fill="url(#${k}g)" stroke="${i === 9 ? ouro : m.c}" stroke-width="3" stroke-linejoin="round"/>
+      <path d="${brasao}" fill="url(#${k}g)" stroke="${i === 9 ? ouro : i === 10 ? '#FFB13A' : m.c}" stroke-width="3" stroke-linejoin="round"/>
       <path d="${brasao}" fill="none" stroke="${borda}" stroke-width="1.5" transform="translate(150 38) scale(.86) translate(-150 -38)"/>
       ${coroa}
       <image href="${Ranque.img(i)}" x="117" y="2" width="66" height="66"/>

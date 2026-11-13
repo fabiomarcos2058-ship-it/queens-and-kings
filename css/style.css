@@ -3357,3 +3357,21 @@ html.leve .carta.ultra .ultra-holo { mix-blend-mode: normal; opacity: 0.12; }
 .aura-evo, .aura-evo.dois { filter: none; }
 html.leve .aura-evo.dois { display: none; }
 html.leve .tropa:not(.surgindo) .tropa-medalhao { animation: none; }
+/* ===== patente Rei da Aura (cartão de batalha) ===== */
+.cartao-batalha.t10 .cb-moldura { background: conic-gradient(from var(--ang), #FF2A00, #FFD25E, #3A0010, #FF4A1A, #FFF6C0, #7A0020, #FF2A00); animation: girarAng 3s linear infinite; box-shadow: inset 0 0 0 1.5px #FFD9A0, 0 0 26px #FF4A1A; }
+.cartao-batalha.t10 .cb-frame { filter: drop-shadow(0 0 10px #FF4A1A) drop-shadow(0 0 3px #FFD25E); overflow: visible; }
+.cartao-batalha.t10 .cb-faixa { background: linear-gradient(180deg, #FFE07A, #FF4A1A 50%, #3A0010); box-shadow: 0 0 14px #FF4A1A; }
+.cb-lingua { transform-box: fill-box; transform-origin: 50% 100%; animation: cbLingua 0.38s ease-in-out infinite alternate; }
+@keyframes cbLingua { from { transform: scale(0.85, 0.75) skewX(-6deg); opacity: 0.85; } to { transform: scale(1.1, 1.18) skewX(6deg); opacity: 1; } }
+.cb-asa-rei { transform-origin: 150px 44px; }
+.cb-asa-rei.e { animation: cbAsaE 1.5s ease-in-out infinite; }
+.cb-asa-rei.d { animation: cbAsaD 1.5s ease-in-out infinite; }
+@keyframes cbAsaE { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(14deg) scale(0.92, 1); } }
+@keyframes cbAsaD { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(-14deg) scale(0.92, 1); } }
+.cb-brilho-rei { transform-box: fill-box; transform-origin: center; animation: cbBrilhoRei 1.8s ease-in-out infinite; opacity: 0; }
+@keyframes cbBrilhoRei { 0%, 100% { opacity: 0; transform: scale(0.3) rotate(0deg); } 45% { opacity: 1; transform: scale(1.15) rotate(45deg); } 70% { opacity: 0; } }
+.cb-brasa { animation: cbBrasa 0.9s ease-in-out infinite alternate; }
+@keyframes cbBrasa { from { fill: #FF2A00; } to { fill: #FFE07A; } }
+.leve .cb-lingua, .leve .cb-brilho-rei, .leve .cb-brasa { animation: none; opacity: 1; }
+.leve .cb-asa-rei.e, .leve .cb-asa-rei.d { animation-duration: 2.4s; }
+.leve .cartao-batalha.t10 .cb-frame { filter: none; }

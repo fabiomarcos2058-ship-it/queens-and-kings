@@ -15,22 +15,25 @@ const Ranque = (() => {
     { id: 'diamante', nome: 'Diamante', cor: '#A8DBFF', escura: '#2A3F9A', dif: 5, difMin: 4, super: 0.22 },
     { id: 'mestre', nome: 'Mestre', cor: '#C99BFF', escura: '#43177C', dif: 5, difMin: 5, super: 0.32 },
     { id: 'mestre_pro', nome: 'Mestre Pro', cor: '#FF7AC0', escura: '#7A1040', dif: 5, difMin: 5, super: 0.45 },
+    { id: 'rei_aura', nome: 'Rei da Aura', cor: '#FF5A1A', escura: '#3A0010', dif: 5, difMin: 5, super: 0.6, ext: 'svg' },
   ];
   const DIV = 100, COM_DIV = 8;
   const INICIO_MESTRE = COM_DIV * 3 * DIV; // 2400
   const INICIO_PRO = 3000;
+  const INICIO_REI = 4000;
   const ROMANO = ['III', 'II', 'I'];
 
   function info(pts) {
     pts = Math.max(0, Math.floor(pts || 0));
-    if (pts >= INICIO_PRO) return { i: 9, p: PATENTES[9], div: '', nome: 'Mestre Pro', base: INICIO_PRO, prox: null, prog: 1, pts, baseTier: INICIO_PRO };
+    if (pts >= INICIO_REI) return { i: 10, p: PATENTES[10], div: '', nome: 'Rei da Aura', base: INICIO_REI, prox: null, prog: 1, pts, baseTier: INICIO_REI };
+    if (pts >= INICIO_PRO) return { i: 9, p: PATENTES[9], div: '', nome: 'Mestre Pro', base: INICIO_PRO, prox: INICIO_REI, prog: (pts - INICIO_PRO) / (INICIO_REI - INICIO_PRO), pts, baseTier: INICIO_PRO };
     if (pts >= INICIO_MESTRE) return { i: 8, p: PATENTES[8], div: '', nome: 'Mestre', base: INICIO_MESTRE, prox: INICIO_PRO, prog: (pts - INICIO_MESTRE) / (INICIO_PRO - INICIO_MESTRE), pts, baseTier: INICIO_MESTRE };
     const i = Math.floor(pts / (3 * DIV));
     const d = Math.floor((pts - i * 3 * DIV) / DIV);
     const base = i * 3 * DIV + d * DIV;
     return { i, p: PATENTES[i], div: ROMANO[d], nome: `${PATENTES[i].nome} ${ROMANO[d]}`, base, prox: base + DIV, prog: (pts - base) / DIV, pts, baseTier: i * 3 * DIV };
   }
-  const img = (i, mini = false) => `assets/patentes/${PATENTES[i].id}${mini ? '_mini' : ''}.png`;
+  const img = (i, mini = false) => `assets/patentes/${PATENTES[i].id}${mini ? '_mini' : ''}.${PATENTES[i].ext || 'png'}`;
 
   // ---------- Temporada ----------
   const temporadaAtual = () => new Date().toISOString().slice(0, 7);
@@ -298,7 +301,7 @@ const Ranque = (() => {
   return { ehEpica, BONUS_EPICA,
     PATENTES, info, img, temporadaAtual, nomeTemporada, diasRestantes, dados, pegarPremioTemporada, partida, previsao, aplicar,
     PASSE_NIVEIS, PASSE_XP, PRECO_PRO, nivelPasse, recompensa, icone, texto, temTrilha, podePegar, pendentes, pegar, comprarPro,
-    sequenciaNormal, registrar, historico, publico, acertarRegistro, INICIO_MESTRE, INICIO_PRO, darEvolucao, passeAtual, diasPasse,
+    sequenciaNormal, registrar, historico, publico, acertarRegistro, INICIO_MESTRE, INICIO_PRO, INICIO_REI, darEvolucao, passeAtual, diasPasse,
     get CARTA_EVOLUCAO() { return passeAtual().carta; },
   };
 })();

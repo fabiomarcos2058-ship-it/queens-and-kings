@@ -458,7 +458,7 @@ const RanqueUI = (() => {
   // ---------- todas as patentes ----------
   function patentes() {
     const r = Ranque.dados(), meu = Ranque.info(r.pts).i;
-    const faixa = (i) => i < 8 ? `${fmt(i * 300)} – ${fmt(i * 300 + 299)} PR · III, II, I` : i === 8 ? `${fmt(Ranque.INICIO_MESTRE)} – ${fmt(Ranque.INICIO_PRO - 1)} PR` : `${fmt(Ranque.INICIO_PRO)}+ PR`;
+    const faixa = (i) => i < 8 ? `${fmt(i * 300)} – ${fmt(i * 300 + 299)} PR · III, II, I` : i === 8 ? `${fmt(Ranque.INICIO_MESTRE)} – ${fmt(Ranque.INICIO_PRO - 1)} PR` : i === 9 ? `${fmt(Ranque.INICIO_PRO)} – ${fmt(Ranque.INICIO_REI - 1)} PR` : `${fmt(Ranque.INICIO_REI)}+ PR`;
     UI.modal({
       titulo: '🏅 Patentes',
       classe: 'modal-patentes',
