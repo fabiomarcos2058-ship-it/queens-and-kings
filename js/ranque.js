@@ -18,11 +18,12 @@ const Ranque = (() => {
     { id: 'rei_aura', nome: 'Rei da Aura', cor: '#FF5A1A', escura: '#3A0010', dif: 5, difMin: 5, super: 0.95, ext: 'svg' },
     { id: 'deus_aura', nome: 'Deus da Aura', cor: '#5CC8FF', escura: '#06103A', dif: 5, difMin: 5, super: 1, ext: 'svg' },
   ];
-  const DIV = 100, COM_DIV = 8;
+  // patentes mais distantes (cada divisão vale 250 PR) e pontos por partida em dobro; quem já tinha pontos foi convertido (x2,5)
+  const DIV = 250, COM_DIV = 8, ESCALA = 2.5, MULT_PR = 2;
   const INICIO_MESTRE = COM_DIV * 3 * DIV; // 2400
-  const INICIO_PRO = 3600;
-  const INICIO_REI = 6000;
-  const INICIO_DEUS = 9000;
+  const INICIO_PRO = 9000;
+  const INICIO_REI = 15000;
+  const INICIO_DEUS = 22500;
   const ROMANO = ['III', 'II', 'I'];
 
   function info(pts) {
@@ -68,8 +69,13 @@ const Ranque = (() => {
   const premioDe = (i) => ({ gemas: GEMAS_TEMPORADA[Math.min(i, GEMAS_TEMPORADA.length - 1)], ouro: 300 + i * 400 });
   function dados() {
     const d = Estado.d;
-    if (!d.ranque) d.ranque = { temporada: temporadaAtual(), pts: 0, melhor: 0, melhorSempre: 0, v: 0, d: 0, e: 0, seq: 0, maiorSeq: 0, escudo: 0, pro: false, xp: 0, pegos: { free: [], pro: [] } };
+    if (!d.ranque) d.ranque = { escala: ESCALA, temporada: temporadaAtual(), pts: 0, melhor: 0, melhorSempre: 0, v: 0, d: 0, e: 0, seq: 0, maiorSeq: 0, escudo: 0, pro: false, xp: 0, pegos: { free: [], pro: [] } };
     const r = d.ranque;
+    if (r.escala !== ESCALA) {
+      // conversão única: as patentes ficaram 2,5x mais distantes, então os pontos de todo mundo sobem junto (ninguém cai de patente)
+      if (!r.escala) { for (const k of ['pts', 'melhor', 'melhorSempre']) r[k] = Math.round((r[k] || 0) * ESCALA); (r.temporadasAnteriores || []).forEach((t) => { t.melhor = Math.round((t.melhor || 0) * ESCALA); }); }
+      r.escala = ESCALA;
+    }
     if (r.temporada === ULTIMA_MENSAL) r.temporada = PRIMEIRA_SEMANAL;
     if (r.temporada !== temporadaAtual()) {
       // virada de temporada: prêmio pela melhor patente e "reset suave" dos pontos
@@ -146,13 +152,13 @@ const Ranque = (() => {
   function bot(pts, usados = [], subir = null) {
     const x = Math.random();
     const passo = subir !== null ? subir : x < 0.3 ? 1 : x < 0.38 ? 2 : x < 0.85 ? 0 : -1;
-    let alvo = Math.max(0, Math.min(INICIO_DEUS + 1500, pts + passo * 300 + Math.round((Math.random() - 0.5) * 120)));
+    let alvo = Math.max(0, Math.min(INICIO_DEUS + 3750, pts + passo * 3 * DIV + Math.round((Math.random() - 0.5) * 1.2 * DIV)));
     // do Mestre pra cima as patentes são bem mais largas: "rival de patente acima" cai direto na próxima (Mestre Pro, Rei da Aura)
     const eu = info(pts).i;
     if (eu >= 8 && passo > 0) {
       const sobe = Math.min(11, eu + passo);
-      alvo = sobe > eu ? [INICIO_PRO, INICIO_REI, INICIO_DEUS][sobe - 9] + Math.round(Math.random() * 400) : pts + 100 + Math.round(Math.random() * 300);
-    } else if (eu >= 8 && passo < 0) alvo = Math.max(INICIO_MESTRE - 250, pts - 150 - Math.round(Math.random() * 250));
+      alvo = sobe > eu ? [INICIO_PRO, INICIO_REI, INICIO_DEUS][sobe - 9] + Math.round(Math.random() * 1000) : pts + 250 + Math.round(Math.random() * 750);
+    } else if (eu >= 8 && passo < 0) alvo = Math.max(INICIO_MESTRE - 625, pts - 375 - Math.round(Math.random() * 625));
     return { nome: nomeBot(usados), avatar: AVATARES[Math.floor(Math.random() * AVATARES.length)], pts: alvo, info: info(alvo) };
   }
   // amigo = { nome, avatar, ranque } quando a dupla é com um amigo de verdade (os bots ficam na média dos dois)
@@ -177,11 +183,12 @@ const Ranque = (() => {
     const rivalPts = Math.max(...rivais.map((b) => b.pts));
     // rival de patente mais alta joga mais forte: IA mais esperta e cartas melhores (vale muito mais pontos)
     const acima = Math.max(0, rivalI - meuI);
-    const difMin = acima ? Math.max(P.difMin || 0, Math.min(5, 2 + acima)) : P.difMin || 0;
+    // na ranqueada o rival joga com cartas básicas (comuns e raras), mas pensa no nível máximo desde o Ferro
+    const difMin = meuI <= 1 ? 5 : 6;
     const nivelForte = acima ? Math.max(nivelDelta, 0) + (acima >= 2 ? 1 : 0) : nivelDelta;
     // a ranqueada sorteia uma das arenas de artes marciais (todo mundo vê, com qualquer quantidade de troféus)
     const arena = ['torneio', 'canion', 'ilha'][Math.floor(Math.random() * 3)];
-    return { arena, dupla, rivais, parceiro, rivalI, meuI, dif: Math.max(dif, difMin), nivelDelta: nivelForte, difMin, chanceSuper: P.super || 0, rivalPts };
+    return { basico: true, arena, dupla, rivais, parceiro, rivalI, meuI, dif: Math.max(dif, difMin), nivelDelta: nivelForte, difMin, chanceSuper: P.super || 0, rivalPts };
   }
 
   // ---------- Pontos ----------
@@ -206,7 +213,8 @@ const Ranque = (() => {
     if (meuI >= 11) { m = 0.35; g = Math.round((ganho - cheio) * 0.35) + cheio; perda = Math.round(perda * 1.8); perdaMax = Math.round(perdaMax * 1.8); }
     else if (meuI >= 9) { m = 0.45; g = Math.round((ganho - cheio) * 0.45) + cheio; perda = Math.round(perda * 1.6); perdaMax = Math.round(perdaMax * 1.6); }
     else if (meuI >= 8) { m = 0.6; g = Math.round((ganho - cheio) * 0.6) + cheio; perda = Math.round(perda * 1.35); perdaMax = Math.round(perdaMax * 1.35); }
-    return { ganho: g, ganhoMax: g + sorte, perda: Math.max(4, perda), perdaMax: Math.max(4, perdaMax), bonusRival, bonusSuper, bonusSeq, bonusEpica: BONUS_EPICA + (diff > 0 ? 5 : 0) };
+    const M = MULT_PR; // tudo em dobro: os números são maiores, mas as patentes também estão mais longe
+    return { ganho: g * M, ganhoMax: (g + sorte) * M, perda: Math.max(4, perda) * M, perdaMax: Math.max(4, perdaMax) * M, bonusRival: bonusRival * M, bonusSuper: bonusSuper * M, bonusSeq: bonusSeq * M, bonusEpica: (BONUS_EPICA + (diff > 0 ? 5 : 0)) * M };
   }
   // Vitória Épica: 3 coroas sem perder nenhuma torre
   const BONUS_EPICA = 15;
@@ -239,7 +247,7 @@ const Ranque = (() => {
       const sorteio = Math.floor(Math.random() * (pv.ganhoMax - pv.ganho + 1));
       bonusSeq = pv.bonusSeq; bonusSuper = pv.bonusSuper; bonusRival = pv.bonusRival + (pv.bonusRival || !superIA ? sorteio : 0);
       if (superIA && !pv.bonusRival) bonusSuper += sorteio;
-      if (epica) { bonusEpica = pv.bonusEpica; r.epicas = (r.epicas || 0) + 1; r.epicasSempre = (r.epicasSempre || 0) + 1; } else bonus3 = coroas === 3 ? 4 : 0;
+      if (epica) { bonusEpica = pv.bonusEpica; r.epicas = (r.epicas || 0) + 1; r.epicasSempre = (r.epicasSempre || 0) + 1; } else bonus3 = coroas === 3 ? 4 * MULT_PR : 0;
       delta = pv.ganho + sorteio + bonus3 + bonusEpica;
     } else if (resultado === 'derrota') {
       r.seq = 0; r.d++;
@@ -365,7 +373,7 @@ const Ranque = (() => {
   const publico = () => { const r = dados(); return { pts: r.pts, melhor: r.melhorSempre || r.pts, v: r.v, d: r.d, temporada: r.temporada }; };
 
   return { ehEpica, BONUS_EPICA,
-    PATENTES, info, img, temporadaAtual, nomeTemporada, diasRestantes, restaTemporada, fimTemporada, PRIMEIRA_SEMANAL, ULTIMA_MENSAL, dados, pegarPremioTemporada, partida, previsao, aplicar,
+    PATENTES, info, img, DIV, MULT_PR, temporadaAtual, nomeTemporada, diasRestantes, restaTemporada, fimTemporada, PRIMEIRA_SEMANAL, ULTIMA_MENSAL, dados, pegarPremioTemporada, partida, previsao, aplicar,
     PASSE_NIVEIS, PASSE_XP, PRECO_PRO, nivelPasse, recompensa, icone, texto, temTrilha, podePegar, pendentes, pegar, comprarPro,
     premioDe, sequenciaNormal, registrar, historico, publico, acertarRegistro, INICIO_MESTRE, INICIO_PRO, INICIO_REI, INICIO_DEUS, darEvolucao, passeAtual, diasPasse,
     get CARTA_EVOLUCAO() { return passeAtual().carta; },

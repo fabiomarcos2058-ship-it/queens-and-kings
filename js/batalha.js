@@ -72,7 +72,7 @@ const Batalha = (() => {
     // 2v2 online: rede.jogadores = { azul2, vermelho, vermelho2 } (perfil de quem está em cada vaga; vaga vazia = IA)
     const jog = dupla && rede ? (rede.jogadores || { azul2: rede.convidado }) : {};
     const deck = evento && evento.deck ? evento.deck : tutorial ? tutorial.deck : Estado.d.deck;
-    const deckIA = evento && evento.deckIA ? evento.deckIA : tutorial ? tutorial.deckIA : x1 ? embaralhar(rede.convidado.deck) : jog.vermelho ? jog.vermelho.deck : embaralhar(Mod.deckApelao() || deckAleatorioIA()).slice(0, 8);
+    const deckIA = evento && evento.deckIA ? evento.deckIA : tutorial ? tutorial.deckIA : x1 ? embaralhar(rede.convidado.deck) : jog.vermelho ? jog.vermelho.deck : embaralhar(Mod.deckApelao() || deckAleatorioIA(!!(ranque && ranque.basico))).slice(0, 8);
     const minhas = Estado.minhasTorres();
     // 2v2: a dupla rival tem torres iguais às suas (sem a "desvantagem de IA"); se tiver gente no time vermelho, usa as torres dela
     const humanoV = jog.vermelho || jog.vermelho2;
@@ -114,13 +114,14 @@ const Batalha = (() => {
       s.difBaseRanque = ranque.dif;
       s.difMinRanque = ranque.difMin || 0; // Platina pra cima: a IA não alivia abaixo disso
       const media = Math.round(deck.reduce((a, id) => a + Estado.d.colecao[id].nivel, 0) / deck.length);
-      s.nivelIA = Math.max(1, Math.min(9, media + ranque.nivelDelta));
+      // cartas básicas são mais fracas por natureza: o rival da ranqueada vem com elas 2 níveis acima pra luta ser justa (medido em teste)
+      s.nivelIA = ranque.basico ? Math.max(1, Math.min(11, media + ranque.nivelDelta + 2)) : Math.max(1, Math.min(9, media + ranque.nivelDelta));
     }
     if (dupla) {
       s.dupla = true;
       s.jogadores = jog;
       s.azul2 = lado(jog.azul2 ? jog.azul2.deck : deckAleatorioIA());
-      s.vermelho2 = lado(jog.vermelho2 ? jog.vermelho2.deck : deckAleatorioIA());
+      s.vermelho2 = lado(jog.vermelho2 ? jog.vermelho2.deck : deckAleatorioIA(!!(ranque && ranque.basico)));
       s.niveis = { azul2: jog.azul2 && jog.azul2.niveis, vermelho: jog.vermelho && jog.vermelho.niveis, vermelho2: jog.vermelho2 && jog.vermelho2.niveis };
       s.niveisAzul2 = s.niveis.azul2 || null;
       s.zenkais = { azul2: jog.azul2 && jog.azul2.zenkai, vermelho: jog.vermelho && jog.vermelho.zenkai, vermelho2: jog.vermelho2 && jog.vermelho2.zenkai };
@@ -144,7 +145,7 @@ const Batalha = (() => {
       if (!evento && Math.random() < Math.max(0.08, (ranque && ranque.chanceSuper) || 0)) {
         s.superIA = true;
         if (ranque) ranque.superIA = true; // a ranqueada paga (e cobra) bem mais contra ela
-        s.nivelIA = Math.min(9, s.nivelIA + 1); // a super IA vem com cartas 1 nível mais fortes
+        s.nivelIA = Math.min(ranque && ranque.basico ? 12 : 9, s.nivelIA + 1); // a super IA vem com cartas 1 nível mais fortes
         if (s.niveisIA) s.niveisIA = {};
       }
     }
@@ -2987,7 +2988,7 @@ const Batalha = (() => {
     if (s.dupla && iaLado !== 'vermelho' && timeDe(iaLado) === 'azul' && !s.difIA) return s.superIA ? 6 : 5;
     if (s.difIA) return s.difIA; // eventos com dificuldade fixa e tutorial
     if (s.superIA) return 6;     // IA super inteligente (rara)
-    if (s.adaptativa) return Math.max(s.difMinRanque || 1, Math.min(5, s.difBase + s.difAjuste));
+    if (s.adaptativa) return Math.max(s.difMinRanque || 1, Math.min(5, s.difBase + s.difAjuste)); // (na ranqueada o mínimo já é 5 ou 6)
     const t = Estado.d.trofeus || 0;
     // a IA joga bem (as cartas dela é que são de nível mais baixo)
     if (t >= 1200) return 5; // muito esperta
@@ -3016,9 +3017,11 @@ const Batalha = (() => {
   }
 
   // deck aleatório e equilibrado: 1 tanque, 2 feitiços/barril, 1 dano em área, 1 atiradora e o resto sorteado
-  function deckAleatorioIA() {
+  function deckAleatorioIA(basico = false) {
     // só cartas que VOCÊ já liberou (arena/troféus); antes vinha Goku MUI na Arena 1
     let base = Estado.disponiveis().filter((c) => !c.token);
+    // rival da ranqueada: só cartas básicas (comuns e raras, sem evento nem exclusivas). A força dele é pensar bem.
+    if (basico) base = Estado.catalogo().filter((c) => !c.token && !c.exclusivo && !c.evento && !c.summon && (c.raridade === 'comum' || c.raridade === 'rara'));
     if (base.length < 12) {
       const resto = Estado.catalogo().filter((c) => !c.exclusivo && !c.token && !base.includes(c)).sort((a, b) => (a.trofeus || 0) - (b.trofeus || 0));
       base = base.concat(resto.slice(0, 12 - base.length));
@@ -3248,7 +3251,9 @@ const Batalha = (() => {
 
       if (!jaDefendido) {
         const opcoes = pode.filter((m) => !m.c.feitico).map((m) => ({ m, nota: notaDefesa(m, grupo, nivel) })).sort((a, b) => b.nota - a.nota);
-        const melhor = opcoes[0];
+        let melhor = opcoes[0];
+        // IA pensadora: entre as defesas que resolvem quase tão bem, usa a mais barata (troca boa de elixir)
+        if (dif >= 6 && melhor && melhor.nota > 15) melhor = opcoes.filter((o) => o.nota >= melhor.nota * 0.8).sort((a, b) => a.m.c.custo - b.m.c.custo || b.nota - a.nota)[0];
         const vale = melhor && (melhor.nota > 15 || perigo > 900);
         if (vale) {
           const c = melhor.m.c;
@@ -3269,8 +3274,10 @@ const Batalha = (() => {
     }
 
     // 3) contra-ataque e apoio: ajuda as minhas tropas que estão atacando
-    const atacando = meus.filter((e) => e.y > RIO_TOPO - 40 && e.vida > e.max * 0.35);
-    if (atacando.length && L.elixir >= 3) {
+    // IA pensadora: não espera o tanque atravessar, já monta o ataque atrás dele (e contra-ataca com quem sobrou da defesa)
+    const atacando = meus.filter((e) => (e.y > RIO_TOPO - 40 || (dif >= 6 && e.y > 90 && e.max >= 800)) && e.vida > e.max * 0.35);
+    if (atacando.length && L.elixir >= (dif >= 6 ? 4 : 3) && !(dif >= 6 && s.t < (s.iaApoioCd && s.iaApoioCd[quem] || 0))) {
+      if (dif >= 6) { if (!s.iaApoioCd) s.iaApoioCd = {}; s.iaApoioCd[quem] = s.t + 2.2; }
       const lider = atacando.reduce((a, b) => (b.max > a.max ? b : a));
       const apoio = pode.filter((m) => !m.c.feitico && !m.c.barril && !ehTanque(m.c)).sort((a, b) => dpsC(b.c) - dpsC(a.c))[0];
       const defesaAzul = inimigos.filter((e) => dist(e, lider) < 120).length;
@@ -3292,6 +3299,8 @@ const Batalha = (() => {
     const ve = vida('esq-azul'), vd = vida('dir-azul');
     const defEsq = inimigos.filter((e) => e.x < W / 2).length, defDir = inimigos.length - defEsq;
     let lado = ve < 0 ? 0 : vd < 0 ? 1 : (ve - defEsq * 150) <= (vd - defDir * 150) ? 0 : 1;
+    // IA pensadora: se já tem tropa minha viva de um lado, junta o ataque nesse lado em vez de espalhar
+    if (dif >= 6) { const mE = meus.filter((e) => e.x < W / 2 && e.y > 120).length, mD = meus.filter((e) => e.x >= W / 2 && e.y > 120).length; if (mE !== mD && torreVivaIA(mE > mD ? 'esq-azul' : 'dir-azul')) lado = mE > mD ? 0 : 1; }
     if (dobro && Math.random() < 0.35) lado = 1 - lado; // ataque dividido no elixir em dobro
     const x = PONTES[lado];
     const bolso = !torreVivaIA(lado ? 'dir-azul' : 'esq-azul');

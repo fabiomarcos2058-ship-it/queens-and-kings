@@ -27,7 +27,7 @@ const Titulos = (() => {
     cacador_trofeus: { nome: 'Caçador de Troféus', ic: '🏆', como: 'Chegue a 3.000 troféus', prog: () => [D().recorde || 0, 3000] },
     imparavel: { nome: 'Imparável', ic: '🔥', raro: 'epico', como: '10 vitórias seguidas na ranqueada', prog: () => [r().maiorSeq || 0, 10] },
     epico: { nome: 'Vitória Épica', ic: '💥', raro: 'epico', como: '10 Vitórias Épicas (3x0) na ranqueada', prog: () => [r().epicasSempre || 0, 10] },
-    mestre: { nome: 'Mestre do Ranque', ic: '🏅', raro: 'lendario', como: 'Chegue no Mestre na ranqueada', prog: () => [Math.min(r().melhorSempre || 0, 2400), 2400] },
+    mestre: { nome: 'Mestre do Ranque', ic: '🏅', raro: 'lendario', como: 'Chegue no Mestre na ranqueada', prog: () => [Math.min(r().melhorSempre || 0, Ranque.INICIO_MESTRE), Ranque.INICIO_MESTRE] },
     lenda_x1: { nome: 'Lenda do X1', ic: '⚔️', raro: 'epico', como: 'Vença 20 X1 com amigos', prog: () => [(D().x1 && D().x1.v) || 0, 20] },
     invocador: { nome: 'Invocador Ultra', ic: '🌀', raro: 'lendario', como: 'Consiga um personagem Ultra no Summon', prog: () => [(D().summon && D().summon.ultras) || 0, 1] },
     farao: { nome: 'Duelista do Faraó', ic: '🃏', raro: 'lendario', como: 'Complete o Duelo do Faraó', tem: () => !!(D().desafios && D().desafios.yugi && D().desafios.yugi.completo) },
