@@ -23,10 +23,10 @@ const Ataques = (() => {
   const NA_TORRE = { tanque: 1.1, lutador: 0.85, assassino: 0.8, atirador: 0.7, mago: 0.65, enxame: 1 };
 
   const CLASSE_DA_CARTA = {
-    tanque: ['itsuki', 'shizuku', 'gogeta_ssj4', 'goku_ssj3', 'goku_ssj4', 'goku_blue_lb', 'gogeta_ultra', 'sonic_excalibur', 'conquest', 'omni_man', 'vegeta_ultra_ego', 'gogeta_blue_solo', 'adam_smasher', 'adam_smasher_evo'],
-    assassino: ['bra', 'teto', 'pan_dbh', 'akame', 'mbappe', 'kashimo', 'goku_pressagio', 'diavolo', 'mita_malvada', 'akame_murasame', 'sonic', 'dark_sonic', 'kurona', 'goku_black_rose', 'goku_blue_kaioken_remake', 'vegetto_blue_solo', 'agente_rubi', 'david_martinez', 'lucy_kushinada'],
-    atirador: ['mai', 'miku_nakano', 'pan_gt', 'riruka', 'rukia_remake', 'nino_nakano', 'gyro', 'johnny', 'roman_cyber', 'johnny_silverhand'],
-    mago: ['rukia', 'nami_last', 'hatsune_miku', 'bambietta', 'bulma', 'gojo', 'robin', 'pucci', 'mita_gentil', 'yugi_moto', 'anri_halloween', 'eve_atomica'],
+    tanque: ['itsuki', 'shizuku', 'gogeta_ssj4', 'goku_ssj3', 'goku_ssj4', 'goku_blue_lb', 'gogeta_ultra', 'sonic_excalibur', 'conquest', 'omni_man', 'vegeta_ultra_ego', 'gogeta_blue_solo', 'adam_smasher', 'adam_smasher_evo', 'albedo'],
+    assassino: ['bra', 'teto', 'pan_dbh', 'akame', 'mbappe', 'kashimo', 'goku_pressagio', 'diavolo', 'mita_malvada', 'akame_murasame', 'sonic', 'dark_sonic', 'kurona', 'goku_black_rose', 'goku_blue_kaioken_remake', 'vegetto_blue_solo', 'agente_rubi', 'david_martinez', 'lucy_kushinada', 'shalltear'],
+    atirador: ['mai', 'miku_nakano', 'pan_gt', 'riruka', 'rukia_remake', 'nino_nakano', 'gyro', 'johnny', 'roman_cyber', 'johnny_silverhand', 'pandoras_actor'],
+    mago: ['rukia', 'nami_last', 'hatsune_miku', 'bambietta', 'bulma', 'gojo', 'robin', 'pucci', 'mita_gentil', 'yugi_moto', 'anri_halloween', 'eve_atomica', 'ainz_ooal_gown', 'demiurge'],
     enxame: ['mini'],
   };
   const classeDe = (c) => {
@@ -82,6 +82,12 @@ const Ataques = (() => {
     adam_smasher: { v: { g: 'tiro', s: 'bala', cor: '#FF6A3A' }, m: { veterano: 0.25, imune: true }, d: 'Recebe 25% menos dano e não pode ser atordoado. Rajada de mísseis.' },
     adam_smasher_evo: { v: { g: 'tiro', s: 'bala', cor: '#FF3A3A' }, m: { veterano: 0.25, imune: true }, d: 'Chassi militar, mísseis e Sandevistan.' },
     johnny_silverhand: { v: { g: 'tiro', s: 'bala', cor: '#FFD25E' }, m: {}, d: 'Malorian Arms: tiro pesado.' },
+    ainz_ooal_gown: { v: { p: 'ki_roxo', vel: 240, tam: 22, rastro: '#B15CFF', explode: true }, m: { nz: true, imune: true, graspHeart: 8, auraDesespero: [130, 0.15] }, d: 'Magias sombrias em área. Agarrar Coração a cada 8s. Aura do Desespero enfraquece quem chega perto.' },
+    albedo: { v: { g: 'corte', cor: '#9B5CFF', pesado: true }, m: { nz: true, escudo: 0.25, veterano: 0.15, guardia: 150, empurrar: 8 }, d: 'Tanque com escudo. Recebe parte do dano dos aliados (metade do dano do Ainz).' },
+    shalltear: { v: { g: 'corte', cor: '#FF2A5C' }, m: { nz: true, vampiro: 0.25, berserk: 0.35 }, d: 'Rouba 25% do dano. Ataca mais rápido quanto mais machucada.' },
+    demiurge: { v: { p: 'fogo', vel: 230, tam: 20, rastro: '#FF4A1A', explode: true }, m: { nz: true, queimar: [0.05, 3, '#FF4A1A', 'fogo'], dominar: [6, 3, 1.2] }, d: 'Fogo infernal que queima. A cada 6s faz até 3 inimigos se ajoelharem.' },
+    sebas_tian: { v: { g: 'soco', cor: '#E8EEF8' }, m: { nz: true, combo: 3, atordoar: [0.15, 0.5], empurrar: 6 }, d: 'Socos precisos: todo 3º golpe causa o dobro.' },
+    pandoras_actor: { v: { p: 'ki_amarelo', vel: 300, tam: 16, rastro: '#FFD25E' }, m: { nz: true, milFaces: true }, d: 'Copia o dano do aliado mais forte ao entrar. Imita habilidades.' },
     goku_vegeta: { v: { g: 'soco', cor: '#C9B8FF', pesado: true }, m: { rivais: true, voo: true }, d: 'Revezam: Instinto (desvia e revida) e Ego (fica mais forte apanhando e rouba vida).' },
     gogeta_vegetto_blue: { v: { g: 'soco', cor: '#3FC4FF', pesado: true }, m: { voo: true }, d: 'Entram dois: Gogeta e Vegetto. Dividem o dano e focam o mesmo alvo.' },
     gogeta_blue_solo: { v: { g: 'soco', cor: '#3FC4FF', pesado: true }, m: { empurrar: 8, voo: true }, d: 'Soco pesado. Divide o dano com o Vegetto.' },

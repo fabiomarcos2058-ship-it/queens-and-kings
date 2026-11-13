@@ -3814,6 +3814,256 @@
         150,
         675
       ]
+    },
+    {
+      "id": "ainz_ooal_gown",
+      "nome": "Ainz Ooal Gown",
+      "raridade": "ultra",
+      "custo": 7,
+      "tipo": "Overlord · Supremo de Nazarick",
+      "descricao": "O Rei Feiticeiro, senhor absoluto da Grande Tumba de Nazarick. Um esqueleto que domina magias que nenhum vivo alcança.",
+      "vida": 1650,
+      "dano": 260,
+      "velocidade": 46,
+      "alcance": 110,
+      "cadencia": 1.3,
+      "danoTorre": 0.55,
+      "passiva": {
+        "nome": "Senhor dos Mortos-Vivos",
+        "tipo": "overlord",
+        "descricao": "Não pode ser atordoado nem desacelerado. Inimigos perto dele causam 15% menos dano (Aura do Desespero). A cada 8s usa Agarrar Coração no inimigo mais forte: 3x de dano e atordoa por 1,5s."
+      },
+      "habilidade": {
+        "nome": "O Objetivo de Toda Vida é a Morte",
+        "tipo": "tempoMorte",
+        "custo": 5,
+        "recarga": 35,
+        "raio": 300,
+        "descricao": "Para o tempo por 2,5s pra todos os inimigos em volta. Quando o relógio bate, quem estiver com 30% de vida ou menos morre na hora (Ultras levam dano em vez de morrer) e o resto perde 25% da vida máxima."
+      },
+      "trofeus": 0,
+      "exclusivo": [],
+      "alvo": "tudo",
+      "arena": 1,
+      "rosto": [
+        395,
+        320,
+        130
+      ],
+      "arte": [
+        68,
+        170,
+        600
+      ],
+      "summon": true
+    },
+    {
+      "id": "albedo",
+      "nome": "Albedo",
+      "raridade": "ultra",
+      "custo": 6,
+      "tipo": "Overlord · Guardiã Suprema",
+      "descricao": "A Supervisora dos Guardiões de Nazarick, na armadura Hermes Trismegistus. Ninguém encosta no Ainz-sama enquanto ela estiver de pé.",
+      "vida": 1700,
+      "dano": 230,
+      "velocidade": 55,
+      "alcance": 20,
+      "cadencia": 1.15,
+      "danoTorre": 0.6,
+      "passiva": {
+        "nome": "Escudo da Guardiã",
+        "tipo": "guardia",
+        "descricao": "Entra com um escudo de 25% da vida e recebe 15% menos dano. Recebe no lugar dele metade do dano que o Ainz levaria, e 20% do dano dos outros aliados perto."
+      },
+      "habilidade": {
+        "nome": "Hermes Trismegistus",
+        "tipo": "hermes",
+        "custo": 4,
+        "recarga": 25,
+        "seg": 3,
+        "descricao": "Por 3s não leva dano nenhum, devolve 40% de todo golpe pra quem bateu e obriga os inimigos em volta a atacarem ela."
+      },
+      "trofeus": 0,
+      "exclusivo": [],
+      "alvo": "tudo",
+      "arena": 1,
+      "rosto": [
+        228,
+        104,
+        80
+      ],
+      "arte": [
+        0,
+        24,
+        474
+      ],
+      "summon": true
+    },
+    {
+      "id": "shalltear",
+      "nome": "Shalltear Bloodfallen",
+      "raridade": "ultra",
+      "custo": 6,
+      "tipo": "Overlord · Vampira Verdadeira",
+      "descricao": "A Guardiã dos três primeiros andares de Nazarick. Uma vampira com uma lança que purifica tudo o que toca.",
+      "vida": 1550,
+      "dano": 290,
+      "velocidade": 80,
+      "alcance": 24,
+      "cadencia": 0.95,
+      "danoTorre": 0.5,
+      "passiva": {
+        "nome": "Sangue Verdadeiro",
+        "tipo": "vampira",
+        "descricao": "Rouba 25% do dano que causa e ataca mais rápido quanto mais machucada estiver."
+      },
+      "habilidade": {
+        "nome": "Lança Purificadora + Einherjar",
+        "tipo": "einherjar",
+        "custo": 5,
+        "recarga": 30,
+        "seg": 10,
+        "descricao": "Arremessa a Lança Purificadora no inimigo mais forte (4x de dano, cura metade) e invoca o Einherjar, uma cópia sombria dela que luta por 10s."
+      },
+      "trofeus": 0,
+      "exclusivo": [],
+      "alvo": "tudo",
+      "arena": 1,
+      "rosto": [
+        335,
+        255,
+        135
+      ],
+      "arte": [
+        0,
+        0,
+        736
+      ],
+      "summon": true
+    },
+    {
+      "id": "demiurge",
+      "nome": "Demiurge",
+      "raridade": "ultra",
+      "custo": 5,
+      "tipo": "Overlord · Estrategista Infernal",
+      "descricao": "O demônio estrategista de Nazarick. Basta uma palavra dele pra que os inimigos se ajoelhem.",
+      "vida": 1150,
+      "dano": 230,
+      "velocidade": 50,
+      "alcance": 90,
+      "cadencia": 1.25,
+      "danoTorre": 0.55,
+      "passiva": {
+        "nome": "Maldição Dominadora",
+        "tipo": "dominar",
+        "descricao": "Seus ataques queimam. A cada 6s manda até 3 inimigos perto se ajoelharem: ficam parados por 1,2s."
+      },
+      "habilidade": {
+        "nome": "Chamas do Inferno",
+        "tipo": "chamasInferno",
+        "custo": 4,
+        "recarga": 22,
+        "descricao": "Abre o inferno onde estão mais inimigos: 2,5x de dano em área e queimadura forte por 4s."
+      },
+      "trofeus": 0,
+      "exclusivo": [],
+      "alvo": "tudo",
+      "arena": 1,
+      "rosto": [
+        330,
+        320,
+        115
+      ],
+      "arte": [
+        60,
+        130,
+        600
+      ],
+      "summon": true
+    },
+    {
+      "id": "sebas_tian",
+      "nome": "Sebas Tian",
+      "raridade": "lendaria",
+      "custo": 5,
+      "tipo": "Overlord · Mordomo de Nazarick",
+      "descricao": "O mordomo-chefe de Nazarick. Educado, justo e capaz de derrubar qualquer um com as próprias mãos.",
+      "vida": 1150,
+      "dano": 225,
+      "velocidade": 70,
+      "alcance": 18,
+      "cadencia": 0.85,
+      "danoTorre": 0.55,
+      "passiva": {
+        "nome": "Mordomo Perfeito",
+        "tipo": "mordomo",
+        "descricao": "Todo 3º golpe causa o dobro de dano e golpes têm 15% de chance de deixar tonto."
+      },
+      "habilidade": {
+        "nome": "Forma de Dragão",
+        "tipo": "formaDragao",
+        "custo": 4,
+        "recarga": 26,
+        "seg": 6,
+        "descricao": "Por 6s: +70% de dano, ataca 30% mais rápido, os golpes empurram e ele cura 20% da vida."
+      },
+      "trofeus": 0,
+      "exclusivo": [],
+      "alvo": "tudo",
+      "arena": 1,
+      "rosto": [
+        430,
+        335,
+        125
+      ],
+      "arte": [
+        60,
+        150,
+        650
+      ],
+      "summon": true
+    },
+    {
+      "id": "pandoras_actor",
+      "nome": "Pandora's Actor",
+      "raridade": "lendaria",
+      "custo": 4,
+      "tipo": "Overlord · O Ator Supremo",
+      "descricao": "O guardião do tesouro de Nazarick. Um doppelgänger que imita qualquer um, até os Seres Supremos.",
+      "vida": 950,
+      "dano": 200,
+      "velocidade": 75,
+      "alcance": 70,
+      "cadencia": 1.0,
+      "danoTorre": 0.5,
+      "passiva": {
+        "nome": "Mil Faces",
+        "tipo": "milFaces",
+        "descricao": "Quando entra, copia 80% do dano do aliado mais forte em campo (se for maior que o dele)."
+      },
+      "habilidade": {
+        "nome": "Doppelgänger",
+        "tipo": "imitacao",
+        "custo": 3,
+        "recarga": 24,
+        "descricao": "Imita a habilidade especial do aliado mais caro em campo. Se não tiver nenhum, usa um Agarrar Coração mais fraco (2x de dano)."
+      },
+      "trofeus": 0,
+      "exclusivo": [],
+      "alvo": "tudo",
+      "arena": 1,
+      "rosto": [
+        325,
+        285,
+        125
+      ],
+      "arte": [
+        40,
+        110,
+        650
+      ],
+      "summon": true
     }
   ]
 }

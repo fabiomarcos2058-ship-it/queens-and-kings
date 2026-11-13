@@ -82,6 +82,28 @@ const Summon = (() => {
     chances: { ultra: 0.02, lendaria: 0.18, epica: 0.8 },
     // garantia do destaque: Goku & Vegeta vem com certeza na 200ª invocação sem ele neste banner
     pityDestaque: 200,
+  }, {
+    id: 'nazarick',
+    nome: 'NAZARICK',
+    sub: 'Os Supremos da Tumba',
+    tema: 'nz',
+    logo: 'nz',
+    fim: new Date(2026, 10, 17, 23, 59, 59), // 17/11/2026
+    arte: 'assets/summon/nazarick.jpg',
+    titulo: 'assets/titulo/nazarick.jpg',
+    mini: 'assets/summon/nazarick_mini.jpg',
+    centro: 'ainz_ooal_gown',
+    destaque: ['albedo', 'shalltear', 'ainz_ooal_gown', 'demiurge', 'sebas_tian', 'pandoras_actor'],
+    pool: {
+      ultra: ['ainz_ooal_gown', 'albedo', 'shalltear', 'demiurge'],
+      lendaria: ['sebas_tian', 'pandoras_actor', 'dio', 'mita_malvada'],
+      epica: ['kurona', 'riruka', 'rukia'],
+    },
+    // o Ainz é o mais difícil de vir
+    pesos: { ainz_ooal_gown: 1, albedo: 2.5, shalltear: 2.5, demiurge: 2.5, sebas_tian: 2, pandoras_actor: 2, dio: 1, mita_malvada: 1 },
+    chances: { ultra: 0.02, lendaria: 0.18, epica: 0.8 },
+    // garantia do destaque: o Ainz vem com certeza na 200ª invocação sem ele neste banner
+    pityDestaque: 200,
   }];
   // só os banners que ainda não acabaram
   const ativos = () => BANNERS.filter((b) => b.fim.getTime() > Date.now());
@@ -210,7 +232,7 @@ const Summon = (() => {
     const abas = lista.map((x, i) => `<button class="sm-aba${i === iAtual ? ' ativa' : ''}${x.tema ? ` t-${x.tema}` : ''}" data-b="${i}">
         <img src="${x.mini || Cartas.arte(Estado.carta(x.centro || x.destaque[0]) || {})}" alt="" />${i === lista.length - 1 ? '<em>NOVO</em>' : ''}
         <span>${esc(x.nome)}</span><small>⏳ ${tempo(x)}</small></button>`).join('');
-    const titulo = b.logo === 'db' ? logoSaiyajin(b) : b.logo ? logoInvencivel(b) : `<div class="smb-titulo"><em>NOVA RARIDADE</em><b>${esc(b.nome)}</b><small>${esc(b.sub)}</small></div>`;
+    const titulo = b.logo === 'nz' ? logoNazarick(b) : b.logo === 'db' ? logoSaiyajin(b) : b.logo ? logoInvencivel(b) : `<div class="smb-titulo"><em>NOVA RARIDADE</em><b>${esc(b.nome)}</b><small>${esc(b.sub)}</small></div>`;
     // personagens em destaque (estilo vitrine)
     const destaques = b.destaque.filter((id) => Estado.carta(id)).map((id) => {
       const c = Estado.carta(id);
@@ -264,6 +286,20 @@ const Summon = (() => {
         <path d="M60 4 C70 22 92 20 86 44 C104 40 108 66 94 78 C104 96 84 112 66 104 C60 118 44 116 40 102 C20 110 8 90 20 76 C4 64 12 40 32 44 C26 22 50 22 60 4 Z" fill="url(#sldN)" stroke="#7a2a00" stroke-width="3" stroke-linejoin="round"/>
         <path d="M66 22 L42 64 L58 64 L50 98 L80 52 L63 52 L72 22 Z" fill="url(#sldR)" stroke="#123a6a" stroke-width="3" stroke-linejoin="round"/></svg>
       <div class="sld-txt"><b>${esc(b.nome)}</b><small>${esc(b.sub)}</small></div></div>`;
+  }
+  // logo do banner de Nazarick (desenho próprio do jogo: coroa sobre um cajado com gemas)
+  function logoNazarick(b) {
+    return `<div class="smb-logo-nz"><svg class="snz-emblema" viewBox="0 0 120 120" aria-hidden="true">
+        <defs><linearGradient id="snzO" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFF1B8"/><stop offset=".5" stop-color="#E8A317"/><stop offset="1" stop-color="#8A5200"/></linearGradient>
+          <radialGradient id="snzG" cx=".4" cy=".35" r=".7"><stop offset="0" stop-color="#F3D9FF"/><stop offset=".5" stop-color="#9B3CFF"/><stop offset="1" stop-color="#3A0F5C"/></radialGradient></defs>
+        <circle cx="60" cy="60" r="54" fill="#12041f" stroke="url(#snzO)" stroke-width="5"/>
+        <circle cx="60" cy="60" r="44" fill="none" stroke="#9B3CFF" stroke-width="1.5" stroke-dasharray="4 5"/>
+        <path d="M60 30 L60 104" stroke="url(#snzO)" stroke-width="7" stroke-linecap="round"/>
+        <path d="M36 40 L42 22 L52 32 L60 16 L68 32 L78 22 L84 40 Z" fill="url(#snzO)" stroke="#3a1e00" stroke-width="2.5" stroke-linejoin="round"/>
+        <circle cx="60" cy="56" r="13" fill="url(#snzG)" stroke="#3a1e00" stroke-width="2.5"/>
+        <circle cx="40" cy="66" r="6" fill="#FF2A5C" stroke="#3a1e00" stroke-width="2"/><circle cx="80" cy="66" r="6" fill="#FF2A5C" stroke="#3a1e00" stroke-width="2"/>
+        <circle cx="55" cy="51" r="3.5" fill="#fff" opacity=".7"/></svg>
+      <div class="snz-txt"><b>${esc(b.nome)}</b><small>${esc(b.sub)}</small></div></div>`;
   }
   // logo do banner do Invencível (desenho próprio do jogo)
   function logoInvencivel(b) {
@@ -459,7 +495,7 @@ const Summon = (() => {
         <div class="smu-velocidade"></div>
         <div class="smu-arte"><img src="${Cartas.arte(c)}" alt="" draggable="false" /><i class="smu-holo"></i></div>
         <div class="smu-texto"><div class="smu-ultra">${letras}</div><b class="smu-nome">${esc(c.nome)}</b><small>${esc(c.tipo)}</small>
-          <p>${banner().tema === 'db' ? 'Um Saiyajin lendário chegou pra lutar do seu lado!' : banner().tema === 'invencivel' ? 'Atravessou o multiverso pra lutar do seu lado!' : 'Um prodígio atravessou o multiverso!'}</p>${r.novo ? '<em class="smu-novo">NOVO!</em>' : `<em class="smu-novo rep">${r.copias ? `+${r.copias} cópia` : `+${fmt(r.ouro)} 🪙`}</em>`}</div>
+          <p>${banner().tema === 'nz' ? 'Um Ser Supremo de Nazarick se curvou diante de você!' : banner().tema === 'db' ? 'Um Saiyajin lendário chegou pra lutar do seu lado!' : banner().tema === 'invencivel' ? 'Atravessou o multiverso pra lutar do seu lado!' : 'Um prodígio atravessou o multiverso!'}</p>${r.novo ? '<em class="smu-novo">NOVO!</em>' : `<em class="smu-novo rep">${r.copias ? `+${r.copias} cópia` : `+${fmt(r.ouro)} 🪙`}</em>`}</div>
         ${Array.from({ length: 30 }, (_, k) => `<i class="smu-brilho" style="--x:${Math.round(Math.random() * 100)}%;--d:${(1.8 + Math.random() * 2).toFixed(2)}s;--a:${(Math.random() * 2).toFixed(2)}s;--h:${k * 37 % 360}"></i>`).join('')}
       </div>
       <small class="smu-toque">toque para continuar</small>`;
