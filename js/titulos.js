@@ -217,7 +217,10 @@ const Titulos = (() => {
   // ---------- cartão de batalha ----------
   // p = { nome, estilo, avatar, titulo (texto), raroTitulo, favorita, pts (PR), trofeus, nivel, cla, eu }
   function cartao(p, { tam = 'grande', lado = '' } = {}) {
-    const f = Ranque.info(p.pts || 0), pat = f.p;
+    const f0 = Ranque.info(p.pts || 0);
+    // moldura escolhida pelo jogador (só patentes que ele já alcançou); sem escolha = patente atual
+    const mi = Number.isInteger(p.moldura) && p.moldura >= 0 && p.moldura < Ranque.PATENTES.length ? p.moldura : f0.i;
+    const f = { ...f0, i: mi }, pat = Ranque.PATENTES[mi];
     const c = p.favorita && Estado.carta(p.favorita);
     const ultra = c && c.raridade === 'ultra';
     const nome = typeof Passe !== 'undefined' && Passe.nomeHtml ? Passe.nomeHtml(p.nome || 'Jogador', p.estilo) : esc(p.nome || 'Jogador');
@@ -242,7 +245,36 @@ const Titulos = (() => {
   function meuCartao(opc = {}) {
     const d = D();
     return cartao({ nome: d.nome, estilo: typeof Passe !== 'undefined' && Passe.estiloNome ? Passe.estiloNome() : '', avatar: d.avatar, titulo: textoAtual(), raroTitulo: raroDe(atual()),
-      favorita: favorita(), pts: r().pts || 0, trofeus: d.trofeus, nivel: d.nivel, cla: d.cla && d.cla.nome, eu: true }, opc);
+      favorita: favorita(), pts: r().pts || 0, trofeus: d.trofeus, nivel: d.nivel, cla: d.cla && d.cla.nome, moldura: molduraEscolhida(), eu: true, ...(opc.p || {}) }, opc);
+  }
+  // ---------- trocar a moldura do cartão ----------
+  const molduraMax = () => Ranque.info(Math.max(r().melhorSempre || 0, r().pts || 0)).i;
+  function molduraEscolhida() {
+    const m = D().moldura;
+    return Number.isInteger(m) && m >= 0 && m <= molduraMax() ? m : null;
+  }
+  function escolherMoldura(depois) {
+    const d = D(), max = molduraMax();
+    const op = (i) => {
+      const livre = i === null || i <= max;
+      const ativo = i === null ? molduraEscolhida() === null : molduraEscolhida() === i;
+      const nome = i === null ? 'Automática' : Ranque.PATENTES[i].nome;
+      return `<button class="mold-op${ativo ? ' usando' : ''}${livre ? '' : ' trancada'}" data-m="${i === null ? 'auto' : i}"${livre ? '' : ' disabled'}>
+        <div class="mold-prev">${meuCartao({ tam: 'mini', p: { moldura: i } }).replace(/<video[^>]*poster="([^"]*)"[^>]*><\/video>/g, '<img src="$1" alt="" />').replace(/<video[^>]*><\/video>/g, '')}</div>
+        <b>${nome}</b><small>${i === null ? 'segue sua patente' : livre ? (ativo ? 'usando' : 'liberada') : `🔒 chegue em ${nome}`}</small></button>`;
+    };
+    const md = UI.modal({
+      titulo: '🖼️ Moldura do cartão',
+      classe: 'modal-moldura',
+      html: `<p class="tt-txt">Toda patente que você já alcançou na ranqueada libera a moldura dela pra sempre. A faixa continua mostrando sua patente de verdade.</p>
+        <div class="mold-grade">${[null, ...Ranque.PATENTES.map((_, i) => i)].map(op).join('')}</div>`,
+      botoes: [{ texto: 'Fechar', classe: 'principal' }],
+    });
+    md.el.querySelectorAll('.mold-op:not(.trancada)').forEach((b) => (b.onclick = () => {
+      d.moldura = b.dataset.m === 'auto' ? null : Number(b.dataset.m); Estado.salvar();
+      md.el.querySelectorAll('.mold-op').forEach((x) => { x.classList.toggle('usando', x === b); const sm = x.querySelector('small'); if (sm && !x.classList.contains('trancada') && x.dataset.m !== 'auto') sm.textContent = x === b ? 'usando' : 'liberada'; });
+      if (depois) depois();
+    }));
   }
   // cartão de um bot da ranqueada (fica igual durante a partida: sorteia uma vez e guarda no bot)
   const TITULOS_BOT = ['imparavel', 'epico', 'colecionador', 'abre_baus', 'cacador_trofeus', 'lenda_x1', 'novato', 'invocador', 'corredor', 'farao'];
@@ -266,5 +298,5 @@ const Titulos = (() => {
     Estado.salvar();
   }
 
-  return { usou, escolher, escolherFavorita, favorita, textoAtual, textoDe, atual, raroDe, cartao, meuCartao, cartaoBot, dar, tituloCarta, USOS, ESPECIAIS };
+  return { usou, escolher, escolherFavorita, escolherMoldura, molduraEscolhida, favorita, textoAtual, textoDe, atual, raroDe, cartao, meuCartao, cartaoBot, dar, tituloCarta, USOS, ESPECIAIS };
 })();

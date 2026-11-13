@@ -34,6 +34,7 @@ const Amigos = (() => {
       titulo: typeof Titulos !== 'undefined' ? Titulos.textoAtual() : '',
       raroTitulo: typeof Titulos !== 'undefined' ? Titulos.raroDe(Titulos.atual()) : '',
       favorita: typeof Titulos !== 'undefined' ? Titulos.favorita() || '' : '',
+      moldura: typeof Titulos !== 'undefined' && Titulos.molduraEscolhida ? Titulos.molduraEscolhida() : null,
       cla: d.cla && d.cla.nome ? String(d.cla.nome).slice(0, 20) : '',
       mod: !!d.modUsado,
       visto: fb().serverTimestamp(),

@@ -105,7 +105,7 @@
         </div>
         <div class="perfil-cartao"><div id="perfil-cartao-box">${Titulos.meuCartao()}</div>
           <div class="pc-botoes"><b>Cartão de Batalha</b><small>Aparece no pareamento da ranqueada, contra o cartão do rival.</small>
-            <button class="btn-modal secundario" id="perfil-fav">⭐ Carta favorita</button><button class="btn-modal secundario" id="perfil-tit">🏷️ Título</button></div></div>
+            <button class="btn-modal secundario" id="perfil-fav">⭐ Carta favorita</button><button class="btn-modal secundario" id="perfil-tit">🏷️ Título</button><button class="btn-modal secundario" id="perfil-mold">🖼️ Moldura</button></div></div>
         <div class="seletor oculto" id="seletor-avatar">
           <div class="seletor-titulo">Escolha seu avatar</div>
           <div class="grade-avatares">${opcoesAvatar.map((a) => `<button data-av="${a}" class="${a === d().avatar ? 'escolhido' : ''}"><img src="${avatarUrl(a)}" alt="" /></button>`).join('')}</div>
@@ -174,6 +174,7 @@
     el.querySelector('#perfil-titulo').onclick = () => Titulos.escolher(refazCartao);
     el.querySelector('#perfil-tit').onclick = () => Titulos.escolher(refazCartao);
     el.querySelector('#perfil-fav').onclick = () => Titulos.escolherFavorita(refazCartao);
+    el.querySelector('#perfil-mold').onclick = () => Titulos.escolherMoldura(refazCartao);
     el.querySelector('#perfil-ranque').onclick = () => { m.fechar(); RanqueUI.abrir(); };
     el.querySelector('#perfil-historico').onclick = () => RanqueUI.historico();
     el.querySelectorAll('[data-av]').forEach((b) => (b.onclick = () => {
@@ -719,7 +720,7 @@
             ${p.titulo ? `<div class="perfil-titulo r-${esc(p.raroTitulo || 'comum')}">${esc(p.titulo)}</div>` : ''}
           </div>
         </div>
-        ${p.favorita ? `<div class="perfil-cartao so">${Titulos.cartao({ nome: p.nome, estilo: p.estiloNome, avatar: p.avatar, titulo: p.titulo, raroTitulo: p.raroTitulo, favorita: p.favorita, pts: (p.ranque && p.ranque.pts) || 0, trofeus: p.trofeus, nivel: p.nivel, cla: p.cla })}</div>` : ''}
+        ${p.favorita ? `<div class="perfil-cartao so">${Titulos.cartao({ nome: p.nome, estilo: p.estiloNome, avatar: p.avatar, titulo: p.titulo, raroTitulo: p.raroTitulo, favorita: p.favorita, moldura: p.moldura, pts: (p.ranque && p.ranque.pts) || 0, trofeus: p.trofeus, nivel: p.nivel, cla: p.cla })}</div>` : ''}
         <div class="estatisticas">
           <div><b>${fmt(p.trofeus || 0)}</b><span>Troféus</span></div>
           <div><b>${fmt(p.recorde || 0)}</b><span>Recorde</span></div>

@@ -30,7 +30,7 @@ const X1 = (() => {
   function cartaoPublico() {
     const d = Estado.d;
     if (typeof Titulos === 'undefined') return {};
-    try { return { titulo: Titulos.textoAtual(), raroTitulo: Titulos.raroDe(Titulos.atual()), favorita: Titulos.favorita() || '', trofeus: d.trofeus || 0, nivel: d.nivel || 1, cla: (d.cla && d.cla.nome) || '' }; } catch (e) { return {}; }
+    try { return { titulo: Titulos.textoAtual(), raroTitulo: Titulos.raroDe(Titulos.atual()), favorita: Titulos.favorita() || '', moldura: Titulos.molduraEscolhida(), trofeus: d.trofeus || 0, nivel: d.nivel || 1, cla: (d.cla && d.cla.nome) || '' }; } catch (e) { return {}; }
   }
   const novoCodigo = () => Array.from({ length: 4 }, () => 'ABCDEFGHJKLMNPQRSTUVWXYZ'[Math.floor(Math.random() * 24)]).join('');
 

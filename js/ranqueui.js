@@ -95,7 +95,7 @@ const RanqueUI = (() => {
     const d = Estado.d, f = Ranque.info(Ranque.dados().pts);
     // cartões de batalha: o seu contra o do rival (no 2v2, os dois de cada lado ficam menores)
     const tam = pt.dupla ? 'mini' : 'medio';
-    const time = [Titulos.meuCartao({ tam, lado: 'eu' })].concat(pt.parceiro ? [pt.parceiro.humano ? Titulos.cartao({ nome: pt.parceiro.nome, estilo: pt.parceiro.estiloNome, avatar: pt.parceiro.avatar, pts: pt.parceiro.pts, favorita: pt.parceiro.favorita || null, titulo: pt.parceiro.titulo, raroTitulo: pt.parceiro.raroTitulo, trofeus: pt.parceiro.trofeus, nivel: pt.parceiro.nivel, cla: pt.parceiro.cla }, { tam }) : Titulos.cartaoBot(pt.parceiro, { tam })] : []);
+    const time = [Titulos.meuCartao({ tam, lado: 'eu' })].concat(pt.parceiro ? [pt.parceiro.humano ? Titulos.cartao({ nome: pt.parceiro.nome, estilo: pt.parceiro.estiloNome, avatar: pt.parceiro.avatar, pts: pt.parceiro.pts, favorita: pt.parceiro.favorita || null, moldura: pt.parceiro.moldura, titulo: pt.parceiro.titulo, raroTitulo: pt.parceiro.raroTitulo, trofeus: pt.parceiro.trofeus, nivel: pt.parceiro.nivel, cla: pt.parceiro.cla }, { tam }) : Titulos.cartaoBot(pt.parceiro, { tam })] : []);
     const rivais = pt.rivais.map((b) => Titulos.cartaoBot(b, { tam, lado: 'rival' }));
     const meuI = f.i;
     const pv = Ranque.previsao(pt.dupla, pt.rivalI, pt.rivalPts);

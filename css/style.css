@@ -3237,3 +3237,13 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 html.leve .qk-palavra::after, html.leve .qk-coroa, html.leve .qk-faisca { animation: none; }
 html.leve .qk-faisca { display: none; }
 html.leve .titulo.com-arte .qk-logo .qk-nome, html.leve .qk-nome { filter: none; }
+
+/* ===== escolher moldura do cartão de batalha ===== */
+.mold-grade { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; max-height: 58vh; overflow-y: auto; padding: 4px 2px 8px; }
+.mold-op { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 4px; border-radius: 14px; background: #ffffff10; border: 2px solid transparent; color: #fff; font: inherit; cursor: pointer; }
+.mold-op.usando { border-color: #FFD25E; background: #FFD25E22; box-shadow: 0 0 12px #FFD25E66; }
+.mold-op b { font-size: 13px; } .mold-op small { font-size: 10.5px; opacity: 0.8; }
+.mold-op.trancada { cursor: default; } .mold-op.trancada .mold-prev { filter: grayscale(1) brightness(0.45); }
+.mold-prev { pointer-events: none; display: flex; justify-content: center; }
+.mold-prev .cartao-batalha { --w: 104px; }
+.mold-prev video { display: none; }
