@@ -111,7 +111,13 @@ const Ranque = (() => {
   function bot(pts, usados = [], subir = null) {
     const x = Math.random();
     const passo = subir !== null ? subir : x < 0.3 ? 1 : x < 0.38 ? 2 : x < 0.85 ? 0 : -1;
-    const alvo = Math.max(0, Math.min(3400, pts + passo * 300 + Math.round((Math.random() - 0.5) * 120)));
+    let alvo = Math.max(0, Math.min(INICIO_REI + 900, pts + passo * 300 + Math.round((Math.random() - 0.5) * 120)));
+    // do Mestre pra cima as patentes são bem mais largas: "rival de patente acima" cai direto na próxima (Mestre Pro, Rei da Aura)
+    const eu = info(pts).i;
+    if (eu >= 8 && passo > 0) {
+      const sobe = Math.min(10, eu + passo);
+      alvo = sobe > eu ? [INICIO_PRO, INICIO_REI][sobe - 9] + Math.round(Math.random() * 400) : pts + 100 + Math.round(Math.random() * 300);
+    } else if (eu >= 8 && passo < 0) alvo = Math.max(INICIO_MESTRE - 250, pts - 150 - Math.round(Math.random() * 250));
     return { nome: nomeBot(usados), avatar: AVATARES[Math.floor(Math.random() * AVATARES.length)], pts: alvo, info: info(alvo) };
   }
   // amigo = { nome, avatar, ranque } quando a dupla é com um amigo de verdade (os bots ficam na média dos dois)
@@ -158,10 +164,11 @@ const Ranque = (() => {
     let perda = dupla ? 28 : 32, perdaMax = dupla ? 38 : 42;
     if (diff > 0 || superIA) { perda = 46 + Math.max(0, diff) * 4; perdaMax = perda + 30; }
     // do Mestre pra cima fica MUITO difícil: ganha bem menos e perde bem mais
-    let g = ganho, m = 1;
-    if (meuI >= 9) { m = 0.45; g = Math.round(ganho * 0.45); perda = Math.round(perda * 1.6); perdaMax = Math.round(perdaMax * 1.6); }
-    else if (meuI >= 8) { m = 0.6; g = Math.round(ganho * 0.6); perda = Math.round(perda * 1.35); perdaMax = Math.round(perdaMax * 1.35); }
-    return { ganho: g, ganhoMax: g + Math.round(sorte * m), perda: Math.max(4, perda), perdaMax: Math.max(4, perdaMax), bonusRival, bonusSuper, bonusSeq, bonusEpica: BONUS_EPICA + (diff > 0 ? 5 : 0) };
+    // (o desconto do Mestre vale só pra vitória comum: o bônus de patente alta e de IA super vem inteiro)
+    let g = ganho, m = 1; const cheio = (diff > 0 ? bonusRival : 0) + bonusSuper;
+    if (meuI >= 9) { m = 0.45; g = Math.round((ganho - cheio) * 0.45) + cheio; perda = Math.round(perda * 1.6); perdaMax = Math.round(perdaMax * 1.6); }
+    else if (meuI >= 8) { m = 0.6; g = Math.round((ganho - cheio) * 0.6) + cheio; perda = Math.round(perda * 1.35); perdaMax = Math.round(perdaMax * 1.35); }
+    return { ganho: g, ganhoMax: g + sorte, perda: Math.max(4, perda), perdaMax: Math.max(4, perdaMax), bonusRival, bonusSuper, bonusSeq, bonusEpica: BONUS_EPICA + (diff > 0 ? 5 : 0) };
   }
   // Vitória Épica: 3 coroas sem perder nenhuma torre
   const BONUS_EPICA = 15;

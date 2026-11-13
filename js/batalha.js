@@ -2983,6 +2983,8 @@ const Batalha = (() => {
   // Dificuldade da IA baseada nos troféus do jogador
   function dificuldadeIA() {
     if (!s) return 3;
+    // parceiro IA do 2v2: sempre joga no nível mais esperto (e acompanha a IA super quando ela aparece)
+    if (s.dupla && iaLado !== 'vermelho' && timeDe(iaLado) === 'azul' && !s.difIA) return s.superIA ? 6 : 5;
     if (s.difIA) return s.difIA; // eventos com dificuldade fixa e tutorial
     if (s.superIA) return 6;     // IA super inteligente (rara)
     if (s.adaptativa) return Math.max(s.difMinRanque || 1, Math.min(5, s.difBase + s.difAjuste));
