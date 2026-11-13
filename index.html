@@ -4,13 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
   <meta name="theme-color" content="#1d2350" />
-  <meta name="versao-pagina" content="1794555516" />
+  <meta name="versao-pagina" content="1794555799" />
   <meta http-equiv="Cache-Control" content="no-cache" />
   <title>Queens and Kings</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Great+Vibes&family=Fredoka:wght@400;500;600;700&family=Lilita+One&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/style.css?v=1794555516" />
+  <link rel="stylesheet" href="css/style.css?v=1794555799" />
 </head>
 <body>
   <div id="app">
@@ -65,23 +65,51 @@
         </section>
 
         <!-- BATALHA -->
-        <section class="tela tela-ativa" data-tela="batalha">
-          <div class="logo">
-            <img class="logo-torre" data-asset="ui/torre_logo" alt="" />
-            <div class="logo-texto"><span>Queens</span><small>and</small><span>Kings</span></div>
-            <img class="logo-torre espelho" data-asset="ui/torre_logo" alt="" />
+        <section class="tela tela-ativa inicio2" data-tela="batalha">
+          <div class="i2-luzes" aria-hidden="true"><i></i><i></i><i></i></div>
+          <div class="i2-logo">
+            <svg class="i2-emblema" viewBox="0 0 120 120" aria-hidden="true">
+              <defs>
+                <linearGradient id="i2o" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFF4C2"/><stop offset=".4" stop-color="#FFD54F"/><stop offset=".65" stop-color="#D98E0F"/><stop offset="1" stop-color="#8A5200"/></linearGradient>
+                <linearGradient id="i2e" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5B3FD0"/><stop offset="1" stop-color="#1D1550"/></linearGradient>
+                <linearGradient id="i2r" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFB3C9"/><stop offset=".5" stop-color="#E0245E"/><stop offset="1" stop-color="#6A0A2A"/></linearGradient>
+              </defs>
+              <path d="M60 8 L102 22 L98 70 Q92 98 60 114 Q28 98 22 70 L18 22 Z" fill="url(#i2e)" stroke="url(#i2o)" stroke-width="6" stroke-linejoin="round"/>
+              <path d="M60 18 L92 29 L89 68 Q84 90 60 103 Q36 90 31 68 L28 29 Z" fill="none" stroke="#FFD54F" stroke-opacity=".45" stroke-width="1.5"/>
+              <path d="M36 52 L32 30 L46 42 L60 22 L74 42 L88 30 L84 52 Z" fill="url(#i2o)" stroke="#3A1E00" stroke-width="2.5" stroke-linejoin="round"/>
+              <rect x="35" y="50" width="50" height="9" rx="3" fill="url(#i2o)" stroke="#3A1E00" stroke-width="2.5"/>
+              <circle cx="60" cy="38" r="4.5" fill="url(#i2r)" stroke="#3A1E00" stroke-width="1.5"/>
+              <path d="M44 66 L76 98 M76 66 L44 98" stroke="url(#i2o)" stroke-width="5" stroke-linecap="round"/>
+              <circle cx="60" cy="82" r="8" fill="url(#i2r)" stroke="#3A1E00" stroke-width="2"/>
+              <path d="M57 79 l4 0" stroke="#fff" stroke-opacity=".8" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            <div class="i2-marca">
+              <span class="qk-palavra qk-queens" data-t="Queens">Queens</span>
+              <span class="i2-e">&amp;</span>
+              <span class="qk-palavra qk-kings" data-t="Kings">Kings</span>
+            </div>
           </div>
           <div class="linha-social"><button class="btn-top" id="btn-top">🏆 Top global</button><button class="btn-top btn-amigos" id="btn-amigos">👥 Amigos<i class="selo-pedidos oculto" id="selo-pedidos"></i></button></div>
           <div class="trofeus"><i class="ic-trofeu"></i><span id="trofeus">0</span><div class="trofeus-barra"><span id="trofeus-barra" style="width: 0%"></span></div><small id="trofeus-prox">Próxima arena: 300</small></div>
-          <div class="arena-card">
-            <div class="arena-nome"><span>Arena 1</span>Festival da Escola</div>
-            <div class="arena-mini" id="arena-mini"></div>
+          <div class="i2-palco">
+            <div class="i2-trilho esq">
+              <button class="btn-extra i2-bolha" id="btn-missoes"><span class="i2-ic">📜</span><small>Missões</small><i class="selo-pedidos oculto" id="selo-missoes"></i></button>
+              <button class="btn-extra i2-bolha" id="btn-eventos-ir"><span class="i2-ic">🎪</span><small>Eventos</small><i class="selo-novo" id="selo-eventos">NOVO</i></button>
+              <button class="btn-extra i2-bolha" id="btn-inventario"><span class="i2-ic">🎒</span><small>Inventário</small></button>
+            </div>
+            <div class="arena-card">
+              <div class="arena-nome"><span>Arena 1</span>Festival da Escola</div>
+              <div class="arena-mini" id="arena-mini"></div>
+            </div>
+            <div class="i2-trilho dir">
+              <button class="i2-bolha i2-gifts" id="btn-gifts"><span class="i2-ic">🎁</span><small>Gifts</small><i class="i2-badge oculto" id="gifts-n">1</i></button>
+              <button class="btn-extra i2-bolha" id="btn-tutorial"><span class="i2-ic">🎓</span><small>Tutorial</small></button>
+            </div>
           </div>
-          <button class="btn-jogar" id="btn-jogar">Jogar</button>
+          <button class="btn-jogar" id="btn-jogar">Batalha</button>
           <button class="btn-ranq" id="btn-ranq"></button>
           <button class="btn-summon" id="btn-summon"></button>
           <div class="linha-modos"><button class="btn-x1" id="btn-x1">⚔️ X1 com amigo</button><button class="btn-x1 btn-2v2" id="btn-2v2">🤝 2v2</button></div>
-          <div class="linha-extra"><button class="btn-extra" id="btn-missoes">📜 Missões<i class="selo-pedidos oculto" id="selo-missoes"></i></button><button class="btn-extra" id="btn-eventos-ir">🎪 Eventos<i class="selo-novo" id="selo-eventos">NOVO</i></button><button class="btn-extra" id="btn-inventario">🎒 Inventário</button><button class="btn-extra" id="btn-tutorial">🎓 Tutorial</button></div>
           <p class="dica-inicio" id="dica-inicio"></p>
           <div class="baus" id="baus"></div>
         </section>

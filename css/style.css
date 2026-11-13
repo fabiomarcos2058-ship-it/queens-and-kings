@@ -3398,3 +3398,93 @@ html.leve .tropa:not(.surgindo) .tropa-medalhao { animation: none; }
 .deck-aba.ativa b { text-shadow: 0 1px 0 #fff8; }
 .deck-aba.copiar { flex: 0 0 44px; font-size: 18px; background: linear-gradient(180deg, #2e7d6a, #18504a); }
 .deck-copiar { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+
+/* =====================================================================
+   Tela inicial 2.0 (moderna)
+   ===================================================================== */
+.tela.inicio2 { position: relative; padding: 10px 12px 30px; background:
+  radial-gradient(120% 60% at 50% -10%, #6a4bd8aa, transparent 60%),
+  radial-gradient(80% 40% at 100% 40%, #e0245e33, transparent 70%),
+  radial-gradient(80% 40% at 0% 70%, #2bb3ff26, transparent 70%),
+  linear-gradient(180deg, #1a1446 0%, #120e33 55%, #0c0a26 100%); isolation: isolate; }
+.i2-luzes { position: absolute; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+.i2-luzes i { position: absolute; width: 4px; height: 4px; border-radius: 50%; background: #fff; box-shadow: 0 0 6px 2px #ffffff88; opacity: .55; }
+.i2-luzes i:nth-child(1) { left: 12%; top: 9%; } .i2-luzes i:nth-child(2) { left: 84%; top: 16%; width: 3px; height: 3px; } .i2-luzes i:nth-child(3) { left: 70%; top: 4%; width: 2px; height: 2px; }
+/* logo nova */
+.i2-logo { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 2px 0 8px; }
+.i2-emblema { width: 52px; height: 52px; flex: none; filter: drop-shadow(0 3px 0 #0a0620) drop-shadow(0 0 10px #8a6cff88); }
+.i2-marca { display: flex; align-items: baseline; gap: 4px; line-height: 1; }
+.i2-marca .qk-palavra { font-size: 30px; -webkit-text-stroke-width: 6px; text-shadow: 0 4px 0 #120626; letter-spacing: 0.5px; }
+.i2-marca .qk-palavra::before { -webkit-text-stroke-width: 2px; }
+.i2-marca .qk-palavra::after { animation-duration: 5s; }
+.i2-e { font-family: 'Great Vibes', 'URW Chancery L', cursive; font-size: 30px; color: #FFF2C2; text-shadow: 0 0 2px #2A1300, 0 2px 0 #2A1300, 0 0 10px #FF8FB8; padding: 0 2px; }
+html.leve .i2-emblema { filter: none; }
+/* social */
+.inicio2 .linha-social { gap: 8px; margin: 0 0 10px; }
+.inicio2 .btn-top { margin: 0; padding: 7px 14px; font-size: 13.5px; border: 1px solid #ffffff26; border-bottom: 3px solid #0006; border-radius: 999px; color: #fff; background: linear-gradient(180deg, #ffffff22, #ffffff0c); box-shadow: 0 4px 12px #0005; text-shadow: 0 1px 0 #0008; }
+.inicio2 .btn-top.btn-amigos { background: linear-gradient(180deg, #8a6cff55, #5b3fd033); }
+/* troféus */
+.inicio2 .trofeus { width: 100%; max-width: 330px; margin: 0 auto 10px; padding: 8px 14px 7px; border-radius: 16px; border: 1px solid #ffffff22; background: linear-gradient(180deg, #ffffff17, #ffffff08); box-shadow: 0 6px 18px #0006, inset 0 1px 0 #ffffff22; }
+.inicio2 .trofeus > span { font: 22px 'Lilita One', sans-serif; text-shadow: 0 2px 0 #0008; }
+.inicio2 .trofeus-barra { height: 9px; background: #0a0822; border-radius: 99px; box-shadow: inset 0 1px 2px #000a; }
+.inicio2 .trofeus-barra span { background: linear-gradient(90deg, #FFB13A, #FFE07A); border-radius: 99px; box-shadow: 0 0 8px #FFC83D99; }
+.inicio2 .trofeus small { opacity: .75; font-size: 11.5px; }
+/* palco: trilhos dos lados + arena */
+.i2-palco { display: grid; grid-template-columns: 58px 1fr 58px; gap: 8px; align-items: start; margin-bottom: 12px; }
+.i2-trilho { display: flex; flex-direction: column; gap: 10px; padding-top: 18px; }
+.i2-bolha { position: relative; display: flex; flex-direction: column; align-items: center; gap: 3px; width: 58px; padding: 0; border: none; background: none; color: #fff; cursor: pointer; font: inherit; flex: none; box-shadow: none; text-shadow: none; }
+.btn-extra.i2-bolha { background: none; border: none; box-shadow: none; padding: 0; }
+.i2-ic { display: grid; place-items: center; width: 52px; height: 52px; border-radius: 18px; font-size: 25px; border: 1px solid #ffffff2e;
+  background: linear-gradient(160deg, #ffffff2a, #ffffff0a 60%), linear-gradient(180deg, #3b2f86, #1f1858); box-shadow: 0 5px 0 #0b0826, 0 8px 16px #0007, inset 0 1px 0 #ffffff40; transition: transform .12s; }
+.i2-bolha:active .i2-ic { transform: translateY(3px); box-shadow: 0 2px 0 #0b0826, 0 4px 10px #0007; }
+.i2-bolha small { font-size: 10px; font-weight: 700; letter-spacing: .2px; text-shadow: 0 1px 2px #000; white-space: nowrap; }
+#btn-missoes .i2-ic { background: linear-gradient(160deg, #ffffff2a, #ffffff0a 60%), linear-gradient(180deg, #E0952A, #8A4A06); }
+#btn-eventos-ir .i2-ic { background: linear-gradient(160deg, #ffffff2a, #ffffff0a 60%), linear-gradient(180deg, #E0457A, #7A1240); }
+#btn-inventario .i2-ic { background: linear-gradient(160deg, #ffffff2a, #ffffff0a 60%), linear-gradient(180deg, #3A9A6A, #145234); }
+#btn-tutorial .i2-ic { background: linear-gradient(160deg, #ffffff2a, #ffffff0a 60%), linear-gradient(180deg, #3A7BD5, #173a7a); }
+.i2-gifts .i2-ic { background: linear-gradient(160deg, #ffffff40, #ffffff0a 60%), linear-gradient(180deg, #FF6FA0, #B0205A); }
+.i2-gifts.tem .i2-ic { animation: giftPula 1.6s ease-in-out infinite; box-shadow: 0 5px 0 #4a0a26, 0 0 18px #FF6FA0aa, inset 0 1px 0 #ffffff60; }
+@keyframes giftPula { 0%, 70%, 100% { transform: translateY(0) rotate(0); } 78% { transform: translateY(-5px) rotate(-8deg); } 86% { transform: translateY(-3px) rotate(7deg); } 93% { transform: translateY(0) rotate(-3deg); } }
+.i2-badge { position: absolute; top: -5px; right: -3px; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 99px; display: grid; place-items: center; font: 12px 'Lilita One', sans-serif; font-style: normal; color: #fff; background: #FF2A4A; border: 2px solid #fff; box-shadow: 0 2px 6px #000a; }
+.i2-bolha .selo-novo { top: -6px; right: -6px; left: auto; }
+.i2-bolha .selo-pedidos { top: -4px; right: -2px; }
+html.leve .i2-gifts.tem .i2-ic { animation: none; }
+/* arena */
+.inicio2 .arena-card { margin: 0; padding: 8px 8px 10px; border-radius: 22px; border: 2px solid var(--cor-arena, #8a6cff) !important; background: linear-gradient(180deg, #ffffff14, #ffffff05), #15103a;
+  box-shadow: 0 0 0 4px #0b082688, 0 0 24px color-mix(in srgb, var(--cor-arena, #8a6cff) 45%, transparent), 0 10px 22px #0008 !important; }
+.inicio2 .arena-nome { font-size: 17px !important; margin-bottom: 6px; }
+.inicio2 .arena-nome span { font: 11px 'Fredoka', sans-serif; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; padding: 2px 10px; border-radius: 99px; background: var(--cor-arena, #8a6cff); color: #10102a; margin-bottom: 3px; text-shadow: none; }
+.inicio2 .arena-mini { height: min(40vh, 330px); border-radius: 14px; }
+/* botão de batalha */
+.inicio2 .btn-jogar { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; max-width: 340px; margin: 0 auto 12px; padding: 0; height: 66px; border: none; border-radius: 20px; color: #3a1d00;
+  background: linear-gradient(180deg, #FFF1B0 0%, #FFD24A 35%, #F59E0B 100%); box-shadow: 0 6px 0 #9a4f00, 0 12px 24px #f59e0b55, inset 0 2px 0 #ffffffaa; text-shadow: 0 1px 0 #fff8; }
+.inicio2 .btn-jogar b { font: 30px 'Lilita One', sans-serif; letter-spacing: 1px; }
+.inicio2 .btn-jogar .i2-espadas { font-size: 26px; filter: drop-shadow(0 2px 0 #0004); }
+.inicio2 .btn-jogar:active { transform: translateY(4px); box-shadow: 0 2px 0 #9a4f00, 0 6px 14px #f59e0b44, inset 0 2px 0 #ffffffaa; }
+.inicio2 .btn-jogar.bloqueado { filter: saturate(0.6); }
+/* ranqueada, summon e modos */
+.inicio2 .btn-ranq, .inicio2 .btn-summon { width: 100%; max-width: 340px; margin: 0 auto 10px; border-radius: 18px; }
+.inicio2 .linha-modos { width: 100%; max-width: 340px; margin: 0 auto 12px; }
+.inicio2 .btn-x1 { margin: 0; border-radius: 16px; border-bottom-width: 4px; }
+.inicio2 #aviso-passe-menu { max-width: 340px; margin: 0 auto 8px; }
+.inicio2 .baus { max-width: 360px; margin: 0 auto; }
+/* caixa de gifts */
+.gift-lista { display: flex; flex-direction: column; gap: 8px; }
+.gift-item { display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 14px; background: #ffffff10; border: 1px solid #ffffff1a; }
+.gift-item.pronto { background: linear-gradient(90deg, #FF6FA033, #ffffff10); border-color: #FF9EC0aa; }
+.gift-item > div { flex: 1; display: flex; flex-direction: column; }
+.gift-item b { font-size: 15px; } .gift-item small { font-size: 12px; opacity: .8; }
+.gift-ic { font-size: 30px; width: 44px; text-align: center; }
+.gift-item .btn-modal { padding: 8px 14px; min-width: 0; }
+.gift-tempo { font-size: 12px; font-weight: 700; opacity: .85; white-space: nowrap; }
+/* barra de cima e abas: visual moderno (vidro escuro com fio dourado) */
+.topbar { background: linear-gradient(180deg, #2a1f6a, #17123f); box-shadow: 0 6px 18px #0008; }
+.topbar::after, .abas::before { height: 2px; background: linear-gradient(90deg, transparent, #FFD25E, #FF8FB8, #FFD25E, transparent); box-shadow: 0 0 10px #FFD25E88; }
+.topbar::after { bottom: -2px; }
+.abas::before { top: -2px; }
+.abas { background: linear-gradient(180deg, #1c1650, #0f0b2e); }
+.abas button { background: transparent; box-shadow: none; color: #b8adff; border-radius: 16px; }
+.abas button.ativa { border: 1px solid #ffffff33; background: linear-gradient(180deg, #7b5cff, #3d2aa8); box-shadow: 0 6px 16px #5b3fd088, inset 0 1px 0 #ffffff55; color: #fff; }
+.topbar .moeda { background: #0b0826aa; border: 1px solid #ffffff22; border-radius: 999px; }
+.btn-som { background: #ffffff14 !important; border: 1px solid #ffffff26 !important; border-radius: 50% !important; }
+.gift-item > div { text-align: left; }

@@ -217,12 +217,61 @@
     fundo.querySelector('button').onclick = () => { fundo.classList.add('sumir'); setTimeout(() => { fundo.remove(); topo(); if (depois) depois(); }, 250); };
   }
 
+  // ---------- Caixa de Gifts (tela inicial) ----------
+  const H4 = 4 * 3600000, D7 = 7 * 86400000;
+  function giftsProntos() {
+    const dd = d(), agora = Date.now();
+    return [
+      { id: 'dia', ic: '🎁', nome: 'Presente do dia', desc: 'Ouro, gemas ou um baú de madeira. Um por dia!', pronto: !!Estado.presenteDiario(), falta: () => { const a = new Date(); return new Date(a.getFullYear(), a.getMonth(), a.getDate() + 1) - a; } },
+      { id: 'rapido', ic: '⚡', nome: 'Gift rápido', desc: 'Um pouquinho de ouro ou gemas a cada 4 horas.', pronto: agora - (dd.giftRapido || 0) >= H4, falta: () => H4 - (agora - (dd.giftRapido || 0)) },
+      { id: 'semana', ic: '💎', nome: 'Gift da semana', desc: '30 gemas toda semana, só por jogar!', pronto: agora - (dd.giftSemana || 0) >= D7, falta: () => D7 - (agora - (dd.giftSemana || 0)) },
+    ];
+  }
+  const tempoTxt = (ms) => { ms = Math.max(0, ms); const h = Math.floor(ms / 3600000), m = Math.floor(ms / 60000) % 60; return h >= 24 ? `${Math.floor(h / 24)}d ${h % 24}h` : h ? `${h}h ${String(m).padStart(2, '0')}min` : `${m}min`; };
+  function atualizarGifts() {
+    const n = giftsProntos().filter((g) => g.pronto).length, b = $('gifts-n'), bt = $('btn-gifts');
+    if (!b || !bt) return;
+    b.textContent = n; b.classList.toggle('oculto', !n); bt.classList.toggle('tem', !!n);
+  }
+  setInterval(() => { try { atualizarGifts(); } catch (e) { /* nada */ } }, 30000);
+  function pegarGift(id) {
+    const dd = d();
+    if (id === 'dia') {
+      const p = Estado.presenteDiario(true);
+      if (!p) return UI.toast('Você já pegou o presente de hoje!');
+      if (p.tipo === 'bau') mostrarBau('madeira', p.abertura);
+      else UI.toast(p.tipo === 'ouro' ? `🪙 +${fmt(p.qtd)} de ouro!` : `💎 +${p.qtd} gemas!`);
+    }
+    if (id === 'rapido') {
+      if (Date.now() - (dd.giftRapido || 0) < H4) return;
+      dd.giftRapido = Date.now();
+      if (Math.random() < 0.7) { const q = 40 + Math.floor(Math.random() * 61); dd.ouro += q; UI.toast(`⚡ +${q} de ouro!`); }
+      else { const q = 2 + Math.floor(Math.random() * 4); dd.gemas += q; UI.toast(`⚡ +${q} gemas!`); }
+      Estado.salvar();
+    }
+    if (id === 'semana') {
+      if (Date.now() - (dd.giftSemana || 0) < D7) return;
+      dd.giftSemana = Date.now(); dd.gemas += 30; Estado.salvar();
+      UI.toast('💎 +30 gemas!');
+    }
+    if (typeof Som !== 'undefined') Som.tocar('moeda');
+    tudo();
+  }
+  function caixaGifts() {
+    const desenhar = () => giftsProntos().map((g) => `<div class="gift-item${g.pronto ? ' pronto' : ''}"><span class="gift-ic">${g.ic}</span><div><b>${g.nome}</b><small>${g.desc}</small></div>
+      ${g.pronto ? `<button class="btn-modal principal" data-gift="${g.id}">Pegar!</button>` : `<span class="gift-tempo">⏳ ${tempoTxt(g.falta())}</span>`}</div>`).join('');
+    const md = UI.modal({ titulo: '🎁 Caixa de Gifts', classe: 'modal-gifts', html: `<div class="gift-lista">${desenhar()}</div><p class="aviso">Os gifts voltam sozinhos. Passa aqui sempre!</p>`, botoes: [{ texto: 'Fechar', classe: 'principal' }] });
+    const ligar = () => md.el.querySelectorAll('[data-gift]').forEach((b) => (b.onclick = () => { pegarGift(b.dataset.gift); md.el.querySelector('.gift-lista').innerHTML = desenhar(); ligar(); }));
+    ligar();
+  }
+
   // ---------- Batalha (tela inicial) ----------
   function telaBatalha() {
     $('trofeus').textContent = fmt(d().trofeus);
     const iniciais = d().baus.filter((b) => b && b.tipo === 'inicial').length;
     $('btn-jogar').classList.toggle('bloqueado', !d().deck.length);
-    $('btn-jogar').textContent = d().deck.length ? 'Jogar' : 'Abra os baús!';
+    $('btn-jogar').innerHTML = d().deck.length ? '<span class="i2-espadas">⚔️</span><b>Batalha</b>' : '<b>Abra os baús!</b>';
+    atualizarGifts();
     $('dica-inicio').textContent = iniciais ? `🎁 Você tem ${iniciais} baú${iniciais > 1 ? 's' : ''} inicia${iniciais > 1 ? 'is' : 'l'} para abrir!` : '';
     const atual = Arena.daQtd(d().recorde), prox = Arena.ARENAS[atual.n] || null;
     const p = prox ? (d().trofeus - atual.trofeus) / (prox.trofeus - atual.trofeus) : 1;
@@ -296,6 +345,7 @@
   $('btn-missoes').onclick = () => Missoes.abrir({ mostrarBau, aoMudar: () => { seloMissoes(); tudo(); } });
   $('btn-eventos-ir').onclick = () => irPara('eventos');
   $('btn-tutorial').onclick = () => Tutorial.comecar(fimDeBatalha);
+  $('btn-gifts').onclick = caixaGifts;
   $('btn-inventario').onclick = () => Inventario.abrir(() => tudo());
   $('btn-summon').onclick = () => Summon.abrir(() => tudo());
   $('loja-summon').onclick = () => Summon.abrir(() => tudo());
