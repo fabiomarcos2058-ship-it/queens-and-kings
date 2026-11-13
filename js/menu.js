@@ -1458,7 +1458,7 @@
     UI.modal({
       titulo: c.nome,
       classe: `modal-carta${c.evolucao ? ' modal-evo' : ''}`,
-      html: `<div class="detalhe-carta">${c.evolucao ? `<div class="evo-palco"><video class="evo-video" src="assets/evolucao/raios.mp4" autoplay muted loop playsinline></video>${Cartas.html(c, { mini: true })}</div>` : Cartas.html(c, { mini: true })}
+      html: `<div class="detalhe-carta">${c.evolucao ? `<div class="evo-palco"><video class="evo-video" src="assets/evolucao/raios.mp4" autoplay muted loop playsinline></video>${Cartas.html(c, { mini: true, vivo: true })}</div>` : Cartas.html(c, { mini: true, vivo: true })}
         <div><span class="raridade-tag ${c.evolucao ? 'evo' : c.raridade}">${c.evolucao ? '🧬 Evolução' : Cartas.NOMES_RARIDADE[c.raridade]}</span>
         <p class="tipo">${c.tipo} · ${c.custo} de elixir</p><p>${c.descricao}</p>
         <p class="aviso">Nível ${col.nivel} · cópias ${col.copias}${col.nivel < Estado.NIVEL_MAX ? `/${Estado.copiasNivel(c, col.nivel)}` : ''}</p></div></div>
@@ -1665,7 +1665,7 @@
       item('ev4', 'Elixir em dobro', 'A batalha inteira com elixir rápido', '', '<button class="selo botao" data-jogar="elixir2x">Jogar</button>') +
       item('ev3', 'Batalha em dupla', 'Você + parceiro (amigo ou IA) contra uma dupla', '', '<button class="selo botao" id="ev-dupla">Jogar</button>');
     $('abrir-passe').onclick = telaPasse;
-    Eventos.ligar($('eventos-novos'), { iniciar: jogarEvento, verCarta: (c) => Estado.tem(c.id) ? detalhes(c.id) : UI.modal({ titulo: c.nome, classe: 'modal-carta', html: `<div class="detalhe-carta">${Cartas.html(c, { mini: true })}<div><span class="raridade-tag ${c.raridade}">${Cartas.NOMES_RARIDADE[c.raridade]} · só de evento</span><p class="tipo">${c.tipo} · ${c.custo} de elixir</p><p>${c.descricao}</p>${c.passiva ? `<p><b>🧩 ${c.passiva.nome}:</b> ${c.passiva.descricao}</p>` : ''}${c.habilidade ? `<p><b>⚡ ${c.habilidade.nome}:</b> ${c.habilidade.descricao}</p>` : ''}</div></div>`, botoes: [{ texto: 'Quero ela!', classe: 'principal' }] }) });
+    Eventos.ligar($('eventos-novos'), { iniciar: jogarEvento, verCarta: (c) => Estado.tem(c.id) ? detalhes(c.id) : UI.modal({ titulo: c.nome, classe: 'modal-carta', html: `<div class="detalhe-carta">${Cartas.html(c, { mini: true, vivo: true })}<div><span class="raridade-tag ${c.raridade}">${Cartas.NOMES_RARIDADE[c.raridade]} · só de evento</span><p class="tipo">${c.tipo} · ${c.custo} de elixir</p><p>${c.descricao}</p>${c.passiva ? `<p><b>🧩 ${c.passiva.nome}:</b> ${c.passiva.descricao}</p>` : ''}${c.habilidade ? `<p><b>⚡ ${c.habilidade.nome}:</b> ${c.habilidade.descricao}</p>` : ''}</div></div>`, botoes: [{ texto: 'Quero ela!', classe: 'principal' }] }) });
     $('ev-dupla').onclick = dupla;
     $('eventos-lista').querySelectorAll('[data-jogar]').forEach((b) => (b.onclick = () => jogar(b.dataset.jogar)));
     $('eventos-lista').querySelectorAll('[data-premio]').forEach((b) => (b.onclick = () => {

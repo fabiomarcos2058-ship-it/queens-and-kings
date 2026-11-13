@@ -29,7 +29,7 @@ const Batalha = (() => {
     requestAnimationFrame(() => el.classList.add(classe));
   }
   // limite de enfeites ao mesmo tempo (partículas e números de dano)
-  const LIMITE = { particula: 45, numero: 18 };
+  const LIMITE = typeof document !== 'undefined' && document.documentElement.classList.contains('leve') ? { particula: 18, numero: 10 } : { particula: 45, numero: 18 };
   const vivos = { particula: 0, numero: 0 };
 
   // ---------- Montagem ----------
@@ -498,6 +498,9 @@ const Batalha = (() => {
   }
 
   function tremer(forte = false) {
+    // no máximo um tremor a cada 0,45s (cada tremor recalcula a arena inteira; golpes pesados seguidos travavam o celular)
+    if (s.tremT !== undefined && s.t - s.tremT < (forte ? 0.25 : 0.45)) return;
+    s.tremT = s.t;
     if (forte) typeof Som !== 'undefined' && Som.tocar('explosao');
     s.arena.classList.remove('tremendo', 'tremendo-forte');
     piscar(s.arena, forte ? 'tremendo-forte' : 'tremendo');

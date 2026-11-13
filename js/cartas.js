@@ -20,18 +20,20 @@ const Cartas = (() => {
   }
 
   // mini = só a carta (mão e loja) | nivel = texto embaixo | extra = html dentro da carta
-  function html(c, { mini = false, nivel = null, extra = '' } = {}) {
+  // vivo = carta em destaque (detalhe): só nela rodam o vídeo e os brilhos animados (nas grades e na mão ficam paradas, pra não pesar)
+  function html(c, { mini = false, nivel = null, extra = '', vivo = false } = {}) {
+    const leve = typeof document !== 'undefined' && document.documentElement.classList.contains('leve');
     const evo = !!c.evolucao;
     let zk = null;
     try { zk = typeof Estado !== 'undefined' && Estado.zenkai && Estado.d ? Estado.zenkai(c.id) : null; } catch (e) { zk = null; }
     const zkHtml = zk && zk.ativo ? `<i class="zenkai-borda"></i><span class="selo-zenkai">ZENKAI${zk.z ? `<b>${'★'.repeat(zk.z)}</b>` : ''}</span>` : '';
-    const carta0 = `<div class="carta ${c.raridade}${zk && zk.ativo ? ' zenkai' : ''}${evo ? ' evo' : ''}${c.video ? ' com-video' : ''}${c.evento ? ' de-evento' : ''}${mini ? ' mini' : ''}">
+    const carta0 = `<div class="carta ${c.raridade}${zk && zk.ativo ? ' zenkai' : ''}${evo ? ' evo' : ''}${c.video ? ' com-video' : ''}${c.evento ? ' de-evento' : ''}${mini ? ' mini' : ''}${vivo ? ' vivo' : ''}">
       ${c.video ? `<video class="carta-video" src="assets/cartas/${c.video}" poster="${arte(c)}" autoplay muted loop playsinline preload="auto" disablepictureinpicture></video>` : `<img src="${arte(c)}" alt="${c.nome}" draggable="false" />`}
       <span class="custo">${c.custo}</span>
       ${mini ? '' : `<span class="nome-3d">${c.nome}</span>`}
       ${c.habilidade ? '<span class="selo-hab" title="Tem habilidade especial">⚡</span>' : ''}
       ${c.passiva ? `<span class="selo-hab passiva" title="Tem habilidade passiva">${c.passiva.tipo === 'esquiva' ? '✨' : '🧩'}</span>` : ''}
-      ${evo ? '<i class="evo-borda"></i><span class="evo-selo">EVO</span>' : ''}${c.evento ? '<span class="selo-evento">EVENTO</span>' : ''}${c.raridade === 'ultra' ? '<video class="ultra-video" src="assets/ui/moldura_ultra.mp4" autoplay muted loop playsinline preload="auto" disablepictureinpicture></video><i class="ultra-holo"></i><i class="ultra-borda"></i><span class="selo-evento selo-ultra">ULTRA</span>' : c.summon ? '<span class="selo-evento selo-summon">SUMMON</span>' : ''}
+      ${evo ? '<i class="evo-borda"></i><span class="evo-selo">EVO</span>' : ''}${c.evento ? '<span class="selo-evento">EVENTO</span>' : ''}${c.raridade === 'ultra' ? `${vivo && !leve ? '<video class="ultra-video" src="assets/ui/moldura_ultra.mp4" autoplay muted loop playsinline preload="auto" disablepictureinpicture></video>' : ''}<i class="ultra-holo"></i><i class="ultra-borda"></i><span class="selo-evento selo-ultra">ULTRA</span>` : c.summon ? '<span class="selo-evento selo-summon">SUMMON</span>' : ''}
       ${zkHtml}${extra}
     </div>`;
     // cartas de evolução: moldura especial + aura roxa animada em volta
