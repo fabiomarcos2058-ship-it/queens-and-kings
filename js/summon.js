@@ -30,8 +30,8 @@ const Summon = (() => {
   // ---------- Summon Zenkai: um banner pra cada dupla que recebe Zenkai (dura até a próxima dupla chegar) ----------
   // mais caro, mas cada carta vem com MUITAS cópias; só as 2 cartas da dupla
   // preço do Summon Zenkai por classe (dupla misturada usa a classe mais alta)
-  const ZK_PRECOS = { comum: [35, 300], rara: [50, 450], epica: [70, 600] };
-  const classeZk = (b) => { if (b.raras) return 'rara'; const r = (b.ids || []).map((id) => (typeof Estado !== 'undefined' && Estado.carta(id) ? Estado.carta(id).raridade : 'comum')); return r.includes('epica') ? 'epica' : r.includes('rara') ? 'rara' : 'comum'; };
+  const ZK_PRECOS = { comum: [35, 300], rara: [50, 450], epica: [70, 600], mista: [50, 450] };
+  const classeZk = (b) => { if (b.raras) return 'rara'; const r = (b.ids || []).map((id) => (typeof Estado !== 'undefined' && Estado.carta(id) ? Estado.carta(id).raridade : 'comum')); return r.includes('epica') ? (r.every((x) => x === 'epica') ? 'epica' : 'mista') : r.includes('rara') ? 'rara' : 'comum'; };
   const ZK_COPIAS = { comum: 25, rara: 10, epica: 3 };
   const ZK_ORDEM = ['bra', 'nami_old', 'chichi', 'pan_dbh', 'teto', 'hatsune_miku', 'isagi', 'goku_ssj3', 'rukia', 'gohan_ssj', 'gyro', 'riruka',
     'sonic', 'johnny', 'trunks_ssj', 'hinata', 'kurona', 'caulifla', 'goku_ssj2', 'vegeta_ssj', 'mark_prisioneiro', 'mark_flaxan', 'vegeta_base', 'roman_cyber'];
