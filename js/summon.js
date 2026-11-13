@@ -27,7 +27,19 @@ const Summon = (() => {
   const COPIAS = { ultra: 1, lendaria: 1, epica: 2, rara: 4, comum: 6 };
   const OURO_MAX = { ultra: 2000, lendaria: 1000, epica: 400, rara: 150, comum: 80 };
 
-  const BANNERS = [{
+  // ---------- Summon Zenkai: mais caro, mas cada carta vem com MUITAS cópias (só cartas com Zenkai liberado) ----------
+  const ZK_PRECO1 = 90, ZK_PRECO10 = 800;
+  const ZK_COPIAS = { comum: 25, epica: 3 };
+  // todas as cartas da lista do Zenkai (as que ainda vão liberar já guardam as cópias pra quando chegar a vez delas)
+  const idsZenkai = () => (typeof Estado !== 'undefined' && Estado.ZENKAI_ORDEM ? Estado.ZENKAI_ORDEM.filter((id) => Estado.carta(id)) : []);
+  const BANNER_ZENKAI = {
+    id: 'zenkai', nome: 'ZENKAI', sub: 'Muitas cópias pra despertar', tema: 'zk', logo: 'zk', zenkai: true,
+    fim: new Date(2026, 11, 31, 23, 59, 59),
+    get destaque() { const l = typeof Estado !== 'undefined' && Estado.zenkaiLiberadas ? Estado.zenkaiLiberadas() : 2; const ids = idsZenkai(); return [...ids.slice(0, l).slice(-3), ...ids.slice(l, l + 3)].slice(0, 6); },
+    get pool() { const ids = idsZenkai(); return { comum: ids.filter((id) => Estado.carta(id).raridade === 'comum'), epica: ids.filter((id) => Estado.carta(id).raridade === 'epica') }; },
+    chances: { epica: 0.3, comum: 0.7 },
+  };
+  const BANNERS = [BANNER_ZENKAI, {
     id: 'ultras-blue-lock',
     nome: 'Fenda do Multiverso',
     sub: 'Ultras: Prodígios do Campo',
@@ -168,7 +180,24 @@ const Summon = (() => {
     for (const [r, v] of resto) { if ((x -= v) <= 0) return r; }
     return resto[0][0];
   }
+  const precoDe = (n, b = banner()) => (b.zenkai ? (n === 10 ? ZK_PRECO10 : ZK_PRECO1) : n === 10 ? PRECO10 : PRECO1);
+  function sortearZenkai(n) {
+    const ds = dados(), p = pool(), res = [];
+    for (let i = 0; i < n; i++) {
+      let rar = Math.random() < 0.3 ? 'epica' : 'comum';
+      if (n === 10 && i === 9 && !res.some((r) => r.raridade === 'epica')) rar = 'epica';
+      if (!p[rar].length) rar = rar === 'epica' ? 'comum' : 'epica';
+      const id = escolher(p[rar]);
+      ds.total++;
+      res.push({ id, raridade: rar, ...receber(id, ZK_COPIAS[rar]) });
+    }
+    for (let i = res.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [res[i], res[j]] = [res[j], res[i]]; }
+    ds.hist = [...res.map((r) => ({ id: r.id, r: r.raridade, t: Date.now() })), ...(ds.hist || [])].slice(0, 40);
+    Estado.salvar();
+    return res;
+  }
   function sortear(n) {
+    if (banner().zenkai) return sortearZenkai(n);
     const ds = dados(), b = banner(), pb = pity(b), p = pool(), res = [];
     for (let i = 0; i < n; i++) {
       const ultimaDaDezena = n === 10 && i === 9 && !res.some((r) => r.raridade === 'ultra' || r.raridade === 'lendaria');
@@ -193,18 +222,25 @@ const Summon = (() => {
     return dk.length ? Math.round(dk.reduce((a, id) => a + (d.colecao[id].nivel || 1), 0) / dk.length) : 3;
   };
   // entrega a carta: nova (desbloqueia) ou repetida (cópias; se já está no máximo vira ouro)
-  function receber(id) {
+  function receber(id, copiasExtra = 0) {
     const d = Estado.d, c = Estado.carta(id), col = d.colecao[id];
     if (!col || !col.tem) {
       if (c.exclusivo) d.cartasExtras = [...new Set([...(d.cartasExtras || []), id])];
       const forte = c.raridade === 'ultra' || c.raridade === 'lendaria';
       // nível fixo baixo (mais justo): ultra e lendária vêm no 3, as outras no 5; dá pra upar com cópias e ouro
       const nivel = Math.max(col && col.nivel || 1, forte ? 3 : 5);
-      d.colecao[id] = { nivel, copias: (col && col.copias) || 0, tem: true };
+      d.colecao[id] = { nivel, copias: ((col && col.copias) || 0) + (copiasExtra || 0), tem: true };
       Estado.recarregarCatalogo();
       return { novo: true, nivel };
     }
     const falta = Estado.faltaParaMax(id);
+    // Summon Zenkai: guarda todas as cópias (só vira ouro se a carta já estiver no máximo E com Zenkai 7)
+    if (copiasExtra) {
+      const zk = Estado.zenkai(id);
+      if (falta <= 0 && zk.z >= 7) { const ouro = OURO_MAX[c.raridade] || 100; d.ouro += ouro; return { ouro }; }
+      col.copias += copiasExtra;
+      return { copias: copiasExtra };
+    }
     if (falta <= 0) { const ouro = OURO_MAX[c.raridade] || 100; d.ouro += ouro; return { ouro }; }
     const q = Math.min(falta, COPIAS[c.raridade] || 1);
     col.copias += q;
@@ -232,7 +268,7 @@ const Summon = (() => {
     const abas = lista.map((x, i) => `<button class="sm-aba${i === iAtual ? ' ativa' : ''}${x.tema ? ` t-${x.tema}` : ''}" data-b="${i}">
         <img src="${x.mini || Cartas.arte(Estado.carta(x.centro || x.destaque[0]) || {})}" alt="" />${i === lista.length - 1 ? '<em>NOVO</em>' : ''}
         <span>${esc(x.nome)}</span><small>⏳ ${tempo(x)}</small></button>`).join('');
-    const titulo = b.logo === 'nz' ? logoNazarick(b) : b.logo === 'db' ? logoSaiyajin(b) : b.logo ? logoInvencivel(b) : `<div class="smb-titulo"><em>NOVA RARIDADE</em><b>${esc(b.nome)}</b><small>${esc(b.sub)}</small></div>`;
+    const titulo = b.logo === 'zk' ? `<div class="smb-logo-zk"><b>ZENKAI</b><small>${esc(b.sub)}</small></div>` : b.logo === 'nz' ? logoNazarick(b) : b.logo === 'db' ? logoSaiyajin(b) : b.logo ? logoInvencivel(b) : `<div class="smb-titulo"><em>NOVA RARIDADE</em><b>${esc(b.nome)}</b><small>${esc(b.sub)}</small></div>`;
     // personagens em destaque (estilo vitrine)
     const destaques = b.destaque.filter((id) => Estado.carta(id)).map((id) => {
       const c = Estado.carta(id);
@@ -247,16 +283,16 @@ const Summon = (() => {
           <div class="sm-banner${b.tema ? ` t-${b.tema}` : ''}${b.arte ? ' com-arte' : ''}">
             ${paineis}
             ${titulo}
-            <div class="smb-chip">🌀 ULTRA</div>
+            <div class="smb-chip">${b.zenkai ? '🔥 ZENKAI' : '🌀 ULTRA'}</div>
             <div class="smb-tempo">⏳ <b>${tempo(b)}</b></div>
           </div>
         </div>
         <div class="sm-destaques"><small>✦ PERSONAGENS EM DESTAQUE ✦</small><div>${destaques}</div></div>
-        <div class="sm-pity"><div><b>Ultra garantido em ${faltaPity()}</b><small>A chance sobe a partir da invocação ${SUAVE}</small></div><i><i style="width:${pct}%"></i></i></div>
+        ${b.zenkai ? `<div class="sm-pity zk"><div><b>🔥 Cada carta vem com +${ZK_COPIAS.comum} cópias (comum) ou +${ZK_COPIAS.epica} (épica)</b><small>${idsZenkai().length} cartas com Zenkai no banner · as cópias ficam guardadas mesmo antes do Zenkai delas liberar</small></div></div>` : `<div class="sm-pity"><div><b>Ultra garantido em ${faltaPity()}</b><small>A chance sobe a partir da invocação ${SUAVE}</small></div><i><i style="width:${pct}%"></i></i></div>`}
         ${b.centro && Estado.carta(b.centro) ? `<div class="sm-pity destaque"><div><b>${esc(Estado.carta(b.centro).nome)} garantido em ${faltaDestaque()}</b><small>Super raro: só ${(chances().ultra * 100 * (b.pesos[b.centro] / Object.values(b.pesos).reduce((a, v) => a + v, 0))).toFixed(2).replace('.', ',')}% por invocação</small></div><i><i style="width:${Math.round(((b.pityDestaque - faltaDestaque()) / b.pityDestaque) * 100)}%"></i></i></div>` : ''}
         <div class="sm-botoes">
-          <button class="sm-btn um" id="sm-1"><small>INVOCAÇÃO</small><b>1x</b><span>💎 ${PRECO1}</span></button>
-          <button class="sm-btn dez" id="sm-10"><em>1 Lendária+ garantida</em><small>INVOCAÇÃO</small><b>10x</b><span>💎 ${PRECO10}</span></button>
+          <button class="sm-btn um" id="sm-1"><small>INVOCAÇÃO</small><b>1x</b><span>💎 ${precoDe(1)}</span></button>
+          <button class="sm-btn dez" id="sm-10"><em>${b.zenkai ? '1 Épica garantida' : '1 Lendária+ garantida'}</em><small>INVOCAÇÃO</small><b>10x</b><span>💎 ${precoDe(10)}</span></button>
         </div>
         <button class="sm-info" id="sm-info">📜 Personagens e chances</button>
         <p class="sm-total">Você já invocou ${fmt(ds.total || 0)} vez${ds.total === 1 ? '' : 'es'}${ds.ultras ? ` · ${ds.ultras} Ultra${ds.ultras > 1 ? 's' : ''}` : ''}</p>
@@ -346,9 +382,9 @@ const Summon = (() => {
   let animando = false;
   async function invocar(n) {
     if (animando) return;
-    const preco = n === 10 ? PRECO10 : PRECO1;
+    const preco = precoDe(n);
     if (Estado.d.gemas < preco) { UI.toast(`Faltam ${preco - Estado.d.gemas} 💎 para invocar ${n}x`); return; }
-    if (!pool().ultra.length) { UI.toast('Banner indisponível agora'); return; }
+    if (banner().zenkai ? !idsZenkai().length : !pool().ultra.length) { UI.toast('Banner indisponível agora'); return; }
     animando = true;
     Estado.d.gemas -= preco;
     let res;
@@ -457,7 +493,7 @@ const Summon = (() => {
     const rodape = document.createElement('div');
     rodape.className = 'sma-rodape';
     rodape.innerHTML = `<p>${novos ? `✨ ${novos} personage${novos > 1 ? 'ns novos' : 'm novo'}!` : 'Cópias guardadas na sua coleção.'}</p>
-      <div><button class="btn-modal secundario" id="sma-ok">Voltar</button><button class="btn-modal principal" id="sma-de-novo">De novo · ${n}x 💎 ${n === 10 ? PRECO10 : PRECO1}</button></div>`;
+      <div><button class="btn-modal secundario" id="sma-ok">Voltar</button><button class="btn-modal principal" id="sma-de-novo">De novo · ${n}x 💎 ${precoDe(n)}</button></div>`;
     el.appendChild(rodape);
     if (typeof Assets !== 'undefined') Assets.fill();
     await new Promise((ok) => {

@@ -3500,3 +3500,16 @@ html.leve .princesa-torre.caindo { animation: princesaCai 0.9s ease-in forwards;
 .projetil.de-torre.t-moranguinho { width: 10px; height: 11px; border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%; background: radial-gradient(circle at 50% 30%, #FF9AB8, #E8336A 60%, #B0174A); box-shadow: 0 -3px 0 -1px #5DCA6A, 0 0 6px 1px #FF6FA0aa; }
 .tropa-img { width: 34px; height: 34px; object-fit: contain; object-position: 50% 20%; }
 .mini-tropa .tropa-img { width: 40px; height: 40px; }
+/* ===== Summon Zenkai ===== */
+.sm-aba.t-zk.ativa { border-color: #FF3A3A; box-shadow: 0 0 12px #FF3A3A88; background: #2a0808; }
+.sm-banner.t-zk { background: linear-gradient(160deg, #3a0606, #120202 60%, #2a1200); }
+.sm-banner.t-zk::before { background: conic-gradient(from var(--ang), #FF3A3A, #FFD25E, #7A0010, #FF7A1A, #FF3A3A); }
+.sm-moldura.t-zk { background: linear-gradient(135deg, #FFE07A, #FF3A3A 30%, #5a0008 55%, #FF7A1A 80%, #FFE07A); box-shadow: 0 10px 30px #000c, 0 0 26px #FF3A3A66; }
+.sm-banner.t-zk .smb-painel img { filter: saturate(1.15) contrast(1.05); }
+.sm-banner.t-zk .smb-painel { box-shadow: inset 0 0 0 2px #FF3A3A; }
+.smb-logo-zk { position: absolute; left: 0; right: 0; bottom: 10px; z-index: 3; display: flex; flex-direction: column; align-items: center; }
+.smb-logo-zk b { font: 46px 'Lilita One', sans-serif; letter-spacing: 3px; line-height: 0.95; color: #FFE07A; -webkit-text-stroke: 2px #5a0008; text-shadow: 0 4px 0 #3a0004, 0 0 18px #FF3A3A, 0 0 34px #FF7A1A88; transform: skewX(-8deg); }
+.smb-logo-zk small { font: 13px 'Lilita One', sans-serif; letter-spacing: 2px; color: #fff; text-shadow: 0 1px 3px #000, 0 0 8px #FF3A3A; }
+.sm-pity.zk { border-color: #FF3A3A88; background: linear-gradient(90deg, #3a0606cc, #120202cc); }
+.sm-pity.zk b { color: #FFE07A; }
+.sm-banner.t-zk .smb-painel span { display: none; }
