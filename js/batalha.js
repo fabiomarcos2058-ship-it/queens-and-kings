@@ -714,8 +714,8 @@ const Batalha = (() => {
     if (e.postura && emEgo(e) && dano > 0) e.ego = Math.min(15, (e.ego || 0) + 1);
     e.vida -= dano;
     numero(e, dano, opc.crit ? 'critico' : opc.tipo);
-    // Adam Smasher (Evolução): com 15% de vida dispara sozinho Mísseis + Sandevistan, sem gastar elixir (uma vez)
-    if (!e.torre && e.vida > 0 && !e.protocoloAdam && e.carta && e.carta.id === 'adam_smasher_evo' && e.habilidade && e.vida <= e.max * 0.15) {
+    // Adam Smasher (Evolução): com 30% de vida dispara sozinho Mísseis + Sandevistan, sem gastar elixir (uma vez)
+    if (!e.torre && e.vida > 0 && !e.protocoloAdam && e.carta && e.carta.id === 'adam_smasher_evo' && e.habilidade && e.vida <= e.max * 0.3) {
       e.protocoloAdam = true;
       agendar(0.05, () => {
         if (e.vida <= 0 || !s || s.acabou) return;
@@ -1158,7 +1158,7 @@ const Batalha = (() => {
     if (!jan || jan.querySelector('.cutin')) return;
     const el = document.createElement('div');
     el.className = `cutin ${qual}`;
-    el.innerHTML = `<div class="cutin-linhas"></div><div class="cutin-faixa"><img src="assets/cutins/${qual}.jpg" alt="" /></div><div class="cutin-legenda">${TEXTO_CUTIN[qual]}</div>`;
+    el.innerHTML = `<div class="cutin-linhas"></div><div class="cutin-faixa"><img src="assets/cutins/${qual}.jpg?v=${window.VERSAO_JOGO || 1}" alt="" /></div><div class="cutin-legenda">${TEXTO_CUTIN[qual]}</div>`;
     jan.appendChild(el);
     try { navigator.vibrate && navigator.vibrate([40, 40, 90]); } catch (e) { /* nada */ }
     setTimeout(() => el.classList.add('saindo'), 1300);

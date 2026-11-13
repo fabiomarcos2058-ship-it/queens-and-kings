@@ -3749,7 +3749,7 @@
       "passiva": {
         "nome": "Protocolo de Combate",
         "tipo": "chassi",
-        "descricao": "Recebe 25% menos dano e não pode ser atordoado nem desacelerado. Quando chega a 15% de vida, dispara sozinho os Mísseis + Sandevistan, sem gastar elixir (uma vez por partida)."
+        "descricao": "Recebe 25% menos dano e não pode ser atordoado nem desacelerado. Quando chega a 30% de vida, dispara sozinho os Mísseis + Sandevistan, sem gastar elixir (uma vez por partida)."
       },
       "habilidade": {
         "nome": "Mísseis + Sandevistan",
