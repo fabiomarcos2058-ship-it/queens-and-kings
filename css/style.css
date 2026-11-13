@@ -3528,3 +3528,18 @@ html.leve .princesa-torre.caindo { animation: princesaCai 0.9s ease-in forwards;
 .gift-item small i.ok { background: #3FAF6A; color: #fff; }
 .gift-item small i.hoje { background: linear-gradient(180deg, #FFE07A, #F5A623); color: #3a1d00; box-shadow: 0 0 8px #FFC83D; }
 .gift-item small i.cal-d7 { min-width: 30px; }
+/* ===== carta com Zenkai desperto: fogo e faíscas ===== */
+.carta.zk-desperta { box-shadow: 0 0 0 2px #FF7A1A, 0 0 14px #FF3A1Acc, 0 0 26px #FF7A1A66; }
+.zk-fogo { position: absolute; inset: 0; z-index: 3; pointer-events: none; border-radius: inherit; overflow: hidden; background: linear-gradient(0deg, #FF2A0077 0%, #FF7A1A33 22%, transparent 48%); }
+.zk-chama { position: absolute; bottom: -6%; left: var(--x); width: 24%; height: var(--h); margin-left: -12%; border-radius: 50% 50% 50% 50% / 68% 68% 32% 32%; transform-origin: 50% 100%;
+  background: radial-gradient(ellipse at 50% 100%, #FFF6C0 0 14%, #FFD25E 30%, #FF7A1A 55%, #FF2A00aa 74%, transparent 82%); mix-blend-mode: screen; animation: zkChama 0.55s var(--d) ease-in-out infinite alternate; }
+@keyframes zkChama { from { transform: scale(0.85, 0.7) skewX(-7deg); opacity: 0.75; } to { transform: scale(1.1, 1.15) skewX(7deg); opacity: 1; } }
+.zk-faisca { position: absolute; bottom: 8%; left: var(--x); width: 4px; height: 4px; border-radius: 50%; background: #FFF2B0; box-shadow: 0 0 5px 2px #FFB13A, 0 0 9px 3px #FF5A1A88; opacity: 0; animation: zkFaisca 2.2s var(--d) ease-out infinite; }
+@keyframes zkFaisca { 0% { transform: translate(0, 0) scale(1); opacity: 0; } 12% { opacity: 1; } 100% { transform: translate(var(--dx), -620%) scale(0.3); opacity: 0; } }
+.carta.mini .zk-faisca { width: 3px; height: 3px; }
+@keyframes zkFaisca { 0% { transform: translate(0, 0); opacity: 0; } 12% { opacity: 1; } 100% { transform: translate(var(--dx), -90px); opacity: 0; } }
+html.leve .zk-chama { animation-duration: 0.9s; mix-blend-mode: normal; }
+html.leve .zk-faisca:nth-child(2n) { display: none; }
+.zk-fogo { z-index: 1; background: linear-gradient(0deg, #FF2A0066 0%, #FF7A1A22 16%, transparent 34%); }
+.zk-chama { height: calc(var(--h) * 0.6); width: 20%; margin-left: -10%; opacity: 0.9; }
+.carta.zk-desperta .nome-3d { z-index: 4; text-shadow: 0 2px 0 #3a0a00, 0 0 8px #FF5A1A; }

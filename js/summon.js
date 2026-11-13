@@ -32,7 +32,10 @@ const Summon = (() => {
   // preço do Summon Zenkai por classe (dupla misturada usa a classe mais alta)
   const ZK_PRECOS = { comum: [35, 300], rara: [50, 450], epica: [70, 600], mista: [50, 450] };
   const classeZk = (b) => { if (b.raras) return 'rara'; const r = (b.ids || []).map((id) => (typeof Estado !== 'undefined' && Estado.carta(id) ? Estado.carta(id).raridade : 'comum')); return r.includes('epica') ? (r.every((x) => x === 'epica') ? 'epica' : 'mista') : r.includes('rara') ? 'rara' : 'comum'; };
-  const ZK_COPIAS = { comum: 25, rara: 10, epica: 3 };
+  // cópias por invocação: sorteadas dentro da faixa de cada raridade
+  const ZK_COPIAS = { comum: [30, 45], rara: [12, 18], epica: [4, 7] };
+  const zkQtd = (rar) => { const [a, b] = ZK_COPIAS[rar] || ZK_COPIAS.epica; return a + Math.floor(Math.random() * (b - a + 1)); };
+  const zkFaixa = (rar) => `+${ZK_COPIAS[rar][0]} a ${ZK_COPIAS[rar][1]}`;
   const ZK_ORDEM = ['bra', 'nami_old', 'chichi', 'pan_dbh', 'teto', 'hatsune_miku', 'isagi', 'goku_ssj3', 'rukia', 'gohan_ssj', 'gyro', 'riruka',
     'sonic', 'johnny', 'trunks_ssj', 'hinata', 'kurona', 'caulifla', 'goku_ssj2', 'vegeta_ssj', 'mark_prisioneiro', 'mark_flaxan', 'vegeta_base', 'roman_cyber'];
   const ZK_INICIO = new Date(2026, 10, 12, 0, 0, 0).getTime(), DIAS3 = 3 * 86400000;
@@ -216,7 +219,7 @@ const Summon = (() => {
       if (!(p[rar] || []).length) rar = rar === 'epica' ? 'comum' : 'epica';
       const id = escolher(p[rar]);
       ds.total++;
-      res.push({ id, raridade: rar, ...receber(id, ZK_COPIAS[rar]) });
+      res.push({ id, raridade: rar, ...receber(id, zkQtd(rar)) });
     }
     for (let i = res.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [res[i], res[j]] = [res[j], res[i]]; }
     ds.hist = [...res.map((r) => ({ id: r.id, r: r.raridade, t: Date.now() })), ...(ds.hist || [])].slice(0, 40);
@@ -315,7 +318,7 @@ const Summon = (() => {
           </div>
         </div>
         <div class="sm-destaques"><small>✦ PERSONAGENS EM DESTAQUE ✦</small><div>${destaques}</div></div>
-        ${b.zenkai ? `<div class="sm-pity zk"><div><b>🔥 ${b.raras ? `Cada carta vem com +${ZK_COPIAS.rara} cópias (rara)` : `Cada carta vem com +${ZK_COPIAS.comum} cópias (comum) ou +${ZK_COPIAS.epica} (épica)`}</b><small>Só ${esc(b.sub)}, a dupla que acabou de ganhar Zenkai · troca quando a próxima dupla chegar</small></div></div>` : `<div class="sm-pity"><div><b>Ultra garantido em ${faltaPity()}</b><small>A chance sobe a partir da invocação ${SUAVE}</small></div><i><i style="width:${pct}%"></i></i></div>`}
+        ${b.zenkai ? `<div class="sm-pity zk"><div><b>🔥 ${b.raras ? `Cada carta vem com ${zkFaixa('rara')} cópias (rara)` : `Cada carta vem com ${zkFaixa('comum')} cópias (comum) ou ${zkFaixa('epica')} (épica)`}</b><small>Só ${esc(b.sub)}, a dupla que acabou de ganhar Zenkai · troca quando a próxima dupla chegar</small></div></div>` : `<div class="sm-pity"><div><b>Ultra garantido em ${faltaPity()}</b><small>A chance sobe a partir da invocação ${SUAVE}</small></div><i><i style="width:${pct}%"></i></i></div>`}
         ${b.centro && Estado.carta(b.centro) ? `<div class="sm-pity destaque"><div><b>${esc(Estado.carta(b.centro).nome)} garantido em ${faltaDestaque()}</b><small>Super raro: só ${(chances().ultra * 100 * (b.pesos[b.centro] / Object.values(b.pesos).reduce((a, v) => a + v, 0))).toFixed(2).replace('.', ',')}% por invocação</small></div><i><i style="width:${Math.round(((b.pityDestaque - faltaDestaque()) / b.pityDestaque) * 100)}%"></i></i></div>` : ''}
         <div class="sm-botoes">
           <button class="sm-btn um" id="sm-1"><small>INVOCAÇÃO</small><b>1x</b><span>💎 ${precoDe(1)}</span></button>

@@ -26,8 +26,10 @@ const Cartas = (() => {
     const evo = !!c.evolucao;
     let zk = null;
     try { zk = typeof Estado !== 'undefined' && Estado.zenkai && Estado.d ? Estado.zenkai(c.id) : null; } catch (e) { zk = null; }
-    const zkHtml = zk && zk.ativo ? `<i class="zenkai-borda"></i><span class="selo-zenkai">ZENKAI${zk.z ? `<b>${'★'.repeat(zk.z)}</b>` : ''}</span>` : '';
-    const carta0 = `<div class="carta ${c.raridade}${zk && zk.ativo ? ' zenkai' : ''}${evo ? ' evo' : ''}${c.video ? ' com-video' : ''}${c.evento ? ' de-evento' : ''}${mini ? ' mini' : ''}${vivo ? ' vivo' : ''}">
+    // fogo e faíscas: só quando a carta já despertou pelo menos 1 Zenkai
+    const fogo = zk && zk.ativo && zk.z > 0 ? `<i class="zk-fogo">${Array.from({ length: 7 }, (_, i) => `<i class="zk-chama" style="--x:${4 + i * 15.3}%;--h:${[34, 46, 30, 52, 36, 48, 32][i]}%;--d:${(i * 0.13).toFixed(2)}s"></i>`).join('')}${Array.from({ length: 6 }, (_, i) => `<i class="zk-faisca" style="--x:${[12, 30, 47, 63, 78, 90][i]}%;--d:${(i * 0.37).toFixed(2)}s;--dx:${[6, -5, 4, -7, 5, -4][i]}px"></i>`).join('')}</i>` : '';
+    const zkHtml = zk && zk.ativo ? `${fogo}<i class="zenkai-borda"></i><span class="selo-zenkai">ZENKAI${zk.z ? `<b>${'★'.repeat(zk.z)}</b>` : ''}</span>` : '';
+    const carta0 = `<div class="carta ${c.raridade}${zk && zk.ativo ? ' zenkai' : ''}${zk && zk.ativo && zk.z > 0 ? ' zk-desperta' : ''}${evo ? ' evo' : ''}${c.video ? ' com-video' : ''}${c.evento ? ' de-evento' : ''}${mini ? ' mini' : ''}${vivo ? ' vivo' : ''}">
       ${c.video ? `<video class="carta-video" src="assets/cartas/${c.video}" poster="${arte(c)}" autoplay muted loop playsinline preload="auto" disablepictureinpicture></video>` : `<img src="${arte(c)}" alt="${c.nome}" draggable="false" />`}
       <span class="custo">${c.custo}</span>
       ${mini ? '' : `<span class="nome-3d">${c.nome}</span>`}
