@@ -72,23 +72,46 @@
     const c = d().conquistas;
     const total = Estado.catalogo().length;
     const temCartas = Object.values(d().colecao).filter((x) => x.nivel > 1 || x.copias > 0).length;
+    const melhorPat = Ranque.info(Ranque.dados().melhorSempre || 0).i;
+    const pat = (i, g) => [`pat${i}`, '🏅', `Patente ${Ranque.PATENTES[i].nome}`, `Chegue em ${Ranque.PATENTES[i].nome} na ranqueada`, melhorPat >= i ? 1 : 0, 1, g];
+    // [id, ícone, título, descrição, valor, meta, gemas]
     return [
-      ['🏆', 'Primeira vitória', 'Vença uma batalha', Math.min(1, d().vitorias), 1],
-      ['👑', 'Três coroas', 'Derrube a torre do rei', Math.min(1, c.tresCoroas), 1],
-      ['⚔️', 'Veterana', 'Vença 10 batalhas', d().vitorias, 10],
-      ['🎁', 'Caçadora de baús', 'Abra 10 baús', c.baus, 10],
-      ['⬆️', 'Treinadora', 'Evolua cartas 5 vezes', c.evolucoes, 5],
-      ['📚', 'Colecionadora', 'Tenha cópias de todas as cartas', temCartas, total],
-      ['🌸', 'Rumo à arena 2', 'Chegue a 300 troféus', d().recorde, 300],
-      ['🛡️', 'Em equipe', 'Entre num clã', d().cla && d().cla.id ? 1 : 0, 1],
+      ['vit1', '🏆', 'Primeira vitória', 'Vença uma batalha', Math.min(1, d().vitorias), 1, 25],
+      ['coroa1', '👑', 'Três coroas', 'Derrube a torre do rei', Math.min(1, c.tresCoroas), 1, 25],
+      ['vit10', '⚔️', 'Veterana', 'Vença 10 batalhas', d().vitorias, 10, 50],
+      ['vit50', '🗡️', 'Guerreira', 'Vença 50 batalhas', d().vitorias, 50, 100],
+      ['vit100', '🛡️', 'Lenda da arena', 'Vença 100 batalhas', d().vitorias, 100, 200],
+      ['coroa10', '👑', 'Rainha das coroas', 'Vença 10 vezes com 3 coroas', c.tresCoroas, 10, 80],
+      ['bau10', '🎁', 'Caçadora de baús', 'Abra 10 baús', c.baus, 10, 30],
+      ['bau50', '🧰', 'Colecionadora de baús', 'Abra 50 baús', c.baus, 50, 100],
+      ['evo5', '⬆️', 'Treinadora', 'Evolua cartas 5 vezes', c.evolucoes, 5, 30],
+      ['evo25', '🚀', 'Mestra das cartas', 'Evolua cartas 25 vezes', c.evolucoes, 25, 100],
+      ['arena2', '🌸', 'Bosque das Cerejeiras', 'Chegue a 400 troféus (arena 2)', d().recorde, 400, 50],
+      ['arena3', '❄️', 'Vila Congelada', 'Chegue a 1000 troféus (arena 3)', d().recorde, 1000, 100],
+      ['arena4', '🌋', 'Templo Vulcânico', 'Chegue a 1800 troféus (arena 4)', d().recorde, 1800, 200],
+      pat(3, 30), pat(4, 50), pat(5, 80), pat(6, 120), pat(7, 160), pat(8, 250), pat(9, 400), pat(10, 800),
+      ['cla', '🤝', 'Em equipe', 'Entre num clã', d().cla && d().cla.id ? 1 : 0, 1, 25],
+      ['colecao', '📚', 'Colecionadora', 'Tenha cópias de todas as cartas', temCartas, total, 300],
     ];
+  }
+  const conquistasProntas = () => { const pg = d().conqPegas || []; return conquistas().filter((x) => x[4] >= x[5] && !pg.includes(x[0])); };
+  function pegarConquistas(ids) {
+    const dd = d(); dd.conqPegas = dd.conqPegas || [];
+    let total = 0;
+    for (const x of conquistas()) if (ids.includes(x[0]) && x[4] >= x[5] && !dd.conqPegas.includes(x[0])) { dd.conqPegas.push(x[0]); total += x[6]; }
+    if (!total) return 0;
+    dd.gemas += total; Estado.salvar();
+    if (typeof Som !== 'undefined') Som.tocar('moeda');
+    UI.toast(`🏅 Conquista${ids.length > 1 ? 's' : ''}: +${total} 💎`);
+    topo();
+    return total;
   }
 
   function perfil() {
     const total = d().vitorias + d().derrotas;
     const xpMax = Estado.XP_NIVEL(d().nivel);
     const lista = conquistas();
-    const feitas = lista.filter((x) => x[3] >= x[4]).length;
+    const feitas = lista.filter((x) => x[4] >= x[5]).length;
     const opcoesAvatar = [...ICONES, ...Estado.catalogo().filter((c) => !c.feitico).map((c) => c.id)];
     const m = UI.modal({
       classe: 'modal-perfil',
@@ -131,9 +154,9 @@
           <div><b>${(d().x1 || {}).v || 0} x ${(d().x1 || {}).d || 0}</b><span>X1 com amigos</span></div>
         </div>
         <div class="titulo-conquistas">Conquistas <small>${feitas}/${lista.length}</small></div>
-        <div class="lista-conquistas">${lista.map(([ic, t, desc, v, max]) => `<div class="conquista${v >= max ? ' feita' : ''}">
-          <span class="ic">${ic}</span><div><b>${t}</b><small>${desc}</small><div class="mini-barra"><i style="width:${Math.min(100, (v / max) * 100)}%"></i></div></div>
-          <span class="estado">${v >= max ? '✓' : `${Math.min(v, max)}/${max}`}</span></div>`).join('')}</div>`,
+        <div class="lista-conquistas">${lista.map(([id, ic, t, desc, v, max, g]) => { const pego = (d().conqPegas || []).includes(id); return `<div class="conquista${v >= max ? ' feita' : ''}">
+          <span class="ic">${ic}</span><div><b>${t}</b><small>${desc} · 💎 ${g}</small><div class="mini-barra"><i style="width:${Math.min(100, (v / max) * 100)}%"></i></div></div>
+          ${v >= max ? (pego ? '<span class="estado">✓</span>' : `<button class="btn-conq" data-conq="${id}">💎 ${g}</button>`) : `<span class="estado">${fmt(Math.min(v, max))}/${fmt(max)}</span>`}</div>`; }).join('')}</div>`,
       botoes: [
         { texto: 'Apagar progresso', classe: 'perigo pequeno', acao: () => {
           UI.modal({ titulo: 'Tem certeza?', html: `<p>Isso apaga tudo: cartas, ouro, troféus e baús${Conta.logado() ? ', inclusive da sua conta' : ''}.</p>`, botoes: [
@@ -177,6 +200,7 @@
     el.querySelector('#perfil-mold').onclick = () => Titulos.escolherMoldura(refazCartao);
     el.querySelector('#perfil-ranque').onclick = () => { m.fechar(); RanqueUI.abrir(); };
     el.querySelector('#perfil-historico').onclick = () => RanqueUI.historico();
+    el.querySelectorAll('[data-conq]').forEach((b) => (b.onclick = () => { if (pegarConquistas([b.dataset.conq])) { b.outerHTML = '<span class="estado">✓</span>'; atualizarGifts(); } }));
     el.querySelectorAll('[data-av]').forEach((b) => (b.onclick = () => {
       d().avatar = b.dataset.av;
       el.querySelectorAll('[data-av]').forEach((x) => x.classList.toggle('escolhido', x === b));
@@ -219,9 +243,30 @@
 
   // ---------- Caixa de Gifts (tela inicial) ----------
   const H4 = 4 * 3600000, D7 = 7 * 86400000;
+  // calendário de login: 7 dias seguidos, cada dia vale mais
+  const CAL_GEMAS = [5, 10, 15, 20, 30, 40, 100];
+  const hojeTxt = () => { const a = new Date(); return `${a.getFullYear()}-${a.getMonth() + 1}-${a.getDate()}`; };
+  const ontemTxt = () => { const a = new Date(Date.now() - 86400000); return `${a.getFullYear()}-${a.getMonth() + 1}-${a.getDate()}`; };
+  function calendario() {
+    const dd = d(), c = dd.login || (dd.login = { dia: '', seq: 0 });
+    const hoje = hojeTxt();
+    // o dia de hoje ainda não pego: se pegou ontem continua a sequência, senão volta pro dia 1
+    const proximo = c.dia === hoje ? c.seq : c.dia === ontemTxt() ? (c.seq % 7) + 1 : 1;
+    return { pronto: c.dia !== hoje, dia: proximo, seq: c.seq, pegoHoje: c.dia === hoje };
+  }
+  function pegarCalendario() {
+    const dd = d(), cal = calendario();
+    if (!cal.pronto) return;
+    const g = CAL_GEMAS[cal.dia - 1];
+    dd.login = { dia: hojeTxt(), seq: cal.dia };
+    dd.gemas += g; Estado.salvar();
+    UI.toast(`📅 Dia ${cal.dia}: +${g} 💎${cal.dia === 7 ? ' · semana completa! 🎉' : ''}`);
+  }
   function giftsProntos() {
-    const dd = d(), agora = Date.now();
+    const dd = d(), agora = Date.now(), cal = calendario(), cq = conquistasProntas();
     return [
+      { id: 'login', ic: '📅', nome: `Calendário · Dia ${cal.dia}`, desc: `Entre todo dia! ${CAL_GEMAS.map((g, i) => `<i class="cal-d${i + 1 < cal.dia || (cal.pegoHoje && i + 1 === cal.dia) ? ' ok' : i + 1 === cal.dia ? ' hoje' : ''}">${g}</i>`).join('')}`, pronto: cal.pronto, falta: () => { const a = new Date(); return new Date(a.getFullYear(), a.getMonth(), a.getDate() + 1) - a; } },
+      ...(cq.length ? [{ id: 'conquistas', ic: '🏅', nome: `Conquistas completas (${cq.length})`, desc: `${cq.slice(0, 3).map((x) => x[2]).join(', ')}${cq.length > 3 ? '…' : ''} · 💎 ${cq.reduce((a, x) => a + x[6], 0)}`, pronto: true, falta: () => 0 }] : []),
       { id: 'dia', ic: '🎁', nome: 'Presente do dia', desc: 'Ouro, gemas ou um baú de madeira. Um por dia!', pronto: !!Estado.presenteDiario(), falta: () => { const a = new Date(); return new Date(a.getFullYear(), a.getMonth(), a.getDate() + 1) - a; } },
       { id: 'rapido', ic: '⚡', nome: 'Gift rápido', desc: 'Um pouquinho de ouro ou gemas a cada 4 horas.', pronto: agora - (dd.giftRapido || 0) >= H4, falta: () => H4 - (agora - (dd.giftRapido || 0)) },
       { id: 'semana', ic: '💎', nome: 'Gift da semana', desc: '30 gemas toda semana, só por jogar!', pronto: agora - (dd.giftSemana || 0) >= D7, falta: () => D7 - (agora - (dd.giftSemana || 0)) },
@@ -229,6 +274,11 @@
   }
   const tempoTxt = (ms) => { ms = Math.max(0, ms); const h = Math.floor(ms / 3600000), m = Math.floor(ms / 60000) % 60; return h >= 24 ? `${Math.floor(h / 24)}d ${h % 24}h` : h ? `${h}h ${String(m).padStart(2, '0')}min` : `${m}min`; };
   function atualizarGifts() {
+    try {
+      const nq = conquistasProntas().length, dd = d();
+      if (nq > (dd.conqAvisadas || 0)) UI.toast('🏅 Conquista completa! Pegue as gemas na Caixa de Gifts 🎁');
+      dd.conqAvisadas = nq;
+    } catch (e) { /* nada */ }
     const n = giftsProntos().filter((g) => g.pronto).length, b = $('gifts-n'), bt = $('btn-gifts');
     if (!b || !bt) return;
     b.textContent = n; b.classList.toggle('oculto', !n); bt.classList.toggle('tem', !!n);
@@ -236,6 +286,8 @@
   setInterval(() => { try { atualizarGifts(); } catch (e) { /* nada */ } }, 30000);
   function pegarGift(id) {
     const dd = d();
+    if (id === 'login') pegarCalendario();
+    if (id === 'conquistas') pegarConquistas(conquistasProntas().map((x) => x[0]));
     if (id === 'dia') {
       const p = Estado.presenteDiario(true);
       if (!p) return UI.toast('Você já pegou o presente de hoje!');
@@ -997,6 +1049,11 @@
   }
 
   function fimDeBatalha(r) {
+    // primeira vitória do dia: +20 💎 (qualquer modo)
+    if (r.resultado === 'vitoria' && !r.tutorial && d().primeiraVitoria !== hojeTxt()) {
+      d().primeiraVitoria = hojeTxt(); d().gemas += 20; Estado.salvar();
+      setTimeout(() => UI.toast('☀️ Primeira vitória do dia: +20 💎'), 1600);
+    }
     if (!(r.evento && r.evento.deck) && !r.tutorial) esgotadas = esgotadas.concat(Estado.contarUsos());
     // Mita Gentil lembra de cada partida com você
     if (!r.tutorial && (r.deck || []).includes('mita_gentil')) Estado.ganharAfeto(r.resultado === 'vitoria' ? 5 : 2);
@@ -1177,6 +1234,17 @@
     $('loja-presente').innerHTML = `<button class="presente-diario${temPresente ? ' pronto' : ''}" id="btn-presente">
         <img src="assets/ui/bau_inicial.svg" alt="" /><div><b>Presente grátis</b><small>${temPresente ? 'Toque para pegar!' : 'Volte amanhã para outro'}</small></div>
         <span class="selo-gratis">${temPresente ? 'GRÁTIS' : '✓'}</span></button>`;
+    // trocar ouro por gemas (limite por dia)
+    const TROCA = { ouro: 1000, gemas: 20, limite: 3 };
+    const tr = d().troca && d().troca.dia === hojeTxt() ? d().troca.n : 0;
+    $('loja-presente').insertAdjacentHTML('beforeend', `<button class="troca-gemas${tr < TROCA.limite ? '' : ' esgotada'}" id="btn-troca"><span class="tg-ic">🪙➜💎</span><div><b>Trocar ouro por gemas</b><small>${fmt(TROCA.ouro)} de ouro = ${TROCA.gemas} 💎 · ${TROCA.limite - tr} troca${TROCA.limite - tr === 1 ? '' : 's'} hoje</small></div><span class="selo-gratis">${tr < TROCA.limite ? `🪙 ${fmt(TROCA.ouro)}` : 'Amanhã'}</span></button>`);
+    $('btn-troca').onclick = () => {
+      const n = d().troca && d().troca.dia === hojeTxt() ? d().troca.n : 0;
+      if (n >= TROCA.limite) return UI.toast('Você já trocou o máximo hoje. Volta amanhã! 😊');
+      if (d().ouro < TROCA.ouro) return UI.toast(`Faltam ${fmt(TROCA.ouro - d().ouro)} de ouro`);
+      d().ouro -= TROCA.ouro; d().gemas += TROCA.gemas; d().troca = { dia: hojeTxt(), n: n + 1 }; Estado.salvar();
+      UI.toast(`💎 +${TROCA.gemas} gemas!`); tudo();
+    };
     $('btn-presente').onclick = () => {
       const p = Estado.presenteDiario(true);
       if (!p) { UI.toast('Você já pegou o presente de hoje!'); return; }

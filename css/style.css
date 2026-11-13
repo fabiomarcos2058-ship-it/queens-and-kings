@@ -3517,3 +3517,14 @@ html.leve .princesa-torre.caindo { animation: princesaCai 0.9s ease-in forwards;
 .modal-chegada .mch-nomes { text-align: center; font-weight: 700; line-height: 1.5; }
 .modal-chegada .mch-gemas { text-align: center; font: 44px 'Lilita One', sans-serif; color: #7FE9FF; text-shadow: 0 3px 0 #0b2a4a, 0 0 18px #5CE1FF; margin: 6px 0; }
 .modal-chegada p { text-align: center; }
+/* ===== mais gemas: troca na loja, conquistas e calendário ===== */
+.troca-gemas { width: 100%; display: flex; align-items: center; gap: 12px; padding: 8px 12px; border-radius: 16px; background: linear-gradient(135deg, #1f4a6a, #2b2f7a); border: 2px solid #5CB8E8; color: #fff; text-align: left; position: relative; margin-bottom: 10px; box-shadow: 0 4px 0 #0e1f40; font: inherit; cursor: pointer; }
+.troca-gemas .tg-ic { font-size: 22px; white-space: nowrap; }
+.troca-gemas div { flex: 1; display: flex; flex-direction: column; }
+.troca-gemas small { opacity: .8; font-size: 12px; }
+.troca-gemas.esgotada { opacity: .6; }
+.btn-conq { border: none; border-radius: 10px; padding: 6px 10px; font: 13px 'Lilita One', sans-serif; color: #3a1d00; background: linear-gradient(180deg, #FFE07A, #F5A623); box-shadow: 0 3px 0 #8a5200; cursor: pointer; animation: pulsa 1.2s ease-in-out infinite; white-space: nowrap; }
+.gift-item small i[class^="cal-d"] { display: inline-grid; place-items: center; min-width: 24px; height: 20px; margin: 3px 2px 0 0; padding: 0 3px; border-radius: 6px; font: 11px 'Lilita One', sans-serif; font-style: normal; background: #ffffff18; color: #ddd; }
+.gift-item small i.ok { background: #3FAF6A; color: #fff; }
+.gift-item small i.hoje { background: linear-gradient(180deg, #FFE07A, #F5A623); color: #3a1d00; box-shadow: 0 0 8px #FFC83D; }
+.gift-item small i.cal-d7 { min-width: 30px; }

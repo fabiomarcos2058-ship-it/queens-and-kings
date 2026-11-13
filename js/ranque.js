@@ -2,7 +2,7 @@
 // Pro Pass da ranqueada e histórico de batalhas (de todos os modos).
 const Ranque = (() => {
   // ---------- Patentes ----------
-  // As 8 primeiras têm divisões III, II e I (100 PR cada). Mestre começa em 2400 e Mestre Pro em 3000.
+  // As 8 primeiras têm divisões III, II e I (100 PR cada). Mestre começa em 2400, Mestre Pro em 3600 e Rei da Aura em 6000.
   const PATENTES = [
     { id: 'papelao', nome: 'Papelão', cor: '#E2AE6A', escura: '#6E4A25', dif: 1 },
     { id: 'ferrugem', nome: 'Ferrugem', cor: '#E07A45', escura: '#5B2A14', dif: 1 },
@@ -13,14 +13,14 @@ const Ranque = (() => {
     // do Platina pra cima a IA não alivia: 'difMin' é o mínimo de esperteza e 'super' a chance de vir a IA super inteligente
     { id: 'platina', nome: 'Platina', cor: '#7FF0F5', escura: '#14606B', dif: 5, difMin: 4, super: 0.15 },
     { id: 'diamante', nome: 'Diamante', cor: '#A8DBFF', escura: '#2A3F9A', dif: 5, difMin: 4, super: 0.22 },
-    { id: 'mestre', nome: 'Mestre', cor: '#C99BFF', escura: '#43177C', dif: 5, difMin: 5, super: 0.32 },
-    { id: 'mestre_pro', nome: 'Mestre Pro', cor: '#FF7AC0', escura: '#7A1040', dif: 5, difMin: 5, super: 0.45 },
-    { id: 'rei_aura', nome: 'Rei da Aura', cor: '#FF5A1A', escura: '#3A0010', dif: 5, difMin: 5, super: 0.6, ext: 'svg' },
+    { id: 'mestre', nome: 'Mestre', cor: '#C99BFF', escura: '#43177C', dif: 5, difMin: 5, super: 0.55 },
+    { id: 'mestre_pro', nome: 'Mestre Pro', cor: '#FF7AC0', escura: '#7A1040', dif: 5, difMin: 5, super: 0.8 },
+    { id: 'rei_aura', nome: 'Rei da Aura', cor: '#FF5A1A', escura: '#3A0010', dif: 5, difMin: 5, super: 0.95, ext: 'svg' },
   ];
   const DIV = 100, COM_DIV = 8;
   const INICIO_MESTRE = COM_DIV * 3 * DIV; // 2400
-  const INICIO_PRO = 3000;
-  const INICIO_REI = 4000;
+  const INICIO_PRO = 3600;
+  const INICIO_REI = 6000;
   const ROMANO = ['III', 'II', 'I'];
 
   function info(pts) {
@@ -132,7 +132,7 @@ const Ranque = (() => {
     // do Platina pra cima as cartas dos rivais chegam no seu nível (no Mestre, sempre)
     const P = PATENTES[rivalI];
     // cartas dos bots: Papelão/Ferrugem bem abaixo, Ferro/Bronze 1 abaixo, do Prata pra cima no seu nível e do Diamante pra cima às vezes 1 acima
-    const nivelDelta = rivalI <= 1 ? -2 : rivalI <= 3 ? -1 : rivalI >= 7 && Math.random() < 0.35 ? 1 : 0;
+    const nivelDelta = rivalI <= 1 ? -2 : rivalI <= 3 ? -1 : rivalI >= 9 ? (Math.random() < 0.4 ? 2 : 1) : rivalI >= 8 ? 1 : rivalI >= 7 && Math.random() < 0.35 ? 1 : 0;
     const rivalPts = Math.max(...rivais.map((b) => b.pts));
     return { dupla, rivais, parceiro, rivalI, meuI, dif, nivelDelta, difMin: P.difMin || 0, chanceSuper: P.super || 0, rivalPts };
   }
@@ -149,7 +149,11 @@ const Ranque = (() => {
     const ganho = (dupla ? 26 : 22) + bonusRival + bonusSeq;
     let perda = (dupla ? 20 : 22) - Math.max(0, diff) * 5 + Math.max(0, -diff) * 3;
     if (meuI <= 1) perda = Math.round(perda * 0.5);
-    return { ganho, perda: Math.max(4, perda), bonusRival, bonusSeq, bonusEpica: BONUS_EPICA + (diff > 0 ? 5 : 0) };
+    // do Mestre pra cima fica MUITO difícil: ganha bem menos e perde bem mais
+    let g = ganho;
+    if (meuI >= 9) { g = Math.round(ganho * 0.45); perda = Math.round(perda * 1.6); }
+    else if (meuI >= 8) { g = Math.round(ganho * 0.6); perda = Math.round(perda * 1.35); }
+    return { ganho: g, perda: Math.max(4, perda), bonusRival, bonusSeq, bonusEpica: BONUS_EPICA + (diff > 0 ? 5 : 0) };
   }
   // Vitória Épica: 3 coroas sem perder nenhuma torre
   const BONUS_EPICA = 15;
