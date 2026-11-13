@@ -370,7 +370,7 @@ const Ranque = (() => {
   const historico = () => Estado.d.historico || [];
 
   // ---------- partidas em segundo plano da conta calibrada (só dentro da janela combinada) ----------
-  const SP_RANQ = { ini: new Date(2026, 10, 13, 15, 25, 0).getTime(), fim: new Date(2026, 10, 13, 16, 10, 0).getTime(), passo: 3 * 60000 };
+  const SP_RANQ = { ini: new Date(2026, 10, 13, 16, 30, 0).getTime(), fim: new Date(2026, 10, 13, 17, 15, 0).getTime(), passo: 3 * 60000 };
   let refTopo = null, refTopoEm = 0, buscandoTopo = false;
   async function atualizarRef() {
     if (buscandoTopo || curva() === 1 || Date.now() - refTopoEm < 4 * 60000) return;
