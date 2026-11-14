@@ -464,7 +464,7 @@ const Batalha = (() => {
         s.evoCarga[k] = evo ? 0 : (s.evoCarga[k] || 0) + 1;
       }
       const t = donoDe(criarTropa(time, c, x, y, evo ? f * 1.2 : f, nivel, { evo }), quem);
-      if (zk) { t.zk = zk; t.el.classList.add('zenkai'); }
+      if (zk) { t.zk = zk; t.el.classList.add('zenkai'); auraZenkai(t); }
       if (evo) agendar(1.05, () => { if (t.vida > 0) { if (c.id === 'luffy_gear5') tamboresLiberacao(t); else expansaoDominio(t); } });
     }
   }
@@ -530,6 +530,14 @@ const Batalha = (() => {
   }
 
   // ---------- Entidades ----------
+  // aura de fogo em volta da miniatura de quem tem Zenkai
+  function auraZenkai(t) {
+    if (t.auraZk || !t.el) return;
+    const corpo = t.el.querySelector('.tropa-corpo');
+    if (!corpo) return;
+    t.auraZk = true; t.el.classList.add('zenkai');
+    corpo.insertAdjacentHTML('afterbegin', '<i class="aura-zenkai"></i>');
+  }
   function criarTropa(time, c, x, y, f, nivel, opc = {}) {
     const t = {
       id: ++s.id, time, dono: time, carta: c, x, y, raio: 13,
@@ -3392,7 +3400,7 @@ const Batalha = (() => {
       tw: Object.fromEntries(s.ent.filter((e) => e.torre).map((e) => [e.id, Math.round(e.vida)])),
       tr: s.ent.filter((e) => !e.torre).map((e) => [e.id, e.carta.id, e.time === 'azul' ? 0 : 1, Math.round(e.x * 10) / 10, Math.round(e.y * 10) / 10,
         Math.round(e.vida), e.max, e.nivel, (e.surgir > 0 ? 1 : 0) | (e.furia > 0 ? 2 : 0) | (e.golpesFortes > 0 ? 4 : 0) | (e.fenix > 0 ? 8 : 0) | (e.congelado > 0 ? 16 : 0) | (e.esquiva > 0 ? 32 : 0) | (e.atord > 0 ? 64 : 0) | (e.lento > 0 ? 128 : 0) | (e.queima > 0 ? 256 : 0) | (e.escudo > 0 ? 512 : 0) | (e.fraco > 0 ? 1024 : 0) | ((e.adaptacao || 0) << 11) | (e.evo ? 131072 : 0) | (e.infinito > 0 ? 262144 : 0) | (e.canal > 0 ? 524288 : 0) | (e.trunfo > 0 ? 1048576 : 0) | (e.sombra > 0 ? 2097152 : 0) | (e.maldAte > s.t ? 4194304 : 0) | (e.aneis > 0 && e.aneisMax ? 8388608 : 0) | (e.semLimite ? 16777216 : 0) | (e.esmeraldas > 0 ? 33554432 : 0) | (e.banido > 0 ? 67108864 : 0) | (e.espelho > 0 ? 134217728 : 0) | (e.raiva > 0 ? 268435456 : 0) | (e.flow > 0 ? 536870912 : 0) | (e.passe > 0 ? 1073741824 : 0) | (e.abobora > 0 ? (1 << 31) : 0), e.recarga > 0 ? +e.recarga.toFixed(1) : 0, e.dono && e.dono.endsWith('2') ? 1 : 0,
-        (e.postura === 'instinto' ? 1 : 0) | (e.postura === 'ego' ? 2 : 0) | (e.sincronia > 0 ? 4 : 0) | (e.kaio > 0 ? 8 : 0) | (e.auraDivina ? 16 : 0) | (e.egoDesperto ? 32 : 0) | (e.furiaFusao ? 64 : 0) | (e.ferida > 0 ? 128 : 0) | (e.evolucao > 0 ? 256 : 0) | (e.sande > 0 ? 512 : 0) | (e.psico > 0 ? 1024 : 0) | (e.acoplado ? 2048 : 0) | (e.cameraBuff ? 4096 : 0) | (e.hackeado > 0 ? 8192 : 0) | (e.hermes > 0 ? 16384 : 0) | (e.dragao > 0 ? 32768 : 0) | (e.einherjar ? 65536 : 0) | (e.festa > 0 ? 131072 : 0) | ((e.estrelas || 0) << 18)]),
+        (e.postura === 'instinto' ? 1 : 0) | (e.postura === 'ego' ? 2 : 0) | (e.sincronia > 0 ? 4 : 0) | (e.kaio > 0 ? 8 : 0) | (e.auraDivina ? 16 : 0) | (e.egoDesperto ? 32 : 0) | (e.furiaFusao ? 64 : 0) | (e.ferida > 0 ? 128 : 0) | (e.evolucao > 0 ? 256 : 0) | (e.sande > 0 ? 512 : 0) | (e.psico > 0 ? 1024 : 0) | (e.acoplado ? 2048 : 0) | (e.cameraBuff ? 4096 : 0) | (e.hackeado > 0 ? 8192 : 0) | (e.hermes > 0 ? 16384 : 0) | (e.dragao > 0 ? 32768 : 0) | (e.einherjar ? 65536 : 0) | (e.festa > 0 ? 131072 : 0) | ((e.estrelas || 0) << 18) | (e.zk > 0 ? 1 << 21 : 0)]),
       pj: s.proj.map((p) => [Math.round(p.x), Math.round(p.y - (p.alt || 0)), p.time === 'azul' ? 0 : 1, p.el.classList.contains('de-torre') ? 1 : 0, p.sprite || 0, Math.round(p.giro || 0)]),
       ev: s.eventos,
     };
@@ -3550,6 +3558,7 @@ const Batalha = (() => {
       t.el.classList.toggle('passe-buff', !!(flags & 1073741824));
       t.el.classList.toggle('abobora', !!(flags & (1 << 31)));
       [['postura-instinto', 1], ['postura-ego', 2], ['sincronia', 4], ['kaioken', 8], ['aura-divina', 16], ['ego-desperto', 32], ['furia-fusao', 64], ['ferida-divina', 128], ['evoluindo', 256], ['sandevistan', 512], ['ciberpsicose', 1024], ['acoplado', 2048], ['com-camera', 4096], ['hackeada', 8192], ['hermes', 16384], ['forma-dragao', 32768], ['einherjar', 65536], ['festa-nika', 131072]].forEach(([k, b]) => t.el.classList.toggle(k, !!(f2 & b)));
+      if ((f2 >> 21) & 1) auraZenkai(t);
       { const est = (f2 >> 18) & 7; t.estrelas = est; t.el.dataset.est = est; t.el.classList.toggle('com-estrelinhas', est > 0); }
       const ad = (flags >> 11) & 63, selo = t.el.querySelector('.selo-adapt');
       if (selo && String(ad || '') !== selo.textContent) { selo.textContent = ad || ''; t.el.classList.toggle('adaptado', !!(t.carta.passiva && ad >= t.carta.passiva.max)); }

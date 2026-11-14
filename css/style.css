@@ -3661,3 +3661,9 @@ html.leve .passe-pegar-tudo { animation: none; }
 .desafio-caixa.zenkai { position: relative; overflow: hidden; border-radius: 16px; background: linear-gradient(135deg, #7a1d00, #ff7a00 60%, #ffd23f); color: #fff; }
 .desafio-caixa.zenkai .sonic-fundo { opacity: .35; }
 .evento .selo.botao[data-farma] { align-self: center; flex: none; }
+
+/* aura de fogo (vídeo da Ally virou sprite) em volta da miniatura de quem tem Zenkai */
+.aura-zenkai { position: absolute; left: -38%; width: 176%; aspect-ratio: 96 / 135; bottom: -20%; z-index: 0; pointer-events: none;
+  background: url(../assets/ui/aura_zenkai.png) 0 0 / 3200% 100% no-repeat; animation: auraZenkai 4s steps(32, jump-none) infinite; filter: drop-shadow(0 0 5px #FF5A1Acc); }
+.tropa-corpo .tropa-medalhao { z-index: 1; }
+@keyframes auraZenkai { to { background-position: 100% 0; } }
