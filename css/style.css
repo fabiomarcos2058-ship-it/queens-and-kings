@@ -3794,3 +3794,9 @@ html.leve .passe-pegar-tudo { animation: none; }
 .pk-bonus{text-align:center;margin:8px 0 0}
 .pk-img{width:64px;height:64px;border-radius:50%;object-fit:cover;border:2px solid #ffd77a;background:#000}
 .pk-c.nova .pk-img{box-shadow:0 0 12px #ffd77a}
+
+/* correções da loja: linhas do grid não encolhem (preço sumia) e gema do item fica grande */
+.lj-grade { grid-auto-rows: max-content; }
+.lj-ic .ic-gema.premio-gema, .lj-ic.grande .ic-gema.premio-gema { width: 100% !important; height: 100% !important; }
+.pk-preco .ic-gema, .pk-bonus .ic-gema { display: inline-block; width: 20px; height: 20px; vertical-align: -4px; background-size: contain; background-repeat: no-repeat; }
+.lj-item { flex-shrink: 0; }
