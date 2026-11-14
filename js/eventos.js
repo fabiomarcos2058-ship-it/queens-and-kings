@@ -342,7 +342,7 @@ const Eventos = (() => {
   function darSonic(id) {
     const c = Ranque.darEvolucao(id);
     const col = Estado.d.colecao[id];
-    if (col) col.nivel = Math.max(col.nivel || 1, Math.min(9, Math.max(5, nivelMedioDeck() - 1)));
+    if (col) col.nivel = Math.max(col.nivel || 1, Math.min(Estado.NIVEL_CARTA_MAX, Math.max(5, nivelMedioDeck() - 1)));
     Estado.salvar();
     if (Conta.salvarAgora) Conta.salvarAgora().catch(() => {});
     return c;

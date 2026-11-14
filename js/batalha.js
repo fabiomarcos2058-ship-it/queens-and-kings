@@ -82,7 +82,7 @@ const Batalha = (() => {
       azul: lado(deck), vermelho: lado(deckIA),
       ent: torres(minhas, delas), proj: [], efeitos: [], agenda: [], selecionada: null, iaTimer: 2, id: 0,
       arenaId: (evento && evento.arena) || (ranque && ranque.arena) || Arena.daQtd(Estado.d.recorde).id,
-      nivelIA: (evento && evento.nivel) || (tutorial && 1) || Math.max(1, Math.min(9, Math.round(deck.reduce((a, id) => a + ((Estado.d.colecao[id] || {}).nivel || 1), 0) / deck.length) - (Mod.deckApelao() ? 0 : 2))),
+      nivelIA: (evento && evento.nivel) || (tutorial && 1) || Math.max(1, Math.min(Estado.NIVEL_CARTA_MAX, Math.round(deck.reduce((a, id) => a + ((Estado.d.colecao[id] || {}).nivel || 1), 0) / deck.length) - (Mod.deckApelao() ? 0 : 2))),
       rede, niveisV: x1 ? rede.convidado.niveis : null, eventos: [], snapTimer: 0,
       zenkais: x1 ? { vermelho: rede.convidado.zenkai || null } : {},
       ias: x1 ? [] : ['vermelho'],
@@ -105,7 +105,7 @@ const Batalha = (() => {
       if (evento.niveisV) s.niveisV = evento.niveisV;
       if (evento.cartaIA && !s.vermelho.fila.slice(0, 4).includes(evento.cartaIA)) { s.vermelho.fila[Math.floor(Math.random() * 4)] = evento.cartaIA; s.vermelho.deck = [...s.vermelho.fila]; }
       if (evento.elixirInicial) { s.azul.elixir = s.vermelho.elixir = evento.elixirInicial; }
-      if (evento.nivelIAMais) s.nivelIA = Math.max(1, Math.min(9, s.nivelIA + evento.nivelIAMais));
+      if (evento.nivelIAMais) s.nivelIA = Math.max(1, Math.min(Estado.NIVEL_CARTA_MAX, s.nivelIA + evento.nivelIAMais));
       if (evento.cartasViradas) s.viradas = true;
     }
     if (tutorial) { s.tutorial = tutorial; s.difIA = 1; s.nivelFixo = 1; s.iaTimer = 1e9; }
@@ -115,7 +115,7 @@ const Batalha = (() => {
       s.difMinRanque = ranque.difMin || 0; // Platina pra cima: a IA não alivia abaixo disso
       const media = Math.round(deck.reduce((a, id) => a + Estado.d.colecao[id].nivel, 0) / deck.length);
       // cartas básicas são mais fracas por natureza: o rival da ranqueada vem com elas 2 níveis acima pra luta ser justa (medido em teste)
-      s.nivelIA = ranque.basico ? Math.max(1, Math.min(11, media + ranque.nivelDelta + 2)) : Math.max(1, Math.min(9, media + ranque.nivelDelta));
+      s.nivelIA = ranque.basico ? Math.max(1, Math.min(Estado.NIVEL_CARTA_MAX, media + ranque.nivelDelta + 2)) : Math.max(1, Math.min(Estado.NIVEL_CARTA_MAX, media + ranque.nivelDelta));
     }
     if (dupla) {
       s.dupla = true;
@@ -131,7 +131,7 @@ const Batalha = (() => {
       s.iaTimer_vermelho2 = 3.2; s.iaTimer_azul2 = 2.6;
       // com 4 jogadores as torres aguentam mais
       for (const t of s.ent) if (t.torre) { t.max = Math.round(t.max * 1.9); t.vida = t.max; }
-      if (!Mod.deckApelao() && !ranque) s.nivelIA = Math.min(9, s.nivelIA + 1); // cartas da dupla rival no mesmo nível médio das suas
+      if (!Mod.deckApelao() && !ranque) s.nivelIA = Math.min(Estado.NIVEL_CARTA_MAX, s.nivelIA + 1); // cartas da dupla rival no mesmo nível médio das suas
     }
     const tituloRanq = ranque ? `🏅 Ranqueada${dupla ? ' 2v2' : ''} · vs ${ranque.rivais.map((b) => b.nome).join(' e ')}` : null;
     const humanosV = dupla ? [jog.vermelho, jog.vermelho2].filter(Boolean).map((p) => p.nome) : [];
@@ -145,7 +145,7 @@ const Batalha = (() => {
       if (!evento && Math.random() < Math.max(0.08, (ranque && ranque.chanceSuper) || 0)) {
         s.superIA = true;
         if (ranque) ranque.superIA = true; // a ranqueada paga (e cobra) bem mais contra ela
-        s.nivelIA = Math.min(ranque && ranque.basico ? 12 : 9, s.nivelIA + 1); // a super IA vem com cartas 1 nível mais fortes
+        s.nivelIA = Math.min(Estado.NIVEL_CARTA_MAX, s.nivelIA + 1); // a super IA vem com cartas 1 nível mais fortes
         if (s.niveisIA) s.niveisIA = {};
       }
     }

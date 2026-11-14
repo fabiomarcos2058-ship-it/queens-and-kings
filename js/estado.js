@@ -1,16 +1,17 @@
 // Progresso do jogador, salvo no navegador (localStorage).
 const Estado = (() => {
   const CHAVE = 'queens-and-kings-v3'; // v3: começa sem cartas e ganha as 8 básicas nos baús iniciais
-  const NIVEL_MAX = 9;
+  const NIVEL_MAX = 9; // Torre do Rei e torres de princesa
+  const NIVEL_CARTA_MAX = 12; // cartas vão até o 12
   // Para evoluir do nível N para N+1: cópias e ouro (índice = nível atual)
-  const COPIAS = [0, 2, 4, 10, 20, 50, 100, 200, 400]; // comuns
+  const COPIAS = [0, 2, 4, 10, 20, 50, 100, 200, 400, 600, 900, 1400]; // comuns
   // cópias para subir de nível conforme a raridade (cartas raras saem bem menos dos baús, então pedem menos)
   const COPIAS_RAR = {
     comum: COPIAS,
-    rara: [0, 2, 4, 8, 15, 30, 60, 110, 200],
-    epica: [0, 1, 2, 4, 8, 15, 30, 50, 90],
-    lendaria: [0, 1, 2, 3, 5, 8, 14, 22, 35],
-    ultra: [0, 1, 1, 2, 3, 4, 6, 9, 14], // só saem no Summon
+    rara: [0, 2, 4, 8, 15, 30, 60, 110, 200, 300, 450, 700],
+    epica: [0, 1, 2, 4, 8, 15, 30, 50, 90, 140, 210, 320],
+    lendaria: [0, 1, 2, 3, 5, 8, 14, 22, 35, 50, 70, 100],
+    ultra: [0, 1, 1, 2, 3, 4, 6, 9, 14, 20, 28, 40], // só saem no Summon
   };
   // cópias que a carta precisa para sair do nível n
   function copiasNivel(id, n) {
@@ -20,11 +21,11 @@ const Estado = (() => {
   const OURO = [0, 25, 80, 200, 500, 1200, 3000, 6000, 12000]; // tabela antiga (não é mais usada nas cartas)
   // ouro para evoluir do nível n ao n+1, conforme a raridade: comuns baratas, lendárias mais caras
   const OURO_RAR = {
-    comum: [0, 10, 25, 60, 150, 350, 700, 1400, 2500],
-    rara: [0, 15, 40, 100, 250, 500, 1000, 1900, 3400],
-    epica: [0, 25, 60, 150, 350, 700, 1400, 2600, 4500],
-    lendaria: [0, 40, 100, 250, 550, 1000, 1900, 3400, 6000],
-    ultra: [0, 60, 150, 350, 700, 1300, 2400, 4200, 7500],
+    comum: [0, 10, 25, 60, 150, 350, 700, 1400, 2500, 4000, 6000, 9000],
+    rara: [0, 15, 40, 100, 250, 500, 1000, 1900, 3400, 5500, 8500, 12500],
+    epica: [0, 25, 60, 150, 350, 700, 1400, 2600, 4500, 7000, 10500, 15000],
+    lendaria: [0, 40, 100, 250, 550, 1000, 1900, 3400, 6000, 9500, 14000, 20000],
+    ultra: [0, 60, 150, 350, 700, 1300, 2400, 4200, 7500, 12000, 18000, 26000],
   };
   function ouroNivel(id, n) {
     const c = typeof id === 'string' ? carta(id) : id;
@@ -269,11 +270,16 @@ const Estado = (() => {
     for (let z = (col && col.z) || 0; z < ZENKAI_MAX; z++) t += tab[z];
     return t;
   }
+  // Zenkai pede a carta no nível máximo (12); quem já tinha começado o Zenkai no nível 9 continua normalmente
+  function zenkaiNivelOk(id) {
+    const col = d.colecao[id], n = (col && col.nivel) || 1;
+    return n >= NIVEL_CARTA_MAX || (!!col && col.z > 0 && n >= NIVEL_MAX);
+  }
   function despertarZenkai(id) {
     const col = d.colecao[id], zk = zenkai(id);
     if (!col || !col.tem) return { ok: false, motivo: 'Você não tem essa carta' };
     if (!zk.ativo) return { ok: false, motivo: 'Essa carta ainda não tem Zenkai' };
-    if ((col.nivel || 1) < NIVEL_MAX) return { ok: false, motivo: `Chegue no nível ${NIVEL_MAX} primeiro` };
+    if (!zenkaiNivelOk(id)) return { ok: false, motivo: `Chegue no nível ${NIVEL_CARTA_MAX} primeiro` };
     if (zk.z >= ZENKAI_MAX) return { ok: false, motivo: 'Zenkai no máximo!' };
     if ((col.copias || 0) < zk.copias) return { ok: false, motivo: `Faltam cópias (${col.copias || 0}/${zk.copias})` };
     if (d.ouro < zk.ouro) return { ok: false, motivo: `Falta ouro (${zk.ouro})` };
@@ -304,7 +310,7 @@ const Estado = (() => {
 
   function podeEvoluir(id) {
     const n = d.colecao[id].nivel;
-    if (n >= NIVEL_MAX) return { ok: false, motivo: 'Nível máximo' };
+    if (n >= NIVEL_CARTA_MAX) return { ok: false, motivo: 'Nível máximo' };
     if (d.colecao[id].copias < copiasNivel(id, n)) return { ok: false, motivo: `Faltam cópias (${d.colecao[id].copias}/${copiasNivel(id, n)})` };
     if (d.ouro < ouroNivel(id, n)) return { ok: false, motivo: `Falta ouro (${ouroNivel(id, n)})` };
     return { ok: true };
@@ -348,7 +354,7 @@ const Estado = (() => {
     const col = d.colecao[id];
     if (!col) return Infinity;
     let falta = 0;
-    for (let n = col.nivel || 1; n < NIVEL_MAX; n++) falta += copiasNivel(id, n);
+    for (let n = col.nivel || 1; n < NIVEL_CARTA_MAX; n++) falta += copiasNivel(id, n);
     return Math.max(0, falta + zenkaiRestante(id) - (col.copias || 0)); // com Zenkai, as cópias continuam servindo depois do nível máximo
   }
   // carta no máximo (ou com cópias suficientes para chegar lá): não vem mais em baú, passe ou loja
@@ -556,7 +562,7 @@ const Estado = (() => {
   return {
     get d() { return d; }, carregar, salvar, apagar, importar, recarregarCatalogo, aoSalvar, carta, stats, catalogo: () => catalogo, tem, liberada, disponiveis, proximaLiberacao, baisAteLendaria,
     zenkai, zenkaiAtivo, zenkaiBonus, despertarZenkai, ZENKAI_ORDEM, zenkaiLiberadas, ZENKAI_INICIO, ZENKAI_RARAS, zenkaiRarasLiberadas, ZENKAI_RARAS_INICIO,
-    mitaAfeto, ganharAfeto, habilidade, ajustarHabilidade, registrarUsoVigiado, cansaco, nivelEfetivo, COPIAS, COPIAS_RAR, copiasNivel, OURO, OURO_RAR, ouroNivel, NIVEL_MAX, BAUS, XP_NIVEL, CORINGAS, darCoringa, usarCoringa, maxada, faltaParaMax,
+    mitaAfeto, ganharAfeto, habilidade, ajustarHabilidade, registrarUsoVigiado, cansaco, nivelEfetivo, COPIAS, COPIAS_RAR, copiasNivel, OURO, OURO_RAR, ouroNivel, NIVEL_MAX, NIVEL_CARTA_MAX, zenkaiNivelOk, BAUS, XP_NIVEL, CORINGAS, darCoringa, usarCoringa, maxada, faltaParaMax,
     contarUsos, usosRestantes, todasCartas: () => todas.filter((c) => !c.token),
     TORRE_OURO, TROPAS_TORRE, nivelRei, minhasTorres, statsTorre, podeEvoluirTorre, evoluirTorre, escolherTropaTorre,
     ganharXp, podeEvoluir, evoluir, abrirBau, tempoRestante, sortearCopias, ofertasDoDia, presenteDiario, sorteio,

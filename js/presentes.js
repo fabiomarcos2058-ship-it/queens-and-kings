@@ -95,7 +95,7 @@ const Presentes = (() => {
       Estado.recarregarCatalogo();
       const colc = d.colecao[c.id] || (d.colecao[c.id] = { nivel: 1, copias: 0, tem: false });
       colc.tem = true;
-      colc.nivel = Math.max(colc.nivel || 1, Math.min(Estado.NIVEL_MAX, Math.max(1, Math.round(p.nivel || 1))));
+      colc.nivel = Math.max(colc.nivel || 1, Math.min(Estado.NIVEL_CARTA_MAX, Math.max(1, Math.round(p.nivel || 1))));
       colc.copias += Math.max(0, Math.round(p.copias || 0));
       if (d.deck.length < 8 && !d.deck.includes(c.id)) d.deck.push(c.id);
       return true;

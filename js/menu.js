@@ -1423,7 +1423,7 @@
     const diasProx = Math.ceil(((Estado.ZENKAI_INICIO + Math.ceil(lib / 2) * 3 * 86400000) - Date.now()) / 86400000);
     const nome = (id) => (Estado.carta(id) ? Estado.carta(id).nome : id);
     const libR = Estado.zenkaiRarasLiberadas(), rr = Estado.ZENKAI_RARAS, novasR = rr.slice(Math.max(0, libR - 2), libR);
-    return `<div class="zenkai-faixa" style="grid-column:1/-1"><b>⚡ ZENKAI</b><span>Novas: <em>${novas.map(nome).join(' e ')}</em>${prox.length ? ` · Próximas em ${diasProx} dia${diasProx === 1 ? '' : 's'}: ${prox.map(nome).join(' e ')}` : ''}</span><span>Raras novas: <em>${novasR.map(nome).join(' e ')}</em></span><small>Cartas com Zenkai no nível ${Estado.NIVEL_MAX} usam as cópias extras pra despertar (até +15%).</small></div>`;
+    return `<div class="zenkai-faixa" style="grid-column:1/-1"><b>⚡ ZENKAI</b><span>Novas: <em>${novas.map(nome).join(' e ')}</em>${prox.length ? ` · Próximas em ${diasProx} dia${diasProx === 1 ? '' : 's'}: ${prox.map(nome).join(' e ')}` : ''}</span><span>Raras novas: <em>${novasR.map(nome).join(' e ')}</em></span><small>Cartas com Zenkai no nível ${Estado.NIVEL_CARTA_MAX} usam as cópias extras pra despertar (até +15%).</small></div>`;
   }
   // ---------- vários decks (igual ao Clash) ----------
   const N_DECKS = 5;
@@ -1485,11 +1485,11 @@
       if (u !== null) return `Nível ${col.nivel} · ${u} partida${u === 1 ? '' : 's'}`;
       const cz = Estado.cansaco(id);
       if (cz) return `😴 ${cz === 2 ? 'Exausto' : 'Cansado'} · Nv ${Estado.nivelEfetivo(id)}`;
-      return col.nivel >= Estado.NIVEL_MAX ? `Nível ${col.nivel} · máx` : `Nível ${col.nivel}`;
+      return col.nivel >= Estado.NIVEL_CARTA_MAX ? `Nível ${col.nivel} · máx` : `Nível ${col.nivel}`;
     };
     const barraCopias = (id) => {
       const col = d().colecao[id];
-      if (col.nivel >= Estado.NIVEL_MAX) return '';
+      if (col.nivel >= Estado.NIVEL_CARTA_MAX) return '';
       const prec = Estado.copiasNivel(id, col.nivel);
       const pode = Estado.podeEvoluir(id).ok;
       // tem as cópias, mas falta ouro: mostra quanto ouro precisa (antes parecia que era só tocar)
@@ -1670,12 +1670,12 @@
       else { trocando = id; cartas(); irPara('cartas'); }
     } });
     const zk = Estado.zenkai(id);
-    if (zk.ativo && col.nivel >= Estado.NIVEL_MAX && zk.z < zk.max) {
+    if (zk.ativo && Estado.zenkaiNivelOk(id) && zk.z < zk.max) {
       const pode = (col.copias || 0) >= zk.copias && d().ouro >= zk.ouro;
       botoes.push({ texto: `⚡ Zenkai ${zk.z + 1} · ${fmt(zk.ouro)} ouro`, classe: 'principal zenkai-btn', desativado: !pode, motivo: (col.copias || 0) < zk.copias ? `Faltam cópias (${col.copias || 0}/${zk.copias})` : `Falta ouro (${fmt(zk.ouro)})`,
         acao: () => { const antes = Estado.stats(id); const r = Estado.despertarZenkai(id); if (!r.ok) { UI.toast(r.motivo); return; } tudo(); zenkaiDespertou(id, antes, r.z); } });
     }
-    if (col.nivel < Estado.NIVEL_MAX) botoes.push({ texto: `Evoluir · ${fmt(Estado.ouroNivel(id, col.nivel))} ouro`, classe: 'principal', desativado: !ev.ok, motivo: ev.motivo,
+    if (col.nivel < Estado.NIVEL_CARTA_MAX) botoes.push({ texto: `Evoluir · ${fmt(Estado.ouroNivel(id, col.nivel))} ouro`, classe: 'principal', desativado: !ev.ok, motivo: ev.motivo,
       acao: () => {
         const antes = Estado.stats(id);
         const r = Estado.evoluir(id);
@@ -1688,14 +1688,14 @@
       html: `<div class="detalhe-carta">${c.evolucao ? `<div class="evo-palco"><video class="evo-video" src="assets/evolucao/raios.mp4" autoplay muted loop playsinline></video>${Cartas.html(c, { mini: true, vivo: true })}</div>` : Cartas.html(c, { mini: true, vivo: true })}
         <div><span class="raridade-tag ${c.evolucao ? 'evo' : c.raridade}">${c.evolucao ? '🧬 Evolução' : Cartas.NOMES_RARIDADE[c.raridade]}</span>
         <p class="tipo">${c.tipo} · ${c.custo} de elixir</p><p>${c.descricao}</p>
-        <p class="aviso">Nível ${col.nivel} · cópias ${col.copias}${col.nivel < Estado.NIVEL_MAX ? `/${Estado.copiasNivel(c, col.nivel)}` : ''}</p></div></div>
+        <p class="aviso">Nível ${col.nivel} · cópias ${col.copias}${col.nivel < Estado.NIVEL_CARTA_MAX ? `/${Estado.copiasNivel(c, col.nivel)}` : ''}</p></div></div>
         <div class="tabela-stats">${linhas.map(([k, v]) => `<div><span>${k}</span><b>${typeof v === 'number' ? fmt(v) : v}</b></div>`).join('')}</div>
         ${infoClasse(c)}
         ${c.evolucao ? `<div class="hab-detalhe evo-detalhe"><b>🧬 ${c.evolucao.nome}</b><br><small>${c.evolucao.descricao}</small></div>` : ''}
         ${c.habilidade ? `<div class="hab-detalhe"><b>⚡ ${c.habilidade.nome}</b> · ${c.habilidade.custo} de elixir<br><small>${c.habilidade.descricao} Durante a batalha, toque no botão da habilidade que aparece na arena.</small></div>` : ''}
         ${c.passiva ? `<div class="hab-detalhe passiva"><b>${c.passiva.tipo === 'esquiva' ? '✨' : '🧩'} ${c.passiva.nome}</b> · passiva (automática)<br><small>${c.passiva.descricao}</small></div>` : ''}
         ${zk.ativo ? `<div class="zenkai-detalhe"><b>⚡ ZENKAI</b><span class="zk-estrelas">${Array.from({ length: zk.max }, (_, i) => `<i class="${i < zk.z ? 'ok' : ''}">★</i>`).join('')}</span>
-          <small>${zk.z >= zk.max ? 'Zenkai máximo! +15% de vida e dano e ataca 10% mais rápido.' : col.nivel < Estado.NIVEL_MAX ? `Chegue no nível ${Estado.NIVEL_MAX} pra despertar o Zenkai. Cada estágio dá +2% de vida e dano; no Zenkai 7, +15% e ataque mais rápido.` : `Próximo estágio: ${zk.copias} cópias + ${fmt(zk.ouro)} ouro (você tem ${col.copias || 0} cópias). Bônus atual: +${Math.round(zk.bonus * 100)}%.`}</small></div>` : ''}`,
+          <small>${zk.z >= zk.max ? 'Zenkai máximo! +15% de vida e dano e ataca 10% mais rápido.' : !Estado.zenkaiNivelOk(id) ? `Chegue no nível ${Estado.NIVEL_CARTA_MAX} pra despertar o Zenkai. Cada estágio dá +2% de vida e dano; no Zenkai 7, +15% e ataque mais rápido.` : `Próximo estágio: ${zk.copias} cópias + ${fmt(zk.ouro)} ouro (você tem ${col.copias || 0} cópias). Bônus atual: +${Math.round(zk.bonus * 100)}%.`}</small></div>` : ''}`,
       botoes,
     });
   }
@@ -1980,7 +1980,7 @@
       const o = $q('#pres-opcoes');
       if (tipo === 'carta') {
         o.innerHTML = `<select id="pres-carta">${cartasTodas.filter((c) => !c.intransferivel).map((c) => `<option value="${c.id}">${c.nome}${c.exclusivo ? ' ⭐ exclusiva' : ''}</option>`).join('')}</select>
-          <div class="pres-linha"><label>Nível <select id="pres-nivel">${Array.from({ length: Estado.NIVEL_MAX }, (_, i) => `<option ${i + 1 === Estado.NIVEL_MAX ? 'selected' : ''}>${i + 1}</option>`).join('')}</select></label>
+          <div class="pres-linha"><label>Nível <select id="pres-nivel">${Array.from({ length: Estado.NIVEL_CARTA_MAX }, (_, i) => `<option ${i + 1 === Estado.NIVEL_CARTA_MAX ? 'selected' : ''}>${i + 1}</option>`).join('')}</select></label>
           <label>Cópias extras <input id="pres-copias" type="number" min="0" max="9999" value="0" /></label></div>
           <div id="pres-previa" class="pres-previa"></div>`;
         const previa = () => { const c = Estado.carta($q('#pres-carta').value); $q('#pres-previa').innerHTML = Cartas.html(c, { nivel: `Nível ${$q('#pres-nivel').value}` }); };

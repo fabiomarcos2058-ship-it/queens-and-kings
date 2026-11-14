@@ -28,7 +28,7 @@ const Mod = (() => {
       ['🃏 Cartas', [
         ['Desbloquear todas', () => { todas().forEach((c) => (d.colecao[c.id].tem = true)); d.recorde = Math.max(d.recorde, ...todas().map((c) => c.trofeus || 0)); }],
         ['+100 cópias de todas', () => { todas().forEach((c) => { d.colecao[c.id].tem = true; d.colecao[c.id].copias += 100; }); }],
-        ['Todas no nível máximo', () => { todas().forEach((c) => { d.colecao[c.id].tem = true; d.colecao[c.id].nivel = Estado.NIVEL_MAX; }); }],
+        ['Todas no nível máximo', () => { todas().forEach((c) => { d.colecao[c.id].tem = true; d.colecao[c.id].nivel = Estado.NIVEL_CARTA_MAX; }); }],
       ]],
       ['🎁 Baús', [
         ['Terminar tempo dos baús', () => { d.baus.forEach((b) => { if (b) b.inicio = 1; }); }],
