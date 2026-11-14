@@ -43,6 +43,7 @@ const Titulo = (() => {
         <div class="qk-meio"><i class="qk-fio"></i><span class="qk-and">and</span><i class="qk-fio dir"></i></div>
         <span class="qk-palavra qk-kings" data-t="Kings">Kings</span>
       </div>
+      <div class="qk-sub"><i></i><span>Batalha dos Multiversos</span><i></i></div>
       ${faisca(8, 30, 0)}${faisca(90, 24, 0.8)}${faisca(84, 78, 1.6)}${faisca(14, 82, 2.3)}${faisca(50, 4, 1.2)}`;
   }
 

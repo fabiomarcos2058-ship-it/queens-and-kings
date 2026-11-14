@@ -3617,3 +3617,9 @@ html.leve .passe-pegar-tudo { animation: none; }
 .hist-filtro span { margin-left: auto; font: 13px 'Lilita One', sans-serif; }
 .hist-filtro .sobe { color: #7CFFB0; } .hist-filtro .desce { color: #FF8A8A; }
 .lista-hist.so-ranq .hist:not(.eh-ranq) { display: none; }
+
+/* subtítulo do logo */
+.qk-sub { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+.qk-sub span { font: 700 min(4.3vw, 17px) 'Cinzel', 'Cinzel Decorative', 'Times New Roman', serif; letter-spacing: .16em; text-transform: uppercase; color: #FFF1C2; white-space: nowrap; text-shadow: 0 2px 0 #3A1E00, 0 0 10px #FFB100aa, 0 3px 8px #000c; }
+.qk-sub i { width: min(7vw, 30px); height: 2px; border-radius: 2px; background: linear-gradient(90deg, transparent, #FFD54F); }
+.qk-sub i:last-child { transform: scaleX(-1); }
