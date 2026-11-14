@@ -702,19 +702,24 @@ const Eventos = (() => {
   }
   // Treino Saiyajin: sobe o Zenkai do Vegeta SSJ4 e do Goku SSJ4 até o estágio do prêmio (nunca diminui)
   function darZenkaiSaiyajin(n) {
-    const novos = [];
+    const novos = []; let ouroExtra = 0;
     for (const id of SAIYAJINS) {
       if (!Estado.tem(id)) { const c = Ranque.darEvolucao(id); if (c) novos.push(c); }
       const col = Estado.d.colecao[id];
       if (col) {
+        const q = n >= 7 ? 300 : 60;
+        const jaMax = (col.nivel || 1) >= Estado.NIVEL_CARTA_MAX && (col.z || 0) >= Estado.zenkai(id).max;
+        if (jaMax) { ouroExtra += q * 100; } // personagem já no máximo: cada carta vale 100 moedas
+        else col.copias = (col.copias || 0) + q;
         col.z = Math.max(col.z || 0, Math.min(Estado.zenkai(id).max, n));
         col.nivel = Math.max(col.nivel || 1, Math.min(Estado.NIVEL_CARTA_MAX, 5 + n)); // vitória 7 = nível máximo
-        col.copias = (col.copias || 0) + (n >= 7 ? 300 : 60);
       }
     }
+    if (ouroExtra) Estado.d.ouro += ouroExtra;
     Estado.salvar();
     if (Conta.salvarAgora) Conta.salvarAgora().catch(() => {});
     if (novos[0]) revelarNino(novos[0], 'LENDÁRIA DO TREINO SAIYAJIN', '"Hmph. Você tem potencial, terráqueo."');
+    if (ouroExtra) UI.toast(`🪙 Já no máximo! As cartas viraram +${UI.fmt(ouroExtra)} moedas (1 carta = 100 🪙)`);
     UI.toast(n >= 7 ? '🐒 MAXIMIZADOS: nível 12, Zenkai 7 e +300 cartas cada!' : `💥 Zenkai ${n}, nível ${Math.min(Estado.NIVEL_CARTA_MAX, 5 + n)} e +60 cartas nos dois!`);
   }
   function darPremio(p, mostrarBau) {
