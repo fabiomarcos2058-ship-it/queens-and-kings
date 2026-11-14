@@ -1,18 +1,17 @@
-// Passe da temporada: 60 níveis por semana (acaba todo sábado às 14:30), três trilhas (Free, Plus, Ultra).
+// Passe da temporada: 60 níveis por semana (acaba todo domingo às 15:00, junto com a ranqueada), três trilhas (Free, Plus, Ultra).
 // Plus e Ultra são comprados com gemas (caros de propósito).
 const Passe = (() => {
   const NIVEIS = 60;
   const PONTOS_NIVEL = 30; // era 55 no passe mensal; semanal precisa de menos pontos por nível
   const PONTOS_NIVEL_ANTIGO = 55;
   const PRECO = { plus: 600, ultra: 1500 }; // Ultra já inclui o Plus
-  // Temporada semanal: acaba todo sábado às 14:30 (horário do aparelho). A primeira acaba em 21/11,
-  // pra ninguém perder o progresso do passe mensal de uma hora pra outra.
-  const PRIMEIRO_FIM = new Date(2026, 10, 21, 14, 30, 0).getTime();
+  // Temporada semanal: acaba todo domingo às 15:00 (horário do aparelho). A primeira acaba em 15/11.
+  const PRIMEIRO_FIM = new Date(2026, 10, 15, 15, 0, 0).getTime();
   function fimTemporada(agora = Date.now()) {
     if (agora < PRIMEIRO_FIM) return new Date(PRIMEIRO_FIM);
     const d = new Date(agora);
-    d.setHours(14, 30, 0, 0);
-    d.setDate(d.getDate() + ((6 - d.getDay() + 7) % 7));
+    d.setHours(15, 0, 0, 0);
+    d.setDate(d.getDate() + ((7 - d.getDay()) % 7)); // próximo domingo
     if (d.getTime() <= agora) d.setDate(d.getDate() + 7);
     return d;
   }
