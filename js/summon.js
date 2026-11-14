@@ -147,26 +147,6 @@ const Summon = (() => {
     chances: { ultra: 0.02, lendaria: 0.18, epica: 0.8 },
     // garantia do destaque: o Ainz vem com certeza na 200ª invocação sem ele neste banner
     pityDestaque: 200,
-  }, {
-    id: 'heranca',
-    nome: 'HERANÇA SAIYAJIN',
-    sub: 'Zaphir, o Saiyajin da Lua',
-    fim: new Date(2026, 10, 22, 23, 59, 59), // 22/11/2026
-    arte: 'assets/summon/heranca.jpg',
-    mini: 'assets/summon/heranca_mini.jpg',
-    centro: 'zaphir_estelar',
-    destaque: ['zaphir', 'zaphir_estelar', 'zaphir_carmesim', 'goku_isc', 'goku_pressagio'],
-    pool: {
-      ultra: ['zaphir_estelar', 'zaphir_carmesim', 'goku_blue_kaioken_remake', 'goku_deus_remake'],
-      lendaria: ['zaphir', 'goku_isc', 'goku_pressagio', 'goku_ssj4'],
-      epica: ['goku_ssj2', 'goku_ssj3'],
-      rara: ['goku_base', 'goku_ssj'],
-    },
-    // o Zaphir Estelar é o mais difícil; o Carmesim vem logo atrás
-    pesos: { zaphir_estelar: 1, zaphir_carmesim: 1.5, goku_blue_kaioken_remake: 3, goku_deus_remake: 3, zaphir: 2.5, goku_isc: 1.5, goku_pressagio: 1.5, goku_ssj4: 1.5 },
-    chances: { ultra: 0.02, lendaria: 0.15, epica: 0.43, rara: 0.4 },
-    // garantia do destaque: o Zaphir Estelar vem com certeza na 200ª invocação sem ele neste banner
-    pityDestaque: 200,
   }];
   // só os banners que ainda não acabaram
   const ativos = () => BANNERS.filter((b) => b.fim.getTime() > Date.now() && (!b.inicio || b.inicio.getTime() <= Date.now()));
