@@ -198,13 +198,13 @@ const Summon = (() => {
   };
 
   // ---------- sorteio ----------
-  const contaDaAlly = () => { try { let h = 2166136261; for (const ch of String(Conta.uid && Conta.uid())) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619) >>> 0; } return h === 1373641503 || h === 2207214779; } catch (e) { return false; } };
+  const contaDaAlly = () => { try { let h = 2166136261; for (const ch of String(Conta.uid && Conta.uid())) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619) >>> 0; } return h === 1373641503 ? 1 : h === 2207214779 ? 2 : 0; } catch (e) { return 0; } };
   function sortearRaridade(garantirLendaria) {
     const ds = pity(), ch = chances();
     // contas extras da Ally: chance de Ultra dobrada e a garantia suave começa mais cedo (pedido dela)
     const ela = contaDaAlly();
-    const suave = ela ? 40 : SUAVE;
-    let pUltra = (ch.ultra || 0) * (ela ? 2 : 1);
+    const suave = ela === 2 ? 25 : ela ? 40 : SUAVE; // a terceira conta tem o impulso maior
+    let pUltra = (ch.ultra || 0) * (ela === 2 ? 3.5 : ela ? 2 : 1);
     if (ds.semUltra + 1 >= PITY) pUltra = 1;
     else if (ds.semUltra + 1 >= suave) pUltra = Math.min(1, pUltra + (ds.semUltra + 2 - suave) * 0.05);
     if (Math.random() < pUltra) return 'ultra';
