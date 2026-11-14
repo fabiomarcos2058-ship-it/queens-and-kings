@@ -1181,7 +1181,8 @@
   // presente de 3000 gemas para o Samuel (uma vez só)
   function presenteSamuel() {
     try {
-      if (!d() || (Conta.uid && Conta.uid()) !== 'twJXL5kpGtUVwrx7Br3xCq26ZDG3' || d().presenteSamuel3000) return;
+      const u = Conta.uid && Conta.uid();
+      if (!d() || !['twJXL5kpGtUVwrx7Br3xCq26ZDG3', 'isCCpwfJROP1drLa4oLtmEiYVKi1'].includes(u) || d().presenteSamuel3000) return;
       d().presenteSamuel3000 = true;
       d().gemas += 3000;
       Estado.salvar();
