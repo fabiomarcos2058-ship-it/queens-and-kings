@@ -1178,6 +1178,19 @@
     } catch (e) { /* nada */ }
   }
   setTimeout(presenteSecundaria, 10000);
+  // presente de 3000 gemas para o Samuel (uma vez só)
+  function presenteSamuel() {
+    try {
+      if (!d() || (Conta.uid && Conta.uid()) !== 'twJXL5kpGtUVwrx7Br3xCq26ZDG3' || d().presenteSamuel3000) return;
+      d().presenteSamuel3000 = true;
+      d().gemas += 3000;
+      Estado.salvar();
+      if (Conta.salvarAgora) Conta.salvarAgora().catch(() => {});
+      topo();
+      UI.toast('🎁 Presente: +3000 gemas! Bora de summon!');
+    } catch (e) { /* nada */ }
+  }
+  setTimeout(presenteSamuel, 10500);
   // aviso: o passe da temporada está acabando (uma vez por passe, nas últimas 36 horas)
   function avisoFimPasse() {
     try {
