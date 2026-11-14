@@ -271,11 +271,11 @@ const Summon = (() => {
     // Summon Zenkai: guarda todas as cópias (só vira ouro se a carta já estiver no máximo E com Zenkai 7)
     if (copiasExtra) {
       const zk = Estado.zenkai(id);
-      if (falta <= 0 && zk.z >= 7) { const ouro = OURO_MAX[c.raridade] || 100; d.ouro += ouro; return { ouro }; }
+      if (falta <= 0 && zk.z >= 7) { const ouro = copiasExtra * 100; d.ouro += ouro; return { ouro }; } // 1 carta = 100 moedas
       col.copias += copiasExtra;
       return { copias: copiasExtra };
     }
-    if (falta <= 0) { const ouro = OURO_MAX[c.raridade] || 100; d.ouro += ouro; return { ouro }; }
+    if (falta <= 0) { const ouro = Math.max(OURO_MAX[c.raridade] || 100, (COPIAS[c.raridade] || 1) * 100); d.ouro += ouro; return { ouro }; } // 1 carta = 100 moedas (nunca menos que antes)
     const q = Math.min(falta, COPIAS[c.raridade] || 1);
     col.copias += q;
     return { copias: q };

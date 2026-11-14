@@ -377,7 +377,7 @@ const Estado = (() => {
     if (chanceNova > 0) d.semLendaria = veioLenda || !lendasFaltando.length ? 0 : (d.semLendaria || 0) + 1;
     const pool = minhas.length ? minhas : outras;
     // todas as suas cartas estão no máximo: o resto vira ouro
-    if (!pool.length && total > 0) { ganhos._ouro = total * 25; d.ouro += total * 25; total = 0; }
+    if (!pool.length && total > 0) { ganhos._ouro = total * 100; d.ouro += total * 100; total = 0; } // 1 carta = 100 moedas
     while (total > 0 && pool.length) {
       const c = pesado(pool);
       const q = Math.min(total, Math.max(1, Math.round(total * ({ comum: 0.32, rara: 0.2, epica: 0.1, lendaria: 0.05 }[c.raridade] || 0.2))));
