@@ -28,7 +28,7 @@ const Eventos = (() => {
     if (!d.festivalNino) d.festivalNino = { v: 0, l: 0, tentativas: 0, ativo: false };
     return d.festivalNino;
   }
-  const txtPremio = (p) => p.ouro && p.gemas ? `${p.gemas} 💎 + ${p.ouro} 🪙` : p.ouro ? `${p.ouro} 🪙` : p.gemas ? `${p.gemas} 💎` : p.bau ? `Baú de ${p.bau}` : p.carta ? 'NINO!' : '';
+  const txtPremio = (p) => p.zenkai ? `Zenkai ${p.zenkai} nos dois Saiyajins 💥` : p.ouro && p.gemas ? `${p.gemas} 💎 + ${p.ouro} 🪙` : p.ouro ? `${p.ouro} 🪙` : p.gemas ? `${p.gemas} 💎` : p.bau ? `Baú de ${p.bau}` : p.carta ? 'NINO!' : '';
 
   // ---------- montar o deck de cada modo ----------
   const embaralhar = (a) => { const b = [...a]; for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [b[i], b[j]] = [b[j], b[i]]; } return b; };
@@ -245,8 +245,23 @@ const Eventos = (() => {
   const diasDesafios = () => Math.max(0, Math.ceil((FIM_DESAFIOS.getTime() - Date.now()) / 86400000));
   const lendariasRival = () => embaralhar(pool((c) => c.raridade === 'lendaria')).slice(0, 8).map((c) => c.id);
   const FIM_CELESTIAL = new Date(2026, 10, 30, 23, 59, 59); // 30/11/2026
+  const FIM_ZENKAI = new Date(2026, 11, 5, 23, 59, 59); // 05/12/2026
+  const SAIYAJINS = ['vegeta_ssj4', 'goku_ssj4'];
   const ultrasRival = () => embaralhar(pool((c) => c.raridade === 'ultra')).slice(0, 8).map((c) => c.id);
   const DESAFIOS = {
+    zenkai: {
+      nome: 'Treino Saiyajin', vidas: 4, preco: 20, fim: FIM_ZENKAI,
+      premios: [1, 2, 3, 4, 5, 6, 7].map((z) => ({ zenkai: z })),
+      etapas: [
+        { nome: 'Sala da Gravidade', ic: '🌍', desc: 'Aquecimento na gravidade 10x. Vença e leve o Zenkai 1 do Vegeta SSJ4 e do Goku SSJ4!', cfg: { dif: 3 } },
+        { nome: 'Ki Explosivo', ic: '⚡', desc: 'Elixir 2x mais rápido. Prêmio: Zenkai 2 nos dois!', cfg: { elixirMult: 2, dif: 3 } },
+        { nome: 'Velocidade Saiyajin', ic: '💨', desc: 'Todas as tropas andam e atacam muito mais rápido. Prêmio: Zenkai 3!', cfg: { turbo: true, dif: 4 } },
+        { nome: 'Treino às Cegas', ic: '🙈', desc: 'Suas cartas ficam viradas: você só vê o custo. Prêmio: Zenkai 4!', cfg: { cartasViradas: true, dif: 4 } },
+        { nome: 'Orgulho Saiyajin', ic: '🦍', desc: 'O rival só joga com lendárias. Prêmio: Zenkai 5!', montar: (ev) => { ev.deckIA = lendariasRival(); }, cfg: { dif: 5 } },
+        { nome: 'Duelo Relâmpago', ic: '💀', desc: '2 minutos, tropas turbo e a primeira torre derrubada decide. Prêmio: Zenkai 6!', cfg: { subita: true, turbo: true, dif: 5 } },
+        { nome: 'Rival Supremo', ic: '🐒', desc: 'O chefe: a IA mais esperta, com o Goku SSJ4 no deck e 1 nível acima. Vença e leve o ZENKAI MÁXIMO (7) nos dois!', cfg: { dif: 6, cartaIA: 'goku_ssj4', nivelIAMais: 1 } },
+      ],
+    },
     celestial: {
       nome: 'Ascensão Celestial', vidas: 2, preco: 40, fim: FIM_CELESTIAL, arena: 'celestial',
       premios: [{ ouro: 500 }, { gemas: 25 }, { bau: 'ouro' }, { gemas: 50 }, { ouro: 1500 }, { bau: 'ouro' }, { gemas: 1000 }],
@@ -308,6 +323,7 @@ const Eventos = (() => {
     const D = DESAFIOS[k], f = dadosDesafio(k);
     if (!aberto(k)) { UI.toast('Esse evento já acabou 😢'); return; }
     if (k === 'celestial' && f.completo && !f.ativo) { UI.toast('Você já completou a Ascensão Celestial! 💎'); return; }
+    if (k === 'zenkai' && f.completo && !f.ativo) { UI.toast('Você já está com o Zenkai máximo! 🐒'); return; }
     if (!f.ativo) {
       if (f.tentativas > 0) {
         if (Estado.d.gemas < D.preco) { UI.toast(`Precisa de ${D.preco} gemas para tentar de novo`); return; }
@@ -387,7 +403,7 @@ const Eventos = (() => {
       if (f.v >= total) { f.ativo = false; f.completo = true; }
       Estado.salvar();
       const txt = premio.escolha ? 'Escolha um Sonic!' : premio.carta ? `${esc(Estado.carta(premio.carta).nome)}!` : txtPremio(premio);
-      UI.modal({ titulo: k === 'yugi' ? '🃏 Você venceu o duelo!' : k === 'cyber' ? '🌃 Missão cumprida!' : k === 'celestial' ? '👼 Mais um degrau!' : '💨 Venceu!', html: `<p class="ev-res">${f.v >= total ? `${D.nome} completo!` : `Vitória ${f.v}/${total}! Você ganhou <b>${txt}</b>`}</p>`, botoes: [{ texto: 'Oba!', classe: 'principal' }] });
+      UI.modal({ titulo: k === 'yugi' ? '🃏 Você venceu o duelo!' : k === 'cyber' ? '🌃 Missão cumprida!' : k === 'celestial' ? '👼 Mais um degrau!' : k === 'zenkai' ? '🐒 Zenkai!' : '💨 Venceu!', html: `<p class="ev-res">${f.v >= total ? `${D.nome} completo!` : `Vitória ${f.v}/${total}! Você ganhou <b>${txt}</b>`}</p>`, botoes: [{ texto: 'Oba!', classe: 'principal' }] });
       setTimeout(() => {
         if (premio.escolha) escolherSonic(tudo);
         else if (premio.carta) {
@@ -431,6 +447,18 @@ const Eventos = (() => {
       <b class="cel-titulo">👼 ${D.nome}</b><span>${f.completo ? 'Você subiu até o topo do céu e levou as 1000 gemas! 🎉' : `${total} batalhas difíceis no <b>Santuário Celestial</b>, uma arena nova. Só ${D.vidas} vidas! Vença o Guardião no final e leve <b class="cel-gemas">1000 💎</b> · ${dias} dias`}</span>
       <div class="fn-pips">${pips}</div><div class="fn-linha"><div class="fn-vidas">${vidas}</div>${botao}</div></div></div>`;
   }
+  function caixaZenkai(D, f, total) {
+    const pips = D.etapas.map((E, i) => `<span class="fn-pip${i < f.v ? ' ok' : ''}${i === total - 1 ? ' final' : ''}" title="${esc(E.nome)}">${i === total - 1 ? '🐒' : `Z${i + 1}`}</span>`).join('');
+    const vidas = Array.from({ length: D.vidas }, (_, i) => `<i class="${i < D.vidas - f.l ? '' : 'perdida'}">🔥</i>`).join('');
+    const prox = D.etapas[Math.min(f.v, total - 1)];
+    const dias = Math.max(0, Math.ceil((D.fim.getTime() - Date.now()) / 86400000));
+    const z = (id) => (Estado.d.colecao[id] && Estado.d.colecao[id].z) || 0;
+    const botao = f.completo && !f.ativo ? '<div class="selo">Zenkai máximo! 🐒</div>' : `<button class="selo botao" data-desafio="zenkai">${f.ativo ? `Jogar: ${prox.nome}` : f.tentativas ? `De novo · ${D.preco} 💎` : 'Começar (grátis)'}</button>`;
+    return `<div class="desafio-caixa zenkai"><div class="sonic-fundo">${SAIYAJINS.map((id) => `<img src="assets/cartas/${id}.jpg" alt="" />`).join('')}</div><div class="mc-conteudo">
+      <b>🐒 ${D.nome}</b><span>${f.completo ? 'Vegeta SSJ4 e Goku SSJ4 estão no Zenkai máximo! 🎉' : `${total} treinos. Cada vitória dá +1 Zenkai no <b>Vegeta SSJ4</b> e no <b>Goku SSJ4</b>; a última leva os dois ao <b>Zenkai MÁXIMO (7)</b>! Se não tiver a carta, ela vem de brinde. · ${dias} dias`}</span>
+      <small class="modo-tempo">Zenkai agora: Vegeta ${z('vegeta_ssj4')}/7 · Goku ${z('goku_ssj4')}/7</small>
+      <div class="fn-pips">${pips}</div><div class="fn-linha"><div class="fn-vidas">${vidas}</div>${botao}</div></div></div>`;
+  }
   function htmlDesafios() {
     if (!desafiosAbertos()) return '';
     const caixa = (k) => {
@@ -438,6 +466,7 @@ const Eventos = (() => {
       const D = DESAFIOS[k], f = dadosDesafio(k), total = D.etapas.length;
       if (k === 'cyber') return caixaCyber(D, f, total);
       if (k === 'celestial') return caixaCelestial(D, f, total);
+      if (k === 'zenkai') return caixaZenkai(D, f, total);
       const pips = D.etapas.map((E, i) => `<span class="fn-pip${i < f.v ? ' ok' : ''}${i === total - 1 ? ' final' : ''}" title="${esc(E.nome)}">${i === total - 1 ? (k === 'yugi' ? `<img src="assets/cartas/${YUGI}_medalhao.png" alt="" />` : '<img src="assets/cartas/sonic_medalhao.png" alt="" />') : E.ic}</span>`).join('');
       const vidas = Array.from({ length: D.vidas }, (_, i) => `<i class="${i < D.vidas - f.l ? '' : 'perdida'}">${k === 'yugi' ? '🃏' : '💍'}</i>`).join('');
       const prox = D.etapas[Math.min(f.v, total - 1)];
@@ -451,7 +480,7 @@ const Eventos = (() => {
         <div class="fn-pips">${pips}</div><div class="fn-linha"><div class="fn-vidas">${vidas}</div>${botao}</div>
         ${k === 'yugi' ? `<button class="fn-ver" data-ver="${YUGI}">Ver a carta</button>` : '<button class="fn-ver" data-ver-sonic="1">Ver os Sonics</button>'}</div></div>`;
     };
-    return `<div class="desafios-evento"><div class="mitas-cab"><small>EVENTOS NOVOS</small><b>⚔️ Desafios Lendários</b></div>${caixa('celestial')}${caixa('cyber')}${caixa('yugi')}${caixa('sonic')}</div>`;
+    return `<div class="desafios-evento"><div class="mitas-cab"><small>EVENTOS NOVOS</small><b>⚔️ Desafios Lendários</b></div>${caixa('zenkai')}${caixa('celestial')}${caixa('cyber')}${caixa('yugi')}${caixa('sonic')}</div>`;
   }
 
   // ---------- eventos de gemas ----------
@@ -479,9 +508,58 @@ const Eventos = (() => {
       if (!Estado.d || !n) return;
       const c = dadosCaca();
       CACA.forEach((m, i) => { if (m.tipo === tipo && c.prog[i] < m.alvo) c.prog[i] = Math.min(m.alvo, c.prog[i] + n); });
+      const dg = dadosDiarias();
+      DIARIAS.forEach((m, i) => { if (m.tipo === tipo && dg.prog[i] < m.alvo) dg.prog[i] = Math.min(m.alvo, dg.prog[i] + n); });
     } catch (e) { /* nunca quebra a batalha */ }
   }
-  const cacaProntas = () => { const c = dadosCaca(); return CACA.filter((m, i) => c.prog[i] >= m.alvo && !c.pego[i]).length; };
+  // Missões Diárias de Farm: pagam ouro e gemas, zeram todo dia
+  const DIARIAS = [
+    { tipo: 'vitorias', alvo: 3, txt: 'Vença 3 batalhas', ouro: 1500 },
+    { tipo: 'coroas', alvo: 8, txt: 'Ganhe 8 coroas', g: 15 },
+    { tipo: 'evento', alvo: 2, txt: 'Jogue 2 batalhas de evento', ouro: 1000 },
+    { tipo: 'dupla', alvo: 1, txt: 'Jogue 1 batalha 2v2', g: 10 },
+    { tipo: 'habilidades', alvo: 8, txt: 'Use 8 habilidades especiais', ouro: 800 },
+    { tipo: 'ranqueada', alvo: 2, txt: 'Vença 2 ranqueadas', g: 25 },
+  ];
+  const DIARIA_BONUS = { ouro: 3000, g: 40 };
+  function dadosDiarias() {
+    const d = Estado.d;
+    if (!d.diariasFarm || d.diariasFarm.dia !== diaTxt()) d.diariasFarm = { dia: diaTxt(), prog: DIARIAS.map(() => 0), pego: DIARIAS.map(() => false), bonus: false };
+    return d.diariasFarm;
+  }
+  function pegarDiaria(i) {
+    const c = dadosDiarias(), m = DIARIAS[i];
+    if (!m || c.pego[i] || c.prog[i] < m.alvo) return null;
+    c.pego[i] = true;
+    let ouro = m.ouro || 0, g = m.g || 0, bonus = false;
+    if (!c.bonus && c.pego.every(Boolean)) { c.bonus = true; bonus = true; ouro += DIARIA_BONUS.ouro; g += DIARIA_BONUS.g; }
+    Estado.d.ouro += ouro; Estado.d.gemas += g; Estado.salvar();
+    return { ouro, g, bonus };
+  }
+  // Minas: batalhas de farm (uma de ouro, uma de cristais) com limite diário
+  const FARMA = {
+    ouro: { nome: 'Mina de Ouro', ic: '🪙', cor: 'dourado', limite: 10000, vit: 700, coroa: 150, emp: 300, der: 120, desc: 'Elixir mais rápido e batalhas curtas. Vitória = 700 🪙 (+150 por coroa).', cfg: { elixirMult: 1.5 } },
+    cristal: { nome: 'Mina de Cristais', ic: '💎', cor: 'azul', limite: 300, vit: 30, coroa: 8, emp: 10, der: 4, desc: 'Cristais brutos! Vitória = 30 💎 (+8 por coroa). Tropas turbo!', cfg: { turbo: true } },
+  };
+  function dadosFarma() {
+    const d = Estado.d;
+    if (!d.farmaDia || d.farmaDia.dia !== diaTxt()) d.farmaDia = { dia: diaTxt(), ouro: 0, cristal: 0 };
+    return d.farmaDia;
+  }
+  function jogarFarma(tipo, iniciar) {
+    const F = FARMA[tipo], h = dadosFarma();
+    if (h[tipo] >= F.limite) UI.toast(`Você já esgotou a ${F.nome} de hoje! Volta amanhã 😉`);
+    iniciar({ id: `farma-${tipo}`, nome: F.nome, farma: tipo, ...F.cfg });
+  }
+  function ganharFarma(tipo, q) {
+    const F = FARMA[tipo], h = dadosFarma();
+    const g = Math.max(0, Math.min(q, F.limite - h[tipo]));
+    h[tipo] += g;
+    if (tipo === 'ouro') Estado.d.ouro += g; else Estado.d.gemas += g;
+    Estado.salvar();
+    return g;
+  }
+  const cacaProntas = () => { const c = dadosCaca(); const dg = dadosDiarias(); return CACA.filter((m, i) => c.prog[i] >= m.alvo && !c.pego[i]).length + DIARIAS.filter((m, i) => dg.prog[i] >= m.alvo && !dg.pego[i]).length; };
   function pegarCaca(i) {
     const c = dadosCaca(), m = CACA[i];
     if (!m || c.pego[i] || c.prog[i] < m.alvo) return 0;
@@ -524,6 +602,21 @@ const Eventos = (() => {
       <span class="cg-desc">Missões da semana que pagam só gemas: até <b>${total} 💎</b>. Completou todas? Bônus de <b>+${CACA_BONUS} 💎</b>${c.bonus ? ' (pego ✓)' : ''}.</span>${linhas}</div>${fds}`;
   }
 
+  function htmlFarm() {
+    const c = dadosDiarias(), h = dadosFarma();
+    const feitas = c.pego.filter(Boolean).length;
+    const linhas = DIARIAS.map((m, i) => {
+      const pronto = c.prog[i] >= m.alvo, txt = [m.ouro ? `${UI.fmt(m.ouro)} 🪙` : '', m.g ? `${m.g} 💎` : ''].filter(Boolean).join(' + ');
+      return `<div class="cg-linha${c.pego[i] ? ' pega' : pronto ? ' pronta' : ''}"><div><b>${m.txt}</b><div class="ev-barra"><i style="width:${(c.prog[i] / m.alvo) * 100}%"></i><small>${c.prog[i]}/${m.alvo}</small></div></div>
+        ${c.pego[i] ? '<span class="cg-ok">✓</span>' : pronto ? `<button class="selo botao" data-diaria="${i}">+${txt}</button>` : `<span class="cg-premio">${txt}</span>`}</div>`;
+    }).join('');
+    const minas = Object.entries(FARMA).map(([k, F]) => `<div class="evento modo-ev ${F.cor}"><span class="modo-ic">${F.ic}</span><div><b>${F.nome}</b><span>${F.desc}</span>
+        <div class="ev-barra"><i style="width:${(h[k] / F.limite) * 100}%"></i><small>${UI.fmt(h[k])}/${UI.fmt(F.limite)} hoje</small></div></div>
+        <button class="selo botao" data-farma="${k}">Jogar</button></div>`).join('');
+    return `<div class="caca-gemas"><div class="cg-topo"><b>🪙 Missões Diárias de Farm</b><small>${feitas}/${DIARIAS.length} · zera hoje à meia-noite</small></div>
+      <span class="cg-desc">Ouro e cristais todo dia! Completou todas? Bônus de <b>+${UI.fmt(DIARIA_BONUS.ouro)} 🪙 e +${DIARIA_BONUS.g} 💎</b>${c.bonus ? ' (pego ✓)' : ''}.</span>${linhas}</div>${minas}`;
+  }
+
   // ---------- tela (dentro da aba Eventos) ----------
   function html() {
     const f = nino();
@@ -553,13 +646,15 @@ const Eventos = (() => {
         <small class="modo-tempo">Você tem <b>${UI.fmt(Estado.d.tokens || 0)}</b> tokens</small></div>
         <div class="ev-tk-botoes"><button class="selo botao" id="tk-jogar">Jogar</button><button class="selo botao tk-trocar" id="tk-trocar">Trocar</button></div></div>`;
     // três abas pra tela não virar uma lista sem fim: Gemas, Desafios e Modos
-    return `<div class="ev-sec" data-sec="gemas">${htmlGemas()}${tokens}</div>
+    return `<div class="ev-sec" data-sec="gemas">${htmlGemas()}${htmlFarm()}${tokens}</div>
       <div class="ev-sec" data-sec="desafios">${htmlDesafios()}${htmlMitas()}${festival}</div>
       <div class="ev-sec" data-sec="modos">${typeof TD !== 'undefined' ? TD.htmlEvento() : ''}<div class="eventos-cab">🎪 Modos de hoje</div>${modos}</div>`;
   }
   function ligar(raiz, { iniciar, verCarta }) {
     if (typeof TD !== 'undefined') TD.ligar(raiz);
     raiz.querySelectorAll('[data-caca]').forEach((b) => (b.onclick = () => { const g = pegarCaca(+b.dataset.caca); if (g) { UI.toast(`+${g} 💎`); if (window.MenuAPI) window.MenuAPI.tudo(); } }));
+    raiz.querySelectorAll('[data-diaria]').forEach((b) => (b.onclick = () => { const r = pegarDiaria(+b.dataset.diaria); if (r) { UI.toast(`+${[r.ouro ? UI.fmt(r.ouro) + ' 🪙' : '', r.g ? r.g + ' 💎' : ''].filter(Boolean).join(' e ')}${r.bonus ? ' (bônus incluso!)' : ''}`); if (window.MenuAPI) window.MenuAPI.tudo(); } }));
+    raiz.querySelectorAll('[data-farma]').forEach((b) => (b.onclick = () => jogarFarma(b.dataset.farma, iniciar)));
     raiz.querySelectorAll('[data-modo]').forEach((b) => (b.onclick = () => jogarModo(b.dataset.modo, iniciar)));
     const j = raiz.querySelector('#fn-jogar');
     if (j) j.onclick = () => jogarFestival(iniciar);
@@ -605,8 +700,22 @@ const Eventos = (() => {
     try { navigator.vibrate && navigator.vibrate([80, 50, 160]); } catch (e) { /* nada */ }
     el.querySelector('button').onclick = () => { el.classList.add('sumir'); setTimeout(() => el.remove(), 300); };
   }
+  // Treino Saiyajin: sobe o Zenkai do Vegeta SSJ4 e do Goku SSJ4 até o estágio do prêmio (nunca diminui)
+  function darZenkaiSaiyajin(n) {
+    const novos = [];
+    for (const id of SAIYAJINS) {
+      if (!Estado.tem(id)) { const c = Ranque.darEvolucao(id); if (c) novos.push(c); }
+      const col = Estado.d.colecao[id];
+      if (col) col.z = Math.max(col.z || 0, Math.min(Estado.zenkai(id).max, n));
+    }
+    Estado.salvar();
+    if (Conta.salvarAgora) Conta.salvarAgora().catch(() => {});
+    if (novos[0]) revelarNino(novos[0], 'LENDÁRIA DO TREINO SAIYAJIN', '"Hmph. Você tem potencial, terráqueo."');
+    UI.toast(n >= 7 ? '🐒 ZENKAI MÁXIMO no Vegeta e no Goku SSJ4!' : `💥 Zenkai ${n} no Vegeta e no Goku SSJ4!`);
+  }
   function darPremio(p, mostrarBau) {
     const d = Estado.d;
+    if (p.zenkai) { darZenkaiSaiyajin(p.zenkai); return; }
     if (p.ouro) d.ouro += p.ouro;
     if (p.gemas) d.gemas += p.gemas;
     Estado.salvar();
@@ -645,6 +754,19 @@ const Eventos = (() => {
       UI.modal({
         titulo: acabou ? '💔 Fim do desafio' : r.resultado === 'empate' ? 'Empate!' : 'Derrota',
         html: `<p class="ev-res">${acabou ? `Você chegou a <b>${f.v}</b> vitória${f.v === 1 ? '' : 's'}. Dá pra tentar de novo por ${PRECO_NOVA} 💎!` : r.resultado === 'empate' ? 'Empate não conta. Bora de novo!' : `Ainda restam <b>${VIDAS - f.l}</b> vida${VIDAS - f.l === 1 ? '' : 's'}.`}</p>`,
+        botoes: [{ texto: 'OK', classe: 'principal', acao: () => tudo() }],
+      });
+      return;
+    }
+    if (ev.farma) {
+      const F = FARMA[ev.farma];
+      const q = ganhou ? F.vit + (r.coroas || 0) * F.coroa : r.resultado === 'empate' ? F.emp : F.der;
+      const got = ganharFarma(ev.farma, q);
+      if (ganhou) d.vitorias++; else if (r.resultado === 'derrota') d.derrotas++;
+      Estado.salvar();
+      UI.modal({
+        titulo: ganhou ? `🎉 Vitória na ${esc(F.nome)}!` : r.resultado === 'empate' ? 'Empate!' : `Derrota na ${esc(F.nome)}`,
+        html: `<p class="ev-res">${r.coroas} 👑 x ${r.coroasInimigo} 👑<br />${got ? `+${UI.fmt(got)} ${F.ic}` : `<small>Limite de hoje atingido</small>`}</p>`,
         botoes: [{ texto: 'OK', classe: 'principal', acao: () => tudo() }],
       });
       return;

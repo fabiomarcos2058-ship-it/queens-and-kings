@@ -252,7 +252,9 @@ const Estado = (() => {
   const ZENKAI_OURO = [500, 1000, 1500, 2000, 3000, 4000, 5000];
   const zenkaiLiberadas = () => Math.min(ZENKAI_ORDEM.length, 2 * (Math.floor(Math.max(0, Date.now() - ZENKAI_INICIO) / (3 * 86400000)) + 1));
   const zenkaiRarasLiberadas = () => Math.min(ZENKAI_RARAS.length, 2 * (Math.floor(Math.max(0, Date.now() - ZENKAI_RARAS_INICIO) / (3 * 86400000)) + 1));
-  const zenkaiAtivo = (id) => { const i = ZENKAI_ORDEM.indexOf(id); if (i >= 0) return i < zenkaiLiberadas(); const j = ZENKAI_RARAS.indexOf(id); return j >= 0 && j < zenkaiRarasLiberadas(); };
+  // lendárias com Zenkai liberado o tempo todo (evento Treino Saiyajin)
+  const ZENKAI_EVENTO = ['vegeta_ssj4', 'goku_ssj4'];
+  const zenkaiAtivo = (id) => { if (ZENKAI_EVENTO.includes(id)) return true; const i = ZENKAI_ORDEM.indexOf(id); if (i >= 0) return i < zenkaiLiberadas(); const j = ZENKAI_RARAS.indexOf(id); return j >= 0 && j < zenkaiRarasLiberadas(); };
   // bônus de vida e dano: +2% por estágio, +15% no Zenkai 7
   const zenkaiBonus = (z) => (z >= 7 ? 0.15 : 0.02 * (z || 0));
   function zenkai(id) {
@@ -561,7 +563,7 @@ const Estado = (() => {
 
   return {
     get d() { return d; }, carregar, salvar, apagar, importar, recarregarCatalogo, aoSalvar, carta, stats, catalogo: () => catalogo, tem, liberada, disponiveis, proximaLiberacao, baisAteLendaria,
-    zenkai, zenkaiAtivo, zenkaiBonus, despertarZenkai, ZENKAI_ORDEM, zenkaiLiberadas, ZENKAI_INICIO, ZENKAI_RARAS, zenkaiRarasLiberadas, ZENKAI_RARAS_INICIO,
+    zenkai, zenkaiAtivo, ZENKAI_EVENTO, zenkaiBonus, despertarZenkai, ZENKAI_ORDEM, zenkaiLiberadas, ZENKAI_INICIO, ZENKAI_RARAS, zenkaiRarasLiberadas, ZENKAI_RARAS_INICIO,
     mitaAfeto, ganharAfeto, habilidade, ajustarHabilidade, registrarUsoVigiado, cansaco, nivelEfetivo, COPIAS, COPIAS_RAR, copiasNivel, OURO, OURO_RAR, ouroNivel, NIVEL_MAX, NIVEL_CARTA_MAX, zenkaiNivelOk, BAUS, XP_NIVEL, CORINGAS, darCoringa, usarCoringa, maxada, faltaParaMax,
     contarUsos, usosRestantes, todasCartas: () => todas.filter((c) => !c.token),
     TORRE_OURO, TROPAS_TORRE, nivelRei, minhasTorres, statsTorre, podeEvoluirTorre, evoluirTorre, escolherTropaTorre,
