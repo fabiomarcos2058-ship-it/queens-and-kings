@@ -4190,6 +4190,132 @@
         "mult": 1.1,
         "descricao": "Faz chover 4 estrelinhas de ki, mais uma por estrelinha que ele já guardou (até 10), cada uma explodindo em área em cima dos inimigos mais perto."
       }
+    },
+    {
+      "trofeus": 0,
+      "exclusivo": [],
+      "summon": true,
+      "alvo": "tudo",
+      "arena": 1,
+      "rosto": [
+        360,
+        350,
+        120
+      ],
+      "arte": [
+        60,
+        40,
+        600
+      ],
+      "alcance": 18,
+      "id": "zaphir",
+      "nome": "Zaphir",
+      "raridade": "lendaria",
+      "custo": 5,
+      "tipo": "Saiyajin Original · Guerreiro das Estrelas",
+      "descricao": "Um Saiyajin criado só pro nosso jogo: o último guerreiro do clã da Lua Crescente. Calmo por fora, mas o sangue dele só esquenta.",
+      "vida": 1180,
+      "dano": 205,
+      "velocidade": 78,
+      "cadencia": 0.9,
+      "danoTorre": 0.55,
+      "passiva": {
+        "nome": "Sangue da Lua",
+        "tipo": "sangueLua",
+        "descricao": "Cada golpe cura 0,8% da vida máxima dele. Voa sobre o campo."
+      },
+      "habilidade": {
+        "nome": "Despertar de Zaphir",
+        "tipo": "furia",
+        "custo": 2,
+        "duracao": 5,
+        "recarga": 14,
+        "descricao": "Por 5s ataca mais rápido, anda mais rápido e causa +30% de dano."
+      }
+    },
+    {
+      "trofeus": 0,
+      "exclusivo": [],
+      "summon": true,
+      "alvo": "tudo",
+      "arena": 1,
+      "rosto": [
+        360,
+        350,
+        120
+      ],
+      "arte": [
+        60,
+        40,
+        600
+      ],
+      "alcance": 18,
+      "id": "zaphir_carmesim",
+      "nome": "Zaphir Fúria Carmesim",
+      "raridade": "ultra",
+      "custo": 6,
+      "tipo": "Ultra · Fúria Carmesim",
+      "descricao": "O sangue do clã ferve: cabelo vermelho, olhos em brasa e uma raiva que cresce a cada ferida.",
+      "vida": 1500,
+      "dano": 215,
+      "velocidade": 84,
+      "cadencia": 0.85,
+      "danoTorre": 0.55,
+      "passiva": {
+        "nome": "Fúria que Cresce",
+        "tipo": "furiaCarmesim",
+        "descricao": "Bate mais rápido quanto menos vida tem (até +45%) e cura 20% do dano que causa."
+      },
+      "habilidade": {
+        "nome": "Rajada Carmesim",
+        "tipo": "kamehameha",
+        "custo": 4,
+        "recarga": 18,
+        "dano": 900,
+        "descricao": "Dispara uma rajada carmesim que atravessa tudo em linha reta (30% do dano nas torres)."
+      }
+    },
+    {
+      "trofeus": 0,
+      "exclusivo": [],
+      "summon": true,
+      "alvo": "tudo",
+      "arena": 1,
+      "rosto": [
+        360,
+        350,
+        120
+      ],
+      "arte": [
+        60,
+        40,
+        600
+      ],
+      "alcance": 18,
+      "id": "zaphir_estelar",
+      "nome": "Zaphir Ascensão Estelar",
+      "raridade": "ultra",
+      "custo": 7,
+      "tipo": "Ultra · Ascensão Estelar",
+      "descricao": "A forma lendária do clã da Lua: cabelo de estrela, aura de cosmos e calma absoluta.",
+      "vida": 1560,
+      "dano": 205,
+      "velocidade": 80,
+      "cadencia": 0.9,
+      "danoTorre": 0.55,
+      "passiva": {
+        "nome": "Escudo Estelar",
+        "tipo": "escudoEstelar",
+        "descricao": "Começa com escudo de 25% da vida, cada golpe cura 0,6% da vida e 25% dos golpes são críticos (2x de dano)."
+      },
+      "habilidade": {
+        "nome": "Ascensão Estelar",
+        "tipo": "furia",
+        "custo": 3,
+        "duracao": 6,
+        "recarga": 18,
+        "descricao": "Por 6s ataca mais rápido, anda mais rápido e causa +30% de dano."
+      }
     }
   ]
 }

@@ -3,7 +3,7 @@
 Uso: python tools/montar_cartas.py
 Lê assets/cartas/cartas.json e as imagens em assets/cartas/originais/<id>.(jpg|png).
 """
-import json
+import json, sys
 from pathlib import Path
 from PIL import Image, ImageDraw
 
@@ -20,6 +20,8 @@ def original(id_):
 
 
 for c in json.loads((PASTA / 'cartas.json').read_text(encoding='utf-8'))['cartas']:
+    if len(sys.argv) > 1 and c['id'] not in sys.argv[1:]:
+        continue  # só os ids pedidos
     if c.get('feitico') or c.get('imagem') or c.get('token'):
         continue  # feitiços, barril e minis usam imagens próprias
     try:
