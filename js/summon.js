@@ -635,5 +635,5 @@ const Summon = (() => {
     return b ? { arte: b.titulo, nome: b.nome, sub: b.sub, tempo: tempo(b) } : null;
   }
 
-  return { abrir, fechar, invocar, info, htmlBotao, tituloAtual, premiosChegada, dados, chances, pool, sortear, banner, PRECO1, PRECO10, PITY };
+  return { abrir, fechar, invocar, info, htmlBotao, tituloAtual, premiosChegada, receber, dados, chances, pool, sortear, banner, PRECO1, PRECO10, PITY };
 })();

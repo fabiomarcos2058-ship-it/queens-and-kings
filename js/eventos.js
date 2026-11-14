@@ -122,9 +122,10 @@ const Eventos = (() => {
     saiyajin: { nome: 'Medalha Saiyajin', curto: 'Saiyajin', ic: 'assets/ui/medalha_saiyajin.svg', cor: 'vermelho', como: 'Vença batalhas no Treino Saiyajin.' },
     estelar: { nome: 'Medalha Estelar', curto: 'Estelar', ic: 'assets/ui/medalha_estelar.svg', cor: 'roxo', como: 'Complete as missões diárias e a Caça às Gemas, e vença ranqueadas.' },
     heroi: { nome: 'Medalha de Herói', curto: 'Herói', ic: 'assets/ui/medalha_heroi.svg', cor: 'verde', como: 'Vença batalhas nos desafios e nos eventos especiais.' },
+    pacotes: { nome: 'Pacotes', curto: 'Pacotes', ic: 'assets/ui/gema.svg', cor: 'rosa', como: 'Pacotes de personagens dos banners. Custam gemas e cada um só pode ser comprado uma vez.' },
     tokens: { nome: 'Tokens', curto: 'Tokens', ic: 'assets/ui/token.svg', cor: 'dourado', como: 'Ganhe tokens na Caça aos Tokens e nas batalhas de evento.' },
   };
-  const saldoMoeda = (m) => (m === 'tokens' ? Estado.d.tokens || 0 : (Estado.d.medalhas || {})[m] || 0);
+  const saldoMoeda = (m) => (m === 'pacotes' ? Estado.d.gemas || 0 : m === 'tokens' ? Estado.d.tokens || 0 : (Estado.d.medalhas || {})[m] || 0);
   function ganharMedalha(m, q) {
     try {
       const d = Estado.d;
@@ -193,19 +194,65 @@ const Eventos = (() => {
     if (!d.lojaTroca || d.lojaTroca.semana !== semanaTxt()) d.lojaTroca = { semana: semanaTxt(), comprados: {} };
     return d.lojaTroca;
   }
+
+  // Pacotes de personagens dos banners (pra quem gastou gemas e não veio): caros e de compra única
+  const PACOTES = [
+    { id: 'pk_saiyajin', nome: 'Pacote Saiyajin', sub: 'Rivais Eternos', cor: 'vermelho', preco: 6500, ids: ['gogeta_vegetto_blue', 'vegetto_gogeta', 'goku_vegeta', 'vegeta_ultra_ego'] },
+    { id: 'pk_bluelock', nome: 'Pacote Blue Lock', sub: 'Prodígios do Campo', cor: 'azul', preco: 4500, ids: ['itoshi_sae', 'itoshi_rin', 'isagi_ultra'] },
+    { id: 'pk_invencivel', nome: 'Pacote Invencível', sub: 'A Guerra dos Marks', cor: 'laranja', preco: 6500, ids: ['mark_eve', 'omni_man', 'invencivel', 'eve_atomica'] },
+    { id: 'pk_overlord', nome: 'Pacote Overlord', sub: 'Os Supremos da Tumba', cor: 'roxo', preco: 6500, ids: ['ainz_ooal_gown', 'albedo', 'shalltear', 'demiurge'] },
+  ];
+  const BONUS_PACOTE = { cor: 30, bau: 'lendario' }; // 30 coringas universais + Baú Lendário em todo pacote
+  const COPIAS_REPETIDA = 40; // carta que você já tem vem como cópias
+  function comprarPacote(pk, depois) {
+    const d = Estado.d;
+    d.pacotesLoja = d.pacotesLoja || {};
+    if (d.pacotesLoja[pk.id]) { UI.toast('Você já comprou esse pacote ✓'); return; }
+    if (d.gemas < pk.preco) { UI.toast(`Faltam ${UI.fmt(pk.preco - d.gemas)} 💎`); return; }
+    d.gemas -= pk.preco;
+    d.pacotesLoja[pk.id] = true;
+    const itens = pk.ids.map((id) => {
+      const novo = !Estado.tem(id);
+      if (novo) Summon.receber(id);
+      else { const col = d.colecao[id]; if (Estado.maxada(id)) d.ouro += COPIAS_REPETIDA * 100; else col.copias = (col.copias || 0) + COPIAS_REPETIDA; }
+      return { id, novo, maxada: !novo && Estado.maxada(id) };
+    });
+    Estado.darCoringa('universal', BONUS_PACOTE.cor);
+    const abertura = Estado.abrirBau(BONUS_PACOTE.bau);
+    Estado.salvar();
+    if (Conta.salvarAgora) Conta.salvarAgora().catch(() => {});
+    UI.modal({
+      titulo: `🎁 ${pk.nome}!`, classe: 'modal-pacote',
+      html: `<div class="pk-res">${itens.map((x) => `<div class="pk-c${x.novo ? ' nova' : ''}"><img class="pk-img" src="assets/cartas/${x.id}_medalhao.png" alt="" /><b>${esc(Estado.carta(x.id).nome)}</b><small>${x.novo ? 'NOVA!' : x.maxada ? `+${UI.fmt(COPIAS_REPETIDA * 100)} 🪙` : `+${COPIAS_REPETIDA} cópias`}</small></div>`).join('')}</div>
+        <p class="pk-bonus">Bônus: ${BONUS_PACOTE.cor}x Coringa Universal + Baú Lendário 🎁</p>`,
+      botoes: [{ texto: 'Que demais!', classe: 'principal', acao: () => { if (window.MenuAPI) window.MenuAPI.mostrarBau(BONUS_PACOTE.bau, abertura); depois && depois(); } }],
+    });
+  }
+  function htmlPacotes() {
+    const comprados = Estado.d.pacotesLoja || {};
+    return PACOTES.map((pk) => {
+      const comp = !!comprados[pk.id], pode = Estado.d.gemas >= pk.preco;
+      const ja = pk.ids.filter((id) => Estado.tem(id)).length;
+      return `<button class="pk-card ${pk.cor}${comp ? ' comprado' : ''}${!comp && !pode ? ' sem' : ''}" data-pk="${pk.id}">
+        <div class="pk-arte">${pk.ids.map((id) => `<img src="assets/cartas/${id}_medalhao.png" alt="" class="${Estado.tem(id) ? 'tem' : ''}" />`).join('')}</div>
+        <div class="pk-info"><b>${pk.nome}</b><small>${pk.sub} · ${pk.ids.length} personagens${ja ? ` (você já tem ${ja})` : ''}</small>
+          <small class="pk-extra">+ ${BONUS_PACOTE.cor} coringas universais + Baú Lendário</small></div>
+        <span class="pk-preco">${comp ? 'COMPRADO ✓' : `<i class="ic-gema"></i> ${UI.fmt(pk.preco)}`}</span></button>`;
+    }).join('');
+  }
   let abaLoja = 'saiyajin';
   function abrirLoja(aba, depois) {
     if (aba) abaLoja = aba;
     document.querySelectorAll('.ev-loja').forEach((x) => x.remove());
     const m = abaLoja, M = MOEDAS[m], L = dadosLoja();
-    const itens = itensLoja(m);
+    const itens = m === 'pacotes' ? [] : itensLoja(m);
     const el = document.createElement('div');
     el.className = `ev-loja ${M.cor}`;
     el.innerHTML = `<div class="lj-brilho"></div>
       <div class="lj-topo"><button class="evm-voltar">‹</button><div class="evm-titulo"><b>🛍️ Loja de Troca</b><small>Troque suas medalhas por prêmios</small></div></div>
-      <div class="lj-abas">${['saiyajin', 'estelar', 'heroi', 'tokens'].map((k) => `<button class="lj-aba ${MOEDAS[k].cor}${k === m ? ' ativa' : ''}" data-aba="${k}"><img src="${MOEDAS[k].ic}" alt="" /><b>${UI.fmt(saldoMoeda(k))}</b><small>${MOEDAS[k].curto}</small></button>`).join('')}</div>
+      <div class="lj-abas">${['saiyajin', 'estelar', 'heroi', 'tokens', 'pacotes'].map((k) => `<button class="lj-aba ${MOEDAS[k].cor}${k === m ? ' ativa' : ''}" data-aba="${k}"><img src="${MOEDAS[k].ic}" alt="" /><b>${UI.fmt(saldoMoeda(k))}</b><small>${MOEDAS[k].curto}</small></button>`).join('')}</div>
       <div class="lj-como"><img src="${M.ic}" alt="" /><span><b>${M.nome}</b> · ${M.como}</span></div>
-      <div class="lj-grade">${itens.map((it) => {
+      <div class="lj-grade${m === 'pacotes' ? ' pacotes' : ''}">${m === 'pacotes' ? htmlPacotes() : itens.map((it) => {
         const rest = it.lim ? Math.max(0, it.lim - (L.comprados[it.id] || 0)) : null, esg = rest === 0, pode = saldoMoeda(m) >= it.preco;
         return `<button class="lj-item${esg ? ' esgotado' : ''}${!esg && !pode ? ' sem' : ''}" data-id="${it.id}"><span class="lj-ic">${it.ic}</span><b>${it.nome}</b>${it.tag ? `<em class="lj-tag">${it.tag}</em>` : ''}${rest != null ? `<small>${esg ? 'Esgotado' : `Restam ${rest} esta semana`}</small>` : '<small>Sempre disponível</small>'}
           <span class="lj-preco"><img src="${M.ic}" alt="" />${UI.fmt(it.preco)}</span>${esg ? '<u>ESGOTADO</u>' : ''}</button>`;
@@ -213,6 +260,13 @@ const Eventos = (() => {
     ($('app') || document.body).appendChild(el);
     el.querySelector('.evm-voltar').onclick = () => { el.remove(); if (depois) depois(); if (window.MenuAPI) window.MenuAPI.tudo(); };
     el.querySelectorAll('.lj-aba').forEach((b) => (b.onclick = () => abrirLoja(b.dataset.aba, depois)));
+    el.querySelectorAll('.pk-card').forEach((b) => (b.onclick = () => {
+      const pk = PACOTES.find((x) => x.id === b.dataset.pk);
+      if ((Estado.d.pacotesLoja || {})[pk.id]) { UI.toast('Você já comprou esse pacote ✓'); return; }
+      UI.modal({ titulo: pk.nome, classe: 'modal-pacote',
+        html: `<div class="pk-res">${pk.ids.map((id) => `<div class="pk-c${Estado.tem(id) ? '' : ' nova'}"><img class="pk-img" src="assets/cartas/${id}_medalhao.png" alt="" /><b>${esc(Estado.carta(id).nome)}</b><small>${Estado.tem(id) ? `já tem · +${COPIAS_REPETIDA} cópias` : 'NOVA'}</small></div>`).join('')}</div><p class="pk-bonus">+ ${BONUS_PACOTE.cor}x Coringa Universal + Baú Lendário</p><p class="pk-bonus">Por <i class="ic-gema"></i> <b>${UI.fmt(pk.preco)}</b> gemas · compra única</p>`,
+        botoes: [{ texto: 'Voltar' }, { texto: 'Comprar!', classe: 'principal', acao: () => comprarPacote(pk, () => abrirLoja(m, depois)) }] });
+    }));
     el.querySelectorAll('.lj-item').forEach((b) => (b.onclick = () => {
       const it = itens.find((x) => x.id === b.dataset.id);
       const rest = it.lim ? it.lim - (L.comprados[it.id] || 0) : 1;
@@ -824,7 +878,7 @@ const Eventos = (() => {
     raiz.querySelectorAll('[data-ver-sonic]').forEach((b) => (b.onclick = () => {
       const md = UI.modal({
         titulo: '💨 Família Sonic', classe: 'modal-escolha-sonic',
-        html: `<div class="escolha-sonic">${FAMILIA_SONIC.map((id) => `<button class="es-op" data-v="${id}">${Cartas.html(Estado.carta(id), { mini: true })}<b>${esc(Estado.carta(id).nome)}</b></button>`).join('')}</div>`,
+        html: `<div class="escolha-sonic">${FAMILIA_SONIC.map((id) => `<button class="es-op" data-v="${id}"><img class="pk-img" src="assets/cartas/${id}_medalhao.png" alt="" /><b>${esc(Estado.carta(id).nome)}</b></button>`).join('')}</div>`,
         botoes: [{ texto: 'Fechar' }],
       });
       md.el.querySelectorAll('[data-v]').forEach((x) => (x.onclick = () => verCarta(Estado.carta(x.dataset.v))));
@@ -1214,9 +1268,9 @@ const Eventos = (() => {
     // --- eventos especiais (desafios com caminho) ---
     if (aberto('zenkai')) { const D = DESAFIOS.zenkai, f = dadosDesafio('zenkai'); L.push({ id: 'zenkai', grupo: 'especial', titulo: 'Treino Saiyajin', sub: 'Zenkai máximo no Vegeta e no Goku SSJ4', cor: 'vermelho', fundo: ['goku_ssj4', 'vegeta_ssj4'], tag: 'NOVO', ic: '🐒', nos: nosDesafio('zenkai', ini), vidas: vidasDe(D, f, '🔥'), rodape: verMais(SAIYAJINS), alerta: !f.completo && !f.ativo && !f.tentativas }); }
     if (aberto('celestial')) { const D = DESAFIOS.celestial, f = dadosDesafio('celestial'); L.push({ id: 'celestial', grupo: 'especial', titulo: 'Ascensão Celestial', sub: 'Suba ao topo do céu', cor: 'azul', fundo: ['arenas/celestial_mini'], tag: 'LIMITADO', ic: '👼', nos: nosDesafio('celestial', ini), vidas: vidasDe(D, f, '🪽') }); }
-    if (aberto('cyber')) { const D = DESAFIOS.cyber, f = dadosDesafio('cyber'); L.push({ id: 'cyber', grupo: 'especial', titulo: 'Noite em Night City', sub: 'Cada missão traz um personagem', cor: 'roxo', fundo: ['roman_cyber', 'david_martinez'], tag: 'NOVO', ic: '🌃', nos: nosDesafio('cyber', ini), vidas: vidasDe(D, f, '💾'), rodape: [{ txt: 'Ver os personagens', clique: () => { UI.modal({ titulo: '🌃 Night City', html: `<div class="escolha-sonic">${CYBER.map((id) => `<div class="es-op">${Cartas.html(Estado.carta(id), { mini: true })}<b>${esc(Estado.carta(id).nome)}</b></div>`).join('')}</div>`, botoes: [{ texto: 'Fechar', classe: 'principal' }] }); } }] }); }
+    if (aberto('cyber')) { const D = DESAFIOS.cyber, f = dadosDesafio('cyber'); L.push({ id: 'cyber', grupo: 'especial', titulo: 'Noite em Night City', sub: 'Cada missão traz um personagem', cor: 'roxo', fundo: ['roman_cyber', 'david_martinez'], tag: 'NOVO', ic: '🌃', nos: nosDesafio('cyber', ini), vidas: vidasDe(D, f, '💾'), rodape: [{ txt: 'Ver os personagens', clique: () => { UI.modal({ titulo: '🌃 Night City', html: `<div class="escolha-sonic">${CYBER.map((id) => `<div class="es-op"><img class="pk-img" src="assets/cartas/${id}_medalhao.png" alt="" /><b>${esc(Estado.carta(id).nome)}</b></div>`).join('')}</div>`, botoes: [{ texto: 'Fechar', classe: 'principal' }] }); } }] }); }
     if (aberto('yugi')) { const D = DESAFIOS.yugi, f = dadosDesafio('yugi'); L.push({ id: 'yugi', grupo: 'especial', titulo: 'Duelo do Faraó', sub: 'Ganhe o Yugi Moto', cor: 'dourado', fundo: ['yugi_moto'], tag: '', ic: '🃏', nos: nosDesafio('yugi', ini), vidas: vidasDe(D, f, '🃏'), rodape: verMais([YUGI]) }); }
-    if (aberto('sonic')) { const D = DESAFIOS.sonic, f = dadosDesafio('sonic'); L.push({ id: 'sonic', grupo: 'especial', titulo: 'Corrida do Sonic', sub: 'Escolha qualquer Sonic', cor: 'azul', fundo: ['sonic', 'shadow'], tag: '', ic: '💨', nos: nosDesafio('sonic', ini), vidas: vidasDe(D, f, '💍'), rodape: [{ txt: 'Ver os Sonics', clique: () => { const m = UI.modal({ titulo: '💨 Família Sonic', classe: 'modal-escolha-sonic', html: `<div class="escolha-sonic">${FAMILIA_SONIC.map((id) => `<button class="es-op" data-v="${id}">${Cartas.html(Estado.carta(id), { mini: true })}<b>${esc(Estado.carta(id).nome)}</b></button>`).join('')}</div>`, botoes: [{ texto: 'Fechar' }] }); m.el.querySelectorAll('[data-v]').forEach((x) => (x.onclick = () => ctxUI.verCarta(Estado.carta(x.dataset.v)))); } }] }); }
+    if (aberto('sonic')) { const D = DESAFIOS.sonic, f = dadosDesafio('sonic'); L.push({ id: 'sonic', grupo: 'especial', titulo: 'Corrida do Sonic', sub: 'Escolha qualquer Sonic', cor: 'azul', fundo: ['sonic', 'shadow'], tag: '', ic: '💨', nos: nosDesafio('sonic', ini), vidas: vidasDe(D, f, '💍'), rodape: [{ txt: 'Ver os Sonics', clique: () => { const m = UI.modal({ titulo: '💨 Família Sonic', classe: 'modal-escolha-sonic', html: `<div class="escolha-sonic">${FAMILIA_SONIC.map((id) => `<button class="es-op" data-v="${id}"><img class="pk-img" src="assets/cartas/${id}_medalhao.png" alt="" /><b>${esc(Estado.carta(id).nome)}</b></button>`).join('')}</div>`, botoes: [{ texto: 'Fechar' }] }); m.el.querySelectorAll('[data-v]').forEach((x) => (x.onclick = () => ctxUI.verCarta(Estado.carta(x.dataset.v)))); } }] }); }
     if (mitasAbertas()) {
       const g = dadosMita('mitaGentil'), m = dadosMita('mitaMalvada');
       L.push({ id: 'mitaGentil', grupo: 'especial', titulo: 'Um dia com a Mita Gentil', sub: 'Ela vai lembrar de cada partida', cor: 'rosa', fundo: ['mita_gentil'], tag: '', ic: '💕', nos: nosMita('mitaGentil', ini), vidas: vidasDe(MITAS.mitaGentil, g, '💗'), rodape: verMais(['mita_gentil']) });

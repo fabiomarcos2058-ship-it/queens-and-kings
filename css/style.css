@@ -3770,3 +3770,27 @@ html.leve .passe-pegar-tudo { animation: none; }
 .lj-conf { display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; color: #fff; }
 .lj-conf b { font: 20px 'Lilita One', sans-serif; } .lj-conf p { display: flex; align-items: center; gap: 5px; margin: 0; }
 .lj-mini { width: 22px; height: 24px; }
+
+/* Pacotes da Loja de Troca */
+.lj-grade.pacotes{display:flex;flex-direction:column;gap:12px;grid-template-columns:none}
+.pk-card{position:relative;display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:16px;border:2px solid #ffd77a;color:#fff;text-align:left;cursor:pointer;overflow:hidden;background:linear-gradient(135deg,#3a1a5c,#1a0f33);box-shadow:0 4px 14px #0008}
+.pk-card.vermelho{background:linear-gradient(135deg,#7a1420,#2a0a14)}
+.pk-card.azul{background:linear-gradient(135deg,#14438a,#0a1633)}
+.pk-card.laranja{background:linear-gradient(135deg,#a8540c,#33180a)}
+.pk-card.roxo{background:linear-gradient(135deg,#55208f,#150a2e)}
+.pk-card.sem{filter:saturate(.6)}
+.pk-card.comprado{opacity:.7}
+.pk-arte{display:flex;justify-content:center;gap:6px}
+.pk-arte img{width:22%;max-width:72px;aspect-ratio:1;object-fit:cover;border-radius:50%;border:2px solid #ffd77a;background:#000;filter:brightness(.8)}
+.pk-arte img.tem{filter:none}
+.pk-info{display:flex;flex-direction:column;gap:2px;text-align:center}
+.pk-info b{font-size:1.1em;color:#ffe9a8}
+.pk-info small{opacity:.85}
+.pk-extra{color:#9dffb0}
+.pk-preco{align-self:center;padding:6px 16px;border-radius:999px;background:#0009;border:1px solid #ffd77a;font-weight:700}
+.pk-res{display:flex;flex-wrap:wrap;justify-content:center;gap:8px}
+.pk-c{display:flex;flex-direction:column;align-items:center;width:44%;font-size:.8em;text-align:center}
+.pk-c.nova b{color:#ffe08a}
+.pk-bonus{text-align:center;margin:8px 0 0}
+.pk-img{width:64px;height:64px;border-radius:50%;object-fit:cover;border:2px solid #ffd77a;background:#000}
+.pk-c.nova .pk-img{box-shadow:0 0 12px #ffd77a}
