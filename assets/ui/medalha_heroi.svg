@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 110">
+<defs>
+<linearGradient id="ring" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFF3B0"/><stop offset=".45" stop-color="#FFE07A"/><stop offset="1" stop-color="#9A6A10"/></linearGradient>
+<radialGradient id="disc" cx=".35" cy=".3" r=".9"><stop offset="0" stop-color="#4EDB8A"/><stop offset=".6" stop-color="#14A05A"/><stop offset="1" stop-color="#064A28"/></radialGradient>
+<linearGradient id="rib" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2EC27A"/><stop offset="1" stop-color="#0F6A3A"/></linearGradient>
+<linearGradient id="em" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset=".5" stop-color="#FFF0A0"/><stop offset="1" stop-color="#FFB02E"/></linearGradient>
+<filter id="gl" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="2.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+</defs>
+<path d="M30 58 L18 104 L34 96 L40 108 L54 62 Z" fill="url(#rib)" stroke="#00000055" stroke-width="1.5" stroke-linejoin="round"/>
+<path d="M70 58 L82 104 L66 96 L60 108 L46 62 Z" fill="url(#rib)" stroke="#00000055" stroke-width="1.5" stroke-linejoin="round"/>
+<circle cx="50" cy="46" r="44" fill="#3EE08A" opacity=".28" filter="url(#gl)"/>
+<circle cx="50" cy="46" r="42" fill="url(#ring)" stroke="#6b4300" stroke-width="2"/>
+<circle cx="50" cy="46" r="35" fill="url(#disc)" stroke="#00000066" stroke-width="2"/>
+<circle cx="50" cy="46" r="31" fill="none" stroke="#ffffff55" stroke-width="1.2" stroke-dasharray="2 3.2"/>
+<path d="M20 38 A32 32 0 0 1 56 15" fill="none" stroke="#ffffff88" stroke-width="3.2" stroke-linecap="round"/>
+<g filter="url(#gl)"><path d="M50 20 L69 28 L67 52 C65 63 57 70 50 74 C43 70 35 63 33 52 L31 28 Z" fill="url(#em)" stroke="#0b4a2a" stroke-width="1.6" stroke-linejoin="round"/><path d="M50 27 L62 32 L61 50 C60 58 55 63 50 66 C45 63 40 58 39 50 L38 32 Z" fill="#1fa860" opacity=".9"/><path d="M41 47 L44 38 L50 44 L56 38 L59 47 Z" fill="url(#em)" stroke="#7a5200" stroke-width="1" stroke-linejoin="round"/></g>
+</svg>

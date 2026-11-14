@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 110">
+<defs>
+<linearGradient id="ring" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFF3B0"/><stop offset=".45" stop-color="#FFD86B"/><stop offset="1" stop-color="#9A6A10"/></linearGradient>
+<radialGradient id="disc" cx=".35" cy=".3" r=".9"><stop offset="0" stop-color="#9A7BFF"/><stop offset=".6" stop-color="#5B3FD0"/><stop offset="1" stop-color="#241468"/></radialGradient>
+<linearGradient id="rib" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7A5CFF"/><stop offset="1" stop-color="#3A1E9A"/></linearGradient>
+<linearGradient id="em" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset=".5" stop-color="#FFF0A0"/><stop offset="1" stop-color="#FFB02E"/></linearGradient>
+<filter id="gl" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="2.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+</defs>
+<path d="M30 58 L18 104 L34 96 L40 108 L54 62 Z" fill="url(#rib)" stroke="#00000055" stroke-width="1.5" stroke-linejoin="round"/>
+<path d="M70 58 L82 104 L66 96 L60 108 L46 62 Z" fill="url(#rib)" stroke="#00000055" stroke-width="1.5" stroke-linejoin="round"/>
+<circle cx="50" cy="46" r="44" fill="#9A7BFF" opacity=".28" filter="url(#gl)"/>
+<circle cx="50" cy="46" r="42" fill="url(#ring)" stroke="#6b4300" stroke-width="2"/>
+<circle cx="50" cy="46" r="35" fill="url(#disc)" stroke="#00000066" stroke-width="2"/>
+<circle cx="50" cy="46" r="31" fill="none" stroke="#ffffff55" stroke-width="1.2" stroke-dasharray="2 3.2"/>
+<path d="M20 38 A32 32 0 0 1 56 15" fill="none" stroke="#ffffff88" stroke-width="3.2" stroke-linecap="round"/>
+<g filter="url(#gl)"><polygon points="50.0,23.0 55.9,38.9 72.8,39.6 59.5,50.1 64.1,66.4 50.0,57.0 35.9,66.4 40.5,50.1 27.2,39.6 44.1,38.9" fill="url(#em)" stroke="#5a2a9a" stroke-width="1.6" stroke-linejoin="round"/><path d="M50 12 L52 19 L59 21 L52 23 L50 30 L48 23 L41 21 L48 19 Z" fill="#fff" opacity=".9" transform="translate(21,-2) scale(.5)"/></g>
+</svg>

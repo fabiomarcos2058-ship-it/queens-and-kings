@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 110">
+<defs>
+<linearGradient id="ring" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFF3B0"/><stop offset=".45" stop-color="#FFC23A"/><stop offset="1" stop-color="#B8620A"/></linearGradient>
+<radialGradient id="disc" cx=".35" cy=".3" r=".9"><stop offset="0" stop-color="#FF9A3A"/><stop offset=".6" stop-color="#E0401A"/><stop offset="1" stop-color="#7A1008"/></radialGradient>
+<linearGradient id="rib" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FF6A2A"/><stop offset="1" stop-color="#A81810"/></linearGradient>
+<linearGradient id="em" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset=".5" stop-color="#FFF0A0"/><stop offset="1" stop-color="#FFB02E"/></linearGradient>
+<filter id="gl" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="2.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+</defs>
+<path d="M30 58 L18 104 L34 96 L40 108 L54 62 Z" fill="url(#rib)" stroke="#00000055" stroke-width="1.5" stroke-linejoin="round"/>
+<path d="M70 58 L82 104 L66 96 L60 108 L46 62 Z" fill="url(#rib)" stroke="#00000055" stroke-width="1.5" stroke-linejoin="round"/>
+<circle cx="50" cy="46" r="44" fill="#FF7A1A" opacity=".28" filter="url(#gl)"/>
+<circle cx="50" cy="46" r="42" fill="url(#ring)" stroke="#6b4300" stroke-width="2"/>
+<circle cx="50" cy="46" r="35" fill="url(#disc)" stroke="#00000066" stroke-width="2"/>
+<circle cx="50" cy="46" r="31" fill="none" stroke="#ffffff55" stroke-width="1.2" stroke-dasharray="2 3.2"/>
+<path d="M20 38 A32 32 0 0 1 56 15" fill="none" stroke="#ffffff88" stroke-width="3.2" stroke-linecap="round"/>
+<g filter="url(#gl)"><path d="M50 20 C59 33 69 40 66 55 C64 67 56 73 50 73 C44 73 36 67 34 55 C32 46 39 42 41 34 C44 41 47 41 48 36 C49 31 48 26 50 20 Z" fill="url(#em)" stroke="#7a2000" stroke-width="1.5" stroke-linejoin="round"/><path d="M50 44 C55 51 58 54 56 60 C55 65 52 67 50 67 C48 67 45 65 44 60 C43 55 47 52 50 44 Z" fill="#FF5A1A" opacity=".85"/></g>
+</svg>

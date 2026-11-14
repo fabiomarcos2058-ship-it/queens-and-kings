@@ -116,7 +116,132 @@ const Eventos = (() => {
     if (tokensHoje().qtd >= LIMITE_TOKENS_DIA) UI.toast('Você já pegou todos os tokens de hoje! Pode jogar, mas só ganha ouro 😉');
     iniciar({ id: 'tokens', nome: 'Caça aos Tokens', tokens: true, elixirMult: 1.25 });
   }
+
+  // ---------- Medalhas e Loja de Troca ----------
+  const MOEDAS = {
+    saiyajin: { nome: 'Medalha Saiyajin', curto: 'Saiyajin', ic: 'assets/ui/medalha_saiyajin.svg', cor: 'vermelho', como: 'Vença batalhas no Treino Saiyajin.' },
+    estelar: { nome: 'Medalha Estelar', curto: 'Estelar', ic: 'assets/ui/medalha_estelar.svg', cor: 'roxo', como: 'Complete as missões diárias e a Caça às Gemas, e vença ranqueadas.' },
+    heroi: { nome: 'Medalha de Herói', curto: 'Herói', ic: 'assets/ui/medalha_heroi.svg', cor: 'verde', como: 'Vença batalhas nos desafios e nos eventos especiais.' },
+    tokens: { nome: 'Tokens', curto: 'Tokens', ic: 'assets/ui/token.svg', cor: 'dourado', como: 'Ganhe tokens na Caça aos Tokens e nas batalhas de evento.' },
+  };
+  const saldoMoeda = (m) => (m === 'tokens' ? Estado.d.tokens || 0 : (Estado.d.medalhas || {})[m] || 0);
+  function ganharMedalha(m, q) {
+    try {
+      const d = Estado.d;
+      d.medalhas = d.medalhas || {};
+      d.medalhas[m] = (d.medalhas[m] || 0) + q;
+      Estado.salvar();
+      setTimeout(() => { try { UI.toast(`+${q} ${MOEDAS[m].nome} 🏅`); } catch (e) { /* nada */ } }, 1400);
+    } catch (e) { /* nunca quebra a batalha */ }
+  }
+  // cópias de uma carta: se ela já está no máximo, cada cópia vira 100 moedas
+  function darCopias(id, q) {
+    const d = Estado.d;
+    if (!Estado.tem(id)) { const c = Ranque.darEvolucao(id); if (c) setTimeout(() => revelarNino(c, 'LENDÁRIA DA LOJA DE TROCA', '"Hmph. Você tem bom gosto."'), 300); }
+    const col = d.colecao[id];
+    if (!col) return null;
+    if (Estado.maxada(id)) { d.ouro += q * 100; UI.toast(`Já no máximo! As cartas viraram +${UI.fmt(q * 100)} 🪙`); return null; }
+    col.copias = (col.copias || 0) + q;
+    Estado.salvar();
+    UI.toast(`🃏 +${q} ${Estado.carta(id).nome}!`);
+    return null;
+  }
+  const dar = (r) => Premios.dar(r);
+  const imgPremio = (r) => Premios.icone(r);
+  function itensLoja(m) {
+    const ouro = (q) => ({ nome: `${UI.fmt(q)} de Ouro`, ic: `<img src="assets/ui/ouro_${q >= 15000 ? 3 : 2}.svg" alt="" />`, dar: () => dar({ tipo: 'ouro', qtd: q }) });
+    const gemas = (q) => ({ nome: `${UI.fmt(q)} Gemas`, ic: '<i class="ic-gema premio-gema muitas"></i>', dar: () => dar({ tipo: 'gemas', qtd: q }) });
+    const bau = (t, nome) => ({ nome, ic: imgPremio({ tipo: 'bau', bau: t }), dar: () => dar({ tipo: 'bau', bau: t }) });
+    const cor = (rar, q) => ({ nome: `${q}x Coringa ${rar === 'universal' ? 'Universal' : { comum: 'Comum', rara: 'Raro', epica: 'Épico', lendaria: 'Lendário' }[rar]}`, ic: imgPremio({ tipo: 'coringa', raridade: rar }), dar: () => dar({ tipo: 'coringa', raridade: rar, qtd: q }) });
+    const cartaX = (id, q) => ({ nome: `${q}x ${Estado.carta(id).nome}`, ic: `<img class="lj-carta" src="assets/cartas/${id}_medalhao.png" alt="" />`, dar: () => darCopias(id, q) });
+    const L = {
+      saiyajin: [
+        { id: 's_vegeta', preco: 12, lim: 5, ...cartaX('vegeta_ssj4', 30) },
+        { id: 's_goku', preco: 12, lim: 5, ...cartaX('goku_ssj4', 30) },
+        { id: 's_cor_l', preco: 25, lim: 4, ...cor('lendaria', 5) },
+        { id: 's_ouro', preco: 10, lim: 5, ...ouro(30000) },
+        { id: 's_bau_l', preco: 60, lim: 2, ...bau('lendario', 'Baú Lendário') },
+        { id: 's_gemas', preco: 20, lim: 3, ...gemas(500) },
+      ],
+      estelar: [
+        { id: 'e_gemas', preco: 15, lim: 4, ...gemas(300) },
+        { id: 'e_cor_u', preco: 20, lim: 4, ...cor('universal', 10) },
+        { id: 'e_bau', preco: 12, lim: 6, ...bau('ouro', 'Baú de Ouro') },
+        { id: 'e_cor_e', preco: 18, lim: 4, ...cor('epica', 10) },
+        { id: 'e_ouro', preco: 8, lim: 6, ...ouro(20000) },
+        { id: 'e_bau_l', preco: 70, lim: 1, ...bau('lendario', 'Baú Lendário') },
+      ],
+      heroi: [
+        { id: 'h_cor_r', preco: 10, lim: 5, ...cor('rara', 20) },
+        { id: 'h_bau', preco: 20, lim: 4, ...bau('ouro', 'Baú de Ouro') },
+        { id: 'h_gemas', preco: 8, lim: 10, ...gemas(100) },
+        { id: 'h_cor_l', preco: 30, lim: 3, ...cor('lendaria', 3) },
+        { id: 'h_ouro', preco: 10, lim: 5, ...ouro(15000) },
+        { id: 'h_cor_u', preco: 25, lim: 3, ...cor('universal', 15) },
+      ],
+      tokens: [
+        ...TROCAS.map((x, i) => ({ id: `t_g${i}`, preco: x.t, lim: 0, tag: x.tag, ...gemas(x.g) })),
+        { id: 't_bau', preco: 150, lim: 5, ...bau('prata', 'Baú de Prata') },
+        { id: 't_cor', preco: 100, lim: 3, ...cor('comum', 20) },
+        { id: 't_ouro', preco: 80, lim: 5, ...ouro(10000) },
+      ],
+    };
+    return L[m];
+  }
+  function dadosLoja() {
+    const d = Estado.d;
+    if (!d.lojaTroca || d.lojaTroca.semana !== semanaTxt()) d.lojaTroca = { semana: semanaTxt(), comprados: {} };
+    return d.lojaTroca;
+  }
+  let abaLoja = 'saiyajin';
+  function abrirLoja(aba, depois) {
+    if (aba) abaLoja = aba;
+    document.querySelectorAll('.ev-loja').forEach((x) => x.remove());
+    const m = abaLoja, M = MOEDAS[m], L = dadosLoja();
+    const itens = itensLoja(m);
+    const el = document.createElement('div');
+    el.className = `ev-loja ${M.cor}`;
+    el.innerHTML = `<div class="lj-brilho"></div>
+      <div class="lj-topo"><button class="evm-voltar">‹</button><div class="evm-titulo"><b>🛍️ Loja de Troca</b><small>Troque suas medalhas por prêmios</small></div></div>
+      <div class="lj-abas">${['saiyajin', 'estelar', 'heroi', 'tokens'].map((k) => `<button class="lj-aba ${MOEDAS[k].cor}${k === m ? ' ativa' : ''}" data-aba="${k}"><img src="${MOEDAS[k].ic}" alt="" /><b>${UI.fmt(saldoMoeda(k))}</b><small>${MOEDAS[k].curto}</small></button>`).join('')}</div>
+      <div class="lj-como"><img src="${M.ic}" alt="" /><span><b>${M.nome}</b> · ${M.como}</span></div>
+      <div class="lj-grade">${itens.map((it) => {
+        const rest = it.lim ? Math.max(0, it.lim - (L.comprados[it.id] || 0)) : null, esg = rest === 0, pode = saldoMoeda(m) >= it.preco;
+        return `<button class="lj-item${esg ? ' esgotado' : ''}${!esg && !pode ? ' sem' : ''}" data-id="${it.id}"><span class="lj-ic">${it.ic}</span><b>${it.nome}</b>${it.tag ? `<em class="lj-tag">${it.tag}</em>` : ''}${rest != null ? `<small>${esg ? 'Esgotado' : `Restam ${rest} esta semana`}</small>` : '<small>Sempre disponível</small>'}
+          <span class="lj-preco"><img src="${M.ic}" alt="" />${UI.fmt(it.preco)}</span>${esg ? '<u>ESGOTADO</u>' : ''}</button>`;
+      }).join('')}</div>`;
+    ($('app') || document.body).appendChild(el);
+    el.querySelector('.evm-voltar').onclick = () => { el.remove(); if (depois) depois(); if (window.MenuAPI) window.MenuAPI.tudo(); };
+    el.querySelectorAll('.lj-aba').forEach((b) => (b.onclick = () => abrirLoja(b.dataset.aba, depois)));
+    el.querySelectorAll('.lj-item').forEach((b) => (b.onclick = () => {
+      const it = itens.find((x) => x.id === b.dataset.id);
+      const rest = it.lim ? it.lim - (L.comprados[it.id] || 0) : 1;
+      if (rest <= 0) { UI.toast('Esgotado por esta semana. Volta na segunda! 🗓️'); return; }
+      if (saldoMoeda(m) < it.preco) { UI.toast(`Faltam ${UI.fmt(it.preco - saldoMoeda(m))} ${M.curto === 'Tokens' ? 'tokens' : 'medalhas'}. ${M.como}`); return; }
+      UI.modal({
+        titulo: 'Trocar?', classe: 'modal-troca',
+        html: `<div class="lj-conf"><span class="lj-ic grande">${it.ic}</span><b>${it.nome}</b><p>por <img class="lj-mini" src="${M.ic}" alt="" /> <b>${UI.fmt(it.preco)}</b> ${M.curto === 'Tokens' ? 'tokens' : M.nome.toLowerCase()}</p></div>`,
+        botoes: [{ texto: 'Voltar' }, { texto: 'Trocar!', classe: 'principal', acao: () => {
+          if (saldoMoeda(m) < it.preco) return;
+          if (m === 'tokens') Estado.d.tokens -= it.preco; else Estado.d.medalhas[m] -= it.preco;
+          L.comprados[it.id] = (L.comprados[it.id] || 0) + 1;
+          const extra = it.dar();
+          Estado.salvar();
+          if (Conta.salvarAgora) Conta.salvarAgora().catch(() => {});
+          if (m === 'tokens' && !extra) UI.toast(`+ ${it.nome}! 💎`);
+          if (extra && extra.bau && window.MenuAPI) window.MenuAPI.mostrarBau(extra.bau, extra.abertura);
+          else if (extra && extra.coringa) UI.toast(`🃏 +${it.nome} (veja no 🎒 Inventário)`);
+          else if (!extra && m !== 'tokens' && !it.id.match(/^(s_vegeta|s_goku)$/)) UI.toast(`+ ${it.nome}!`);
+          abrirLoja(m, depois);
+        } }],
+      });
+    }));
+  }
+
   function trocarTokens(depois) {
+    abrirLoja('tokens', depois); return;
+  }
+  function trocarTokensAntigo(depois) {
     const d = Estado.d;
     const md = UI.modal({
       titulo: '🪙 Trocar tokens',
@@ -182,6 +307,7 @@ const Eventos = (() => {
       const premio = D.premios[Math.min(f.v, D.premios.length - 1)];
       f.v++;
       if (f.v >= D.vitorias) { f.ativo = false; f.completo = true; }
+      ganharMedalha('heroi', f.v >= D.vitorias ? 15 : 5);
       Estado.salvar();
       UI.modal({ titulo: k === 'mitaMalvada' ? '🖤 Venceu!' : '💕 Venceu!', html: `<p class="ev-res">${f.v >= D.vitorias ? 'Desafio completo!' : `Vitória ${f.v}/${D.vitorias}! Você ganhou <b>${txtPremio(premio)}</b>`}</p>`, botoes: [{ texto: 'Oba!', classe: 'principal' }] });
       setTimeout(() => {
@@ -401,6 +527,7 @@ const Eventos = (() => {
       const premio = D.premios[Math.min(f.v, D.premios.length - 1)];
       f.v++;
       if (f.v >= total) { f.ativo = false; f.completo = true; }
+      if (k === 'zenkai') { ganharMedalha('saiyajin', f.v >= total ? 40 : 8); ganharMedalha('heroi', 3); } else ganharMedalha('heroi', f.v >= total ? 15 : 5);
       Estado.salvar();
       const txt = premio.escolha ? 'Escolha um Sonic!' : premio.carta ? `${esc(Estado.carta(premio.carta).nome)}!` : txtPremio(premio);
       UI.modal({ titulo: k === 'yugi' ? '🃏 Você venceu o duelo!' : k === 'cyber' ? '🌃 Missão cumprida!' : k === 'celestial' ? '👼 Mais um degrau!' : k === 'zenkai' ? '🐒 Zenkai!' : '💨 Venceu!', html: `<p class="ev-res">${f.v >= total ? `${D.nome} completo!` : `Vitória ${f.v}/${total}! Você ganhou <b>${txt}</b>`}</p>`, botoes: [{ texto: 'Oba!', classe: 'principal' }] });
@@ -508,6 +635,7 @@ const Eventos = (() => {
       if (!Estado.d || !n) return;
       const c = dadosCaca();
       CACA.forEach((m, i) => { if (m.tipo === tipo && c.prog[i] < m.alvo) c.prog[i] = Math.min(m.alvo, c.prog[i] + n); });
+      if (tipo === 'ranqueada') { const dm = Estado.d.medalhas || (Estado.d.medalhas = {}); dm.estelar = (dm.estelar || 0) + n; }
       const dg = dadosDiarias();
       DIARIAS.forEach((m, i) => { if (m.tipo === tipo && dg.prog[i] < m.alvo) dg.prog[i] = Math.min(m.alvo, dg.prog[i] + n); });
     } catch (e) { /* nunca quebra a batalha */ }
@@ -534,6 +662,7 @@ const Eventos = (() => {
     let ouro = m.ouro || 0, g = m.g || 0, bonus = false;
     if (!c.bonus && c.pego.every(Boolean)) { c.bonus = true; bonus = true; ouro += DIARIA_BONUS.ouro; g += DIARIA_BONUS.g; }
     Estado.d.ouro += ouro; Estado.d.gemas += g; Estado.salvar();
+    ganharMedalha('estelar', bonus ? 8 : 2);
     return { ouro, g, bonus };
   }
   // Minas: batalhas de farm (uma de ouro, uma de cristais) com limite diário
@@ -567,6 +696,7 @@ const Eventos = (() => {
     let g = m.g;
     if (!c.bonus && c.pego.every(Boolean)) { c.bonus = true; g += CACA_BONUS; }
     Estado.d.gemas += g; Estado.salvar();
+    ganharMedalha('estelar', 3);
     return g;
   }
   // Fim de Semana de Gemas: sábado e domingo, as 3 primeiras vitórias do dia pagam gemas extras
@@ -777,6 +907,7 @@ const Eventos = (() => {
         const premio = PREMIOS[Math.min(f.v, PREMIOS.length - 1)];
         f.v++;
         if (f.v >= VITORIAS) { f.ativo = false; f.completo = true; }
+        ganharMedalha('heroi', f.v >= VITORIAS ? 15 : 5);
         Estado.salvar();
         // o prêmio é entregue NA HORA (antes dependia de tocar em "Pegar")
         const msg = f.v >= VITORIAS ? 'Você completou o Festival das Quíntuplas! 🎀' : `Vitória ${f.v}/${VITORIAS}! Você ganhou <b>${txtPremio(premio)}</b>`;
@@ -799,6 +930,7 @@ const Eventos = (() => {
       let msg = '';
       if (ganhou && !f.pego && aberto100k()) {
         f.v = Math.min(META_100K, f.v + 1);
+        ganharMedalha('heroi', 5);
         if (f.v >= META_100K) { f.pego = true; d.ouro += PREMIO_100K; msg = `<br /><b>+${UI.fmt(PREMIO_100K)} 🪙 !!!</b>`; }
         else msg = `<br />Vitória ${f.v}/${META_100K}!`;
       }
@@ -817,6 +949,7 @@ const Eventos = (() => {
       const F = FARMA[ev.farma];
       const q = ganhou ? F.vit + (r.coroas || 0) * F.coroa : r.resultado === 'empate' ? F.emp : F.der;
       const got = ganharFarma(ev.farma, q);
+      if (ganhou) ganharMedalha('heroi', 2);
       if (ganhou) d.vitorias++; else if (r.resultado === 'derrota') d.derrotas++;
       Estado.salvar();
       UI.modal({
@@ -1076,6 +1209,7 @@ const Eventos = (() => {
   const iniMapa = (ev) => { fecharMapa(true); ctxUI.iniciar(ev); }; // a batalha cobre a tela; o mapa reabre quando ela acabar
   function especs(ini) {
     const L = [];
+    L.push({ id: 'loja', grupo: 'especial', titulo: 'Loja de Troca', sub: 'Troque medalhas e tokens por prêmios', cor: 'dourado', fundo: [], arteHtml: ['saiyajin', 'estelar', 'heroi'].map((k) => `<img src="${MOEDAS[k].ic}" alt="" />`).join(''), tag: 'NOVO', ic: '🛍️', nos: [] });
     const verMais = (ids) => ids.map((id) => ({ txt: `Ver ${Estado.carta(id).nome}`, clique: () => ctxUI.verCarta(Estado.carta(id)) }));
     // --- eventos especiais (desafios com caminho) ---
     if (aberto('zenkai')) { const D = DESAFIOS.zenkai, f = dadosDesafio('zenkai'); L.push({ id: 'zenkai', grupo: 'especial', titulo: 'Treino Saiyajin', sub: 'Zenkai máximo no Vegeta e no Goku SSJ4', cor: 'vermelho', fundo: ['goku_ssj4', 'vegeta_ssj4'], tag: 'NOVO', ic: '🐒', nos: nosDesafio('zenkai', ini), vidas: vidasDe(D, f, '🔥'), rodape: verMais(SAIYAJINS), alerta: !f.completo && !f.ativo && !f.tentativas }); }
@@ -1118,7 +1252,7 @@ const Eventos = (() => {
     const th = tokensHoje();
     L.push({ id: 'tokens', grupo: 'farm', titulo: 'Caça aos Tokens', sub: 'Troque tokens por gemas', cor: 'roxo', fundo: [], tag: '', ic: '🪙',
       nos: [{ ic: '⚔️', rotulo: 'Caçar tokens', progresso: Math.min(1, th.qtd / LIMITE_TOKENS_DIA), estado: th.qtd >= LIMITE_TOKENS_DIA ? 'feito' : 'atual', grande: true, clique: () => jogarTokens(ini) },
-        { ic: '💎', rotulo: 'Trocar por gemas', estado: 'atual', grande: true, clique: () => trocarTokens(() => { if (window.MenuAPI) window.MenuAPI.tudo(); }) }] });
+        { ic: '🛍️', rotulo: 'Loja de Troca', estado: 'atual', grande: true, clique: () => abrirLoja('tokens') }] });
     L.push({ id: 'modos', grupo: 'farm', titulo: 'Modos do Dia', sub: 'Mudam todo dia', cor: 'verde', fundo: [], tag: '', ic: '🎪',
       nos: modosDeHoje().map((id) => ({ ic: MODOS[id].ic, rotulo: MODOS[id].nome, estado: 'atual', grande: true, clique: () => jogarModo(id, ini) })) });
     for (const x of (ctxUI.extras ? ctxUI.extras() : [])) L.push(x);
@@ -1128,7 +1262,7 @@ const Eventos = (() => {
   function htmlHub() {
     const L = especs(iniMapa);
     const banner = (e) => `<button class="evh-banner ${e.cor}" data-evmapa="${e.id}">
-        <div class="evh-fundo">${(e.fundo.length ? e.fundo : []).map((f) => `<i style="background-image:url(assets/${f.includes('/') ? f : `cartas/${f}`}.jpg)"></i>`).join('') || `<em>${e.ic}</em>`}</div>
+        <div class="evh-fundo${e.arteHtml ? ' loja-art' : ''}">${e.arteHtml ? e.arteHtml : (e.fundo.length ? e.fundo : []).map((f) => `<i style="background-image:url(assets/${f.includes('/') ? f : `cartas/${f}`}.jpg)"></i>`).join('') || `<em>${e.ic}</em>`}</div>
         <div class="evh-sombra"></div>
         ${e.tag ? `<span class="evh-fita">${e.tag}</span>` : ''}${e.alerta ? '<span class="evh-alerta">!</span>' : ''}
         <div class="evh-texto"><b>${esc(e.titulo)}</b><small>${esc(e.sub)}</small></div></button>`;
@@ -1142,6 +1276,7 @@ const Eventos = (() => {
     if (!manter) mapaAtual = null;
   }
   function abrirMapa(id) {
+    if (id === 'loja') { abrirLoja(); return; }
     const e = especs(iniMapa).find((x) => x.id === id);
     if (!e) { mapaAtual = null; return; }
     mapaAtual = id;
@@ -1185,5 +1320,5 @@ const Eventos = (() => {
     if (mapaAtual) setTimeout(() => { if (mapaAtual && !document.querySelector('.ev-mapa') && !document.body.classList.contains('em-batalha')) abrirMapa(mapaAtual); }, 120);
   }
 
-  return { contarGemas, cacaProntas, vitoriaFds, html, ligar, fecharMapa, fim, conferir, trocarTokens, ganharTokens, tokensHoje, MODOS, modosDeHoje, jogarModo, jogarFestival, nino };
+  return { contarGemas, cacaProntas, vitoriaFds, html, ligar, fecharMapa, abrirLoja, ganharMedalha, fim, conferir, trocarTokens, ganharTokens, tokensHoje, MODOS, modosDeHoje, jogarModo, jogarFestival, nino };
 })();
