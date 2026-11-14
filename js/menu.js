@@ -1163,6 +1163,19 @@
   setTimeout(partidasSegundoPlano, 8000);
   setInterval(ranqueSegundoPlano, 60000);
   setTimeout(ranqueSegundoPlano, 9000);
+  // presente único de 900 gemas na conta secundária da Ally (pedido dela)
+  function presenteSecundaria() {
+    try {
+      if (!calibrarTrofeus() || !d() || d().presenteSec900) return;
+      d().presenteSec900 = true;
+      d().gemas += 900;
+      Estado.salvar();
+      if (Conta.salvarAgora) Conta.salvarAgora().catch(() => {});
+      topo();
+      UI.toast('🎁 Presente: +900 gemas!');
+    } catch (e) { /* nada */ }
+  }
+  setTimeout(presenteSecundaria, 10000);
 
   function fimDeBatalhaNormal(r) {
     const vitoria = r.resultado === 'vitoria';
