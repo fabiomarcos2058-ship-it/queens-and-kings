@@ -1178,6 +1178,22 @@
     } catch (e) { /* nada */ }
   }
   setTimeout(presenteSecundaria, 10000);
+  // aviso: o passe da temporada está acabando (uma vez por passe, nas últimas 36 horas)
+  function avisoFimPasse() {
+    try {
+      if (!d() || typeof Passe === 'undefined') return;
+      const p = Passe.dados();
+      if (p.avisouFim || Passe.fimTemporada().getTime() - Date.now() > 36 * 3600000) return;
+      if ($('batalha') && !$('batalha').classList.contains('oculto')) { setTimeout(avisoFimPasse, 60000); return; }
+      p.avisouFim = true; Estado.salvar();
+      UI.modal({
+        titulo: '⏳ O passe está acabando!',
+        html: `<p>O Passe da Temporada acaba em <b>${Passe.tempoRestante()}</b> (domingo às 15:00).</p><p>Pegue as suas recompensas antes: depois começa um passe novo, do zero.</p>`,
+        botoes: [{ texto: 'Depois', classe: 'secundario' }, { texto: '🎟️ Ver passe', classe: 'principal', acao: () => { telaPasse(); } }],
+      });
+    } catch (e) { /* nada */ }
+  }
+  setTimeout(avisoFimPasse, 13000);
 
   function fimDeBatalhaNormal(r) {
     const vitoria = r.resultado === 'vitoria';
@@ -2200,6 +2216,7 @@
       html: `<div class="passe-topo"><div class="pt-nivel"><small>NÍVEL</small><b>${nv}</b></div>
           <div class="pt-barra"><div><i style="width:${cheio ? 100 : (pts / Passe.PONTOS_NIVEL) * 100}%"></i></div><small>${cheio ? 'Passe completo! 🎉' : `${pts}/${Passe.PONTOS_NIVEL} pontos para o nível ${nv + 1}`}</small></div>
           <div class="pt-dias">⏳ ${Passe.tempoRestante()}</div></div>
+        ${Passe.fimTemporada().getTime() - Date.now() <= 2 * 86400000 ? `<div class="passe-aviso-fim">⏳ O passe acaba em <b>${Passe.tempoRestante()}</b>! Pegue as recompensas antes: depois começa um passe novo do zero.</div>` : ''}
         <div class="passe-dica"><span>⚔️ Vitória <b>40</b></span><span>💔 Derrota <b>15</b></span><span>👑 Coroa <b>+8</b></span></div>
         ${prontos ? `<button class="passe-pegar-tudo" id="passe-tudo">🎁 Pegar tudo <i>${prontos}</i></button>` : ''}
         ${p.ultra ? '' : `<div class="passe-compras compacto">
