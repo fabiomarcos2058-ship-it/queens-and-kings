@@ -1192,6 +1192,28 @@
     } catch (e) { /* nada */ }
   }
   setTimeout(presenteSamuel, 10500);
+  // presente de atualização (14/11): 2500 gemas pra todo mundo, uma vez só
+  function presenteAtualizacao() {
+    try {
+      if (!d() || d().presenteAtualiza1114) return;
+      d().presenteAtualiza1114 = true;
+      d().gemas += 2500;
+      Estado.salvar();
+      if (Conta.salvarAgora) Conta.salvarAgora().catch(() => {});
+      topo();
+      const mostrar = () => {
+        if (document.querySelector('.titulo, .tela-conta, .revela-evo, #batalha:not(.oculto), .td-tela')) return setTimeout(mostrar, 2500);
+        UI.modal({
+          titulo: '🎁 Presente de atualização!',
+          classe: 'modal-chegada',
+          html: '<p class="mch-nomes">Eventos novos, Loja de Troca, Pacotes e muito mais!</p><div class="mch-gemas">💎 +2.500</div><p>Obrigada por jogar, rei e rainha! Aproveita no Summon 💖</p>',
+          botoes: [{ texto: 'Receber!', classe: 'principal' }],
+        });
+      };
+      setTimeout(mostrar, 1500);
+    } catch (e) { /* nada */ }
+  }
+  setTimeout(presenteAtualizacao, 11000);
   // aviso: o passe da temporada está acabando (uma vez por passe, nas últimas 36 horas)
   function avisoFimPasse() {
     try {
