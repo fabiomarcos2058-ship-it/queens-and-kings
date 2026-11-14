@@ -602,6 +602,30 @@ const Eventos = (() => {
       <span class="cg-desc">Missões da semana que pagam só gemas: até <b>${total} 💎</b>. Completou todas? Bônus de <b>+${CACA_BONUS} 💎</b>${c.bonus ? ' (pego ✓)' : ''}.</span>${linhas}</div>${fds}`;
   }
 
+  // Chuva de Ouro: evento relâmpago (até 15/11 às 9:10). Vença 3 batalhas no elixir 3x e leve 100 mil moedas
+  const FIM_100K = new Date(2026, 10, 15, 9, 10, 0);
+  const META_100K = 3, PREMIO_100K = 100000;
+  const aberto100k = () => Date.now() < FIM_100K.getTime();
+  function dados100k() {
+    const d = Estado.d;
+    return d.ouro100k || (d.ouro100k = { v: 0, pego: false });
+  }
+  function jogar100k(iniciar) {
+    const f = dados100k();
+    if (!aberto100k()) { UI.toast('A Chuva de Ouro já acabou 😢'); return; }
+    if (f.pego) { UI.toast('Você já levou as 100 mil moedas! 🪙'); return; }
+    iniciar({ id: 'ouro100k', nome: 'Chuva de Ouro · Elixir 3x', ouro100k: true, elixirMult: 3 });
+  }
+  function html100k() {
+    if (!aberto100k()) return '';
+    const f = dados100k();
+    const h = Math.max(0, FIM_100K.getTime() - Date.now()), hh = Math.floor(h / 3600000), mm = Math.floor((h % 3600000) / 60000);
+    const pips = Array.from({ length: META_100K }, (_, i) => `<span class="fn-pip${i < f.v ? ' ok' : ''}${i === META_100K - 1 ? ' final' : ''}">${i === META_100K - 1 ? '🪙' : i + 1}</span>`).join('');
+    return `<div class="evento modo-ev dourado ev-100k"><span class="modo-ic">💰</span><div><b>Chuva de Ouro · ${UI.fmt(PREMIO_100K)} 🪙</b>
+      <span>${f.pego ? 'Você já levou as 100 mil moedas! 🎉' : `Vença <b>${META_100K}</b> batalhas no <b>elixir 3x</b> e leve <b>${UI.fmt(PREMIO_100K)} moedas</b>! Só até amanhã 9:10.`}</span>
+      <div class="fn-pips">${pips}</div><small class="modo-tempo">${f.pego ? 'Concluído' : `Acaba em ${hh}h ${mm}min`}</small></div>
+      ${f.pego ? '<div class="selo">Pego ✓</div>' : '<button class="selo botao" data-ouro100k="1">Jogar</button>'}</div>`;
+  }
   function htmlFarm() {
     const c = dadosDiarias(), h = dadosFarma();
     const feitas = c.pego.filter(Boolean).length;
@@ -613,7 +637,7 @@ const Eventos = (() => {
     const minas = Object.entries(FARMA).map(([k, F]) => `<div class="evento modo-ev ${F.cor}"><span class="modo-ic">${F.ic}</span><div><b>${F.nome}</b><span>${F.desc}</span>
         <div class="ev-barra"><i style="width:${(h[k] / F.limite) * 100}%"></i><small>${UI.fmt(h[k])}/${UI.fmt(F.limite)} hoje</small></div></div>
         <button class="selo botao" data-farma="${k}">Jogar</button></div>`).join('');
-    return `<div class="caca-gemas"><div class="cg-topo"><b>🪙 Missões Diárias de Farm</b><small>${feitas}/${DIARIAS.length} · zera hoje à meia-noite</small></div>
+    return `${html100k()}<div class="caca-gemas"><div class="cg-topo"><b>🪙 Missões Diárias de Farm</b><small>${feitas}/${DIARIAS.length} · zera hoje à meia-noite</small></div>
       <span class="cg-desc">Ouro e cristais todo dia! Completou todas? Bônus de <b>+${UI.fmt(DIARIA_BONUS.ouro)} 🪙 e +${DIARIA_BONUS.g} 💎</b>${c.bonus ? ' (pego ✓)' : ''}.</span>${linhas}</div>${minas}`;
   }
 
@@ -654,6 +678,7 @@ const Eventos = (() => {
     if (typeof TD !== 'undefined') TD.ligar(raiz);
     raiz.querySelectorAll('[data-caca]').forEach((b) => (b.onclick = () => { const g = pegarCaca(+b.dataset.caca); if (g) { UI.toast(`+${g} 💎`); if (window.MenuAPI) window.MenuAPI.tudo(); } }));
     raiz.querySelectorAll('[data-diaria]').forEach((b) => (b.onclick = () => { const r = pegarDiaria(+b.dataset.diaria); if (r) { UI.toast(`+${[r.ouro ? UI.fmt(r.ouro) + ' 🪙' : '', r.g ? r.g + ' 💎' : ''].filter(Boolean).join(' e ')}${r.bonus ? ' (bônus incluso!)' : ''}`); if (window.MenuAPI) window.MenuAPI.tudo(); } }));
+    raiz.querySelectorAll('[data-ouro100k]').forEach((b) => (b.onclick = () => jogar100k(iniciar)));
     raiz.querySelectorAll('[data-farma]').forEach((b) => (b.onclick = () => jogarFarma(b.dataset.farma, iniciar)));
     raiz.querySelectorAll('[data-modo]').forEach((b) => (b.onclick = () => jogarModo(b.dataset.modo, iniciar)));
     const j = raiz.querySelector('#fn-jogar');
@@ -765,6 +790,25 @@ const Eventos = (() => {
       UI.modal({
         titulo: acabou ? '💔 Fim do desafio' : r.resultado === 'empate' ? 'Empate!' : 'Derrota',
         html: `<p class="ev-res">${acabou ? `Você chegou a <b>${f.v}</b> vitória${f.v === 1 ? '' : 's'}. Dá pra tentar de novo por ${PRECO_NOVA} 💎!` : r.resultado === 'empate' ? 'Empate não conta. Bora de novo!' : `Ainda restam <b>${VIDAS - f.l}</b> vida${VIDAS - f.l === 1 ? '' : 's'}.`}</p>`,
+        botoes: [{ texto: 'OK', classe: 'principal', acao: () => tudo() }],
+      });
+      return;
+    }
+    if (ev.ouro100k) {
+      const f = dados100k();
+      let msg = '';
+      if (ganhou && !f.pego && aberto100k()) {
+        f.v = Math.min(META_100K, f.v + 1);
+        if (f.v >= META_100K) { f.pego = true; d.ouro += PREMIO_100K; msg = `<br /><b>+${UI.fmt(PREMIO_100K)} 🪙 !!!</b>`; }
+        else msg = `<br />Vitória ${f.v}/${META_100K}!`;
+      }
+      d.ouro += ganhou ? 60 : r.resultado === 'empate' ? 30 : 15;
+      if (ganhou) d.vitorias++; else if (r.resultado === 'derrota') d.derrotas++;
+      Estado.salvar();
+      if (Conta.salvarAgora && f.pego) Conta.salvarAgora().catch(() => {});
+      UI.modal({
+        titulo: f.pego && msg ? '💰 CHUVA DE OURO!' : ganhou ? '🎉 Vitória!' : r.resultado === 'empate' ? 'Empate!' : 'Derrota',
+        html: `<p class="ev-res">${r.coroas} 👑 x ${r.coroasInimigo} 👑${msg || (ganhou ? '' : '<br />Só vitórias contam. Bora de novo!')}</p>`,
         botoes: [{ texto: 'OK', classe: 'principal', acao: () => tudo() }],
       });
       return;
