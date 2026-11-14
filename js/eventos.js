@@ -614,7 +614,7 @@ const Eventos = (() => {
     const f = dados100k();
     if (!aberto100k()) { UI.toast('A Chuva de Ouro já acabou 😢'); return; }
     if (f.pego) { UI.toast('Você já levou as 100 mil moedas! 🪙'); return; }
-    iniciar({ id: 'ouro100k', nome: 'Chuva de Ouro · Elixir 3x', ouro100k: true, elixirMult: 3 });
+    iniciar({ id: 'ouro100k', nome: 'Chuva de Ouro · Elixir 3x', ouro100k: true, elixirMult: 3, dif: 6 }); // IA super inteligente
   }
   function html100k() {
     if (!aberto100k()) return '';
@@ -622,7 +622,7 @@ const Eventos = (() => {
     const h = Math.max(0, FIM_100K.getTime() - Date.now()), hh = Math.floor(h / 3600000), mm = Math.floor((h % 3600000) / 60000);
     const pips = Array.from({ length: META_100K }, (_, i) => `<span class="fn-pip${i < f.v ? ' ok' : ''}${i === META_100K - 1 ? ' final' : ''}">${i === META_100K - 1 ? '🪙' : i + 1}</span>`).join('');
     return `<div class="evento modo-ev dourado ev-100k"><span class="modo-ic">💰</span><div><b>Chuva de Ouro · ${UI.fmt(PREMIO_100K)} 🪙</b>
-      <span>${f.pego ? 'Você já levou as 100 mil moedas! 🎉' : `Vença <b>${META_100K}</b> batalhas no <b>elixir 3x</b> e leve <b>${UI.fmt(PREMIO_100K)} moedas</b>! Só até amanhã 9:10.`}</span>
+      <span>${f.pego ? 'Você já levou as 100 mil moedas! 🎉' : `Vença <b>${META_100K}</b> batalhas no <b>elixir 3x</b> contra a <b>IA super inteligente</b> e leve <b>${UI.fmt(PREMIO_100K)} moedas</b>! Só até amanhã 9:10.`}</span>
       <div class="fn-pips">${pips}</div><small class="modo-tempo">${f.pego ? 'Concluído' : `Acaba em ${hh}h ${mm}min`}</small></div>
       ${f.pego ? '<div class="selo">Pego ✓</div>' : '<button class="selo botao" data-ouro100k="1">Jogar</button>'}</div>`;
   }
