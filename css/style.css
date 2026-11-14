@@ -3800,3 +3800,98 @@ html.leve .passe-pegar-tudo { animation: none; }
 .lj-ic .ic-gema.premio-gema, .lj-ic.grande .ic-gema.premio-gema { width: 100% !important; height: 100% !important; }
 .pk-preco .ic-gema, .pk-bonus .ic-gema { display: inline-block; width: 20px; height: 20px; vertical-align: -4px; background-size: contain; background-repeat: no-repeat; }
 .lj-item { flex-shrink: 0; }
+
+/* ===== Abertura do Summon: luta em 2D (Zaphir x Vorak) ===== */
+.luta-summon { position: absolute; inset: 0; z-index: 3; overflow: hidden; opacity: 0; transition: opacity .3s; user-select: none; -webkit-user-select: none; touch-action: none;
+  --c1: #B79CFF; --c2: #FFD25E; --ceu: linear-gradient(#FFB05A, #D8502A 48%, #4A1420); --sol: radial-gradient(circle, #fff 0 18%, #FFE9A0 32%, #FF9A3C 55%, transparent 72%); }
+.luta-summon.entra { opacity: 1; }
+.luta-summon.v-lendaria { --c1: #FF4A2A; --c2: #FFC24A; --ceu: linear-gradient(#FF8A3A, #A8101E 46%, #1E0510); --sol: radial-gradient(circle, #fff 0 15%, #FFD0A0 30%, #FF3A2A 56%, transparent 72%); }
+.luta-summon.v-ultra { --c1: #7FE8FF; --c2: #FF5CF4; --ceu: linear-gradient(#7A4AE8, #231C7A 46%, #05031A); --sol: radial-gradient(circle, #fff 0 15%, #C8F4FF 30%, #7A5CFF 56%, transparent 72%); }
+.luta-summon img { display: block; pointer-events: none; -webkit-user-drag: none; }
+.ls-ceu { position: absolute; inset: 0; background: var(--ceu); }
+.ls-sol { position: absolute; left: 50%; top: 4%; width: 52%; aspect-ratio: 1; background: var(--sol); border-radius: 50%; opacity: 0; }
+.ls-estrelas { position: absolute; inset: 0; }
+.ls-estrelas i { position: absolute; width: 4px; height: 4px; border-radius: 50%; background: #fff; animation: lsPisca var(--d) ease-in-out infinite alternate; }
+@keyframes lsPisca { from { opacity: .15; transform: scale(.6); } to { opacity: 1; transform: scale(1.5); } }
+.ls-linhas { position: absolute; inset: -40%; opacity: 0; background: repeating-conic-gradient(from 0deg at 50% 50%, rgba(255,255,255,.6) 0 1.1deg, transparent 1.1deg 8deg);
+  -webkit-mask-image: radial-gradient(circle, transparent 14%, #000 58%); mask-image: radial-gradient(circle, transparent 14%, #000 58%); }
+.ls-cam { position: absolute; inset: 0; }
+.ls-cam.treme { animation: lsTreme .3s linear; }
+@keyframes lsTreme { 0% { transform: translate(0, 0); } 15% { transform: translate(-14px, 8px); } 35% { transform: translate(12px, -10px); } 55% { transform: translate(-8px, -6px); } 75% { transform: translate(6px, 7px); } 100% { transform: translate(0, 0); } }
+.ls-heroi, .ls-rival { position: absolute; height: auto; will-change: transform; filter: drop-shadow(0 0 16px var(--c1)); }
+.ls-rival { filter: drop-shadow(0 0 16px var(--c2)); }
+.ls-esfera, .ls-feixe, .ls-colisao { position: absolute; opacity: 0; pointer-events: none; }
+.ls-esfera { left: 50%; top: 46%; width: 60%; aspect-ratio: 1; margin: -30% 0 0 -30%; border-radius: 50%; border: 6px solid #fff8; background: radial-gradient(circle, #fff3 0, #fff1 55%, var(--c1) 100%); }
+.ls-fx { position: absolute; inset: 0; pointer-events: none; }
+.ls-faixa { position: absolute; left: -30%; top: 41%; width: 160%; height: 10px; background: linear-gradient(90deg, transparent, #fff, transparent); opacity: 0; transform: rotate(-6deg) scaleX(0); }
+.ls-clarao { position: absolute; inset: 0; background: #fff; opacity: 0; pointer-events: none; }
+.ls-clarao.pisca { animation: lsPisca2 .14s ease-out; }
+@keyframes lsPisca2 { from { opacity: .85; } to { opacity: 0; } }
+.ls-clarao.total { opacity: 1; transition: opacity .35s ease-in; }
+
+/* corte A: câmera baixa, rival pequeno perto do sol */
+.luta-summon[data-cut="a"] .ls-sol { opacity: 1; animation: lsSol 1.7s ease-in-out forwards; }
+@keyframes lsSol { from { transform: scale(.8); } to { transform: scale(1.12); } }
+.luta-summon[data-cut="a"] .ls-rival { width: 24%; left: 63%; top: 14%; animation: lsBob 1.1s ease-in-out infinite alternate; }
+@keyframes lsBob { from { transform: translateY(-6px) rotate(-3deg); } to { transform: translateY(8px) rotate(3deg); } }
+.luta-summon[data-cut="a"] .ls-heroi { width: 118%; left: -9%; bottom: -14%; animation: lsSobe 1.7s ease-out forwards; }
+@keyframes lsSobe { from { transform: translateY(70px) scale(1) rotate(-2deg); } to { transform: translateY(0) scale(1.07) rotate(0); } }
+/* corte B: close no rosto */
+.luta-summon[data-cut="b"] .ls-sol { opacity: .55; width: 30%; top: 2%; }
+.luta-summon[data-cut="b"] .ls-rival { opacity: 0; width: 24%; left: 63%; top: 14%; }
+.luta-summon[data-cut="b"] .ls-heroi { width: 118%; left: -9%; bottom: -14%; transform-origin: 50% 36%; animation: lsZoom 1.15s cubic-bezier(.5, 0, .9, .6) forwards; }
+@keyframes lsZoom { from { transform: translateY(-110px) scale(1.2); } to { transform: translateY(-130px) scale(2.5); } }
+.luta-summon[data-cut="b"] .ls-linhas { opacity: .55; animation: lsGira 6s linear infinite; }
+@keyframes lsGira { to { transform: rotate(360deg); } }
+.luta-summon[data-cut="b"] .ls-faixa { animation: lsFaixa .45s .55s ease-out forwards; }
+@keyframes lsFaixa { 0% { opacity: 1; transform: rotate(-6deg) scaleX(0); } 100% { opacity: 0; transform: rotate(-6deg) scaleX(1); } }
+/* corte C: investida, esfera de impacto */
+.luta-summon[data-cut="c"] .ls-linhas { opacity: .5; }
+.luta-summon[data-cut="c"] .ls-heroi { width: 86%; top: 22%; left: -100%; animation: lsEntraH .85s cubic-bezier(.15, .9, .2, 1) forwards; }
+.luta-summon[data-cut="c"] .ls-rival { width: 86%; top: 22%; left: 100%; opacity: 1; animation: lsEntraR .85s cubic-bezier(.15, .9, .2, 1) forwards; }
+@keyframes lsEntraH { to { left: -22%; } }
+@keyframes lsEntraR { to { left: 36%; } }
+.luta-summon[data-cut="c"] .ls-esfera { animation: lsEsfera .85s .25s ease-out forwards; }
+@keyframes lsEsfera { 0% { opacity: .95; transform: scale(.1); } 100% { opacity: .55; transform: scale(1.7); } }
+/* corte D: trocação */
+.luta-summon[data-cut="d"] .ls-heroi { width: 86%; top: 22%; left: -22%; }
+.luta-summon[data-cut="d"] .ls-rival { width: 86%; top: 22%; left: 36%; opacity: 1; }
+.luta-summon[data-cut="d"][data-hit="0"] .ls-heroi { animation: lsGolpeA .3s ease-out; }
+.luta-summon[data-cut="d"][data-hit="0"] .ls-rival { animation: lsRecuaB .3s ease-out; }
+.luta-summon[data-cut="d"][data-hit="1"] .ls-heroi { animation: lsRecuaA .3s ease-out; }
+.luta-summon[data-cut="d"][data-hit="1"] .ls-rival { animation: lsGolpeB .3s ease-out; }
+@keyframes lsGolpeA { 0% { transform: translateX(-30px); } 40% { transform: translateX(46px) rotate(2deg) scale(1.04); } 100% { transform: translateX(0); } }
+@keyframes lsRecuaA { 0% { transform: translateX(0); } 40% { transform: translateX(-34px) rotate(-3deg); } 100% { transform: translateX(0); } }
+@keyframes lsGolpeB { 0% { transform: translateX(30px); } 40% { transform: translateX(-46px) rotate(-2deg) scale(1.04); } 100% { transform: translateX(0); } }
+@keyframes lsRecuaB { 0% { transform: translateX(0); } 40% { transform: translateX(34px) rotate(3deg); } 100% { transform: translateX(0); } }
+.ls-impacto { position: absolute; width: 0; height: 0; }
+.ls-impacto .anel { position: absolute; left: -60px; top: -60px; width: 120px; height: 120px; border-radius: 50%; border: 7px solid #fff; animation: lsAnel .5s ease-out forwards; }
+.ls-impacto .anel.b { border-color: var(--c2); animation-delay: .06s; }
+@keyframes lsAnel { from { transform: scale(.2); opacity: 1; } to { transform: scale(2.8); opacity: 0; } }
+.ls-impacto .estrela { position: absolute; left: -70px; top: -70px; width: 140px; height: 140px; background: radial-gradient(circle, #fff 0 25%, var(--c2) 60%); clip-path: polygon(50% 0, 60% 32%, 93% 14%, 70% 42%, 100% 50%, 70% 58%, 93% 86%, 60% 68%, 50% 100%, 40% 68%, 7% 86%, 30% 58%, 0 50%, 30% 42%, 7% 14%, 40% 32%); animation: lsEstrela .4s ease-out forwards; }
+@keyframes lsEstrela { from { transform: scale(.3) rotate(0); opacity: 1; } to { transform: scale(1.4) rotate(40deg); opacity: 0; } }
+.ls-impacto b { position: absolute; left: -90px; top: -90px; width: 180px; text-align: center; font: 40px/1 'Lilita One', sans-serif; color: #FFE45C; -webkit-text-stroke: 3px #3a0a10; paint-order: stroke fill; transform: rotate(var(--r)); animation: lsTexto .55s ease-out forwards; text-shadow: 0 4px 0 #3a0a10; }
+@keyframes lsTexto { 0% { transform: rotate(var(--r)) scale(.3); opacity: 0; } 25% { transform: rotate(var(--r)) scale(1.3); opacity: 1; } 100% { transform: rotate(var(--r)) scale(1) translateY(-26px); opacity: 0; } }
+/* corte E: recuam e carregam as rajadas */
+.luta-summon[data-cut="e"] .ls-heroi, .luta-summon[data-cut="f"] .ls-heroi { width: 56%; top: 36%; left: -4%; animation: lsRecuo .5s ease-out forwards; }
+.luta-summon[data-cut="e"] .ls-rival, .luta-summon[data-cut="f"] .ls-rival { width: 56%; top: 36%; left: 48%; opacity: 1; animation: lsRecuoR .5s ease-out forwards; }
+@keyframes lsRecuo { from { transform: translateX(80px) scale(1.3); } to { transform: none; } }
+@keyframes lsRecuoR { from { transform: translateX(-80px) scale(1.3); } to { transform: none; } }
+.luta-summon[data-cut="e"] .ls-feixe, .luta-summon[data-cut="f"] .ls-feixe { top: 60%; margin-top: -34px; height: 68px; border-radius: 34px; opacity: 1; }
+.ls-feixe.h { left: 36%; background: radial-gradient(circle, #fff 0 30%, var(--c1) 62%, transparent 72%); }
+.ls-feixe.r { right: 36%; background: radial-gradient(circle, #fff 0 30%, var(--c2) 62%, transparent 72%); }
+.luta-summon[data-cut="e"] .ls-feixe { width: 14px; animation: lsCarga 1s ease-in forwards; }
+@keyframes lsCarga { from { width: 14px; height: 14px; margin-top: -7px; } to { width: 70px; height: 70px; margin-top: -35px; } }
+.luta-summon[data-cut="f"] .ls-cam { animation: lsTremeLongo .12s linear infinite; }
+@keyframes lsTremeLongo { 0% { transform: translate(0, 0); } 33% { transform: translate(-5px, 3px); } 66% { transform: translate(4px, -3px); } 100% { transform: translate(0, 0); } }
+.luta-summon[data-cut="f"] .ls-feixe.h { background: linear-gradient(90deg, var(--c1), #fff 70%, #fff); width: 14%; transform-origin: left center; animation: lsFeixe .45s ease-out forwards; box-shadow: 0 0 26px var(--c1); }
+.luta-summon[data-cut="f"] .ls-feixe.r { background: linear-gradient(270deg, var(--c2), #fff 70%, #fff); width: 14%; transform-origin: right center; animation: lsFeixe .45s ease-out forwards; box-shadow: 0 0 26px var(--c2); }
+@keyframes lsFeixe { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+.luta-summon[data-cut="f"] .ls-colisao { left: 50%; top: 60%; width: 90px; height: 90px; margin: -45px 0 0 -45px; border-radius: 50%; background: radial-gradient(circle, #fff 0 38%, var(--c1) 64%, transparent 74%); opacity: 1; animation: lsColisao 1.2s .4s ease-in forwards; }
+.luta-summon.v-ultra[data-cut="f"] .ls-colisao { animation-duration: 1.5s; }
+@keyframes lsColisao { 0% { transform: scale(.3); } 45% { transform: scale(1.2); } 100% { transform: scale(7); } }
+/* celular fraco: sem brilhos pesados */
+html.leve .ls-heroi, html.leve .ls-rival { filter: none; }
+html.leve .ls-linhas { animation: none !important; -webkit-mask-image: none; mask-image: none; opacity: .25 !important; }
+html.leve .ls-estrelas { display: none; }
+html.leve .ls-feixe { box-shadow: none !important; }

@@ -498,13 +498,15 @@ const Summon = (() => {
     let pulou = false;
     el.querySelector('.sma-pular').onclick = () => { pulou = true; el.classList.add('pulando'); };
 
-    // 1) a jogada: 3 jogadores tocam a bola e você chuta pro gol (variação conforme o melhor que veio)
+    // 1) a cena de abertura (variação conforme o melhor que veio)
     const variante = melhor === 'ultra' ? 'ultra' : melhor === 'lendaria' ? 'lendaria' : 'normal';
-    if (typeof GolSummon !== 'undefined') {
+    // (nova abertura: luta em 2D do Zaphir contra o Vorak; se falhar, cai no jogo de futebol antigo)
+    const Abertura = typeof LutaSummon !== 'undefined' ? LutaSummon : (typeof GolSummon !== 'undefined' ? GolSummon : null);
+    if (Abertura) {
       const cena = document.createElement('div');
       el.insertBefore(cena, el.querySelector('.sma-flash'));
-      el.classList.add('no-gol'); // o fundo fica escondido atrás do campo (não precisa desenhar)
-      try { await GolSummon.jogar(cena, variante, { pulou: () => pulou, som }); } catch (e) { console.warn('GolSummon', e); }
+      el.classList.add('no-gol'); // o fundo fica escondido atrás da cena (não precisa desenhar)
+      try { await Abertura.jogar(cena, variante, { pulou: () => pulou, som }); } catch (e) { console.warn('Abertura', e); }
       el.classList.add('flash');
       await espera(pulou ? 0 : 200);
       cena.remove(); el.classList.remove('no-gol');

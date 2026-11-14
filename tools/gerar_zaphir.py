@@ -64,7 +64,7 @@ def raio_zig(rng, x0, y0, x1, y1, n=7, desv=26):
     return ' '.join(f'{x:.0f},{y:.0f}' for x, y in pts)
 
 
-def desenhar(id_, f):
+def desenhar(id_, f, solo=False):
     rng = random.Random(hash(id_) % 99991 + 7)
     cx, cy = HC
     o = []
@@ -80,18 +80,20 @@ def desenhar(id_, f):
 <filter id="blur" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="18"/></filter>
 <filter id="blur2"><feGaussianBlur stdDeviation="5"/></filter>
 </defs>''')
-    a(f'<rect width="{W}" height="{H}" fill="url(#bg)"/>')
+    if not solo:
+        a(f'<rect width="{W}" height="{H}" fill="url(#bg)"/>')
     # raios de luz saindo da cabeça
-    for i in range(26):
+    for i in range(0 if solo else 26):
         ang = i * (360 / 26) + rng.uniform(-3, 3)
         p1 = pt(cx, cy, ang - 2.2, 60)
         p2 = pt(cx, cy, ang + 2.2, 60)
         t = pt(cx, cy, ang, 900)
         a(f'<path d="M{p1[0]:.0f},{p1[1]:.0f} L{t[0]:.0f},{t[1]:.0f} L{p2[0]:.0f},{p2[1]:.0f}Z" fill="{f["aura"][0]}" opacity="{rng.uniform(.06, .16):.2f}"/>')
     # aura grande, atrás
-    a(f'<ellipse cx="{cx}" cy="470" rx="330" ry="470" fill="url(#aura)" filter="url(#blur)"/>')
+    if not solo:
+        a(f'<ellipse cx="{cx}" cy="470" rx="330" ry="470" fill="url(#aura)" filter="url(#blur)"/>')
     # chamas da aura
-    for i in range(16):
+    for i in range(0 if solo else 16):
         bx = 90 + i * 36 + rng.uniform(-12, 12)
         top = rng.uniform(120, 460)
         lg = rng.uniform(26, 48)
@@ -214,7 +216,7 @@ def desenhar(id_, f):
     a('</g>')
 
     # ---------- efeitos ----------
-    if f['raios']:
+    if f['raios'] and not solo:
         for _ in range(7):
             sx = rng.choice([rng.uniform(40, 200), rng.uniform(520, 680)])
             sy = rng.uniform(250, 800)
@@ -222,17 +224,18 @@ def desenhar(id_, f):
             ey = sy + rng.uniform(-150, 150)
             a(f'<polyline points="{raio_zig(rng, sx, sy, ex, ey)}" fill="none" stroke="#FFD8B0" stroke-width="7" stroke-linejoin="round" opacity=".9"/>')
             a(f'<polyline points="{raio_zig(rng, sx, sy, ex, ey)}" fill="none" stroke="{f["aura"][0]}" stroke-width="16" stroke-linejoin="round" opacity=".35" filter="url(#blur2)"/>')
-    if f['estrelas']:
+    if f['estrelas'] and not solo:
         for _ in range(26):
             x, y = rng.uniform(20, 700), rng.uniform(40, 900)
             a(estrela4(round(x), round(y), rng.uniform(5, 20), '#FFFFFF', rng.uniform(.5, 1)))
         a(f'<circle cx="{cx}" cy="150" r="112" fill="none" stroke="url(#ouro)" stroke-width="7" opacity=".95"/>')
         a(f'<circle cx="{cx}" cy="150" r="124" fill="none" stroke="#fff" stroke-width="2" opacity=".6"/>')
-    for _ in range(40):
+    for _ in range(0 if solo else 40):
         x, y = rng.uniform(10, 710), rng.uniform(30, 940)
         a(f'<circle cx="{x:.0f}" cy="{y:.0f}" r="{rng.uniform(1.5, 4.5):.1f}" fill="{f["ouro"]}" opacity="{rng.uniform(.4, .95):.2f}"/>')
     # contorno de luz nas bordas (vinheta leve)
-    a(f'<rect width="{W}" height="{H}" fill="none" stroke="#000" stroke-opacity=".25" stroke-width="16"/>')
+    if not solo:
+        a(f'<rect width="{W}" height="{H}" fill="none" stroke="#000" stroke-opacity=".25" stroke-width="16"/>')
     a('</svg>')
     return '\n'.join(o)
 
@@ -243,3 +246,11 @@ if __name__ == '__main__':
         svg.write_text(desenhar(id_, f), encoding='utf-8')
         subprocess.run(['rsvg-convert', '-w', str(W), '-h', str(H), str(svg), '-o', str(ORIG / f'{id_}.png')], check=True)
         print('ok', id_)
+    # recortes sem fundo pras cenas de luta do summon
+    LUTA = RAIZ / 'assets' / 'summon' / 'luta'
+    LUTA.mkdir(parents=True, exist_ok=True)
+    for id_, f in FORMAS.items():
+        svg = SVGS / f'{id_}_solo.svg'
+        svg.write_text(desenhar(id_, f, solo=True), encoding='utf-8')
+        subprocess.run(['rsvg-convert', '-w', '560', '-h', '747', str(svg), '-o', str(LUTA / f'{id_}.png')], check=True)
+        print('ok solo', id_)
