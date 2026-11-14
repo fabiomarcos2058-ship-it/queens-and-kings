@@ -28,7 +28,7 @@ const Eventos = (() => {
     if (!d.festivalNino) d.festivalNino = { v: 0, l: 0, tentativas: 0, ativo: false };
     return d.festivalNino;
   }
-  const txtPremio = (p) => p.zenkai ? `Zenkai ${p.zenkai} nos dois Saiyajins 💥` : p.ouro && p.gemas ? `${p.gemas} 💎 + ${p.ouro} 🪙` : p.ouro ? `${p.ouro} 🪙` : p.gemas ? `${p.gemas} 💎` : p.bau ? `Baú de ${p.bau}` : p.carta ? 'NINO!' : '';
+  const txtPremio = (p) => p.zenkai ? `Zenkai ${p.zenkai} + ${p.zenkai >= 7 ? 300 : 60} cartas nos dois Saiyajins 💥` : p.ouro && p.gemas ? `${p.gemas} 💎 + ${p.ouro} 🪙` : p.ouro ? `${p.ouro} 🪙` : p.gemas ? `${p.gemas} 💎` : p.bau ? `Baú de ${p.bau}` : p.carta ? 'NINO!' : '';
 
   // ---------- montar o deck de cada modo ----------
   const embaralhar = (a) => { const b = [...a]; for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [b[i], b[j]] = [b[j], b[i]]; } return b; };
@@ -253,13 +253,13 @@ const Eventos = (() => {
       nome: 'Treino Saiyajin', vidas: 4, preco: 20, fim: FIM_ZENKAI,
       premios: [1, 2, 3, 4, 5, 6, 7].map((z) => ({ zenkai: z })),
       etapas: [
-        { nome: 'Sala da Gravidade', ic: '🌍', desc: 'Aquecimento na gravidade 10x. Vença e leve o Zenkai 1 do Vegeta SSJ4 e do Goku SSJ4!', cfg: { dif: 3 } },
+        { nome: 'Sala da Gravidade', ic: '🌍', desc: 'Aquecimento na gravidade 10x. Vença e leve Zenkai 1, nível 6 e +60 cartas do Vegeta SSJ4 e do Goku SSJ4!', cfg: { dif: 3 } },
         { nome: 'Ki Explosivo', ic: '⚡', desc: 'Elixir 2x mais rápido. Prêmio: Zenkai 2 nos dois!', cfg: { elixirMult: 2, dif: 3 } },
         { nome: 'Velocidade Saiyajin', ic: '💨', desc: 'Todas as tropas andam e atacam muito mais rápido. Prêmio: Zenkai 3!', cfg: { turbo: true, dif: 4 } },
         { nome: 'Treino às Cegas', ic: '🙈', desc: 'Suas cartas ficam viradas: você só vê o custo. Prêmio: Zenkai 4!', cfg: { cartasViradas: true, dif: 4 } },
         { nome: 'Orgulho Saiyajin', ic: '🦍', desc: 'O rival só joga com lendárias. Prêmio: Zenkai 5!', montar: (ev) => { ev.deckIA = lendariasRival(); }, cfg: { dif: 5 } },
         { nome: 'Duelo Relâmpago', ic: '💀', desc: '2 minutos, tropas turbo e a primeira torre derrubada decide. Prêmio: Zenkai 6!', cfg: { subita: true, turbo: true, dif: 5 } },
-        { nome: 'Rival Supremo', ic: '🐒', desc: 'O chefe: a IA mais esperta, com o Goku SSJ4 no deck e 1 nível acima. Vença e leve o ZENKAI MÁXIMO (7) nos dois!', cfg: { dif: 6, cartaIA: 'goku_ssj4', nivelIAMais: 1 } },
+        { nome: 'Rival Supremo', ic: '🐒', desc: 'O chefe: a IA mais esperta, com o Goku SSJ4 no deck e 1 nível acima. Vença e deixe os dois MAXIMIZADOS: nível 12, Zenkai 7 e +300 cartas!', cfg: { dif: 6, cartaIA: 'goku_ssj4', nivelIAMais: 1 } },
       ],
     },
     celestial: {
@@ -455,7 +455,7 @@ const Eventos = (() => {
     const z = (id) => (Estado.d.colecao[id] && Estado.d.colecao[id].z) || 0;
     const botao = f.completo && !f.ativo ? '<div class="selo">Zenkai máximo! 🐒</div>' : `<button class="selo botao" data-desafio="zenkai">${f.ativo ? `Jogar: ${prox.nome}` : f.tentativas ? `De novo · ${D.preco} 💎` : 'Começar (grátis)'}</button>`;
     return `<div class="desafio-caixa zenkai"><div class="sonic-fundo">${SAIYAJINS.map((id) => `<img src="assets/cartas/${id}.jpg" alt="" />`).join('')}</div><div class="mc-conteudo">
-      <b>🐒 ${D.nome}</b><span>${f.completo ? 'Vegeta SSJ4 e Goku SSJ4 estão no Zenkai máximo! 🎉' : `${total} treinos. Cada vitória dá +1 Zenkai no <b>Vegeta SSJ4</b> e no <b>Goku SSJ4</b>; a última leva os dois ao <b>Zenkai MÁXIMO (7)</b>! Se não tiver a carta, ela vem de brinde. · ${dias} dias`}</span>
+      <b>🐒 ${D.nome}</b><span>${f.completo ? 'Vegeta SSJ4 e Goku SSJ4 estão no Zenkai máximo! 🎉' : `${total} treinos. Cada vitória dá +1 Zenkai, +1 nível e +60 cartas no <b>Vegeta SSJ4</b> e no <b>Goku SSJ4</b>; a última leva os dois ao <b>MÁXIMO: nível 12 e Zenkai 7</b>, com +300 cartas! Se não tiver a carta, ela vem de brinde. · ${dias} dias`}</span>
       <small class="modo-tempo">Zenkai agora: Vegeta ${z('vegeta_ssj4')}/7 · Goku ${z('goku_ssj4')}/7</small>
       <div class="fn-pips">${pips}</div><div class="fn-linha"><div class="fn-vidas">${vidas}</div>${botao}</div></div></div>`;
   }
@@ -706,12 +706,16 @@ const Eventos = (() => {
     for (const id of SAIYAJINS) {
       if (!Estado.tem(id)) { const c = Ranque.darEvolucao(id); if (c) novos.push(c); }
       const col = Estado.d.colecao[id];
-      if (col) col.z = Math.max(col.z || 0, Math.min(Estado.zenkai(id).max, n));
+      if (col) {
+        col.z = Math.max(col.z || 0, Math.min(Estado.zenkai(id).max, n));
+        col.nivel = Math.max(col.nivel || 1, Math.min(Estado.NIVEL_CARTA_MAX, 5 + n)); // vitória 7 = nível máximo
+        col.copias = (col.copias || 0) + (n >= 7 ? 300 : 60);
+      }
     }
     Estado.salvar();
     if (Conta.salvarAgora) Conta.salvarAgora().catch(() => {});
     if (novos[0]) revelarNino(novos[0], 'LENDÁRIA DO TREINO SAIYAJIN', '"Hmph. Você tem potencial, terráqueo."');
-    UI.toast(n >= 7 ? '🐒 ZENKAI MÁXIMO no Vegeta e no Goku SSJ4!' : `💥 Zenkai ${n} no Vegeta e no Goku SSJ4!`);
+    UI.toast(n >= 7 ? '🐒 MAXIMIZADOS: nível 12, Zenkai 7 e +300 cartas cada!' : `💥 Zenkai ${n}, nível ${Math.min(Estado.NIVEL_CARTA_MAX, 5 + n)} e +60 cartas nos dois!`);
   }
   function darPremio(p, mostrarBau) {
     const d = Estado.d;
