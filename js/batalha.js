@@ -542,6 +542,7 @@ const Batalha = (() => {
       atord: 0, lento: 0, lentoPct: 0, queima: 0, queimaDps: 0, queimaAcum: 0, fraco: 0, fracoPct: 0,
       lentoAtq: 0, lentoAtqPct: 0, marcado: 0, marcaPct: 0, escudo: 0, escudoMax: 0, teleCd: 1.5, investiu: false, buffVel: 0,
     };
+    if (nivel >= Ataques.NIVEL_PASSIVA && Ataques.passiva12(c.id)) { t.atk = Ataques.com12(t.atk, c.id); t.passiva12 = true; }
     const m0 = t.atk.m || {};
     if (m0.escudo) { t.escudo = t.escudoMax = Math.round(t.max * m0.escudo); }
     t.evo = !!opc.evo;
@@ -762,7 +763,7 @@ const Batalha = (() => {
       e.el.classList.add('ego-desperto');
       atualizarHp(e);
       fxEl('fx-hakai', e.x, e.y, 1000); fxJ(32, e.x, e.y);
-      falar(e, 'Meu ego não deixa eu cair!', 'fala-db');
+      falar(e, e.carta.id === 'vegeta_ssj4' ? 'Orgulho Saiyajin! Eu não caio!' : e.carta.id === 'goku_ssj4' ? 'Ainda tem mais poder aqui!' : 'Meu ego não deixa eu cair!', 'fala-db');
       tremer(true);
       return dano;
     }
@@ -3768,6 +3769,26 @@ const Batalha = (() => {
     }
   }
 
+  // Vegeta SSJ4 + Goku SSJ4 no nível 12 na mesma equipe (decks juntos): +20% de elixir pra equipe toda
+  function nivelDoLado(quem, id) {
+    return quem === 'azul' ? ((Estado.d.colecao[id] && Estado.d.colecao[id].nivel) || 1)
+      : s.niveis && s.niveis[quem] ? (s.niveis[quem][id] || 1)
+      : quem === 'azul2' && s.niveisAzul2 ? (s.niveisAzul2[id] || 1)
+      : s.niveisV ? (s.niveisV[id] || 1) : 0; // IA/bot não ganha a sinergia
+  }
+  function sinergiaSaiyajin() {
+    const r = {};
+    if (s.nivelFixo) return r;
+    const [a, b] = Ataques.SINERGIA_SAIYAJIN.ids;
+    for (const time of ['azul', 'vermelho']) {
+      const lados = LADOS.filter((l) => s[l] && timeDe(l) === time);
+      const tem = (id) => lados.some((l) => (s[l].deck || []).includes(id) && nivelDoLado(l, id) >= Ataques.NIVEL_PASSIVA);
+      if (tem(a) && tem(b)) r[time] = true;
+    }
+    if (r.azul && typeof UI !== 'undefined') setTimeout(() => UI.toast('🐒 Sinergia Saiyajin: +20% de elixir!'), 1200);
+    return r;
+  }
+
   function passo(dt) {
     s.t += dt;
     const limite = DURACAO + (s.prorrogacao ? PRORROGACAO : 0);
@@ -3776,7 +3797,8 @@ const Batalha = (() => {
     const ganho = (dt / ELIXIR_SEG) * (dobro ? 2 : 1) * (s.elixirMult || 1);
     if (typeof Som !== 'undefined' && !s.tutorial) Som.musica(resta <= 60 ? 'final' : 'batalha');
     const acel = s.aceleraTempo && s.t < s.aceleraTempo.ate ? s.aceleraTempo.dono : null; // Made in Heaven
-    for (const quem of LADOS) if (s[quem]) s[quem].elixir = Math.min(maxEl(quem), s[quem].elixir + ganho * (quem === acel ? 1.7 : 1) * (s.fluxo && s.fluxo.includes(quem) ? 3 : 1));
+    if (!s.sinSaiyajin) s.sinSaiyajin = sinergiaSaiyajin();
+    for (const quem of LADOS) if (s[quem]) s[quem].elixir = Math.min(maxEl(quem), s[quem].elixir + ganho * (quem === acel ? 1.7 : 1) * (s.fluxo && s.fluxo.includes(quem) ? 3 : 1) * (s.sinSaiyajin[timeDe(quem)] ? Ataques.SINERGIA_SAIYAJIN.elixir : 1));
     marcarTempo();
     if (Mod.flag('elixirInfinito')) s.azul.elixir = 10;
 

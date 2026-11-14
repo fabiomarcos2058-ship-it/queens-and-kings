@@ -158,5 +158,17 @@ const Ataques = (() => {
   const padrao = (c) => (c && c.alcance > 40 ? { v: { p: 'ki_amarelo', vel: 300, tam: 14 } } : { v: { g: 'soco', cor: '#ffffff' } });
   const de = (c) => A[c && c.id] || padrao(c);
 
-  return { CLASSES, CONTRA, NA_TORRE, classeDe, fortes, fracos, de, lista: A };
+  // Passiva do nível 12 (Treino Saiyajin): Vegeta SSJ4 e Goku SSJ4. Sobrescreve/soma as mecânicas quando a carta está no nível 12.
+  const NIVEL_PASSIVA = 12;
+  const PASSIVA12 = {
+    vegeta_ssj4: { nome: 'Orgulho do Rei Saiyajin', m: { berserk: 0.7, vampiro: 0.3, ultraEgo: true, escudo: 0.2 },
+      d: 'Bate até 70% mais rápido quanto mais machucado, cura 30% do dano, nasce com escudo de 20% da vida e, quando cairia, volta uma vez com 35% da vida.' },
+    goku_ssj4: { nome: 'Instinto Primitivo Total', m: { vampiro: 0.3, regen: 0.012, escudo: 0.3, critico: [0.3, 2], ultraEgo: true },
+      d: 'Cura 30% do dano, regenera vida o tempo todo, nasce com escudo de 30% da vida, 30% de chance de golpe crítico (x2) e, quando cairia, volta uma vez com 35% da vida.' },
+  };
+  const SINERGIA_SAIYAJIN = { ids: ['vegeta_ssj4', 'goku_ssj4'], elixir: 1.2 };
+  const passiva12 = (id) => PASSIVA12[id] || null;
+  const com12 = (atk, id) => (PASSIVA12[id] ? { ...atk, m: { ...(atk.m || {}), ...PASSIVA12[id].m }, d: PASSIVA12[id].d } : atk);
+
+  return { CLASSES, CONTRA, NA_TORRE, classeDe, fortes, fracos, de, lista: A, NIVEL_PASSIVA, PASSIVA12, passiva12, com12, SINERGIA_SAIYAJIN };
 })();
