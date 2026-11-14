@@ -152,14 +152,31 @@ const Passe = (() => {
     return { r, extra };
   }
 
+  // Carta exclusiva de quem COMPRA o Ultra, uma por passe. O passe de 15/11 (o atual) não tem; esta começa em 22/11.
+  const CARTAS_ULTRA = { 'p2026-11-22': 'gohan_mirai' };
+  const cartaUltraDaTemporada = () => { const id = CARTAS_ULTRA[dados().temporada]; return id ? Estado.carta(id) || null : null; };
+  function entregarCartaUltra() {
+    const p = dados(), d = Estado.d, id = CARTAS_ULTRA[p.temporada];
+    if (!id || p.cartaUltraDada) return null;
+    const c = Estado.carta(id);
+    if (!c) return null;
+    d.cartasExtras = [...new Set([...(d.cartasExtras || []), id])];
+    const col = d.colecao[id];
+    d.colecao[id] = { nivel: Math.max((col && col.nivel) || 1, c.nivelInicial || 6), copias: (col && col.copias) || 0, tem: true, z: (col && col.z) || 0 };
+    p.cartaUltraDada = true;
+    Estado.recarregarCatalogo();
+    return c;
+  }
+
   function comprar(tipo) {
     const d = Estado.d;
     const preco = tipo === 'ultra' && dados().plus ? PRECO.ultra - PRECO.plus : PRECO[tipo];
     if (d.gemas < preco) return { ok: false, motivo: `Faltam ${preco - d.gemas} gemas` };
     d.gemas -= preco;
     dados()[tipo] = true;
+    const carta = tipo === 'ultra' ? entregarCartaUltra() : null;
     Estado.salvar();
-    return { ok: true };
+    return { ok: true, carta };
   }
 
   const precoAtual = (tipo) => (tipo === 'ultra' && dados().plus ? PRECO.ultra - PRECO.plus : PRECO[tipo]);
@@ -170,5 +187,5 @@ const Passe = (() => {
     return d ? `${d}d ${h}h` : h ? `${h}h ${m}m` : `${m}m`;
   };
 
-  return { ESTILOS_NOME, podeEstilo, estiloNome, escolherEstilo, nomeHtml, NIVEIS, PONTOS_NIVEL, PRECO, dados, nivel, recompensa, icone, texto, temTrilha, podePegar, pendentes, ganharPontos, pegar, comprar, precoAtual, diasRestantes, tempoRestante, fimTemporada };
+  return { ESTILOS_NOME, podeEstilo, estiloNome, escolherEstilo, nomeHtml, NIVEIS, PONTOS_NIVEL, PRECO, dados, nivel, recompensa, icone, texto, temTrilha, podePegar, pendentes, ganharPontos, pegar, comprar, precoAtual, diasRestantes, tempoRestante, fimTemporada, cartaUltraDaTemporada };
 })();

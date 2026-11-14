@@ -26,7 +26,7 @@ const Ataques = (() => {
     tanque: ['itsuki', 'shizuku', 'gogeta_ssj4', 'goku_ssj3', 'goku_ssj4', 'goku_blue_lb', 'gogeta_ultra', 'sonic_excalibur', 'conquest', 'omni_man', 'vegeta_ultra_ego', 'gogeta_blue_solo', 'adam_smasher', 'adam_smasher_evo', 'albedo'],
     assassino: ['bra', 'teto', 'pan_dbh', 'akame', 'mbappe', 'kashimo', 'goku_pressagio', 'diavolo', 'mita_malvada', 'akame_murasame', 'sonic', 'dark_sonic', 'kurona', 'goku_black_rose', 'goku_blue_kaioken_remake', 'vegetto_blue_solo', 'agente_rubi', 'david_martinez', 'lucy_kushinada', 'shalltear'],
     atirador: ['mai', 'miku_nakano', 'pan_gt', 'riruka', 'rukia_remake', 'nino_nakano', 'gyro', 'johnny', 'roman_cyber', 'johnny_silverhand', 'pandoras_actor'],
-    mago: ['rukia', 'nami_last', 'hatsune_miku', 'bambietta', 'bulma', 'gojo', 'robin', 'pucci', 'mita_gentil', 'yugi_moto', 'anri_halloween', 'eve_atomica', 'ainz_ooal_gown', 'demiurge'],
+    mago: ['gohan_mirai', 'rukia', 'nami_last', 'hatsune_miku', 'bambietta', 'bulma', 'gojo', 'robin', 'pucci', 'mita_gentil', 'yugi_moto', 'anri_halloween', 'eve_atomica', 'ainz_ooal_gown', 'demiurge'],
     enxame: ['mini'],
   };
   const classeDe = (c) => {
@@ -148,6 +148,7 @@ const Ataques = (() => {
     dio: { v: { g: 'soco', cor: '#FFD25E', pesado: true }, m: { vampiro: 0.25, moveNoTempo: true }, d: 'Golpes que roubam vida (25%). Anda no tempo parado.' },
     diavolo: { v: { g: 'corte', cor: '#FF3D7F' }, m: { epitafio: 7 }, d: 'Corte do Stand. Epitáfio: desvia de um golpe a cada 7s.' },
     pucci: { v: { p: 'disco', vel: 230, tam: 20, giro: 720, rastro: '#D9B8FF' }, m: { disco: 3 }, d: 'Discos. A cada 3, rouba o disco do alvo (trava a habilidade e enfraquece).' },
+    gohan_mirai: { v: { p: 'ki_amarelo', vel: 250, tam: 20, rastro: '#FFE45C' }, m: { estrelinhas: [6, 170] }, d: 'Ki dourado. Cada inimigo que cai vira uma estrelinha que gira ao redor dele e voa sozinha atrás dos vizinhos.' },
     gyro: { v: { p: 'bola_aco', vel: 240, tam: 18, giro: 900, rastro: '#C9D3DE' }, m: { ricochete: 0.6, lentidao: [0.3, 1.5] }, d: 'Bola de Aço que quica em outro inimigo e deixa todos lentos.' },
     johnny: { v: { p: 'unha', vel: 330, tam: 15, giro: 1080, rastro: '#8FD3FF' }, m: { tusk: 0.15 }, d: 'Unhas giratórias de longe. +15% de dano por tiro seguido no mesmo alvo (até +60%).' },
     mita_gentil: { v: { p: 'coracao_mita', vel: 220, tam: 17, rastro: '#FF8FC0' }, m: { mitaGentil: true }, d: 'Joga corações. Lembra de você e fica mais forte a cada partida juntos. Protege sua torre do rei uma vez.' },

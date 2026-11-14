@@ -4146,6 +4146,50 @@
       },
       "arena": 1,
       "danoTorre": 0.55
+    },
+    {
+      "id": "gohan_mirai",
+      "nome": "Mirai Gohan",
+      "raridade": "ultra",
+      "custo": 4,
+      "tipo": "Mago · Estrelinhas de Ki",
+      "descricao": "O último guerreiro do futuro, que ainda protege todo mundo. Cada inimigo que cai vira uma estrelinha de ki que gira ao redor dele e voa sozinha atrás dos vizinhos. Quanto mais spam, mais estrelinhas! Exclusivo do Passe Ultra.",
+      "trofeus": 0,
+      "exclusivo": [],
+      "passeUltra": true,
+      "efeito": "estrelinhas",
+      "arena": 1,
+      "nivelInicial": 6,
+      "rosto": [
+        345,
+        455,
+        165
+      ],
+      "arte": [
+        0,
+        30,
+        736
+      ],
+      "vida": 1150,
+      "dano": 170,
+      "velocidade": 62,
+      "alcance": 85,
+      "cadencia": 0.9,
+      "alvo": "tudo",
+      "danoTorre": 0.45,
+      "passiva": {
+        "nome": "Estrelinhas de Ki",
+        "tipo": "estrelinhas",
+        "descricao": "Cada inimigo que cai perto dele vira uma estrelinha de ki que gira ao redor dele (até 6). A cada golpe, até 2 estrelinhas voam e acertam os inimigos vizinhos do alvo (60% do dano). Contra spam ele se enche de estrelinhas!"
+      },
+      "habilidade": {
+        "nome": "Chuva de Estrelinhas",
+        "tipo": "chuvaEstrelas",
+        "custo": 2,
+        "recarga": 15,
+        "mult": 1.1,
+        "descricao": "Faz chover 4 estrelinhas de ki, mais uma por estrelinha que ele já guardou (até 10), cada uma explodindo em área em cima dos inimigos mais perto."
+      }
     }
   ]
 }

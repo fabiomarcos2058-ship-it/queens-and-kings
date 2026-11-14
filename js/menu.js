@@ -2219,6 +2219,7 @@
         ${Passe.fimTemporada().getTime() - Date.now() <= 2 * 86400000 ? `<div class="passe-aviso-fim">⏳ O passe acaba em <b>${Passe.tempoRestante()}</b>! Pegue as recompensas antes: depois começa um passe novo do zero.</div>` : ''}
         <div class="passe-dica"><span>⚔️ Vitória <b>40</b></span><span>💔 Derrota <b>15</b></span><span>👑 Coroa <b>+8</b></span></div>
         ${prontos ? `<button class="passe-pegar-tudo" id="passe-tudo">🎁 Pegar tudo <i>${prontos}</i></button>` : ''}
+        ${(() => { const cu = Passe.cartaUltraDaTemporada(); return cu ? `<div class="passe-carta-ultra${p.cartaUltraDada ? ' pega' : ''}"><img src="assets/cartas/${cu.id}_medalhao.png" alt="" /><span>${p.cartaUltraDada ? `✅ <b>${cu.nome}</b> já é sua!` : `🌟 Compre o <b>Ultra</b> e leve a carta exclusiva <b>${cu.nome}</b>!`}</span></div>` : ''; })()}
         ${p.ultra ? '' : `<div class="passe-compras compacto">
           ${p.plus ? '' : `<button class="comprar-passe plus" data-c="plus"><b>PLUS</b><small>💎 ${Passe.precoAtual('plus')}</small></button>`}
           <button class="comprar-passe ultra" data-c="ultra"><b>ULTRA</b><small>💎 ${Passe.precoAtual('ultra')}</small></button>
@@ -2258,9 +2259,9 @@
         titulo: `Comprar passe ${t === 'plus' ? 'Plus' : 'Ultra'}?`,
         html: t === 'plus'
           ? `<p>Libera a trilha <b>Plus</b> desta temporada: muito ouro, baús de prata e de ouro e gemas.</p><p><b>💎 ${preco} gemas</b></p>`
-          : `<p>Libera as trilhas <b>Plus e Ultra</b>: baús de ouro, cartas épicas e <b>cartas lendárias</b>.</p><p><b>💎 ${preco} gemas</b>${Passe.dados().plus ? ' (desconto de quem já tem o Plus)' : ''}</p>`,
+          : `<p>Libera as trilhas <b>Plus e Ultra</b>: baús de ouro, cartas épicas e <b>cartas lendárias</b>.</p>${Passe.cartaUltraDaTemporada() ? `<p>🌟 Ainda leva a carta exclusiva <b>${Passe.cartaUltraDaTemporada().nome}</b>!</p>` : ''}<p><b>💎 ${preco} gemas</b>${Passe.dados().plus ? ' (desconto de quem já tem o Plus)' : ''}</p>`,
         botoes: [{ texto: 'Agora não', classe: 'secundario' }, { texto: 'Comprar', classe: 'principal', desativado: d().gemas < preco, motivo: `Faltam ${preco - d().gemas} gemas`,
-          acao: () => { const r = Passe.comprar(t); if (r.ok) { UI.toast(`Passe ${t === 'plus' ? 'Plus' : 'Ultra'} ativado! ✨`); m.fechar(); topo(); setTimeout(telaPasse, 250); } } }],
+          acao: () => { const r = Passe.comprar(t); if (r.ok) { UI.toast(`Passe ${t === 'plus' ? 'Plus' : 'Ultra'} ativado! ✨`); m.fechar(); topo(); if (r.carta) { tudo(); UI.modal({ titulo: '🌟 Carta exclusiva!', classe: 'modal-carta', html: `<div class="detalhe-carta">${Cartas.html(r.carta, { mini: true, vivo: true })}<div><span class="raridade-tag ultra">Exclusiva do Passe Ultra</span><p><b>${r.carta.nome}</b> já está na sua coleção!</p></div></div>`, botoes: [{ texto: 'Que fofa! 💛', classe: 'principal', acao: () => setTimeout(telaPasse, 150) }] }); } else setTimeout(telaPasse, 250); } } }],
       });
     }));
   }

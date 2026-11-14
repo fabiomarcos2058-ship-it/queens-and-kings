@@ -551,7 +551,7 @@ const Batalha = (() => {
     t.el = document.createElement('div');
     t.el.className = `tropa ${time} surgindo${c.token ? ' mini' : ''}${c.habilidade ? ' campea' : ''}${t.escudo ? ' com-escudo' : ''}${t.voo ? ' voando' : ''}${c.evolucao ? ' carta-evo' : ''}${t.evo ? ' evoluida' : ''}${t.infinito ? ' com-infinito' : ''}`;
     t.el.innerHTML = `${barraHp()}
-      <div class="tropa-corpo">${c.evolucao ? '<i class="aura-evo"></i><i class="aura-evo dois"></i>' : ''}${t.evo ? '<span class="selo-evo">EVO</span>' : ''}<div class="tropa-medalhao">${c.videoRosto ? `<video src="assets/cartas/${c.videoRosto}" poster="assets/cartas/${c.id}_medalhao.png" autoplay muted loop playsinline></video>` : `<img src="assets/cartas/${c.id}_medalhao.png" alt="" />`}<b>${nivel}</b>${c.passiva && c.passiva.tipo === 'adaptar' ? '<i class="selo-adapt"></i>' : ''}</div></div><div class="tropa-sombra"></div>`;
+      <div class="tropa-corpo">${m0.estrelinhas ? `<div class="orbita-estrelas">${'<i></i>'.repeat(m0.estrelinhas[0])}</div>` : ''}${c.evolucao ? '<i class="aura-evo"></i><i class="aura-evo dois"></i>' : ''}${t.evo ? '<span class="selo-evo">EVO</span>' : ''}<div class="tropa-medalhao">${c.videoRosto ? `<video src="assets/cartas/${c.videoRosto}" poster="assets/cartas/${c.id}_medalhao.png" autoplay muted loop playsinline></video>` : `<img src="assets/cartas/${c.id}_medalhao.png" alt="" />`}<b>${nivel}</b>${c.passiva && c.passiva.tipo === 'adaptar' ? '<i class="selo-adapt"></i>' : ''}</div></div><div class="tropa-sombra"></div>`;
     s.arena.appendChild(t.el);
     s.ent.push(t);
     posicionar(t);
@@ -801,6 +801,8 @@ const Batalha = (() => {
       // Isagi (Ultra): devora o campo, cada inimigo que cai perto deixa ele mais forte
       if (!e.torre) for (const o of s.ent) if (!o.torre && o.time !== e.time && o.vida > 0 && o.atk && o.atk.m && o.atk.m.devorar && dist(o, e) < 180 && (o.devorar || 0) < o.atk.m.devorar) { o.devorar = (o.devorar || 0) + 1; o.el.classList.add('devorando'); particulas(o.x, o.y, '#5EC8FF', 5, 16); }
       // Rin no Flow: cada inimigo que cai devolve vida
+      // Mirai Gohan: cada inimigo que cai perto dele vira uma estrelinha de ki
+      if (!e.torre) for (const o of s.ent) if (!o.torre && o.time !== e.time && o.vida > 0 && o.atk && o.atk.m && o.atk.m.estrelinhas && dist(o, e) < o.atk.m.estrelinhas[1]) ganharEstrela(o, e);
       if (fonte && !fonte.torre && fonte.flow > 0 && fonte.vida > 0) { fonte.vida = Math.min(fonte.max, fonte.vida + fonte.max * 0.15); atualizarHp(fonte); }
       if (e.rotInf && e.rotInf.resta > 0.6) {
         const r = e.rotInf, f = r.fonte;
@@ -996,6 +998,7 @@ const Batalha = (() => {
     if (h.tipo === 'kingCrimson') kingCrimson(t);
     if (h.tipo === 'madeInHeaven') madeInHeaven(t);
     if (h.tipo === 'ballBreaker') ballBreaker(t, h);
+    if (h.tipo === 'chuvaEstrelas') chuvaEstrelas(t, h);
     if (h.tipo === 'tuskAct4') tuskAct4(t, h);
     if (h.tipo === 'gigantescoMano') gigantescoMano(t, h);
     if (h.tipo === 'esquiva') {
@@ -1843,6 +1846,59 @@ const Batalha = (() => {
     cutinRede('db_evolution');
     kamehameha(t, Math.round(t.dano * (h.mult || 3.2)), { tipo: 9, comp: 430, larg: 46, torreMult: 0.35, atraso: 0.55,
       aoAcertar: (e) => { if (!e.torre) { e.marcado = 4; e.marcaPct = 0.25; e.el.classList.add('marcada'); } } });
+  }
+  // ---------- Mirai Gohan: estrelinhas de ki ----------
+  function marcarEstrelas(g) {
+    const n = g.estrelas || 0;
+    g.el.dataset.est = n;
+    g.el.classList.toggle('com-estrelinhas', n > 0);
+  }
+  function ganharEstrela(g, de) {
+    const max = g.atk.m.estrelinhas[0];
+    if ((g.estrelas || 0) >= max) return;
+    g.estrelas = (g.estrelas || 0) + 1;
+    marcarEstrelas(g);
+    fxEl('fx-estrela pequena', de.x, de.y, 500);
+    voarSprite('ki_amarelo', { x: de.x, y: de.y }, { x: g.x, y: g.y - 6 }, 0.28, 9);
+  }
+  // cada golpe solta até 2 estrelinhas nos vizinhos do alvo (os mais fraquinhos primeiro)
+  function estrelasAtaque(g, alvo, dano) {
+    const vizinhos = s.ent.filter((e) => !e.torre && e !== alvo && e.time !== g.time && e.vida > 0 && dist(e, alvo) < 110 + e.raio)
+      .sort((a, b) => a.vida - b.vida).slice(0, Math.min(2, g.estrelas));
+    vizinhos.forEach((v, i) => {
+      g.estrelas--;
+      agendar(0.12 + i * 0.09, () => {
+        if (!s || s.acabou || v.vida <= 0) return;
+        voarSprite('ki_amarelo', { x: g.x, y: g.y - 6 }, v, 0.16, 12);
+        ferir(v, Math.round(dano * 0.6 * multClasse(g, v)), g.time, g);
+        fxEl('fx-estrela pequena', v.x, v.y, 500);
+        if (s.rede || s.aoVivo) s.eventos.push(['x', Math.round(v.x), Math.round(v.y), 16, '#FFE45C']);
+      });
+    });
+    if (vizinhos.length) marcarEstrelas(g);
+  }
+  // Chuva de Estrelinhas: 4 + as que ele guardou, cada uma explode em área
+  function chuvaEstrelas(t, h) {
+    const n = Math.min(10, 4 + (t.estrelas || 0));
+    t.estrelas = 0; marcarEstrelas(t);
+    falar(t, 'Estrelinhas, vão!', 'fala-db');
+    const perto = s.ent.filter((e) => !e.torre && e.time !== t.time && e.vida > 0 && dist(e, t) < 270).sort((a, b) => dist(a, t) - dist(b, t));
+    const frente = t.time === 'azul' ? -1 : 1;
+    const centros = perto.length ? perto : [t.alvo && t.alvo.vida > 0 ? t.alvo : { x: t.x, y: t.y + frente * 70 }];
+    for (let i = 0; i < n; i++) {
+      const base = centros[i % centros.length];
+      const dx = (Math.random() - 0.5) * 22, dy = (Math.random() - 0.5) * 22;
+      agendar(0.1 + i * 0.09, () => {
+        if (!s || s.acabou || t.vida <= 0) return;
+        const x = (base.x || 0) + dx, y = (base.y || 0) + dy;
+        fxEl('fx-estrela', x, y, 650);
+        for (const e of [...s.ent]) {
+          if (e.torre || e.time === t.time || e.vida <= 0 || dist(e, { x, y }) > 30 + e.raio) continue;
+          ferir(e, Math.round(t.dano * (h.mult || 1.1) * multClasse(t, e)), t.time, t);
+        }
+        if (s.rede || s.aoVivo) s.eventos.push(['x', Math.round(x), Math.round(y), 28, '#FFE45C']);
+      });
+    }
   }
   // Majin Vegeta: quando cai, se explode
   function explosaoFinal(e) {
@@ -2905,6 +2961,7 @@ const Batalha = (() => {
       if (v.ceu) { raioDoCeu(atacante, alvo, dano, crit); return; }
       if (m.passePerfeito && atacante.golpes % m.passePerfeito === 0) { passePerfeito(atacante, alvo, dano, crit); return; }
       if (m.chuteFantasma && atacante.golpes % m.chuteFantasma === 0) { chuteFantasma(atacante, alvo, dano); return; }
+      if (m.estrelinhas && atacante.estrelas > 0) estrelasAtaque(atacante, alvo, dano);
       const n = m.rajada || 1;
       for (let i = 0; i < n; i++) {
         const disparar = () => { if (atacante.vida > 0 && alvo.vida > 0) criarProjetil(atacante, alvo, Math.round(dano / n), v, { crit, x: atacante.x + (i - (n - 1) / 2) * 5 }); };
@@ -3147,6 +3204,7 @@ const Batalha = (() => {
         || ((h.tipo === 'golpes' || h.tipo === 'furia') && perto && (t.alvo.torre || t.alvo.vida > t.dano))
         || ((h.tipo === 'kamehameha' || h.tipo === 'vazioPurpura') && t.alvo && dist(t, t.alvo) < 240)
         || (h.tipo === 'esquiva' && perto && t.vida < t.max * 0.8)
+        || (h.tipo === 'chuvaEstrelas' && s.ent.filter((e) => !e.torre && e.time !== t.time && e.vida > 0 && dist(e, t) < 240).length >= 3)
         || (h.tipo === 'mitaJoga' && L.fila.slice(0, 4).some((id) => { const c = Estado.carta(id); return !c.feitico && !c.barril && c.custo >= 4; }))
         || (h.tipo === 'juntos' && t.alvo && dist(t, t.alvo) < 240)
         || ((h.tipo === 'rivaisEternos' || h.tipo === 'fusaoDupla' || h.tipo === 'finalFlash' || h.tipo === 'kameKaioken') && t.alvo && dist(t, t.alvo) < 250 && (t.alvo.torre || t.alvo.vida > t.dano * 2 || s.ent.filter((e) => !e.torre && e.time !== t.time && e.vida > 0 && dist(e, t) < 250).length >= 2))
@@ -3333,7 +3391,7 @@ const Batalha = (() => {
       tw: Object.fromEntries(s.ent.filter((e) => e.torre).map((e) => [e.id, Math.round(e.vida)])),
       tr: s.ent.filter((e) => !e.torre).map((e) => [e.id, e.carta.id, e.time === 'azul' ? 0 : 1, Math.round(e.x * 10) / 10, Math.round(e.y * 10) / 10,
         Math.round(e.vida), e.max, e.nivel, (e.surgir > 0 ? 1 : 0) | (e.furia > 0 ? 2 : 0) | (e.golpesFortes > 0 ? 4 : 0) | (e.fenix > 0 ? 8 : 0) | (e.congelado > 0 ? 16 : 0) | (e.esquiva > 0 ? 32 : 0) | (e.atord > 0 ? 64 : 0) | (e.lento > 0 ? 128 : 0) | (e.queima > 0 ? 256 : 0) | (e.escudo > 0 ? 512 : 0) | (e.fraco > 0 ? 1024 : 0) | ((e.adaptacao || 0) << 11) | (e.evo ? 131072 : 0) | (e.infinito > 0 ? 262144 : 0) | (e.canal > 0 ? 524288 : 0) | (e.trunfo > 0 ? 1048576 : 0) | (e.sombra > 0 ? 2097152 : 0) | (e.maldAte > s.t ? 4194304 : 0) | (e.aneis > 0 && e.aneisMax ? 8388608 : 0) | (e.semLimite ? 16777216 : 0) | (e.esmeraldas > 0 ? 33554432 : 0) | (e.banido > 0 ? 67108864 : 0) | (e.espelho > 0 ? 134217728 : 0) | (e.raiva > 0 ? 268435456 : 0) | (e.flow > 0 ? 536870912 : 0) | (e.passe > 0 ? 1073741824 : 0) | (e.abobora > 0 ? (1 << 31) : 0), e.recarga > 0 ? +e.recarga.toFixed(1) : 0, e.dono && e.dono.endsWith('2') ? 1 : 0,
-        (e.postura === 'instinto' ? 1 : 0) | (e.postura === 'ego' ? 2 : 0) | (e.sincronia > 0 ? 4 : 0) | (e.kaio > 0 ? 8 : 0) | (e.auraDivina ? 16 : 0) | (e.egoDesperto ? 32 : 0) | (e.furiaFusao ? 64 : 0) | (e.ferida > 0 ? 128 : 0) | (e.evolucao > 0 ? 256 : 0) | (e.sande > 0 ? 512 : 0) | (e.psico > 0 ? 1024 : 0) | (e.acoplado ? 2048 : 0) | (e.cameraBuff ? 4096 : 0) | (e.hackeado > 0 ? 8192 : 0) | (e.hermes > 0 ? 16384 : 0) | (e.dragao > 0 ? 32768 : 0) | (e.einherjar ? 65536 : 0) | (e.festa > 0 ? 131072 : 0)]),
+        (e.postura === 'instinto' ? 1 : 0) | (e.postura === 'ego' ? 2 : 0) | (e.sincronia > 0 ? 4 : 0) | (e.kaio > 0 ? 8 : 0) | (e.auraDivina ? 16 : 0) | (e.egoDesperto ? 32 : 0) | (e.furiaFusao ? 64 : 0) | (e.ferida > 0 ? 128 : 0) | (e.evolucao > 0 ? 256 : 0) | (e.sande > 0 ? 512 : 0) | (e.psico > 0 ? 1024 : 0) | (e.acoplado ? 2048 : 0) | (e.cameraBuff ? 4096 : 0) | (e.hackeado > 0 ? 8192 : 0) | (e.hermes > 0 ? 16384 : 0) | (e.dragao > 0 ? 32768 : 0) | (e.einherjar ? 65536 : 0) | (e.festa > 0 ? 131072 : 0) | ((e.estrelas || 0) << 18)]),
       pj: s.proj.map((p) => [Math.round(p.x), Math.round(p.y - (p.alt || 0)), p.time === 'azul' ? 0 : 1, p.el.classList.contains('de-torre') ? 1 : 0, p.sprite || 0, Math.round(p.giro || 0)]),
       ev: s.eventos,
     };
@@ -3491,6 +3549,7 @@ const Batalha = (() => {
       t.el.classList.toggle('passe-buff', !!(flags & 1073741824));
       t.el.classList.toggle('abobora', !!(flags & (1 << 31)));
       [['postura-instinto', 1], ['postura-ego', 2], ['sincronia', 4], ['kaioken', 8], ['aura-divina', 16], ['ego-desperto', 32], ['furia-fusao', 64], ['ferida-divina', 128], ['evoluindo', 256], ['sandevistan', 512], ['ciberpsicose', 1024], ['acoplado', 2048], ['com-camera', 4096], ['hackeada', 8192], ['hermes', 16384], ['forma-dragao', 32768], ['einherjar', 65536], ['festa-nika', 131072]].forEach(([k, b]) => t.el.classList.toggle(k, !!(f2 & b)));
+      { const est = (f2 >> 18) & 7; t.estrelas = est; t.el.dataset.est = est; t.el.classList.toggle('com-estrelinhas', est > 0); }
       const ad = (flags >> 11) & 63, selo = t.el.querySelector('.selo-adapt');
       if (selo && String(ad || '') !== selo.textContent) { selo.textContent = ad || ''; t.el.classList.toggle('adaptado', !!(t.carta.passiva && ad >= t.carta.passiva.max)); }
       t.recarga = recarga;
