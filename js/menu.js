@@ -1122,6 +1122,9 @@
       if (!calibrarTrofeus() || !d()) return;
       if (document.querySelector('#batalha:not(.oculto)')) return;
       const dd = d(), ate = Math.min(Date.now(), SEGUNDO_PLANO.fim);
+      // registro coerente: vitórias equivalentes aos troféus (cerca de 32 por vitória) e derrotas na proporção
+      const vMin = Math.ceil(Math.max(dd.recorde || 0, dd.trofeus || 0) / 32);
+      if ((dd.vitorias || 0) < vMin) { const falta = vMin - (dd.vitorias || 0); dd.vitorias = vMin; dd.derrotas = (dd.derrotas || 0) + Math.round(falta * 0.22); Estado.salvar(); if (Conta.salvarAgora) Conta.salvarAgora().catch(() => {}); topo(); }
       // base da janela: troféus de quando ela começou (guardado uma vez por janela)
       if (dd.spJan !== SEGUNDO_PLANO.ini) { dd.spJan = SEGUNDO_PLANO.ini; dd.spBase = dd.trofeus; }
       const meta = SEGUNDO_PLANO.meta;
