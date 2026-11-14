@@ -1900,7 +1900,7 @@
     const prontasG = Eventos.cacaProntas() + (ev.sequencia >= 3 && !ev.desafioPremio ? 1 : 0) + (ev.coroas >= 30 && !ev.torneioPremio ? 1 : 0);
     $('eventos-lista').dataset.aba = abaEv;
     $('eventos-lista').innerHTML = `<button class="cartao-passe${p.ultra ? ' ultra' : p.plus ? ' plus' : ''}" id="abrir-passe">
-        <div class="passe-topo"><b>🎟️ Passe da Temporada</b><small>${Passe.diasRestantes()} dias restantes</small></div>
+        <div class="passe-topo"><b>🎟️ Passe da Temporada</b><small>${Passe.tempoRestante()} restantes</small></div>
         <div class="passe-linha"><span class="passe-nivel">${nv}</span><div class="ev-barra passe-barra"><i style="width:${nv >= Passe.NIVEIS ? 100 : ((p.pontos % Passe.PONTOS_NIVEL) / Passe.PONTOS_NIVEL) * 100}%"></i><small>${nv >= Passe.NIVEIS ? 'Completo!' : `${p.pontos % Passe.PONTOS_NIVEL}/${Passe.PONTOS_NIVEL}`}</small></div><span class="passe-tipo">${p.ultra ? 'ULTRA' : p.plus ? 'PLUS' : 'FREE'}</span></div>
         ${pend ? `<span class="passe-pendente">${pend} prêmio${pend > 1 ? 's' : ''} para pegar!</span>` : ''}
       </button>` +
@@ -2199,7 +2199,7 @@
       classe: 'modal-passe passe-novo',
       html: `<div class="passe-topo"><div class="pt-nivel"><small>NÍVEL</small><b>${nv}</b></div>
           <div class="pt-barra"><div><i style="width:${cheio ? 100 : (pts / Passe.PONTOS_NIVEL) * 100}%"></i></div><small>${cheio ? 'Passe completo! 🎉' : `${pts}/${Passe.PONTOS_NIVEL} pontos para o nível ${nv + 1}`}</small></div>
-          <div class="pt-dias">⏳ ${Passe.diasRestantes()}d</div></div>
+          <div class="pt-dias">⏳ ${Passe.tempoRestante()}</div></div>
         <div class="passe-dica"><span>⚔️ Vitória <b>40</b></span><span>💔 Derrota <b>15</b></span><span>👑 Coroa <b>+8</b></span></div>
         ${prontos ? `<button class="passe-pegar-tudo" id="passe-tudo">🎁 Pegar tudo <i>${prontos}</i></button>` : ''}
         ${p.ultra ? '' : `<div class="passe-compras compacto">

@@ -1,13 +1,28 @@
-// Passe da temporada: 60 níveis por mês, três trilhas (Free, Plus, Ultra).
+// Passe da temporada: 60 níveis por semana (acaba todo sábado às 14:30), três trilhas (Free, Plus, Ultra).
 // Plus e Ultra são comprados com gemas (caros de propósito).
 const Passe = (() => {
   const NIVEIS = 60;
-  const PONTOS_NIVEL = 55;
+  const PONTOS_NIVEL = 30; // era 55 no passe mensal; semanal precisa de menos pontos por nível
+  const PONTOS_NIVEL_ANTIGO = 55;
   const PRECO = { plus: 600, ultra: 1500 }; // Ultra já inclui o Plus
-  const temporadaAtual = () => new Date().toISOString().slice(0, 7); // AAAA-MM
+  // Temporada semanal: acaba todo sábado às 14:30 (horário do aparelho). A primeira acaba em 21/11,
+  // pra ninguém perder o progresso do passe mensal de uma hora pra outra.
+  const PRIMEIRO_FIM = new Date(2026, 10, 21, 14, 30, 0).getTime();
+  function fimTemporada(agora = Date.now()) {
+    if (agora < PRIMEIRO_FIM) return new Date(PRIMEIRO_FIM);
+    const d = new Date(agora);
+    d.setHours(14, 30, 0, 0);
+    d.setDate(d.getDate() + ((6 - d.getDay() + 7) % 7));
+    if (d.getTime() <= agora) d.setDate(d.getDate() + 7);
+    return d;
+  }
+  const idDe = (f) => `p${f.getFullYear()}-${String(f.getMonth() + 1).padStart(2, '0')}-${String(f.getDate()).padStart(2, '0')}`;
+  const temporadaAtual = () => idDe(fimTemporada());
+  const mesDe = (t) => String(t).replace(/^p/, '').slice(0, 7); // AAAA-MM
+  const FIM_MES_PAGO = new Date(2026, 10, 30, 23, 59, 59).getTime(); // quem comprou Plus/Ultra no passe mensal de novembro mantém até aqui
 
   // recompensa de cada nível em cada trilha (bem variada: ouro, gemas, baús, cartas, coringas e tokens)
-  function recompensa(trilha, n) {
+  function base(trilha, n) {
     const C = (raridade, qtd) => ({ tipo: 'coringa', raridade, qtd });
     if (trilha === 'free') {
       if (n === NIVEIS) return C('epica', 6);
@@ -41,6 +56,14 @@ const Passe = (() => {
       { tipo: 'gemas', qtd: 30 }, C('epica', 2 + Math.floor(n / 20)), { tipo: 'ouro', qtd: 500 + n * 25 },
       C('universal', 5), { tipo: 'tokens', qtd: 60 }, { tipo: 'carta', raridade: 'epica', qtd: 3 },
     ][n % 6];
+  }
+
+  // recompensas em dobro (+100%): quantidades x2 e baús um nível acima (madeira→prata→ouro)
+  const BAU_ACIMA = { madeira: 'prata', prata: 'ouro' };
+  function recompensa(trilha, n) {
+    const r = base(trilha, n);
+    if (r.tipo === 'bau') return BAU_ACIMA[r.bau] ? { ...r, bau: BAU_ACIMA[r.bau] } : r;
+    return r.qtd ? { ...r, qtd: r.qtd * 2 } : r;
   }
 
   // Estilos de nome: quem tem o Passe Plus ou Ultra escolhe; os animados são só do Ultra.
@@ -78,11 +101,20 @@ const Passe = (() => {
 
   function dados() {
     const d = Estado.d;
-    if (!d.passe || d.passe.temporada !== temporadaAtual()) {
-      d.passe = { temporada: temporadaAtual(), pontos: 0, plus: false, ultra: false, pegos: { free: [], plus: [], ultra: [] } };
+    const atual = temporadaAtual();
+    if (!d.passe || d.passe.temporada !== atual) {
+      const v = d.passe;
+      let novo = { temporada: atual, pontos: 0, plus: false, ultra: false, pegos: { free: [], plus: [], ultra: [] } };
+      const levaPasse = () => { novo.plus = !!v.plus; novo.ultra = !!v.ultra; novo.legado = true; novo.presenteUltra = !!v.presenteUltra; };
+      if (v && /^\d{4}-\d{2}$/.test(v.temporada)) {
+        // passe mensal antigo vira semanal: quem não terminou continua de onde parou; quem terminou começa um novo já
+        if ((v.pontos || 0) < NIVEIS * PONTOS_NIVEL_ANTIGO) novo = { ...v, temporada: atual, legado: true };
+        else levaPasse();
+      } else if (v && v.legado && fimTemporada().getTime() <= FIM_MES_PAGO) levaPasse(); // Plus/Ultra pagos em novembro valem até o fim do mês
+      d.passe = novo;
     }
     const meu = typeof Conta !== 'undefined' && Conta.uid ? Conta.uid() : null;
-    if (meu && !d.passe.presenteUltra && (PRESENTES_ULTRA[meu] || []).includes(d.passe.temporada)) {
+    if (meu && !d.passe.presenteUltra && (PRESENTES_ULTRA[meu] || []).includes(mesDe(d.passe.temporada))) {
       d.passe.ultra = true;
       d.passe.presenteUltra = true;
       Estado.salvar();
@@ -131,11 +163,12 @@ const Passe = (() => {
   }
 
   const precoAtual = (tipo) => (tipo === 'ultra' && dados().plus ? PRECO.ultra - PRECO.plus : PRECO[tipo]);
-  const diasRestantes = () => {
-    const h = new Date();
-    const fim = new Date(h.getFullYear(), h.getMonth() + 1, 1);
-    return Math.ceil((fim - h) / 86400000);
+  const diasRestantes = () => Math.max(1, Math.ceil((fimTemporada().getTime() - Date.now()) / 86400000));
+  const tempoRestante = () => {
+    const ms = Math.max(0, fimTemporada().getTime() - Date.now());
+    const d = Math.floor(ms / 86400000), h = Math.floor(ms / 3600000) % 24, m = Math.floor(ms / 60000) % 60;
+    return d ? `${d}d ${h}h` : h ? `${h}h ${m}m` : `${m}m`;
   };
 
-  return { ESTILOS_NOME, podeEstilo, estiloNome, escolherEstilo, nomeHtml, NIVEIS, PONTOS_NIVEL, PRECO, dados, nivel, recompensa, icone, texto, temTrilha, podePegar, pendentes, ganharPontos, pegar, comprar, precoAtual, diasRestantes };
+  return { ESTILOS_NOME, podeEstilo, estiloNome, escolherEstilo, nomeHtml, NIVEIS, PONTOS_NIVEL, PRECO, dados, nivel, recompensa, icone, texto, temTrilha, podePegar, pendentes, ganharPontos, pegar, comprar, precoAtual, diasRestantes, tempoRestante, fimTemporada };
 })();
