@@ -40,10 +40,10 @@ const Passe = (() => {
       if (n % 25 === 0) return C('lendaria', 1);
       if (n % 12 === 0) return C('epica', 4);
       if (n % 10 === 0) return { tipo: 'bau', bau: 'ouro' };
-      if (n % 4 === 0) return { tipo: 'bau', bau: 'prata' };
+      if (n % 4 === 0) return n % 8 === 0 ? { tipo: 'bau', bau: 'prata' } : { tipo: 'gemas', qtd: 60 };
       return [
-        { tipo: 'ouro', qtd: 150 + n * 8 }, C('rara', 4 + Math.floor(n / 10)), { tipo: 'gemas', qtd: 20 },
-        C('comum', 15 + Math.floor(n / 4)), { tipo: 'tokens', qtd: 35 }, { tipo: 'carta', raridade: 'epica', qtd: 1 },
+        { tipo: 'ouro', qtd: 150 + n * 8 }, C('rara', 4 + Math.floor(n / 10)), { tipo: 'gemas', qtd: 75 },
+        C('comum', 15 + Math.floor(n / 4)), { tipo: 'gemas', qtd: 60 }, { tipo: 'carta', raridade: 'epica', qtd: 1 },
       ][n % 6];
     }
     // ultra
@@ -53,8 +53,8 @@ const Passe = (() => {
     if (n % 10 === 0) return { tipo: 'carta', raridade: 'lendaria', qtd: 1 };
     if (n % 7 === 0) return { tipo: 'bau', bau: 'ouro' };
     return [
-      { tipo: 'gemas', qtd: 30 }, C('epica', 2 + Math.floor(n / 20)), { tipo: 'ouro', qtd: 500 + n * 25 },
-      C('universal', 5), { tipo: 'tokens', qtd: 60 }, { tipo: 'carta', raridade: 'epica', qtd: 3 },
+      { tipo: 'gemas', qtd: 150 }, C('epica', 2 + Math.floor(n / 20)), { tipo: 'ouro', qtd: 500 + n * 25 },
+      C('universal', 5), { tipo: 'gemas', qtd: 100 }, { tipo: 'carta', raridade: 'epica', qtd: 3 },
     ][n % 6];
   }
 
