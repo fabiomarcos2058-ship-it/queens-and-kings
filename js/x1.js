@@ -76,12 +76,12 @@ const X1 = (() => {
         if (v && v.val()) Batalha.adversarioSaiu(); // continua fora depois da espera: saiu de verdade
       }, ESPERA_SAIU);
     }));
-    let enviando = false;
+    let noAr = 0; // fotos enviadas que o servidor ainda não confirmou
     Batalha.iniciar({
       modo: modoSala === '2v2' ? '2v2' : 'x1', fim,
       rede: {
         tipo: 'host', convidado,
-        enviarEstado: (est) => { if (enviando && !est.fim) return; enviando = true; m.set(r(`salas/${sala}/estado`), limpo(est)).catch(() => {}).finally(() => (enviando = false)); },
+        enviarEstado: (est) => { if (noAr >= 3 && !est.fim) return; noAr++; m.set(r(`salas/${sala}/estado`), limpo(est)).catch(() => {}).finally(() => { noAr = Math.max(0, noAr - 1); }); }, // até 3 fotos no ar: esperar a resposta de cada uma deixava o convidado com 3-5 fotos por segundo
         fim: () => { setTimeout(() => { m.remove(r(`salas/${sala}`)).catch(() => {}); limpar(); }, 6000); },
       },
     });
@@ -109,12 +109,12 @@ const X1 = (() => {
         if (v && !v.exists()) Batalha.adversarioSaiu(lado); // não voltou: a IA assume
       }, ESPERA_SAIU);
     }));
-    let enviando = false;
+    let noAr = 0; // fotos enviadas que o servidor ainda não confirmou
     Batalha.iniciar({
       modo: '2v2', fim, ranque: extra.ranque || null,
       rede: {
         tipo: 'host', jogadores,
-        enviarEstado: (est) => { if (enviando && !est.fim) return; enviando = true; m.set(r(`salas/${sala}/estado`), limpo(est)).catch(() => {}).finally(() => (enviando = false)); },
+        enviarEstado: (est) => { if (noAr >= 3 && !est.fim) return; noAr++; m.set(r(`salas/${sala}/estado`), limpo(est)).catch(() => {}).finally(() => { noAr = Math.max(0, noAr - 1); }); }, // até 3 fotos no ar: esperar a resposta de cada uma deixava o convidado com 3-5 fotos por segundo
         fim: () => { setTimeout(() => { m.remove(r(`salas/${sala}`)).catch(() => {}); limpar(); }, 6000); },
       },
     });

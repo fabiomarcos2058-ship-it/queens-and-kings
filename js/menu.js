@@ -569,6 +569,7 @@
       clearTimeout(tempo); fechar();
       if (d().deck.length < 8) { UI.toast(`Você precisa de 8 cartas no deck para o ${ehDupla ? '2v2' : 'x1'}.`); X1.responder(c.codigo, 'recusou'); return; }
       document.querySelectorAll('.modal-fundo').forEach((m) => m.remove());
+      if (ehDupla) { try { RanqueUI.fechar(); } catch (e) { /* nada */ } } // não fica preso na tela da ranqueada
       if (ehTD) { TD.entrar(c.codigo); return; }
       x1Entrar(c.codigo);
     };
@@ -985,11 +986,11 @@
         aoComecar: (h, info) => {
           espera.fechar();
           // quem foi convidado estava na tela da ranqueada: ela ficava por cima da batalha
-          try { RanqueUI.fechar(); } catch (e) { /* nada */ }
+          try { RanqueUI.fechar(); document.querySelectorAll('.tela-ranque, .procurando').forEach((t) => t.remove()); } catch (e) { /* nada */ }
           if (!info) { X1.assistir(h, fimDeBatalha); return; }
           // 2v2: descobre quem é meu parceiro e quem são os rivais
           const par = { azul: 'azul2', azul2: 'azul', vermelho: 'vermelho2', vermelho2: 'vermelho' }[info.meuLado];
-          const p = info.vagas[par];
+          const p = info.vagas[par] || (par === 'azul' ? h : null); // na ranqueada o parceiro é quem criou a sala
           const rivais = Object.entries(info.vagas).filter(([l]) => timeVaga(l) !== timeVaga(info.meuLado)).map(([, x]) => x.nome);
           X1.assistir(h, fimDeBatalha, { meuLado: info.meuLado, nomeParceiro: p ? p.nome : 'Parceiro IA', deckParceiro: p ? p.deck : null,
             titulo: rivais.length ? `vs ${rivais.join(' e ')}` : `com ${p ? p.nome : 'IA'}`, ranque: info.ranque || null });
