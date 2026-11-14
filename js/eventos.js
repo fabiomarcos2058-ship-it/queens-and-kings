@@ -736,6 +736,8 @@ const Eventos = (() => {
   }
   function fim(r, { mostrarBau, tudo }) {
     const ev = r.evento || {};
+    // todo evento também dá pontos (XP) do passe
+    try { const pp = Passe.ganharPontos(r.resultado, r.coroas || 0); setTimeout(() => UI.toast(`🎟️ +${pp.ganho} pontos do passe${pp.subiu ? ` · nível ${Passe.nivel()}!` : ''}`), 600); } catch (e) { /* nada */ }
     if (ev.mita) { fimMita(r, { mostrarBau, tudo }); return; }
     if (ev.desafio) { fimDesafio(r, { mostrarBau, tudo }); return; }
     const ganhou = r.resultado === 'vitoria';
