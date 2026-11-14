@@ -642,7 +642,7 @@ const Eventos = (() => {
   }
 
   // ---------- tela (dentro da aba Eventos) ----------
-  function html() {
+  function htmlAntigo() {
     const f = nino();
     const temNino = Estado.tem(NINO);
     const hoje = modosDeHoje();
@@ -674,7 +674,7 @@ const Eventos = (() => {
       <div class="ev-sec" data-sec="desafios">${htmlDesafios()}${htmlMitas()}${festival}</div>
       <div class="ev-sec" data-sec="modos">${typeof TD !== 'undefined' ? TD.htmlEvento() : ''}<div class="eventos-cab">🎪 Modos de hoje</div>${modos}</div>`;
   }
-  function ligar(raiz, { iniciar, verCarta }) {
+  function ligarAntigo(raiz, { iniciar, verCarta }) {
     if (typeof TD !== 'undefined') TD.ligar(raiz);
     raiz.querySelectorAll('[data-caca]').forEach((b) => (b.onclick = () => { const g = pegarCaca(+b.dataset.caca); if (g) { UI.toast(`+${g} 💎`); if (window.MenuAPI) window.MenuAPI.tudo(); } }));
     raiz.querySelectorAll('[data-diaria]').forEach((b) => (b.onclick = () => { const r = pegarDiaria(+b.dataset.diaria); if (r) { UI.toast(`+${[r.ouro ? UI.fmt(r.ouro) + ' 🪙' : '', r.g ? r.g + ' 💎' : ''].filter(Boolean).join(' e ')}${r.bonus ? ' (bônus incluso!)' : ''}`); if (window.MenuAPI) window.MenuAPI.tudo(); } }));
@@ -1041,5 +1041,149 @@ const Eventos = (() => {
     conferindo = false;
   }
 
-  return { contarGemas, cacaProntas, vitoriaFds, html, ligar, fim, conferir, trocarTokens, ganharTokens, tokensHoje, MODOS, modosDeHoje, jogarModo, jogarFestival, nino };
+
+  // =====================================================================
+  // Visual novo dos eventos (estilo Dragon Ball Legends): vitrine de banners
+  // e, dentro de cada evento, um caminho com fases que você toca uma a uma.
+  // =====================================================================
+  let ctxUI = { iniciar: () => {}, verCarta: () => {}, extras: () => [] };
+  let mapaAtual = null; // id do evento aberto (reabre sozinho depois da batalha)
+  const premioIc = (p) => !p ? '' : p.carta ? `<img src="assets/cartas/${p.carta}_medalhao.png" alt="" />` : p.zenkai ? '🐒' : p.escolha ? '⭐' : p.bau ? '🎁' : p.gemas ? '💎' : p.ouro ? '🪙' : '';
+  const art = (id) => `assets/cartas/${id}.jpg`;
+  const vidasDe = (D, f, ic) => ({ total: D.vidas, resta: f.ativo ? Math.max(0, D.vidas - f.l) : D.vidas, ic });
+
+  function nosDesafio(k, ini) {
+    const D = DESAFIOS[k], f = dadosDesafio(k), total = D.etapas.length;
+    const fechado = f.completo && !f.ativo;
+    const travaTudo = fechado && (k === 'celestial' || k === 'zenkai');
+    const atual = fechado ? 0 : Math.min(f.v, total - 1);
+    return D.etapas.map((E, i) => ({
+      ic: E.ic || '⚔️', rotulo: fechado && i === 0 && !travaTudo ? 'Jogar de novo' : E.nome, premio: premioIc(D.premios[i]), grande: i === total - 1,
+      estado: travaTudo ? 'feito' : fechado ? (i === 0 ? 'atual' : 'feito') : i < f.v ? 'feito' : i === atual ? 'atual' : 'travado',
+      clique: () => jogarDesafio(k, ini),
+    }));
+  }
+  function nosMita(k, ini) {
+    const D = MITAS[k], f = dadosMita(k), trava = D.requer && !Estado.tem(D.requer);
+    const fechado = f.completo && !f.ativo;
+    return Array.from({ length: D.vitorias }, (_, i) => ({
+      ic: i === D.vitorias - 1 ? '' : k === 'mitaMalvada' ? '🖤' : '💗', img: i === D.vitorias - 1 ? `assets/cartas/${D.carta}_medalhao.png` : '', rotulo: i === D.vitorias - 1 ? 'Final' : `Batalha ${i + 1}`,
+      premio: premioIc(D.premios[i]), grande: i === D.vitorias - 1,
+      estado: trava ? 'travado' : fechado ? (i === 0 ? 'atual' : 'feito') : i < f.v ? 'feito' : i === f.v ? 'atual' : 'travado',
+      clique: () => jogarMita(k, ini),
+    }));
+  }
+  const iniMapa = (ev) => { fecharMapa(true); ctxUI.iniciar(ev); }; // a batalha cobre a tela; o mapa reabre quando ela acabar
+  function especs(ini) {
+    const L = [];
+    const verMais = (ids) => ids.map((id) => ({ txt: `Ver ${Estado.carta(id).nome}`, clique: () => ctxUI.verCarta(Estado.carta(id)) }));
+    // --- eventos especiais (desafios com caminho) ---
+    if (aberto('zenkai')) { const D = DESAFIOS.zenkai, f = dadosDesafio('zenkai'); L.push({ id: 'zenkai', grupo: 'especial', titulo: 'Treino Saiyajin', sub: 'Zenkai máximo no Vegeta e no Goku SSJ4', cor: 'vermelho', fundo: ['goku_ssj4', 'vegeta_ssj4'], tag: 'NOVO', ic: '🐒', nos: nosDesafio('zenkai', ini), vidas: vidasDe(D, f, '🔥'), rodape: verMais(SAIYAJINS), alerta: !f.completo && !f.ativo && !f.tentativas }); }
+    if (aberto('celestial')) { const D = DESAFIOS.celestial, f = dadosDesafio('celestial'); L.push({ id: 'celestial', grupo: 'especial', titulo: 'Ascensão Celestial', sub: 'Suba ao topo do céu', cor: 'azul', fundo: ['arenas/celestial_mini'], tag: 'LIMITADO', ic: '👼', nos: nosDesafio('celestial', ini), vidas: vidasDe(D, f, '🪽') }); }
+    if (aberto('cyber')) { const D = DESAFIOS.cyber, f = dadosDesafio('cyber'); L.push({ id: 'cyber', grupo: 'especial', titulo: 'Noite em Night City', sub: 'Cada missão traz um personagem', cor: 'roxo', fundo: ['roman_cyber', 'david_martinez'], tag: 'NOVO', ic: '🌃', nos: nosDesafio('cyber', ini), vidas: vidasDe(D, f, '💾'), rodape: [{ txt: 'Ver os personagens', clique: () => { UI.modal({ titulo: '🌃 Night City', html: `<div class="escolha-sonic">${CYBER.map((id) => `<div class="es-op">${Cartas.html(Estado.carta(id), { mini: true })}<b>${esc(Estado.carta(id).nome)}</b></div>`).join('')}</div>`, botoes: [{ texto: 'Fechar', classe: 'principal' }] }); } }] }); }
+    if (aberto('yugi')) { const D = DESAFIOS.yugi, f = dadosDesafio('yugi'); L.push({ id: 'yugi', grupo: 'especial', titulo: 'Duelo do Faraó', sub: 'Ganhe o Yugi Moto', cor: 'dourado', fundo: ['yugi_moto'], tag: '', ic: '🃏', nos: nosDesafio('yugi', ini), vidas: vidasDe(D, f, '🃏'), rodape: verMais([YUGI]) }); }
+    if (aberto('sonic')) { const D = DESAFIOS.sonic, f = dadosDesafio('sonic'); L.push({ id: 'sonic', grupo: 'especial', titulo: 'Corrida do Sonic', sub: 'Escolha qualquer Sonic', cor: 'azul', fundo: ['sonic', 'shadow'], tag: '', ic: '💨', nos: nosDesafio('sonic', ini), vidas: vidasDe(D, f, '💍'), rodape: [{ txt: 'Ver os Sonics', clique: () => { const m = UI.modal({ titulo: '💨 Família Sonic', classe: 'modal-escolha-sonic', html: `<div class="escolha-sonic">${FAMILIA_SONIC.map((id) => `<button class="es-op" data-v="${id}">${Cartas.html(Estado.carta(id), { mini: true })}<b>${esc(Estado.carta(id).nome)}</b></button>`).join('')}</div>`, botoes: [{ texto: 'Fechar' }] }); m.el.querySelectorAll('[data-v]').forEach((x) => (x.onclick = () => ctxUI.verCarta(Estado.carta(x.dataset.v)))); } }] }); }
+    if (mitasAbertas()) {
+      const g = dadosMita('mitaGentil'), m = dadosMita('mitaMalvada');
+      L.push({ id: 'mitaGentil', grupo: 'especial', titulo: 'Um dia com a Mita Gentil', sub: 'Ela vai lembrar de cada partida', cor: 'rosa', fundo: ['mita_gentil'], tag: '', ic: '💕', nos: nosMita('mitaGentil', ini), vidas: vidasDe(MITAS.mitaGentil, g, '💗'), rodape: verMais(['mita_gentil']) });
+      L.push({ id: 'mitaMalvada', grupo: 'especial', titulo: 'Fuja da Mita Malvada', sub: Estado.tem('mita_gentil') ? 'Ela sabe que você está aí…' : 'Ganhe a Gentil primeiro', cor: 'preto', fundo: ['mita_malvada'], tag: '', ic: '🖤', nos: nosMita('mitaMalvada', ini), vidas: vidasDe(MITAS.mitaMalvada, m, '🖤'), rodape: verMais(['mita_malvada']) });
+    }
+    if (festivalAberto()) {
+      const f = nino(), temNino = Estado.tem(NINO);
+      L.push({ id: 'festival', grupo: 'especial', titulo: 'Festival das Quíntuplas', sub: 'Conquiste a Nino Nakano', cor: 'rosa', fundo: ['nino_nakano'], tag: '', ic: '🎀',
+        nos: PREMIOS.map((pr, i) => ({ ic: i === VITORIAS - 1 ? '' : '🎀', img: i === VITORIAS - 1 ? 'assets/cartas/nino_nakano_medalhao.png' : '', rotulo: i === VITORIAS - 1 ? 'Final' : `Batalha ${i + 1}`, premio: premioIc(pr), grande: i === VITORIAS - 1,
+          estado: f.completo && !f.ativo ? (i === 0 ? 'atual' : 'feito') : i < f.v ? 'feito' : i === f.v ? 'atual' : 'travado', clique: () => jogarFestival(ini) })),
+        vidas: { total: VIDAS, resta: f.ativo ? Math.max(0, VIDAS - f.l) : VIDAS, ic: '❤️' }, rodape: verMais([NINO]) });
+    }
+    if (typeof TD !== 'undefined' && TD.htmlEvento()) L.push({ id: 'td', grupo: 'especial', titulo: 'Defesa do Reino', sub: 'Segure as ondas de inimigos', cor: 'verde', fundo: [], tag: 'EVENTO', ic: '🏰',
+      nos: [{ ic: '👤', rotulo: 'Solo', estado: 'atual', clique: () => TD.jogarSolo() }, { ic: '🤝', rotulo: 'Com amigo', estado: 'atual', grande: true, clique: () => TD.jogarCoop() }] });
+    // --- relâmpago e farm ---
+    if (aberto100k()) {
+      const f = dados100k();
+      L.push({ id: 'ouro100k', grupo: 'especial', titulo: 'Chuva de Ouro', sub: 'Elixir 3x contra a IA mais esperta', cor: 'dourado', fundo: [], tag: 'SÓ HOJE', ic: '💰', alerta: !f.pego,
+        nos: Array.from({ length: META_100K }, (_, i) => ({ ic: i === META_100K - 1 ? '💰' : '⚡', rotulo: i === META_100K - 1 ? 'Chuva de Ouro' : `Vitória ${i + 1}`, premio: i === META_100K - 1 ? '🪙' : '', grande: i === META_100K - 1,
+          estado: f.pego || i < f.v ? 'feito' : i === f.v ? 'atual' : 'travado', clique: () => jogar100k(ini) })) });
+    }
+    const dg = dadosDiarias();
+    L.push({ id: 'diarias', grupo: 'farm', titulo: 'Missões Diárias', sub: 'Ouro e cristais todo dia', cor: 'laranja', fundo: [], tag: '', ic: '📜', alerta: DIARIAS.some((m, i) => dg.prog[i] >= m.alvo && !dg.pego[i]),
+      nos: DIARIAS.map((m, i) => { const pronto = dg.prog[i] >= m.alvo; return { ic: m.ouro ? '🪙' : '💎', rotulo: m.txt, premio: '', progresso: Math.min(1, dg.prog[i] / m.alvo), estado: dg.pego[i] ? 'feito' : pronto ? 'pronto' : 'atual',
+        clique: () => { if (dg.pego[i]) return; if (!pronto) { UI.toast(`${m.txt} pra liberar 😉`); return; } const r = pegarDiaria(i); if (r) { UI.toast(`+${[r.ouro ? UI.fmt(r.ouro) + ' 🪙' : '', r.g ? r.g + ' 💎' : ''].filter(Boolean).join(' e ')}${r.bonus ? ' (bônus!)' : ''}`); if (window.MenuAPI) window.MenuAPI.tudo(); } } }; }).concat([{ ic: '🎁', rotulo: 'Bônus', grande: true, estado: dg.bonus ? 'feito' : 'travado', clique: () => UI.toast('Complete todas as missões pra ganhar o bônus! 🎁') }]) });
+    const cc = dadosCaca();
+    L.push({ id: 'caca', grupo: 'farm', titulo: 'Caça às Gemas', sub: 'Missões da semana, só gemas', cor: 'azul', fundo: [], tag: '', ic: '💎', alerta: CACA.some((m, i) => cc.prog[i] >= m.alvo && !cc.pego[i]),
+      nos: CACA.map((m, i) => { const pronto = cc.prog[i] >= m.alvo; return { ic: '💎', rotulo: m.txt, progresso: Math.min(1, cc.prog[i] / m.alvo), estado: cc.pego[i] ? 'feito' : pronto ? 'pronto' : 'atual',
+        clique: () => { if (cc.pego[i]) return; if (!pronto) { UI.toast(`${m.txt} pra liberar 😉`); return; } const g = pegarCaca(i); if (g) { UI.toast(`+${g} 💎`); if (window.MenuAPI) window.MenuAPI.tudo(); } } }; }).concat([{ ic: '🎁', rotulo: 'Bônus', grande: true, estado: cc.bonus ? 'feito' : 'travado', clique: () => UI.toast('Complete todas as missões da semana pra ganhar o bônus! 🎁') }]) });
+    const hf = dadosFarma();
+    L.push({ id: 'minas', grupo: 'farm', titulo: 'Minas', sub: 'Farme ouro e cristais', cor: 'dourado', fundo: [], tag: '', ic: '⛏️',
+      nos: Object.entries(FARMA).map(([k, F]) => ({ ic: F.ic, rotulo: F.nome, progresso: Math.min(1, hf[k] / F.limite), estado: hf[k] >= F.limite ? 'feito' : 'atual', grande: true, clique: () => jogarFarma(k, ini) })) });
+    const th = tokensHoje();
+    L.push({ id: 'tokens', grupo: 'farm', titulo: 'Caça aos Tokens', sub: 'Troque tokens por gemas', cor: 'roxo', fundo: [], tag: '', ic: '🪙',
+      nos: [{ ic: '⚔️', rotulo: 'Caçar tokens', progresso: Math.min(1, th.qtd / LIMITE_TOKENS_DIA), estado: th.qtd >= LIMITE_TOKENS_DIA ? 'feito' : 'atual', grande: true, clique: () => jogarTokens(ini) },
+        { ic: '💎', rotulo: 'Trocar por gemas', estado: 'atual', grande: true, clique: () => trocarTokens(() => { if (window.MenuAPI) window.MenuAPI.tudo(); }) }] });
+    L.push({ id: 'modos', grupo: 'farm', titulo: 'Modos do Dia', sub: 'Mudam todo dia', cor: 'verde', fundo: [], tag: '', ic: '🎪',
+      nos: modosDeHoje().map((id) => ({ ic: MODOS[id].ic, rotulo: MODOS[id].nome, estado: 'atual', grande: true, clique: () => jogarModo(id, ini) })) });
+    for (const x of (ctxUI.extras ? ctxUI.extras() : [])) L.push(x);
+    return L;
+  }
+
+  function htmlHub() {
+    const L = especs(iniMapa);
+    const banner = (e) => `<button class="evh-banner ${e.cor}" data-evmapa="${e.id}">
+        <div class="evh-fundo">${(e.fundo.length ? e.fundo : []).map((f) => `<i style="background-image:url(assets/${f.includes('/') ? f : `cartas/${f}`}.jpg)"></i>`).join('') || `<em>${e.ic}</em>`}</div>
+        <div class="evh-sombra"></div>
+        ${e.tag ? `<span class="evh-fita">${e.tag}</span>` : ''}${e.alerta ? '<span class="evh-alerta">!</span>' : ''}
+        <div class="evh-texto"><b>${esc(e.titulo)}</b><small>${esc(e.sub)}</small></div></button>`;
+    const card = (e) => `<button class="evh-card ${e.cor}" data-evmapa="${e.id}"><span class="evh-ic">${e.ic}</span><b>${esc(e.titulo)}</b><small>${esc(e.sub)}</small>${e.alerta ? '<span class="evh-alerta">!</span>' : ''}</button>`;
+    const esp = L.filter((e) => e.grupo === 'especial'), farm = L.filter((e) => e.grupo !== 'especial');
+    return `<div class="ev-hub"><div class="evh-titulo">✨ Eventos</div>${esp.map(banner).join('')}<div class="evh-titulo pequeno">⛏️ Farm e Modos</div><div class="evh-grade">${farm.map(card).join('')}</div></div>`;
+  }
+
+  function fecharMapa(manter) {
+    document.querySelectorAll('.ev-mapa').forEach((e) => e.remove());
+    if (!manter) mapaAtual = null;
+  }
+  function abrirMapa(id) {
+    const e = especs(iniMapa).find((x) => x.id === id);
+    if (!e) { mapaAtual = null; return; }
+    mapaAtual = id;
+    document.querySelectorAll('.ev-mapa').forEach((x) => x.remove());
+    const n = e.nos.length, PASSO = 118, H = n * PASSO + 110;
+    const pos = e.nos.map((no, i) => { const j = n - 1 - i; return { x: 50 + 27 * Math.sin(i * 1.25 + 0.3), y: 78 + j * PASSO }; }); // fase 1 embaixo, final em cima
+    const d = pos.map((q, i) => `${i ? 'L' : 'M'} ${q.x.toFixed(1)} ${q.y}`).join(' ');
+    const curva = pos.reduce((acc, q, i, a) => { if (!i) return `M ${q.x.toFixed(1)} ${q.y}`; const p0 = a[i - 1], my = (p0.y + q.y) / 2; return `${acc} C ${p0.x.toFixed(1)} ${my}, ${q.x.toFixed(1)} ${my}, ${q.x.toFixed(1)} ${q.y}`; }, '');
+    let foco = e.nos.findIndex((no) => no.estado === 'pronto'); if (foco < 0) foco = e.nos.findIndex((no) => no.estado === 'atual');
+    const vidas = e.vidas ? `<div class="evm-vidas">${Array.from({ length: e.vidas.total }, (_, i) => `<i class="${i < e.vidas.resta ? '' : 'perdida'}">${e.vidas.ic}</i>`).join('')}</div>` : '';
+    const el = document.createElement('div');
+    el.className = `ev-mapa ${e.cor}`;
+    el.innerHTML = `<div class="evm-fundo">${e.fundo.map((f) => `<i style="background-image:url(assets/${f.includes('/') ? f : `cartas/${f}`}.jpg)"></i>`).join('')}</div>
+      <div class="evm-topo"><button class="evm-voltar">‹</button><div class="evm-titulo"><b>${esc(e.titulo)}</b><small>${esc(e.sub)}</small></div>${vidas}</div>
+      <div class="evm-rolagem"><div class="evm-caminho" style="height:${H}px">
+        <svg viewBox="0 0 100 ${H}" preserveAspectRatio="none"><path d="${curva}" class="evm-trilha" vector-effect="non-scaling-stroke"/><path d="${curva}" class="evm-brilho" vector-effect="non-scaling-stroke"/></svg>
+        ${e.nos.map((no, i) => `<button class="evm-no ${no.estado}${no.grande ? ' grande' : ''}${i === foco ? ' foco' : ''}" data-i="${i}" style="left:${pos[i].x}%;top:${pos[i].y}px;--p:${Math.round((no.progresso || 0) * 100)}%">
+          <span class="evm-bola">${no.img ? `<img src="${no.img}" alt="" />` : no.ic}${no.progresso != null && no.estado !== 'feito' ? '<u></u>' : ''}${no.estado === 'feito' ? '<em class="ok">✓</em>' : no.estado === 'travado' ? '<em class="trava">🔒</em>' : ''}${no.premio ? `<s>${no.premio}</s>` : ''}${i === foco ? '<b class="dedo">👆</b>' : ''}</span>
+          <small>${esc(no.rotulo)}</small></button>`).join('')}
+      </div></div>
+      ${e.rodape && e.rodape.length ? `<div class="evm-rodape">${e.rodape.map((r, i) => `<button class="evm-rb" data-r="${i}">${esc(r.txt)}</button>`).join('')}</div>` : ''}`;
+    const app = $('app') || document.body;
+    app.appendChild(el);
+    el.querySelector('.evm-voltar').onclick = () => { fecharMapa(); };
+    el.querySelectorAll('.evm-no').forEach((b) => (b.onclick = () => {
+      const no = e.nos[+b.dataset.i];
+      if (no.estado === 'feito') { UI.toast('Já concluído ✓'); return; }
+      if (no.estado === 'travado') { UI.toast('Vença a fase anterior primeiro 🔒'); return; }
+      if (no.clique) no.clique();
+      setTimeout(() => { if (mapaAtual === id && document.querySelector('.ev-mapa') && !document.body.classList.contains('em-batalha')) abrirMapa(id); }, 350);
+    }));
+    el.querySelectorAll('.evm-rb').forEach((b) => (b.onclick = () => e.rodape[+b.dataset.r].clique()));
+    const alvo = el.querySelector('.evm-no.foco');
+    const rol = el.querySelector('.evm-rolagem');
+    setTimeout(() => { if (alvo) rol.scrollTop = Math.max(0, alvo.offsetTop - rol.clientHeight / 2); else rol.scrollTop = rol.scrollHeight; }, 30);
+  }
+  function html(extras) { ctxUI.extras = extras || ctxUI.extras; return htmlHub(); }
+  function ligar(raiz, ctx) {
+    ctxUI = { ...ctxUI, ...ctx };
+    raiz.querySelectorAll('[data-evmapa]').forEach((b) => (b.onclick = () => abrirMapa(b.dataset.evmapa)));
+    if (mapaAtual) setTimeout(() => { if (mapaAtual && !document.querySelector('.ev-mapa') && !document.body.classList.contains('em-batalha')) abrirMapa(mapaAtual); }, 120);
+  }
+
+  return { contarGemas, cacaProntas, vitoriaFds, html, ligar, fecharMapa, fim, conferir, trocarTokens, ganharTokens, tokensHoje, MODOS, modosDeHoje, jogarModo, jogarFestival, nino };
 })();

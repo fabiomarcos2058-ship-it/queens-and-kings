@@ -1929,31 +1929,26 @@
     const pend = Passe.pendentes();
     const abaEv = ['gemas', 'desafios', 'modos'].includes(window.abaEventos) ? window.abaEventos : 'gemas';
     const prontasG = Eventos.cacaProntas() + (ev.sequencia >= 3 && !ev.desafioPremio ? 1 : 0) + (ev.coroas >= 30 && !ev.torneioPremio ? 1 : 0);
+    const extras = () => [
+      { id: 'festivalBaus', grupo: 'farm', titulo: 'Desafio do Festival', sub: 'Vitórias seguidas valem um baú', cor: 'laranja', fundo: [], tag: '', ic: '🏆', alerta: ev.sequencia >= 3 && !ev.desafioPremio,
+        nos: [0, 1, 2].map((i) => ({ ic: '⚔️', rotulo: `Vitória ${i + 1}`, estado: ev.desafioPremio || i < ev.sequencia ? 'feito' : i === ev.sequencia ? 'atual' : 'travado', clique: () => jogar('normal') }))
+          .concat([{ ic: '🎁', rotulo: 'Baú de ouro', grande: true, estado: ev.desafioPremio ? 'feito' : ev.sequencia >= 3 ? 'pronto' : 'travado', clique: () => { if (ev.sequencia >= 3 && !ev.desafioPremio) { ev.desafioPremio = true; mostrarBau('ouro', Estado.abrirBau('ouro')); } } }]) },
+      { id: 'torneioCoroas', grupo: 'farm', titulo: 'Torneio das Coroas', sub: 'Junte coroas e ganhe gemas', cor: 'dourado', fundo: [], tag: '', ic: '👑', alerta: ev.coroas >= 30 && !ev.torneioPremio,
+        nos: [0, 1, 2, 3, 4].map((i) => ({ ic: '👑', rotulo: `Etapa ${i + 1}`, estado: ev.torneioPremio || ev.coroas >= (i + 1) * 6 ? 'feito' : ev.coroas >= i * 6 ? 'atual' : 'travado', progresso: Math.min(1, Math.max(0, (ev.coroas - i * 6) / 6)), clique: () => jogar('normal') }))
+          .concat([{ ic: '💎', rotulo: 'Prêmio', grande: true, estado: ev.torneioPremio ? 'feito' : ev.coroas >= 30 ? 'pronto' : 'travado', clique: () => { if (ev.coroas >= 30 && !ev.torneioPremio) { ev.torneioPremio = true; d().gemas += 100; Estado.salvar(); UI.toast('+100 gemas! 💎'); tudo(); } } }]) },
+      { id: 'elixir2x', grupo: 'farm', titulo: 'Elixir em Dobro', sub: 'Batalha com elixir rápido', cor: 'roxo', fundo: [], tag: '', ic: '⚡', nos: [{ ic: '⚡', rotulo: 'Jogar', estado: 'atual', grande: true, clique: () => jogar('elixir2x') }] },
+      { id: 'dupla', grupo: 'farm', titulo: 'Batalha em Dupla', sub: 'Você e um parceiro', cor: 'azul', fundo: [], tag: '', ic: '🤝', nos: [{ ic: '🤝', rotulo: 'Jogar', estado: 'atual', grande: true, clique: () => dupla() }] },
+    ];
     $('eventos-lista').dataset.aba = abaEv;
     $('eventos-lista').innerHTML = `<button class="cartao-passe${p.ultra ? ' ultra' : p.plus ? ' plus' : ''}" id="abrir-passe">
         <div class="passe-topo"><b>🎟️ Passe da Temporada</b><small>${Passe.tempoRestante()} restantes</small></div>
         <div class="passe-linha"><span class="passe-nivel">${nv}</span><div class="ev-barra passe-barra"><i style="width:${nv >= Passe.NIVEIS ? 100 : ((p.pontos % Passe.PONTOS_NIVEL) / Passe.PONTOS_NIVEL) * 100}%"></i><small>${nv >= Passe.NIVEIS ? 'Completo!' : `${p.pontos % Passe.PONTOS_NIVEL}/${Passe.PONTOS_NIVEL}`}</small></div><span class="passe-tipo">${p.ultra ? 'ULTRA' : p.plus ? 'PLUS' : 'FREE'}</span></div>
         ${pend ? `<span class="passe-pendente">${pend} prêmio${pend > 1 ? 's' : ''} para pegar!</span>` : ''}
       </button>` +
-      `<div class="ev-abas">${[['gemas', '💎 Gemas', prontasG], ['desafios', '⚔️ Desafios', 0], ['modos', '🎮 Modos', 0]].map(([k, t, n]) => `<button class="ev-aba${k === abaEv ? ' ativa' : ''}" data-aba-ev="${k}">${t}${n ? `<i>${n}</i>` : ''}</button>`).join('')}</div>` +
-      `<div id="eventos-novos">${Eventos.html()}</div><div class="ev-sec" data-sec="gemas">` +
-      item('ev1', 'Desafio do Festival', 'Vença 3 batalhas seguidas · prêmio: baú de ouro', barra(ev.sequencia, 3), btnPremio(ev.sequencia >= 3, ev.desafioPremio, 'desafio')) +
-      item('ev2', 'Torneio das Coroas', 'Junte 30 coroas · prêmio: 100 gemas', barra(ev.coroas, 30), btnPremio(ev.coroas >= 30, ev.torneioPremio, 'torneio')) + '</div><div class="ev-sec" data-sec="modos">' +
-      item('ev4', 'Elixir em dobro', 'A batalha inteira com elixir rápido', '', '<button class="selo botao" data-jogar="elixir2x">Jogar</button>') +
-      item('ev3', 'Batalha em dupla', 'Você + parceiro (amigo ou IA) contra uma dupla', '', '<button class="selo botao" id="ev-dupla">Jogar</button>') + '</div>';
+      `<div id="eventos-novos">${Eventos.html(extras)}</div>`;
+
     $('abrir-passe').onclick = telaPasse;
-    $('eventos-lista').querySelectorAll('[data-aba-ev]').forEach((b) => (b.onclick = () => {
-      window.abaEventos = b.dataset.abaEv; $('eventos-lista').dataset.aba = b.dataset.abaEv;
-      $('eventos-lista').querySelectorAll('[data-aba-ev]').forEach((x) => x.classList.toggle('ativa', x === b));
-      const tl = $('eventos-lista').closest('.tela'); if (tl) tl.scrollTop = 0;
-    }));
-    Eventos.ligar($('eventos-novos'), { iniciar: jogarEvento, verCarta: (c) => Estado.tem(c.id) ? detalhes(c.id) : UI.modal({ titulo: c.nome, classe: 'modal-carta', html: `<div class="detalhe-carta">${Cartas.html(c, { mini: true, vivo: true })}<div><span class="raridade-tag ${c.raridade}">${Cartas.NOMES_RARIDADE[c.raridade]} · só de evento</span><p class="tipo">${c.tipo} · ${c.custo} de elixir</p><p>${c.descricao}</p>${c.passiva ? `<p><b>🧩 ${c.passiva.nome}:</b> ${c.passiva.descricao}</p>` : ''}${c.habilidade ? `<p><b>⚡ ${c.habilidade.nome}:</b> ${c.habilidade.descricao}</p>` : ''}</div></div>`, botoes: [{ texto: 'Quero ela!', classe: 'principal' }] }) });
-    $('ev-dupla').onclick = dupla;
-    $('eventos-lista').querySelectorAll('[data-jogar]').forEach((b) => (b.onclick = () => jogar(b.dataset.jogar)));
-    $('eventos-lista').querySelectorAll('[data-premio]').forEach((b) => (b.onclick = () => {
-      if (b.dataset.premio === 'desafio') { ev.desafioPremio = true; mostrarBau('ouro', Estado.abrirBau('ouro')); }
-      else { ev.torneioPremio = true; d().gemas += 100; Estado.salvar(); UI.toast('+100 gemas! 💎'); tudo(); }
-    }));
+    Eventos.ligar($('eventos-novos'), { extras, iniciar: jogarEvento, verCarta: (c) => Estado.tem(c.id) ? detalhes(c.id) : UI.modal({ titulo: c.nome, classe: 'modal-carta', html: `<div class="detalhe-carta">${Cartas.html(c, { mini: true, vivo: true })}<div><span class="raridade-tag ${c.raridade}">${Cartas.NOMES_RARIDADE[c.raridade]} · só de evento</span><p class="tipo">${c.tipo} · ${c.custo} de elixir</p><p>${c.descricao}</p>${c.passiva ? `<p><b>🧩 ${c.passiva.nome}:</b> ${c.passiva.descricao}</p>` : ''}${c.habilidade ? `<p><b>⚡ ${c.habilidade.nome}:</b> ${c.habilidade.descricao}</p>` : ''}</div></div>`, botoes: [{ texto: 'Quero ela!', classe: 'principal' }] }) });
   }
 
   // ---------- Presentear (só a criadora) ----------
