@@ -96,7 +96,7 @@ const Eventos = (() => {
 
   // ---------- Caça aos Tokens (evento fixo) ----------
   const LIMITE_TOKENS_DIA = 300;
-  const TROCAS = [{ t: 100, g: 10 }, { t: 450, g: 50, tag: '+11%' }, { t: 850, g: 100, tag: '+18%' }];
+  const TROCAS = [{ t: 50, g: 100, tag: '2x' }, { t: 200, g: 500, tag: '2,5x' }, { t: 500, g: 1500, tag: '3x' }, { t: 1000, g: 4000, tag: '4x 🔥' }];
   const dia = () => { const t = new Date(); return `${t.getFullYear()}-${t.getMonth() + 1}-${t.getDate()}`; };
   function tokensHoje() {
     const d = Estado.d;
