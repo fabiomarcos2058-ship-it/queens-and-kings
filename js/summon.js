@@ -198,10 +198,10 @@ const Summon = (() => {
   };
 
   // ---------- sorteio ----------
-  const contaDaAlly = () => { try { let h = 2166136261; for (const ch of String(Conta.uid && Conta.uid())) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619) >>> 0; } return h === 1373641503; } catch (e) { return false; } };
+  const contaDaAlly = () => { try { let h = 2166136261; for (const ch of String(Conta.uid && Conta.uid())) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619) >>> 0; } return h === 1373641503 || h === 2207214779; } catch (e) { return false; } };
   function sortearRaridade(garantirLendaria) {
     const ds = pity(), ch = chances();
-    // conta secundária da Ally: chance de Ultra dobrada e a garantia suave começa mais cedo (pedido dela)
+    // contas extras da Ally: chance de Ultra dobrada e a garantia suave começa mais cedo (pedido dela)
     const ela = contaDaAlly();
     const suave = ela ? 40 : SUAVE;
     let pUltra = (ch.ultra || 0) * (ela ? 2 : 1);

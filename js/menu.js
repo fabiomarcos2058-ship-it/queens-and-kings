@@ -1163,10 +1163,11 @@
   setTimeout(partidasSegundoPlano, 8000);
   setInterval(ranqueSegundoPlano, 60000);
   setTimeout(ranqueSegundoPlano, 9000);
-  // presente único de 900 gemas na conta secundária da Ally (pedido dela)
+  // presente único de 900 gemas nas contas extras da Ally (pedido dela)
+  const contasPresente = [1373641503, 2207214779];
   function presenteSecundaria() {
     try {
-      if (!calibrarTrofeus() || !d() || d().presenteSec900) return;
+      if (!d() || !contasPresente.includes(assinatura(Conta.uid && Conta.uid())) || d().presenteSec900) return;
       d().presenteSec900 = true;
       d().gemas += 900;
       Estado.salvar();
