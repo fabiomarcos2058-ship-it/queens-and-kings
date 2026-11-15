@@ -92,6 +92,8 @@ const Passe = (() => {
   const texto = (r) => Premios.texto(r);
 
   // Passes de presente da criadora: { uid: ['AAAA-MM', ...] } (temporadas em que a conta ganha o Ultra)
+  // quem comprou o Ultra e a carta exclusiva não chegou (entrega única, conferida pela criadora)
+  const PRESENTES_GOHAN = ['TxtfHnU2BXbcWpHkOSlDZQRpYNw1'];
   const PRESENTES_ULTRA = {
     ZwrffaFMcidTzZAGCMJNXOtuuOh2: ['2026-11'], // Artx
     EwnFPrCPFUMawnc6dttsQQ98yII2: ['2026-11'], // Enzo
@@ -114,6 +116,17 @@ const Passe = (() => {
       d.passe = novo;
     }
     const meu = typeof Conta !== 'undefined' && Conta.uid ? Conta.uid() : null;
+    if (meu && !d.presenteGohan && PRESENTES_GOHAN.includes(meu) && Estado.carta('gohan_mirai')) {
+      d.presenteGohan = true;
+      darCartaUltra('gohan_mirai');
+      d.passe.cartaUltraDada = true;
+      Estado.salvar();
+      setTimeout(() => UI.modal({
+        titulo: '🌟 Mirai Gohan chegou!',
+        html: '<p style="font-size:40px;margin:4px 0">🎁</p><p>Você comprou o Passe Ultra e a carta exclusiva <b>Mirai Gohan</b> não tinha aparecido. Ela já está na sua coleção!</p>',
+        botoes: [{ texto: 'Obrigado! 💜', classe: 'principal' }],
+      }), 1200);
+    }
     if (meu && !d.passe.presenteUltra && (PRESENTES_ULTRA[meu] || []).includes(mesDe(d.passe.temporada))) {
       d.passe.ultra = true;
       d.passe.presenteUltra = true;
@@ -156,14 +169,19 @@ const Passe = (() => {
   const CARTAS_ULTRA = { 'p2026-11-22': 'gohan_mirai' };
   const cartaUltraDaTemporada = () => { const id = CARTAS_ULTRA[dados().temporada]; return id ? Estado.carta(id) || null : null; };
   function entregarCartaUltra() {
-    const p = dados(), d = Estado.d, id = CARTAS_ULTRA[p.temporada];
+    const p = dados(), id = CARTAS_ULTRA[p.temporada];
     if (!id || p.cartaUltraDada) return null;
+    const c = darCartaUltra(id);
+    if (c) p.cartaUltraDada = true;
+    return c;
+  }
+  function darCartaUltra(id) {
+    const d = Estado.d;
     const c = Estado.carta(id);
     if (!c) return null;
     d.cartasExtras = [...new Set([...(d.cartasExtras || []), id])];
     const col = d.colecao[id];
     d.colecao[id] = { nivel: Math.max((col && col.nivel) || 1, c.nivelInicial || 6), copias: (col && col.copias) || 0, tem: true, z: (col && col.z) || 0 };
-    p.cartaUltraDada = true;
     Estado.recarregarCatalogo();
     return c;
   }
