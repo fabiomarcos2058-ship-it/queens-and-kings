@@ -116,6 +116,19 @@ const Passe = (() => {
       d.passe = novo;
     }
     const meu = typeof Conta !== 'undefined' && Conta.uid ? Conta.uid() : null;
+    // quem tem o Ultra pago (inclusive o que vale até o fim do mês) e ainda não recebeu a carta exclusiva desta temporada
+    if (d.passe.ultra && !d.passe.presenteUltra && !d.passe.cartaUltraDada && CARTAS_ULTRA[d.passe.temporada] && Estado.carta(CARTAS_ULTRA[d.passe.temporada])) {
+      const c = darCartaUltra(CARTAS_ULTRA[d.passe.temporada]);
+      if (c) {
+        d.passe.cartaUltraDada = true;
+        Estado.salvar();
+        setTimeout(() => UI.modal({
+          titulo: '🌟 Mirai Gohan chegou!',
+          html: '<p style="font-size:40px;margin:4px 0">🎁</p><p>Você tem o Passe Ultra, então a carta exclusiva <b>Mirai Gohan</b> já está na sua coleção!</p>',
+          botoes: [{ texto: 'Obrigado! 💜', classe: 'principal' }],
+        }), 1200);
+      }
+    }
     if (meu && !d.presenteGohan && PRESENTES_GOHAN.includes(meu) && Estado.carta('gohan_mirai')) {
       d.presenteGohan = true;
       darCartaUltra('gohan_mirai');
