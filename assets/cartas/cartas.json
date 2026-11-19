@@ -4316,6 +4316,47 @@
         "recarga": 18,
         "descricao": "Por 6s ataca mais rápido, anda mais rápido e causa +30% de dano."
       }
+    },
+    {
+      "id": "kaiser",
+      "nome": "Michael Kaiser",
+      "raridade": "ultra",
+      "custo": 6,
+      "tipo": "Ultra · O Imperador do Campo",
+      "trofeus": 0,
+      "exclusivo": [],
+      "summon": true,
+      "descricao": "O Imperador: um atacante cheio de si, de olhar azul brilhante e chute devastador. Quando ele vê o gol, ninguém segura.",
+      "rosto": [
+        315,
+        440,
+        125
+      ],
+      "arte": [
+        0,
+        30,
+        736
+      ],
+      "vida": 1180,
+      "dano": 250,
+      "velocidade": 68,
+      "alcance": 70,
+      "cadencia": 0.95,
+      "alvo": "tudo",
+      "arena": 1,
+      "danoTorre": 0.65,
+      "passiva": {
+        "nome": "Visão do Imperador",
+        "tipo": "imperador",
+        "descricao": "25% dos chutes são críticos e causam 2,2x de dano. Cada inimigo que cai perto dele deixa o Kaiser +4% mais forte (até +40%)."
+      },
+      "habilidade": {
+        "nome": "Kaiser Impact",
+        "tipo": "golDireto",
+        "custo": 4,
+        "recarga": 22,
+        "descricao": "O chute do Imperador: aliados em volta atacam mais rápido por 5s e o Kaiser solta um chute direto que atravessa a linha inteira."
+      }
     }
   ]
 }

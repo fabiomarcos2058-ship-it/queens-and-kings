@@ -2072,7 +2072,7 @@ const Batalha = (() => {
     falar(t, 'Destruição.', 'fala-rin');
   }
   function golDireto(t, h) {
-    cutinRede('ultra_isagi');
+    if (t.carta.id !== 'kaiser') cutinRede('ultra_isagi'); // o Kaiser usa o mesmo chute sem o corte do Isagi
     for (const e of aliadosPerto(t, 200)) darPasse(e, 5);
     kamehameha(t, Math.round(t.dano * (h.mult || 2.6) * (1 + 0.04 * (t.devorar || 0))), { tipo: 6, comp: 270, larg: 30, torreMult: 0.4, atraso: 0.35 });
   }

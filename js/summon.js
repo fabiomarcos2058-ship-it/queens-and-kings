@@ -84,6 +84,25 @@ const Summon = (() => {
     },
     chances: { ultra: 0.02, lendaria: 0.12, epica: 0.41, rara: 0.45 },
   }, {
+    id: 'kaiser',
+    nome: 'O IMPERADOR',
+    sub: 'Michael Kaiser',
+    fim: new Date(2026, 10, 26, 23, 59, 59), // 26/11/2026
+    arte: 'assets/summon/kaiser.jpg',
+    mini: 'assets/summon/kaiser_mini.jpg',
+    centro: 'kaiser',
+    destaque: ['kaiser', 'itoshi_sae', 'itoshi_rin', 'isagi_ultra'],
+    pool: {
+      ultra: ['kaiser', 'itoshi_sae', 'itoshi_rin', 'isagi_ultra'],
+      lendaria: ['shadow', 'anri_halloween'],
+      epica: ['isagi', 'sonic', 'kurona'],
+      rara: ['mbappe'],
+    },
+    // o Kaiser é o destaque: o mais difícil de vir; os outros ultras vêm mais fácil
+    pesos: { kaiser: 1, itoshi_sae: 3, itoshi_rin: 3, isagi_ultra: 3 },
+    chances: { ultra: 0.02, lendaria: 0.12, epica: 0.41, rara: 0.45 },
+    pityDestaque: 200, // garantia: o Kaiser vem com certeza na 200ª invocação sem ele neste banner
+  }, {
     id: 'invencivel',
     nome: 'INVENCÍVEL',
     sub: 'A Guerra dos Marks',
