@@ -107,6 +107,11 @@ const Batalha = (() => {
       if (evento.elixirInicial) { s.azul.elixir = s.vermelho.elixir = evento.elixirInicial; }
       if (evento.nivelIAMais) s.nivelIA = Math.max(1, Math.min(Estado.NIVEL_CARTA_MAX, s.nivelIA + evento.nivelIAMais));
       if (evento.cartasViradas) s.viradas = true;
+      if (evento.chefe) { // Chefão Mundial: as torres do chefe aguentam muito e o dano total vira a contribuição do jogador
+        s.chefe = true;
+        s.chefeTorres = s.ent.filter((q) => q.torre && q.time === 'vermelho');
+        for (const q of s.chefeTorres) { q.max = Math.round(q.max * (evento.chefe.mult || 12)); q.vida = q.max; }
+      }
     }
     if (tutorial) { s.tutorial = tutorial; s.difIA = 1; s.nivelFixo = 1; s.iaTimer = 1e9; }
     if (ranque) {
@@ -3769,6 +3774,11 @@ const Batalha = (() => {
     const txt = `${Math.floor(resta / 60)}:${String(Math.floor(resta % 60)).padStart(2, '0')}`;
     if (!s.hudEl) s.hudEl = { tempo: document.querySelector('.tempo') };
     if (txt !== s.hudTxt) { s.hudTxt = txt; s.hudEl.tempo.textContent = txt; s.hudEl.tempo.classList.toggle('dobro', s.modo === 'elixir2x' || !!s.prorrogacao || resta <= 60); }
+    if (s.chefe) {
+      if (!s.hudChefe) { s.hudChefe = document.createElement('div'); s.hudChefe.className = 'hud-chefe'; (s.hudEl.tempo.parentNode || document.body).appendChild(s.hudChefe); }
+      const dn = danoNoChefe();
+      if (dn !== s.hudChefeV) { s.hudChefeV = dn; s.hudChefe.innerHTML = `👹 Dano ao Chefão: <b>${dn.toLocaleString('pt-BR')}</b>`; }
+    }
     const el = Math.round(s.azul.elixir * 50) / 50;
     if (el !== s.hudElixir) { s.hudElixir = el; atualizarElixir(); }
     if (s.chipP && s.azul2) {
@@ -4065,6 +4075,9 @@ const Batalha = (() => {
     return ts.length ? Math.min(...ts.map((t) => t.vida / t.max)) : 0;
   }
 
+  function danoNoChefe() {
+    return Math.max(0, Math.round((s.chefeTorres || []).reduce((acc, q) => acc + (q.max - Math.max(0, q.vida)), 0)));
+  }
   function terminar(desistiu = false) {
     if (s.acabou) return;
     s.acabou = true;
@@ -4076,9 +4089,10 @@ const Batalha = (() => {
       const a = vidaMinima('azul'), v = vidaMinima('vermelho');
       resultado = Math.abs(a - v) < 0.01 ? 'empate' : a > v ? 'vitoria' : 'derrota';
     }
+    const danoChefe = s.chefe ? danoNoChefe() : undefined;
     const dados = { resultado, coroas: s.azul.coroas, coroasInimigo: s.vermelho.coroas, modo: s.modo, ranque: s.ranque || null,
       deck: s.azul.deck, deckRival: s.vermelho.deck, deckParceiro: s.azul2 && s.azul2.deck, deckRival2: s.vermelho2 && s.vermelho2.deck,
-      nomeRival: s.rede && s.rede.convidado ? s.rede.convidado.nome : null, nomeParceiro: s.nomeParceiro || null, duracao: Math.round(s.t), evento: s.evento || null, tutorial: s.tutorial ? true : undefined };
+      nomeRival: s.rede && s.rede.convidado ? s.rede.convidado.nome : null, nomeParceiro: s.nomeParceiro || null, duracao: Math.round(s.t), danoChefe, evento: s.evento || null, tutorial: s.tutorial ? true : undefined };
     if (typeof Som !== 'undefined') { Som.musica(null); Som.tocar(resultado === 'vitoria' ? 'vitoria' : 'derrota'); }
     if (s.adaptativa) Estado.ajustarHabilidade(resultado, s.superIA, s.azul.coroas - s.vermelho.coroas);
     if (typeof AoVivo !== 'undefined') AoVivo.terminou(foto(), resultado);

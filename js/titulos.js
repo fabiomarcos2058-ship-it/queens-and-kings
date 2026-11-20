@@ -32,6 +32,8 @@ const Titulos = (() => {
     invocador: { nome: 'Invocador Ultra', ic: '🌀', raro: 'lendario', como: 'Consiga um personagem Ultra no Summon', prog: () => [(D().summon && D().summon.ultras) || 0, 1] },
     farao: { nome: 'Duelista do Faraó', ic: '🃏', raro: 'lendario', como: 'Complete o Duelo do Faraó', tem: () => !!(D().desafios && D().desafios.yugi && D().desafios.yugi.completo) },
     corredor: { nome: 'Mais Rápido do Multiverso', ic: '💨', raro: 'lendario', como: 'Complete a Corrida do Sonic', tem: () => !!(D().desafios && D().desafios.sonic && D().desafios.sonic.completo) },
+    cacador_chefao: { nome: 'Caçador do Chefão', ic: '👹', raro: 'lendario', como: 'Ajude todo mundo a derrubar o Chefão Mundial', tem: () => (D().titulosGanhos || []).includes('cacador_chefao') },
+    campeao_torneio: { nome: 'Campeão do Torneio', ic: '🏆', raro: 'mitico', como: 'Vença um Torneio entre amigos (ganha também a moldura de campeão)', tem: () => (D().titulosGanhos || []).includes('campeao_torneio') },
     mitas: { nome: 'Dentro do Jogo', ic: '🎮', raro: 'lendario', como: 'Consiga as duas Mitas', tem: () => Estado.tem('mita_gentil') && Estado.tem('mita_malvada') },
   };
   const ganhouEspecial = (id) => { const t = ESPECIAIS[id]; if (!t) return false; if (t.tem) return !!t.tem(); const [a, m] = t.prog(); return a >= m; };
@@ -234,6 +236,22 @@ const Titulos = (() => {
     </svg>`;
   }
 
+  // moldura exclusiva do campeão do torneio: coroa, louros e estrelas por cima da moldura da patente
+  const ehCampeao = () => (D().titulosGanhos || []).includes('campeao_torneio');
+  function molduraCampea() {
+    const folha = (s) => `<path d="M${150 + s * 14} 76 q${s * 58} 30 ${s * 108} 120 q${-s * 52} -38 ${-s * 94} -42 Z" fill="#FFD25E" fill-opacity=".0"/>`;
+    const estrela = (x, y, r) => `<path class="cb-brilho-rei" d="M${x} ${y - r} L${x + r * 0.3} ${y - r * 0.3} L${x + r} ${y} L${x + r * 0.3} ${y + r * 0.3} L${x} ${y + r} L${x - r * 0.3} ${y + r * 0.3} L${x - r} ${y} L${x - r * 0.3} ${y - r * 0.3} Z" fill="#FFF6C0" stroke="#FFB13A" stroke-width="1.5"/>`;
+    return `<svg class="cb-frame cb-campeao" viewBox="0 -20 300 445" preserveAspectRatio="none" aria-hidden="true">
+      <defs><linearGradient id="cpo" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFF6C0"/><stop offset=".5" stop-color="#FFD25E"/><stop offset="1" stop-color="#B86A00"/></linearGradient></defs>
+      <path d="M26 14 H274 Q296 14 296 36 V399 Q296 421 274 421 H26 Q4 421 4 399 V36 Q4 14 26 14 Z" fill="none" stroke="url(#cpo)" stroke-width="5" stroke-dasharray="1 0"/>
+      <path d="M30 27 H270 Q283 27 283 40 V395 Q283 408 270 408 H30 Q17 408 17 395 V40 Q17 27 30 27 Z" fill="none" stroke="#fff" stroke-opacity=".7" stroke-width="1.5"/>
+      <path d="M112 8 L124 -12 L137 4 L150 -20 L163 4 L176 -12 L188 8 Q150 16 112 8 Z" fill="url(#cpo)" stroke="#7A4204" stroke-width="2"/>
+      <circle cx="150" cy="-4" r="4" fill="#E8304A" stroke="#7A0010" stroke-width="1"/>
+      ${estrela(14, 24, 11)}${estrela(286, 24, 11)}${estrela(14, 411, 11)}${estrela(286, 411, 11)}${estrela(150, 417, 8)}
+      ${[-1, 1].map((s) => `<g>${[0, 1, 2, 3, 4, 5].map((n) => `<ellipse cx="${150 + s * (38 + n * 9)}" cy="${392 + n * 2 - (n > 3 ? 4 : 0)}" rx="10" ry="4.5" transform="rotate(${s * (-18 + n * 6)} ${150 + s * (38 + n * 9)} 392)" fill="url(#cpo)" stroke="#7A4204" stroke-width="1"/>`).join('')}</g>`).join('')}
+    </svg>`;
+  }
+
   // ---------- cartão de batalha ----------
   // p = { nome, estilo, avatar, titulo (texto), raroTitulo, favorita, pts (PR), trofeus, nivel, cla, eu }
   function cartao(p, { tam = 'grande', lado = '' } = {}) {
@@ -245,7 +263,7 @@ const Titulos = (() => {
     const ultra = c && c.raridade === 'ultra';
     const nome = typeof Passe !== 'undefined' && Passe.nomeHtml ? Passe.nomeHtml(p.nome || 'Jogador', p.estilo) : esc(p.nome || 'Jogador');
     const arte = c ? (c.video ? `<video src="assets/cartas/${c.video}" poster="${Cartas.arte(c)}" autoplay muted loop playsinline preload="auto"></video>` : `<img src="${Cartas.arte(c)}" alt="" draggable="false" />`) : '<div class="cb-vazio">?</div>';
-    return `<div class="cartao-batalha ${tam} t${f.i} novo${ultra ? ' fav-ultra' : ''}${lado ? ` ${lado}` : ''}" style="--cor:${pat.cor};--escura:${pat.escura}">
+    return `<div class="cartao-batalha ${tam} t${f.i} novo${p.moldura === 'campeao' ? ' campeao' : ''}${ultra ? ' fav-ultra' : ''}${lado ? ` ${lado}` : ''}" style="--cor:${pat.cor};--escura:${pat.escura}">
       <div class="cb-dentro">
         <div class="cb-arte">${arte}${ultra ? '<video class="cb-ultra" src="assets/ui/moldura_ultra.mp4" autoplay muted loop playsinline preload="auto"></video>' : ''}<i class="cb-reflexo"></i></div>
         <div class="cb-topo"><span class="cb-av"><img src="${avatarUrl(p.avatar)}" alt="" /><em>${p.nivel || 1}</em></span>
@@ -257,7 +275,7 @@ const Titulos = (() => {
           <div class="cb-stats"><span>🏆 ${fmt(p.trofeus)}</span>${p.cla ? `<span class="cb-cla">🛡️ ${esc(p.cla)}</span>` : ''}</div>
         </div>
       </div>
-      ${moldura(f.i)}
+      ${moldura(f.i)}${p.moldura === 'campeao' ? molduraCampea() : ''}
       <div class="cb-faixa"><span>${esc(f.nome)}</span></div>
     </div>`;
   }
@@ -271,6 +289,7 @@ const Titulos = (() => {
   const molduraMax = () => Ranque.info(Math.max(r().melhorSempre || 0, r().pts || 0)).i;
   function molduraEscolhida() {
     const m = D().moldura;
+    if (m === 'campeao') return ehCampeao() ? 'campeao' : null;
     return Number.isInteger(m) && m >= 0 && m <= molduraMax() ? m : null;
   }
   function escolherMoldura(depois) {
@@ -283,16 +302,19 @@ const Titulos = (() => {
         <div class="mold-prev">${meuCartao({ tam: 'mini', p: { moldura: i } }).replace(/<video[^>]*poster="([^"]*)"[^>]*><\/video>/g, '<img src="$1" alt="" />').replace(/<video[^>]*><\/video>/g, '')}</div>
         <b>${nome}</b><small>${i === null ? 'segue sua patente' : livre ? (ativo ? 'usando' : 'liberada') : `🔒 chegue em ${nome}`}</small></button>`;
     };
+    const opCampeao = () => `<button class="mold-op${molduraEscolhida() === 'campeao' ? ' usando' : ''}" data-m="campeao">
+        <div class="mold-prev">${meuCartao({ tam: 'mini', p: { moldura: 'campeao' } }).replace(/<video[^>]*poster="([^"]*)"[^>]*><\/video>/g, '<img src="$1" alt="" />').replace(/<video[^>]*><\/video>/g, '')}</div>
+        <b>Campeão 🏆</b><small>${molduraEscolhida() === 'campeao' ? 'usando' : 'exclusiva do torneio'}</small></button>`;
     const md = UI.modal({
       titulo: '🖼️ Moldura do cartão',
       classe: 'modal-moldura',
       html: `<p class="tt-txt">Toda patente que você já alcançou na ranqueada libera a moldura dela pra sempre. A faixa continua mostrando sua patente de verdade.</p>
-        <div class="mold-grade">${[null, ...Ranque.PATENTES.map((_, i) => i)].map(op).join('')}</div>`,
+        <div class="mold-grade">${[null, ...Ranque.PATENTES.map((_, i) => i)].map(op).join('')}${ehCampeao() ? opCampeao() : ''}</div>`,
       botoes: [{ texto: 'Fechar', classe: 'principal' }],
     });
     md.el.querySelectorAll('.mold-op:not(.trancada)').forEach((b) => (b.onclick = () => {
-      d.moldura = b.dataset.m === 'auto' ? null : Number(b.dataset.m); Estado.salvar();
-      md.el.querySelectorAll('.mold-op').forEach((x) => { x.classList.toggle('usando', x === b); const sm = x.querySelector('small'); if (sm && !x.classList.contains('trancada') && x.dataset.m !== 'auto') sm.textContent = x === b ? 'usando' : 'liberada'; });
+      d.moldura = b.dataset.m === 'auto' ? null : b.dataset.m === 'campeao' ? 'campeao' : Number(b.dataset.m); Estado.salvar();
+      md.el.querySelectorAll('.mold-op').forEach((x) => { x.classList.toggle('usando', x === b); const sm = x.querySelector('small'); if (sm && !x.classList.contains('trancada') && x.dataset.m !== 'auto' && x.dataset.m !== 'campeao') sm.textContent = x === b ? 'usando' : 'liberada'; });
       if (depois) depois();
     }));
   }

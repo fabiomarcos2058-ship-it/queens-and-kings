@@ -1967,9 +1967,13 @@
         <div class="passe-linha"><span class="passe-nivel">${nv}</span><div class="ev-barra passe-barra"><i style="width:${nv >= Passe.NIVEIS ? 100 : ((p.pontos % Passe.PONTOS_NIVEL) / Passe.PONTOS_NIVEL) * 100}%"></i><small>${nv >= Passe.NIVEIS ? 'Completo!' : `${p.pontos % Passe.PONTOS_NIVEL}/${Passe.PONTOS_NIVEL}`}</small></div><span class="passe-tipo">${p.ultra ? 'ULTRA' : p.plus ? 'PLUS' : 'FREE'}</span></div>
         ${pend ? `<span class="passe-pendente">${pend} prêmio${pend > 1 ? 's' : ''} para pegar!</span>` : ''}
       </button>` +
+      Chefe.cartaoHtml() + Torneio.cartaoHtml() +
       `<div id="eventos-novos">${Eventos.html(extras)}</div>`;
 
     $('abrir-passe').onclick = telaPasse;
+    $('abrir-chefe').onclick = () => Chefe.abrir({ iniciar: jogarEvento, mostrarBau, tudo: () => { tudo(); irPara('eventos'); } });
+    Torneio.ligar({ fimBatalha: fimDeBatalha, tudo: () => { tudo(); irPara('eventos'); } });
+    $('abrir-torneio').onclick = () => Torneio.menu();
     Eventos.ligar($('eventos-novos'), { extras, iniciar: jogarEvento, verCarta: (c) => Estado.tem(c.id) ? detalhes(c.id) : UI.modal({ titulo: c.nome, classe: 'modal-carta', html: `<div class="detalhe-carta">${Cartas.html(c, { mini: true, vivo: true })}<div><span class="raridade-tag ${c.raridade}">${Cartas.NOMES_RARIDADE[c.raridade]} · só de evento</span><p class="tipo">${c.tipo} · ${c.custo} de elixir</p><p>${c.descricao}</p>${c.passiva ? `<p><b>🧩 ${c.passiva.nome}:</b> ${c.passiva.descricao}</p>` : ''}${c.habilidade ? `<p><b>⚡ ${c.habilidade.nome}:</b> ${c.habilidade.descricao}</p>` : ''}</div></div>`, botoes: [{ texto: 'Quero ela!', classe: 'principal' }] }) });
   }
 

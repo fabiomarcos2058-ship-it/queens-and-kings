@@ -3895,3 +3895,55 @@ html.leve .ls-heroi, html.leve .ls-rival { filter: none; }
 html.leve .ls-linhas { animation: none !important; -webkit-mask-image: none; mask-image: none; opacity: .25 !important; }
 html.leve .ls-estrelas { display: none; }
 html.leve .ls-feixe { box-shadow: none !important; }
+
+/* ---------- Chefão Mundial + Torneio ---------- */
+.cartao-chefe { display: flex; align-items: center; gap: 10px; width: 100%; margin: 8px 0; padding: 10px 12px; border-radius: 14px; border: 2px solid #ff5a3c; background: linear-gradient(135deg, #3a0a18, #1a0630 70%); color: #fff; text-align: left; position: relative; overflow: hidden; box-shadow: 0 0 14px #ff5a3c55; }
+.cartao-chefe.fim { filter: grayscale(.7); }
+.cartao-chefe .ch-img { width: 64px; height: 64px; object-fit: contain; flex: none; filter: drop-shadow(0 0 8px #ff5a3c); }
+.cartao-chefe .ch-txt { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.cartao-chefe .ch-txt b { font-size: 16px; }
+.cartao-chefe .ch-txt small { opacity: .8; font-size: 12px; }
+.cartao-chefe .ch-txt span { font-size: 12px; color: #ffd25e; }
+.cartao-torneio { border-color: #ffd25e; background: linear-gradient(135deg, #3a2a05, #1a0f30 70%); box-shadow: 0 0 14px #ffd25e44; }
+.cartao-torneio .tn-ic { font-size: 44px; display: grid; place-items: center; filter: none; }
+.modal-chefe .ch-palco { display: grid; place-items: center; height: 150px; }
+.modal-chefe .ch-palco img { height: 150px; object-fit: contain; filter: drop-shadow(0 0 14px #ff3c3c); animation: ch-resp 2.4s ease-in-out infinite; }
+.modal-chefe .ch-palco img.caido { filter: grayscale(1) brightness(.6); animation: none; transform: rotate(-12deg); }
+@keyframes ch-resp { 50% { transform: scale(1.05) translateY(-3px); } }
+.modal-chefe .ch-nome { display: block; text-align: center; margin: 4px 0; }
+.ch-vida { position: relative; height: 22px; border-radius: 11px; background: #2a0a12; border: 2px solid #ff5a3c; overflow: hidden; margin: 6px 0; }
+.ch-vida i { position: absolute; inset: 0 auto 0 0; background: linear-gradient(90deg, #ff2a4a, #ff8a3c); transition: width .6s; }
+.ch-vida small { position: absolute; inset: 0; display: grid; place-items: center; font-size: 12px; font-weight: 700; color: #fff; text-shadow: 0 1px 2px #000; }
+.ch-dica { font-size: 12px; opacity: .85; margin: 6px 0; }
+.ch-meu { font-size: 13px; margin: 6px 0; text-align: center; }
+.ch-rank h4 { margin: 8px 0 4px; font-size: 13px; }
+.ch-lin { display: flex; gap: 8px; align-items: center; padding: 3px 6px; border-radius: 8px; font-size: 13px; }
+.ch-lin.eu { background: #ffffff1f; }
+.ch-lin span { width: 28px; text-align: center; }
+.ch-lin b { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ch-botoes { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+.hud-chefe { position: absolute; top: 62px; left: 50%; transform: translateX(-50%); z-index: 30; background: #3a0a18e6; border: 1px solid #ff5a3c; border-radius: 10px; padding: 3px 10px; font-size: 12px; color: #fff; white-space: nowrap; pointer-events: none; }
+.hud-chefe b { color: #ffd25e; }
+.modal-torneio .tn-entrar { display: flex; gap: 6px; margin-top: 8px; }
+.modal-torneio .tn-entrar input { flex: 1; text-transform: uppercase; text-align: center; letter-spacing: 3px; padding: 8px; border-radius: 10px; border: 2px solid #ffffff33; background: #0006; color: #fff; }
+.modal-torneio .btn-modal { width: 100%; margin-top: 6px; }
+.modal-torneio .tn-entrar .btn-modal { width: auto; margin-top: 0; }
+.tn-lista { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+.tn-nome { background: #ffffff22; padding: 4px 10px; border-radius: 12px; font-size: 13px; }
+.tn-nome.vazio { opacity: .4; border: 1px dashed #fff8; background: none; }
+.tn-chave { display: flex; gap: 10px; overflow-x: auto; padding: 6px 0; }
+.tn-col { flex: 1; min-width: 96px; display: flex; flex-direction: column; justify-content: space-around; gap: 8px; }
+.tn-col h5 { margin: 0; text-align: center; font-size: 11px; opacity: .7; }
+.tn-luta { background: #0005; border: 1px solid #ffffff33; border-radius: 8px; overflow: hidden; }
+.tn-j { padding: 4px 6px; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tn-j + .tn-j { border-top: 1px solid #ffffff22; }
+.tn-j.venceu { background: #ffd25e33; font-weight: 700; }
+.tn-j.eu { color: #ff9ad0; }
+.tn-j.espera { opacity: .5; }
+.tn-campeao { text-align: center; font-size: 16px; padding: 8px; margin-top: 6px; border-radius: 12px; background: linear-gradient(90deg, #ffd25e33, #ff9ad033); }
+.tn-minha { margin-top: 8px; padding: 8px; border-radius: 12px; background: #ffffff14; display: flex; flex-direction: column; gap: 4px; }
+.tn-dono { margin-top: 8px; font-size: 12px; }
+.tn-dono div { margin: 4px 0; }
+.cartao-batalha.campeao { filter: drop-shadow(0 0 10px #ffd25e); }
+.cb-campeao { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 3; }
+.modal-campeao .camp-cartao { display: grid; place-items: center; transform: scale(.8); margin: -20px 0; }
