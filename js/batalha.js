@@ -470,7 +470,7 @@ const Batalha = (() => {
       }
       const t = donoDe(criarTropa(time, c, x, y, evo ? f * 1.2 : f, nivel, { evo }), quem);
       if (zk) { t.zk = zk; t.el.classList.add('zenkai'); auraZenkai(t); }
-      if (evo) agendar(1.05, () => { if (t.vida > 0) { if (c.id === 'luffy_gear5') tamboresLiberacao(t); else expansaoDominio(t); } });
+      if (evo) agendar(1.05, () => { if (t.vida > 0) { if (c.id === 'luffy_gear5') tamboresLiberacao(t); else if (c.id === 'sonic_relampago') estrondoSonico(t); else if (c.id === 'super_sonic_solar') supernovaChegada(t); else expansaoDominio(t); } });
     }
   }
   // marca de quem é a tropa (no 2v2 as do parceiro ganham um selo)
@@ -2252,7 +2252,7 @@ const Batalha = (() => {
     // Super Sonic Radiante: aura dourada queima quem está colado
     if (m.auraSolar && t.surgir <= 0 && (t.solarT = (t.solarT || 0) + dt) >= 0.5) {
       t.solarT = 0;
-      for (const e of inimigosPerto(t, m.auraSolar[0])) ferir(e, Math.max(1, Math.round(t.dano * m.auraSolar[1] * multClasse(t, e) * (e.torre ? 0.3 : 1))), t.time, t, { tipo: 'queimadura', semContra: true, semEsquiva: true });
+      for (const e of inimigosPerto(t, m.auraSolar[0] * (t.evo ? 1.5 : 1))) ferir(e, Math.max(1, Math.round(t.dano * m.auraSolar[1] * multClasse(t, e) * (e.torre ? 0.3 : 1))), t.time, t, { tipo: 'queimadura', semContra: true, semEsquiva: true });
     }
     // Yugi: compra uma carta de tempos em tempos
     if (m.duelista && (t.cartaTimer -= dt) <= 0) { t.cartaTimer = m.duelista; comprarCarta(t); }
@@ -2286,10 +2286,10 @@ const Batalha = (() => {
     if ((t.mom || 0) < t.atk.m.momento[0]) setMomento(t, (t.mom || 0) + 1);
   }
   function renascerSuper(e) {
-    const dur = e.atk.m.superRenasce;
+    const dur = e.atk.m.superRenasce + (e.evo ? 6 : 0);
     e.superFeito = true; e.superRen = dur;
     setMomento(e, 0);
-    e.vida = Math.round(e.max * 0.7);
+    e.vida = Math.round(e.max * (e.evo ? 0.9 : 0.7));
     e.dano = Math.round(e.dano * 1.5); e.danoBase = Math.round(e.danoBase * 1.5); e.vel *= 1.25; e.velBase *= 1.25;
     e.voo = true; e.esmeraldas = 7; e.el.dataset.esm = 7; e.el.style.setProperty('--esm', 7);
     e.atord = 0; e.congelado = 0; e.lento = 0; e.queima = 0; e.fraco = 0; e.intocavel = Math.max(e.intocavel || 0, 1.5);
@@ -2313,6 +2313,19 @@ const Batalha = (() => {
     particulas(t.x, t.y, '#FFD93B', 10, 28);
     falar(t, 'Ufa...', 'fala-sonic');
   }
+  // evoluídos: chegada especial
+  function estrondoSonico(t) {
+    fxEl('fx-raio-luz', t.x, t.y, 1500); fxJ(20, t.x, t.y);
+    falar(t, 'Mais rápido que o som!', 'fala-sonic');
+    for (const e of inimigosPerto(t, 120)) if (!imuneA(e)) { e.atord = Math.max(e.atord, 1.2); e.el.classList.add('atordoada'); empurrar(e, t, 18); }
+    for (const e of aliadosPerto(t, 160)) e.buffDano = Math.max(e.buffDano || 0, 5);
+    particulas(t.x, t.y, '#7DD3FC', 14, 40);
+  }
+  function supernovaChegada(t) {
+    fxEl('fx-raio-luz', t.x, t.y, 1500); fxJ(20, t.x, t.y);
+    falar(t, 'Supernova!', 'fala-sonic');
+    explosaoArea(t, t, Math.round(t.dano * 1.2), 100, { visual: 'impacto', cor: '#FFD93B', empurrar: 22, atordoar: 0.8 });
+  }
   function loopRelampago(t, h) {
     cutinRede('sonic_relampago');
     t.intocavel = Math.max(t.intocavel || 0, 1.4);
@@ -2328,15 +2341,17 @@ const Batalha = (() => {
   }
   function chaosBlast(t, h) {
     cutinRede('super_sonic_solar');
-    t.intocavel = Math.max(t.intocavel || 0, 1.6);
+    t.intocavel = Math.max(t.intocavel || 0, t.evo ? 2 : 1.6);
     t.el.classList.add('carregando-solar');
     fxEl('fx-raio-luz', t.x, t.y, 1500); fxJ(15, t.x, t.y);
     falar(t, 'Chaos Blast!', 'fala-sonic');
-    [[0.9, 80, 0.9], [1.25, 120, 0.9], [1.6, 165, 1.0]].forEach(([seg, raio, mult], i) => agendar(seg, () => {
+    const ondas = [[0.9, 80, 0.9], [1.25, 120, 0.9], [1.6, 165, 1.0]];
+    if (t.evo) ondas.push([1.95, 210, 1.2]);
+    ondas.forEach(([seg, raio, mult], i) => agendar(seg, () => {
       if (t.vida <= 0) return;
       explosaoArea(t, t, Math.round(t.dano * mult), raio, { visual: 'impacto', cor: '#FFD93B', empurrar: 18 });
       for (const e of inimigosPerto(t, raio)) if (!e.torre && !imuneA(e)) { e.lento = 3; e.lentoPct = 0.35; e.el.classList.add('lenta'); }
-      if (i === 2) t.el.classList.remove('carregando-solar');
+      if (i === ondas.length - 1) t.el.classList.remove('carregando-solar');
     }));
   }
   function destransformar(t) {

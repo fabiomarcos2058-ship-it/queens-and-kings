@@ -179,7 +179,7 @@ const Passe = (() => {
   }
 
   // Carta exclusiva de quem COMPRA o Ultra, uma por passe. O passe de 15/11 (o atual) não tem; esta começa em 22/11.
-  const CARTAS_ULTRA = { 'p2026-11-22': 'gohan_mirai', 'p2026-11-29': 'sonic_relampago', 'p2026-12-06': 'super_sonic_solar' };
+  const CARTAS_ULTRA = { 'p2026-11-22': 'gohan_mirai' };
   const cartaUltraDaTemporada = () => { const id = CARTAS_ULTRA[dados().temporada]; return id ? Estado.carta(id) || null : null; };
   function entregarCartaUltra() {
     const p = dados(), id = CARTAS_ULTRA[p.temporada];

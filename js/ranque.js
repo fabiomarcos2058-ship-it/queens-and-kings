@@ -98,11 +98,16 @@ const Ranque = (() => {
   const CARTAS_PASSE = [{ carta: 'luffy_gear5', nome: 'Luffy Gear 5', curto: 'luffy' }, { carta: 'gojo', nome: 'Gojo Satoru', curto: 'gojo' }];
   const INICIO_PASSES = new Date(2026, 10, 13, 9, 10).getTime(); // 13/11/2026 09:10 (começo do passe do Luffy)
   const SEMANA_MS = 7 * 86400000;
+  // depois da semana do Gojo (a atual), o lugar do Luffy passou pros Sonics
+  const SEQ_NOVA = [{ carta: 'sonic_relampago', nome: 'Sonic Relâmpago', curto: 'sonic' }, { carta: 'super_sonic_solar', nome: 'Super Sonic Radiante', curto: 'supersonic' }, { carta: 'gojo', nome: 'Gojo Satoru', curto: 'gojo' }];
   function passeDaSemana(k) {
     if (k < 0) return { id: 'gojo', carta: 'gojo', nome: 'Gojo Satoru', fim: new Date(INICIO_PASSES) };
-    const c = CARTAS_PASSE[k % CARTAS_PASSE.length];
+    const fim = new Date(INICIO_PASSES + (k + 1) * SEMANA_MS);
     // a primeira semana mantém o id 'luffy' pra ninguém perder o progresso que já tinha
-    return { id: k === 0 ? 'luffy' : `${c.curto}-${k}`, carta: c.carta, nome: c.nome, fim: new Date(INICIO_PASSES + (k + 1) * SEMANA_MS) };
+    if (k === 0) return { id: 'luffy', carta: 'luffy_gear5', nome: 'Luffy Gear 5', fim };
+    if (k === 1) return { id: 'gojo-1', carta: 'gojo', nome: 'Gojo Satoru', fim };
+    const c = SEQ_NOVA[(k - 2) % SEQ_NOVA.length];
+    return { id: `${c.curto}-${k}`, carta: c.carta, nome: c.nome, fim };
   }
   const passeAtual = () => passeDaSemana(Math.floor((Date.now() - INICIO_PASSES) / SEMANA_MS));
   function passeDe(id) {
