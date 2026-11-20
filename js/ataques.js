@@ -111,6 +111,8 @@ const Ataques = (() => {
     itoshi_sae: { v: { g: 'chute', cor: '#E8E4D8', s: 'bola' }, m: { passePerfeito: 3 }, d: 'Passa a bola pro aliado mais forte, que bate na hora e fica mais forte.' },
     itoshi_rin: { v: { g: 'chute', cor: '#4FD1C5', s: 'bola' }, m: { chuteFantasma: 4 }, d: 'Chute Fantasma: curva, não dá pra esquivar e ricocheteia.' },
     kaiser: { v: { g: 'chute', cor: '#3AA8FF', s: 'bola', pesado: true }, m: { devorar: 10, critico: [0.25, 2.2] }, d: 'Chutes críticos e fica mais forte a cada inimigo que cai perto.' },
+    isagi_meta: { v: { g: 'chute', cor: '#5EC8FF', s: 'bola' }, m: { devorar: 10, renascer: 3 }, d: 'Adapta a cada segundo; cai e volta até 3x mais forte. Na 3ª volta, a Metavisão quebra o campo.' },
+    kaiser_isagi: { v: { g: 'chute', cor: '#7B5CFF', s: 'bola', pesado: true }, m: { devorar: 10, critico: [0.3, 2.2] }, d: 'Pacto do Diabo: nasce em Metavisão, com chutes críticos.' },
     isagi_ultra: { v: { g: 'chute', cor: '#5EC8FF', s: 'bola' }, m: { devorar: 10 }, d: 'Metavisão: desvia de golpes e fica mais forte a cada inimigo que cai perto.' },
     anri_halloween: { v: { p: 'abobora', vel: 260, tam: 20, giro: 300, rastro: '#F58A28' }, m: { chaEncantado: [5, 0.1, 100] }, d: 'Joga abóboras e cura os aliados com chá encantado.' },
     akame_murasame: { v: { g: 'corte', s: 'katana', cor: '#E0102F' }, m: { queimar: [0.06, 3, '#B0123A', 'veneno'], murasame: 0.2, sombras: 1.5 }, d: 'Murasame: o corte amaldiçoa com veneno e elimina na hora quem fica fraco demais.' },

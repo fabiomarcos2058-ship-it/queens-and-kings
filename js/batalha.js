@@ -799,6 +799,8 @@ const Batalha = (() => {
       const img = e.img || (e.img = s.arena.querySelector(`[data-torre="${e.id}"]`));
       if (img) { piscar(img, 'torre-levou'); }
       if (e.vida <= 0) destruirTorre(e, deTime);
+    } else if (e.vida <= 0 && !e.torre && e.atk && e.atk.m && e.atk.m.renascer && (e.renasceu || 0) < e.atk.m.renascer && !e.temporario && !s.acabou) {
+      renascerAdaptado(e);
     } else if (e.vida <= 0 && e.fenix > 0) {
       e.fenix = 0;
       e.vida = Math.round(e.max * 0.5);
@@ -807,6 +809,7 @@ const Batalha = (() => {
       efeito('renascer', e.x, e.y, 900);
       particulas(e.x, e.y, '#FAC775', 14, 34);
     } else if (e.vida <= 0) {
+      if (e.meta > 0) fimMetavisao(e);
       if (e.isca) borboletas(e);
       if (!e.torre && e.atk && e.atk.m && (e.atk.m.renascerForma || e.formaGoku) && (e.formaGoku || 0) < 2 && !e.temporario) transformarGoku(e);
       if (e.atk && e.atk.m && e.atk.m.explosaoFinal) explosaoFinal(e);
@@ -1070,6 +1073,109 @@ const Batalha = (() => {
     if (selo) { selo.textContent = t.adaptacao; piscar(selo, 'pulo'); }
     if (t.adaptacao % 5 === 0) { particulas(t.x, t.y, '#7FE8FF', 8, 20); if (t.time === 'azul' && t.adaptacao === p.max) UI.toast('🧩 Isagi se adaptou totalmente!'); }
     t.el.classList.toggle('adaptado', t.adaptacao >= p.max);
+    if (t.adaptacao >= p.max && t.atk && t.atk.m && t.atk.m.renascer && !t.metaGasta) { t.metaGasta = true; metavisao(t, 14); }
+  }
+
+  // ---------- Isagi (Metavisão): cai, aprende e volta melhor; adaptado ao máximo, quebra o campo e vê tudo ----------
+  const FALAS_ISAGI = ['Já entendi o seu jeito.', 'Está ficando claro...', 'Agora eu vejo o campo inteiro.'];
+  function recalcAdapt(t) {
+    const p = t.carta.passiva;
+    const ad = p && p.tipo === 'adaptar' ? t.adaptacao : 0;
+    t.dano = Math.round(t.danoBase * (1 + (ad ? p.dano * ad : 0)));
+    t.vel = t.velBase * (1 + (ad ? p.vel * ad : 0));
+  }
+  function renascerAdaptado(e) {
+    if (e.meta > 0) fimMetavisao(e);
+    const n = (e.renasceu = (e.renasceu || 0) + 1), max = e.atk.m.renascer;
+    e.max = Math.round(e.max * 1.12);
+    e.vida = Math.round(e.max * (0.45 + 0.1 * n)); // volta com 55%, 65% e 75% da vida
+    e.danoBase = Math.round(e.danoBase * 1.2);
+    e.velBase *= 1.08;
+    e.atord = 0; e.congelado = 0; e.lento = 0; e.queima = 0; e.fraco = 0;
+    recalcAdapt(e);
+    atualizarHp(e);
+    e.el.classList.add('renascendo');
+    setTimeout(() => e.el && e.el.classList.remove('renascendo'), 1100);
+    efeito('renascer', e.x, e.y, 900);
+    particulas(e.x, e.y, '#5EC8FF', 16, 36);
+    falar(e, FALAS_ISAGI[Math.min(n, 3) - 1], 'fala-db');
+    if (e.time === 'azul') UI.toast(`🧩 Isagi voltou mais adaptado (${n}/${max})`);
+    if (n >= max) agendar(0.45, () => { if (s && !s.acabou && e.vida > 0) metavisao(e, 14); });
+  }
+  function metavisao(t, dur = 14, semCutin = false) {
+    if (t.vida <= 0 || s.acabou) return;
+    if (t.meta > 0) { t.meta = Math.max(t.meta, dur); return; }
+    if (!semCutin) cutinRede('isagi_meta');
+    s.metaCont = (s.metaCont || 0) + 1;
+    if (s.metaCont === 1) { if (s.rede || s.aoVivo) s.eventos.push(['m', 1]); cenaMeta(true); }
+    t.meta = dur;
+    t.el.classList.add('metavisao');
+    t.danoBase = Math.round(t.danoBase * 1.6); t.velBase *= 1.3; t.cadencia *= 0.7;
+    recalcAdapt(t);
+    t.esquiva = dur; t.esquivaChance = 0.5;
+    falar(t, 'Eu vejo tudo.', 'fala-db');
+  }
+  function fimMetavisao(t) {
+    if (!(t.meta > 0)) return;
+    t.meta = 0;
+    t.el.classList.remove('metavisao');
+    t.danoBase = Math.round(t.danoBase / 1.6); t.velBase /= 1.3; t.cadencia /= 0.7;
+    recalcAdapt(t);
+    if (t.esquiva > 0) t.esquiva = 0;
+    s.metaCont = Math.max(0, (s.metaCont || 1) - 1);
+    if (!s.metaCont) { if (s.rede || s.aoVivo) s.eventos.push(['m', 0]); cenaMeta(false); }
+  }
+  // o campo racha, estilhaça e se remonta todo azul (a Metavisão do Isagi)
+  function cenaMeta(on) {
+    const jan = document.querySelector('.arena-grande-janela');
+    if (!jan) return;
+    jan.classList.toggle('meta-azul', !!on);
+    const cx = document.createElement('div');
+    cx.className = 'meta-cacos';
+    if (!document.documentElement.classList.contains('leve')) {
+      const C = 6, R = 8;
+      for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) {
+        const i = document.createElement('i');
+        const ang = Math.random() * Math.PI * 2, d = 60 + Math.random() * 140;
+        i.style.cssText = `left:${(c / C) * 100}%;top:${(r / R) * 100}%;width:${100 / C + 0.4}%;height:${100 / R + 0.4}%;--dx:${Math.round(Math.cos(ang) * d)}px;--dy:${Math.round(Math.sin(ang) * d)}px;--r:${Math.round(Math.random() * 120 - 60)}deg;--at:${(Math.random() * 0.12).toFixed(2)}s`;
+        cx.appendChild(i);
+      }
+    }
+    const fl = document.createElement('div'); fl.className = 'meta-flash'; cx.appendChild(fl);
+    jan.appendChild(cx);
+    tremer(true);
+    setTimeout(() => cx.remove(), 1900);
+  }
+
+  // Kaiser e Isagi no mesmo time: chance de os dois firmarem o Pacto do Diabo e virarem um só
+  function checarFusao(dt) {
+    s.fusaoT = (s.fusaoT || 0) - dt;
+    if (s.fusaoT > 0) return;
+    s.fusaoT = 0.5;
+    for (const time of ['azul', 'vermelho']) {
+      const k = s.ent.find((e) => !e.torre && e.time === time && e.carta.id === 'kaiser' && e.vida > 0 && !(e.surgir > 0) && !e.temporario);
+      if (!k) continue;
+      const i = s.ent.find((e) => !e.torre && e.time === time && (e.carta.id === 'isagi_meta' || e.carta.id === 'isagi_ultra') && e.vida > 0 && !(e.surgir > 0) && !e.temporario && dist(e, k) < 200);
+      if (i && Math.random() < 0.12) { fundirKaiserIsagi(k, i); return; }
+    }
+  }
+  function fundirKaiserIsagi(k, i) {
+    const c = Estado.carta('kaiser_isagi');
+    if (!c) return;
+    const x = (k.x + i.x) / 2, y = (k.y + i.y) / 2, time = k.time;
+    const f = (k.f + i.f) / 2, nivel = Math.max(k.nivel, i.nivel);
+    const frac = (k.vida / k.max + i.vida / i.max) / 2;
+    cutinRede('kaiser_isagi');
+    for (const q of [k, i]) { if (q.meta > 0) fimMetavisao(q); const el = q.el; el.classList.add('morrendo'); setTimeout(() => el.remove(), 350); q.vida = 0; }
+    s.ent = s.ent.filter((q) => q !== k && q !== i);
+    efeito('renascer', x, y, 900);
+    particulas(x, y, '#7B5CFF', 18, 40); particulas(x, y, '#5EC8FF', 12, 30);
+    const n = criarTropa(time, c, x, y, f, nivel, {});
+    n.vida = Math.round(n.max * Math.max(0.6, frac)); atualizarHp(n);
+    n.fundida = true;
+    n.el.classList.add('fusao-pacto');
+    falar(n, 'Um pacto... só nós dois.', 'fala-db');
+    agendar(0.6, () => { if (s && !s.acabou && n.vida > 0) metavisao(n, 10, true); });
   }
 
   // tipo: 0 = Kamehameha, 1 = Super Kamehameha (fúria do Goku), 2 = Vazio Púrpura (Gojo)
@@ -1209,8 +1315,8 @@ const Batalha = (() => {
   }
 
   // corte de cena por cima da arena (aparece pra todo mundo da partida)
-  const CUTINS = ['goku_furia', 'jojo_jotaro', 'jojo_dio', 'jojo_diavolo', 'jojo_pucci', 'jojo_gyro', 'jojo_johnny', 'sonic_shadow', 'sonic_super', 'sonic_dark', 'sonic_excalibur', 'sonic_hyper', 'yugi_reino', 'ultra_sae', 'ultra_rin', 'ultra_isagi', 'ultra_anri', 'inv_mark_eve', 'inv_mark', 'inv_eve', 'inv_conquest', 'inv_omni', 'inv_anissa', 'db_goku_vegeta', 'db_gogeta_vegetto', 'db_vegetto_gogeta', 'db_ultra_ego', 'db_kaioken', 'db_goku_deus', 'db_black', 'db_evolution', 'cy_david', 'cy_adam', 'cy_adam_evo', 'cy_rubi', 'cy_silverhand', 'nz_ainz', 'nz_albedo', 'nz_shalltear', 'nz_demiurge', 'nz_sebas', 'nz_pandora', 'op_luffy'];
-  const TEXTO_CUTIN_2 = { sonic_shadow: 'Chaos Control!', sonic_super: 'Super Boost!', sonic_dark: 'Explosão Sombria!', sonic_excalibur: 'Soul Surge!', sonic_hyper: 'Hiper Velocidade!', yugi_reino: 'Reino das Sombras!', ultra_sae: 'Visão do Gênio!', ultra_rin: 'Flow: Destruição!', ultra_isagi: 'Direct Shot!', ultra_anri: 'Doces ou Travessuras?', inv_mark_eve: 'Juntos somos invencíveis!', inv_mark: 'Investida Invencível!', inv_eve: 'Barreira Atômica!', inv_conquest: 'Esmagar!', inv_omni: 'Fúria do Regente!', inv_anissa: 'Rajada Viltrumita!', db_goku_vegeta: 'Rivais Eternos!', db_gogeta_vegetto: 'Kamehameha Final + Big Bang!', db_vegetto_gogeta: 'Soul Punisher!', db_ultra_ego: 'Hakai!', db_kaioken: 'Kaioken x20!', db_goku_deus: 'Punho do Deus Saiyajin!', db_black: 'Ceifa Divina!', db_evolution: 'Final Flash!', cy_david: 'Sandevistan!', cy_adam: 'Rajada de Mísseis!', cy_adam_evo: 'Mísseis + Sandevistan!', cy_rubi: 'Ciberpsicose!', cy_silverhand: 'Johnny Silverhand!', nz_ainz: 'O Objetivo de Toda Vida é a Morte!', nz_albedo: 'Hermes Trismegistus!', nz_shalltear: 'Lança Purificadora!', nz_demiurge: 'Chamas do Inferno!', nz_sebas: 'Forma de Dragão!', nz_pandora: 'Doppelgänger!', op_luffy: 'Gomu Gomu no... Bajrang Gun!' };
+  const CUTINS = ['goku_furia', 'jojo_jotaro', 'jojo_dio', 'jojo_diavolo', 'jojo_pucci', 'jojo_gyro', 'jojo_johnny', 'sonic_shadow', 'sonic_super', 'sonic_dark', 'sonic_excalibur', 'sonic_hyper', 'yugi_reino', 'ultra_sae', 'ultra_rin', 'ultra_isagi', 'ultra_anri', 'inv_mark_eve', 'inv_mark', 'inv_eve', 'inv_conquest', 'inv_omni', 'inv_anissa', 'db_goku_vegeta', 'db_gogeta_vegetto', 'db_vegetto_gogeta', 'db_ultra_ego', 'db_kaioken', 'db_goku_deus', 'db_black', 'db_evolution', 'cy_david', 'cy_adam', 'cy_adam_evo', 'cy_rubi', 'cy_silverhand', 'nz_ainz', 'nz_albedo', 'nz_shalltear', 'nz_demiurge', 'nz_sebas', 'nz_pandora', 'op_luffy', 'isagi_meta', 'kaiser_isagi'];
+  const TEXTO_CUTIN_2 = { isagi_meta: 'Metavisão!', kaiser_isagi: 'Pacto do Diabo!', sonic_shadow: 'Chaos Control!', sonic_super: 'Super Boost!', sonic_dark: 'Explosão Sombria!', sonic_excalibur: 'Soul Surge!', sonic_hyper: 'Hiper Velocidade!', yugi_reino: 'Reino das Sombras!', ultra_sae: 'Visão do Gênio!', ultra_rin: 'Flow: Destruição!', ultra_isagi: 'Direct Shot!', ultra_anri: 'Doces ou Travessuras?', inv_mark_eve: 'Juntos somos invencíveis!', inv_mark: 'Investida Invencível!', inv_eve: 'Barreira Atômica!', inv_conquest: 'Esmagar!', inv_omni: 'Fúria do Regente!', inv_anissa: 'Rajada Viltrumita!', db_goku_vegeta: 'Rivais Eternos!', db_gogeta_vegetto: 'Kamehameha Final + Big Bang!', db_vegetto_gogeta: 'Soul Punisher!', db_ultra_ego: 'Hakai!', db_kaioken: 'Kaioken x20!', db_goku_deus: 'Punho do Deus Saiyajin!', db_black: 'Ceifa Divina!', db_evolution: 'Final Flash!', cy_david: 'Sandevistan!', cy_adam: 'Rajada de Mísseis!', cy_adam_evo: 'Mísseis + Sandevistan!', cy_rubi: 'Ciberpsicose!', cy_silverhand: 'Johnny Silverhand!', nz_ainz: 'O Objetivo de Toda Vida é a Morte!', nz_albedo: 'Hermes Trismegistus!', nz_shalltear: 'Lança Purificadora!', nz_demiurge: 'Chamas do Inferno!', nz_sebas: 'Forma de Dragão!', nz_pandora: 'Doppelgänger!', op_luffy: 'Gomu Gomu no... Bajrang Gun!' };
   const TEXTO_CUTIN = { ...TEXTO_CUTIN_2, goku_furia: "You're going to pay for this!", jojo_jotaro: 'Star Platinum: The World!', jojo_dio: 'ZA WARUDO! Toki yo tomare!', jojo_diavolo: 'King Crimson!', jojo_pucci: 'Made in Heaven!', jojo_gyro: 'Ball Breaker!', jojo_johnny: 'Tusk Act 4!' };
   const cutinRede = (qual) => { cutin(qual); if (s.rede || s.aoVivo) s.eventos.push(['c', CUTINS.indexOf(qual)]); };
   function cutin(qual) {
@@ -3613,6 +3719,8 @@ const Batalha = (() => {
         setTimeout(() => tremer(true), 300);
       } else if (ev[0] === 'q') {
         tremer(true);
+      } else if (ev[0] === 'm') {
+        cenaMeta(!!ev[1]);
       } else if (ev[0] === 'c') {
         cutin(CUTINS[ev[1]] || 'goku_furia');
       } else if (ev[0] === 'd') {
@@ -3852,10 +3960,12 @@ const Batalha = (() => {
     for (const tw of s.ent) if (tw.torre && tw.queima > 0) queimar(tw, dt);
 
     // tropas
+    checarFusao(dt);
     for (const t of s.ent) {
       if (t.torre || t.vida <= 0) continue;
       if (t.surgir > 0) { t.surgir -= dt; if (t.surgir <= 0) t.el.classList.remove('surgindo'); continue; }
       if (t.carta.passiva && t.carta.passiva.tipo === 'adaptar') adaptar(t, dt);
+      if (t.meta > 0 && (t.meta -= dt) <= 0) fimMetavisao(t);
       atualizarStatus(t, dt);
       if (t.vida <= 0) continue;
       if (t.congelado > 0) { if ((t.congelado -= dt) <= 0) t.el.classList.remove('congelada'); continue; }

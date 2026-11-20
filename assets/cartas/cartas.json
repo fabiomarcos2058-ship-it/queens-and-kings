@@ -4357,6 +4357,86 @@
         "recarga": 22,
         "descricao": "O chute do Imperador: aliados em volta atacam mais rápido por 5s e o Kaiser solta um chute direto que atravessa a linha inteira."
       }
+    },
+    {
+      "id": "isagi_meta",
+      "nome": "Isagi Yoichi (Metavisão)",
+      "raridade": "ultra",
+      "custo": 5,
+      "tipo": "Ultra · O Predador que se Adapta",
+      "trofeus": 0,
+      "exclusivo": [],
+      "summon": true,
+      "descricao": "Cada vez que cai, ele volta mais forte: aprende com a derrota. Na terceira volta, a Metavisão quebra o campo inteiro e ele passa a enxergar tudo.",
+      "rosto": [
+        365,
+        470,
+        150
+      ],
+      "arte": [
+        0,
+        200,
+        736
+      ],
+      "vida": 1100,
+      "dano": 235,
+      "velocidade": 70,
+      "alcance": 60,
+      "cadencia": 1.0,
+      "alvo": "tudo",
+      "arena": 1,
+      "danoTorre": 0.6,
+      "passiva": {
+        "nome": "Adaptação",
+        "tipo": "adaptar",
+        "intervalo": 2,
+        "max": 12,
+        "dano": 0.03,
+        "vel": 0.012,
+        "defesa": 0.015,
+        "descricao": "A cada 2 segundos se adapta: mais dano, mais rápido e mais resistente (até 12 vezes). Quando cai, volta até 3 vezes com mais vida, dano e velocidade. Na 3ª volta (ou adaptado ao máximo) entra em Metavisão: o campo quebra, fica azul e ele ganha +60% de dano, +30% de velocidade e desvia de metade dos golpes por 14s."
+      },
+      "habilidade": {
+        "nome": "Direct Shot",
+        "tipo": "golDireto",
+        "custo": 4,
+        "recarga": 22,
+        "descricao": "Aliados em volta atacam mais rápido por 5s e o Isagi solta um chute direto que atravessa a linha inteira."
+      }
+    },
+    {
+      "id": "kaiser_isagi",
+      "nome": "Kaiser & Isagi: Pacto do Diabo",
+      "raridade": "ultra",
+      "custo": 6,
+      "tipo": "Fusão · Os dois Monstros",
+      "trofeus": 0,
+      "corpo": true,
+      "summon": false,
+      "descricao": "O Imperador e o Predador firmam o pacto: dois egos num só chute.",
+      "rosto": [
+        335,
+        640,
+        115
+      ],
+      "arte": [
+        0,
+        120,
+        675
+      ],
+      "vida": 3000,
+      "dano": 520,
+      "velocidade": 72,
+      "alcance": 75,
+      "cadencia": 0.9,
+      "alvo": "tudo",
+      "arena": 1,
+      "danoTorre": 0.7,
+      "passiva": {
+        "nome": "Pacto do Diabo",
+        "tipo": "imperador",
+        "descricao": "Nasce em Metavisão. Chutes críticos e fica mais forte a cada inimigo que cai perto."
+      }
     }
   ]
 }

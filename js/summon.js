@@ -85,23 +85,24 @@ const Summon = (() => {
     chances: { ultra: 0.02, lendaria: 0.12, epica: 0.41, rara: 0.45 },
   }, {
     id: 'kaiser',
-    nome: 'O IMPERADOR',
-    sub: 'Michael Kaiser',
+    nome: 'IMPERADOR & PREDADOR',
+    sub: 'Kaiser × Isagi · Metavisão',
     fim: new Date(2026, 10, 26, 23, 59, 59), // 26/11/2026
     arte: 'assets/summon/kaiser.jpg',
     mini: 'assets/summon/kaiser_mini.jpg',
     centro: 'kaiser',
-    destaque: ['kaiser', 'itoshi_sae', 'itoshi_rin', 'isagi_ultra'],
+    centros: ['kaiser', 'isagi_meta'],
+    destaque: ['kaiser', 'isagi_meta', 'itoshi_sae', 'itoshi_rin', 'isagi_ultra'],
     pool: {
-      ultra: ['kaiser', 'itoshi_sae', 'itoshi_rin', 'isagi_ultra'],
+      ultra: ['kaiser', 'isagi_meta', 'itoshi_sae', 'itoshi_rin', 'isagi_ultra'],
       lendaria: ['shadow', 'anri_halloween'],
       epica: ['isagi', 'sonic', 'kurona'],
       rara: ['mbappe'],
     },
-    // o Kaiser é o destaque: o mais difícil de vir; os outros ultras vêm mais fácil
-    pesos: { kaiser: 1, itoshi_sae: 3, itoshi_rin: 3, isagi_ultra: 3 },
+    // o Kaiser e o Isagi (Metavisão) são os destaques: os mais difíceis de vir; os outros ultras vêm mais fácil
+    pesos: { kaiser: 1, isagi_meta: 1, itoshi_sae: 3, itoshi_rin: 3, isagi_ultra: 3 },
     chances: { ultra: 0.02, lendaria: 0.12, epica: 0.41, rara: 0.45 },
-    pityDestaque: 200, // garantia: o Kaiser vem com certeza na 200ª invocação sem ele neste banner
+    pityDestaque: 200, // garantia: Kaiser OU Isagi (Metavisão) vem com certeza na 200ª invocação sem nenhum dos dois
   }, {
     id: 'invencivel',
     nome: 'INVENCÍVEL',
@@ -257,11 +258,12 @@ const Summon = (() => {
       let rar = sortearRaridade(ultimaDaDezena);
       let id;
       // garantia do destaque (Mark & Eve)
-      if (b.centro && b.pityDestaque && pb.semDestaque + 1 >= b.pityDestaque && Estado.carta(b.centro)) { rar = 'ultra'; id = b.centro; }
+      const cs = b.centros || (b.centro ? [b.centro] : []);
+      if (cs.length && b.pityDestaque && pb.semDestaque + 1 >= b.pityDestaque) { rar = 'ultra'; id = cs[Math.floor(Math.random() * cs.length)]; }
       else id = escolher(p[rar], b.pesos);
       ds.total++;
       if (rar === 'ultra') { pb.semUltra = 0; ds.ultras = (ds.ultras || 0) + 1; } else pb.semUltra++;
-      if (b.centro) { if (id === b.centro) pb.semDestaque = 0; else pb.semDestaque = (pb.semDestaque || 0) + 1; }
+      if (cs.length) { if (cs.includes(id)) pb.semDestaque = 0; else pb.semDestaque = (pb.semDestaque || 0) + 1; }
       res.push({ id, raridade: rar, ...receber(id) });
     }
     // as 10 aparecem misturadas, mas a garantida não fica sempre no fim
@@ -312,26 +314,21 @@ const Summon = (() => {
     const lista = ativos();
     if (!lista.length) { el.remove(); UI.toast('Nenhum banner aberto agora. Logo vem outro! ✨'); aoFechar(); return; }
     const iAtual = Math.max(0, Math.min(atualI, lista.length - 1));
+    const pagina = (i) => {
+      atualI = i;
+      const b = banner();
     const paineis = b.arte ? `<img class="smb-arte" src="${b.arte}" alt="" draggable="false" />` : `<div class="smb-paineis">${b.destaque.filter((id) => Estado.carta(id)).map((id, i) => {
       const c = Estado.carta(id);
       return `<div class="smb-painel${id === b.centro ? ' centro' : ''}" style="--i:${i}"><img src="${Cartas.arte(c)}" alt="" draggable="false" /><span>${esc(c.nome)}</span></div>`;
     }).join('')}</div>`;
     const pct = Math.round(((PITY - faltaPity()) / PITY) * 100);
-    // seletor de banners (cartõezinhos com o tempo que falta)
-    const abas = lista.map((x, i) => `<button class="sm-aba${i === iAtual ? ' ativa' : ''}${x.tema ? ` t-${x.tema}` : ''}" data-b="${i}">
-        <img src="${x.mini || Cartas.arte(Estado.carta(x.centro || x.destaque[0]) || {})}" alt="" />${i === lista.length - 1 ? '<em>NOVO</em>' : ''}
-        <span>${esc(x.nome)}</span><small>⏳ ${tempo(x)}</small></button>`).join('');
     const titulo = b.logo === 'zk' ? `<div class="smb-logo-zk"><b>ZENKAI</b><small>${b.raras ? '✦ RARAS ✦ ' : ''}${esc(b.sub)}</small></div>` : b.logo === 'nz' ? logoNazarick(b) : b.logo === 'db' ? logoSaiyajin(b) : b.logo ? logoInvencivel(b) : `<div class="smb-titulo"><em>NOVA RARIDADE</em><b>${esc(b.nome)}</b><small>${esc(b.sub)}</small></div>`;
     // personagens em destaque (estilo vitrine)
     const destaques = b.destaque.filter((id) => Estado.carta(id)).map((id) => {
       const c = Estado.carta(id);
-      return `<button class="smd-un r-${c.raridade}${id === b.centro ? ' centro' : ''}"><i><img src="assets/cartas/${id}_medalhao.png" alt="" /></i><b>${esc(c.nome)}</b>${id === b.centro ? '<em>DESTAQUE</em>' : ''}</button>`;
+      return `<button class="smd-un r-${c.raridade}${(b.centros || [b.centro]).includes(id) ? ' centro' : ''}"><i><img src="assets/cartas/${id}_medalhao.png" alt="" /></i><b>${esc(c.nome)}</b>${(b.centros || [b.centro]).includes(id) ? '<em>DESTAQUE</em>' : ''}</button>`;
     }).join('');
-    el.innerHTML = `${fundoMultiverso()}
-      <div class="sm-topo"><button class="tr-voltar" id="sm-voltar">‹</button><div><b>Summon</b><small>${lista.length} banner${lista.length > 1 ? 's' : ''} aberto${lista.length > 1 ? 's' : ''}</small></div>
-        <span class="sm-gemas">💎 ${fmt(Estado.d.gemas)}</span></div>
-      <div class="sm-rolagem">
-        <div class="sm-abas">${abas}</div>
+      return `<section class="sm-pag" data-b="${i}">
         <div class="sm-moldura${b.tema ? ` t-${b.tema}` : ''}">
           <div class="sm-banner${b.tema ? ` t-${b.tema}` : ''}${b.arte ? ' com-arte' : ''}">
             ${paineis}
@@ -342,22 +339,42 @@ const Summon = (() => {
         </div>
         <div class="sm-destaques"><small>✦ PERSONAGENS EM DESTAQUE ✦</small><div>${destaques}</div></div>
         ${b.zenkai ? `<div class="sm-pity zk"><div><b>🔥 ${b.raras ? `Cada carta vem com ${zkFaixa('rara')} cópias (rara)` : `Cada carta vem com ${zkFaixa('comum')} cópias (comum) ou ${zkFaixa('epica')} (épica)`}</b><small>Só ${esc(b.sub)}, a dupla que acabou de ganhar Zenkai · troca quando a próxima dupla chegar</small></div></div>` : `<div class="sm-pity"><div><b>Ultra garantido em ${faltaPity()}</b><small>A chance sobe a partir da invocação ${SUAVE}</small></div><i><i style="width:${pct}%"></i></i></div>`}
-        ${b.centro && Estado.carta(b.centro) ? `<div class="sm-pity destaque"><div><b>${esc(Estado.carta(b.centro).nome)} garantido em ${faltaDestaque()}</b><small>Super raro: só ${(chances().ultra * 100 * (b.pesos[b.centro] / Object.values(b.pesos).reduce((a, v) => a + v, 0))).toFixed(2).replace('.', ',')}% por invocação</small></div><i><i style="width:${Math.round(((b.pityDestaque - faltaDestaque()) / b.pityDestaque) * 100)}%"></i></i></div>` : ''}
+        ${b.centro && Estado.carta(b.centro) ? `<div class="sm-pity destaque"><div><b>${b.centros ? b.centros.map((c) => esc(Estado.carta(c).nome.split(' (')[0])).join(' ou ') : esc(Estado.carta(b.centro).nome)} garantido em ${faltaDestaque()}</b><small>Super raro: só ${(chances().ultra * 100 * ((b.centros || [b.centro]).reduce((a, c) => a + b.pesos[c], 0) / Object.values(b.pesos).reduce((a, v) => a + v, 0))).toFixed(2).replace('.', ',')}% por invocação (os dois juntos)</small></div><i><i style="width:${Math.round(((b.pityDestaque - faltaDestaque()) / b.pityDestaque) * 100)}%"></i></i></div>` : ''}
         <div class="sm-botoes">
-          <button class="sm-btn um" id="sm-1"><small>INVOCAÇÃO</small><b>1x</b><span>💎 ${precoDe(1)}</span></button>
-          <button class="sm-btn dez" id="sm-10">${b.zenkai ? '<em>Muitas cópias!</em>' : '<em>1 Lendária+ garantida</em>'}<small>INVOCAÇÃO</small><b>10x</b><span>💎 ${precoDe(10)}</span></button>
+          <button class="sm-btn um" data-n="1"><small>INVOCAÇÃO</small><b>1x</b><span>💎 ${precoDe(1)}</span></button>
+          <button class="sm-btn dez" data-n="10">${b.zenkai ? '<em>Muitas cópias!</em>' : '<em>1 Lendária+ garantida</em>'}<small>INVOCAÇÃO</small><b>10x</b><span>💎 ${precoDe(10)}</span></button>
         </div>
-        <button class="sm-info" id="sm-info">📜 Personagens e chances</button>
+        <button class="sm-info">📜 Personagens e chances</button>
         <p class="sm-total">Você já invocou ${fmt(ds.total || 0)} vez${ds.total === 1 ? '' : 'es'}${ds.ultras ? ` · ${ds.ultras} Ultra${ds.ultras > 1 ? 's' : ''}` : ''}</p>
-      </div>`;
+      </section>`;
+    };
+    const ordem = lista.map((_, i) => i).reverse(); // o mais novo fica em cima, igual ao Dragon Ball Legends
+    const paginas = ordem.map(pagina).join('');
+    atualI = iAtual;
+    el.innerHTML = `${fundoMultiverso()}
+      <div class="sm-topo"><button class="tr-voltar" id="sm-voltar">‹</button><div><b>Summon</b><small>${lista.length > 1 ? `${lista.length} banners · arraste pra baixo ⌄` : '1 banner aberto'}</small></div>
+        <span class="sm-gemas">💎 ${fmt(Estado.d.gemas)}</span></div>
+      <div class="sm-rolagem" id="sm-rolagem">${paginas}</div>
+      ${lista.length > 1 ? `<div class="sm-pontos">${ordem.map((i) => `<i data-b="${i}"></i>`).join('')}</div>` : ''}`;
     $('app').appendChild(el);
     if (typeof Assets !== 'undefined') Assets.fill();
     el.querySelector('#sm-voltar').onclick = () => fechar();
-    el.querySelectorAll('.sm-aba').forEach((x) => (x.onclick = () => { atualI = +x.dataset.b; abrir(); }));
-    el.querySelector('#sm-info').onclick = () => info();
-    el.querySelectorAll('.smd-un').forEach((x) => (x.onclick = () => info()));
-    el.querySelector('#sm-1').onclick = () => invocar(1);
-    el.querySelector('#sm-10').onclick = () => invocar(10);
+    el.querySelectorAll('.sm-pag').forEach((pg) => {
+      const i = +pg.dataset.b;
+      pg.querySelector('.sm-info').onclick = () => { atualI = i; info(); };
+      pg.querySelectorAll('.smd-un').forEach((x) => (x.onclick = () => { atualI = i; info(); }));
+      pg.querySelectorAll('.sm-btn').forEach((x) => (x.onclick = () => { atualI = i; invocar(+x.dataset.n); }));
+    });
+    // rolagem: cada banner ocupa a tela; o que está na tela vira o banner atual
+    const rol = el.querySelector('#sm-rolagem');
+    const pontos = [...el.querySelectorAll('.sm-pontos i')];
+    const marcar = () => {
+      const k = Math.max(0, Math.min(ordem.length - 1, Math.round(rol.scrollTop / Math.max(1, rol.clientHeight))));
+      atualI = ordem[k];
+      pontos.forEach((x) => x.classList.toggle('on', +x.dataset.b === atualI));
+    };
+    rol.addEventListener('scroll', marcar, { passive: true });
+    requestAnimationFrame(() => { rol.scrollTop = ordem.indexOf(iAtual) * rol.clientHeight; marcar(); });
   }
   function fechar(silencioso) {
     const el = $('summon-tela');
