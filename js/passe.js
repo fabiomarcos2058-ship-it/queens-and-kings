@@ -117,7 +117,7 @@ const Passe = (() => {
     }
     const meu = typeof Conta !== 'undefined' && Conta.uid ? Conta.uid() : null;
     // quem tem o Ultra pago (inclusive o que vale até o fim do mês) e ainda não recebeu a carta exclusiva desta temporada
-    if (d.passe.ultra && !d.passe.presenteUltra && !d.passe.cartaUltraDada && CARTAS_ULTRA[d.passe.temporada] && Estado.carta(CARTAS_ULTRA[d.passe.temporada])) {
+    if (d.passe.ultra && CARTAS_ULTRA[d.passe.temporada] && Estado.carta(CARTAS_ULTRA[d.passe.temporada]) && (!d.passe.cartaUltraDada || !Estado.tem(CARTAS_ULTRA[d.passe.temporada]))) { // vale também pro Ultra de presente, e reentrega se a carta sumiu
       const c = darCartaUltra(CARTAS_ULTRA[d.passe.temporada]);
       if (c) {
         d.passe.cartaUltraDada = true;
