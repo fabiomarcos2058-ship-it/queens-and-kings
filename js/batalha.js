@@ -756,6 +756,8 @@ const Batalha = (() => {
       ferir(e.gemeo, metade, deTime, fonte, { dividido: true, semEsquiva: true, semContra: true, atravessa: true, ignoraEscudo: true });
     }
     if (e.postura && emEgo(e) && dano > 0) e.ego = Math.min(15, (e.ego || 0) + 1);
+    // ULTRA BALANCEAMENTO: nenhum golpe isolado tira mais que 40% da vida máxima de uma tropa (nada mata tudo de uma vez só)
+    if (!e.torre && !opc.semLimite && e.max > 0 && dano > e.max * 0.4) dano = Math.round(e.max * 0.4);
     e.vida -= dano;
     numero(e, dano, opc.crit ? 'critico' : opc.tipo);
     // Adam Smasher (Evolução): com 30% de vida dispara sozinho Mísseis + Sandevistan, sem gastar elixir (uma vez)
