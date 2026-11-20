@@ -89,6 +89,7 @@ const Summon = (() => {
     sub: 'Kaiser × Isagi · Metavisão',
     fim: new Date(2026, 10, 26, 23, 59, 59), // 26/11/2026
     arte: 'assets/summon/kaiser.jpg',
+    titulo: 'assets/titulo/kaiser.jpg', // arte da tela de título
     mini: 'assets/summon/kaiser_mini.jpg',
     centro: 'kaiser',
     centros: ['kaiser', 'isagi_meta'],
