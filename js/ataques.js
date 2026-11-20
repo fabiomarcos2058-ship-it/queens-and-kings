@@ -24,7 +24,7 @@ const Ataques = (() => {
 
   const CLASSE_DA_CARTA = {
     tanque: ['itsuki', 'shizuku', 'gogeta_ssj4', 'goku_ssj3', 'goku_ssj4', 'goku_blue_lb', 'gogeta_ultra', 'sonic_excalibur', 'conquest', 'omni_man', 'vegeta_ultra_ego', 'gogeta_blue_solo', 'adam_smasher', 'adam_smasher_evo', 'albedo'],
-    assassino: ['bra', 'teto', 'pan_dbh', 'akame', 'mbappe', 'kashimo', 'goku_pressagio', 'diavolo', 'mita_malvada', 'akame_murasame', 'sonic', 'dark_sonic', 'kurona', 'goku_black_rose', 'goku_blue_kaioken_remake', 'vegetto_blue_solo', 'agente_rubi', 'david_martinez', 'lucy_kushinada', 'shalltear'],
+    assassino: ['bra', 'teto', 'pan_dbh', 'akame', 'mbappe', 'kashimo', 'goku_pressagio', 'diavolo', 'mita_malvada', 'akame_murasame', 'sonic', 'sonic_relampago', 'dark_sonic', 'kurona', 'goku_black_rose', 'goku_blue_kaioken_remake', 'vegetto_blue_solo', 'agente_rubi', 'david_martinez', 'lucy_kushinada', 'shalltear'],
     atirador: ['mai', 'miku_nakano', 'pan_gt', 'riruka', 'rukia_remake', 'nino_nakano', 'gyro', 'johnny', 'roman_cyber', 'johnny_silverhand', 'pandoras_actor'],
     mago: ['gohan_mirai', 'rukia', 'nami_last', 'hatsune_miku', 'bambietta', 'bulma', 'gojo', 'robin', 'pucci', 'mita_gentil', 'yugi_moto', 'anri_halloween', 'eve_atomica', 'ainz_ooal_gown', 'demiurge'],
     enxame: ['mini'],
@@ -62,6 +62,8 @@ const Ataques = (() => {
     super_sonic: { v: { g: 'impacto', cor: '#FFD25E' }, m: { superForma: 16, voo: true }, d: 'Voa e é invencível enquanto tiver anéis.' },
     dark_sonic: { v: { g: 'giro', cor: '#A855F7' }, m: { raivaSombria: true, berserk: 0.35 }, d: 'Fica furioso quando um aliado cai perto.' },
     sonic_excalibur: { v: { g: 'corte', s: 'espada_trunks', cor: '#BFE8FF' }, m: { escudo: 0.2, aparar: 7 }, d: 'Corte em área, escudo e aparar com contra-ataque.' },
+    sonic_relampago: { v: { g: 'giro', cor: '#38BDF8' }, m: { momento: [8, 0.05], superRenasce: 12 }, d: 'Acelera a cada golpe. Ao cair, renasce como Super Sonic com 7 Esmeraldas girando.' },
+    super_sonic_solar: { v: { g: 'impacto', cor: '#FFD93B' }, m: { auraSolar: [58, 0.1], supernova: [5, 70, 1.4], voo: true }, d: 'Aura dourada que queima e Supernova a cada 5 golpes.' },
     hyper_sonic: { v: { g: 'impacto', cor: '#F5F5FF' }, m: { esmeraldas: 7, hyperFlash: [5, 90, 0.45], voo: true }, d: '7 Esmeraldas do Caos seguram golpes. Hiper Flash atordoa em volta.' },
     yugi_moto: { v: { p: 'coringa', vel: 300, tam: 18, giro: 540, rastro: '#FFD25E' }, m: { duelista: 8 }, d: 'Joga cartas de longe e compra uma carta especial a cada 8s.' },
     anissa: { v: { g: 'soco', cor: '#E8EEF8' }, m: { combo: 3, atordoar: [0.25, 0.4], veterano: 0.1, voo: true }, d: 'Socos Viltrumitas rápidos que deixam tonto.' },

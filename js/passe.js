@@ -123,8 +123,8 @@ const Passe = (() => {
         d.passe.cartaUltraDada = true;
         Estado.salvar();
         setTimeout(() => UI.modal({
-          titulo: '🌟 Mirai Gohan chegou!',
-          html: '<p style="font-size:40px;margin:4px 0">🎁</p><p>Você tem o Passe Ultra, então a carta exclusiva <b>Mirai Gohan</b> já está na sua coleção!</p>',
+          titulo: `🌟 ${c.nome} chegou!`,
+          html: `<p style="font-size:40px;margin:4px 0">🎁</p><p>Você tem o Passe Ultra, então a carta exclusiva <b>${c.nome}</b> já está na sua coleção!</p>`,
           botoes: [{ texto: 'Obrigado! 💜', classe: 'principal' }],
         }), 1200);
       }
@@ -179,7 +179,7 @@ const Passe = (() => {
   }
 
   // Carta exclusiva de quem COMPRA o Ultra, uma por passe. O passe de 15/11 (o atual) não tem; esta começa em 22/11.
-  const CARTAS_ULTRA = { 'p2026-11-22': 'gohan_mirai' };
+  const CARTAS_ULTRA = { 'p2026-11-22': 'gohan_mirai', 'p2026-11-29': 'sonic_relampago', 'p2026-12-06': 'super_sonic_solar' };
   const cartaUltraDaTemporada = () => { const id = CARTAS_ULTRA[dados().temporada]; return id ? Estado.carta(id) || null : null; };
   function entregarCartaUltra() {
     const p = dados(), id = CARTAS_ULTRA[p.temporada];

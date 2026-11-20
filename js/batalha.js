@@ -565,7 +565,7 @@ const Batalha = (() => {
     t.el = document.createElement('div');
     t.el.className = `tropa ${time} surgindo${c.token ? ' mini' : ''}${c.habilidade ? ' campea' : ''}${t.escudo ? ' com-escudo' : ''}${t.voo ? ' voando' : ''}${c.evolucao ? ' carta-evo' : ''}${t.evo ? ' evoluida' : ''}${t.infinito ? ' com-infinito' : ''}`;
     t.el.innerHTML = `${barraHp()}
-      <div class="tropa-corpo">${m0.estrelinhas ? `<div class="orbita-estrelas">${'<i></i>'.repeat(m0.estrelinhas[0])}</div>` : ''}${c.evolucao ? '<i class="aura-evo"></i><i class="aura-evo dois"></i>' : ''}${t.evo ? '<span class="selo-evo">EVO</span>' : ''}<div class="tropa-medalhao">${c.videoRosto ? `<video src="assets/cartas/${c.videoRosto}" poster="assets/cartas/${c.id}_medalhao.png" autoplay muted loop playsinline></video>` : `<img src="assets/cartas/${c.id}_medalhao.png" alt="" />`}<b>${nivel}</b>${c.passiva && c.passiva.tipo === 'adaptar' ? '<i class="selo-adapt"></i>' : ''}</div></div><div class="tropa-sombra"></div>`;
+      <div class="tropa-corpo">${m0.superRenasce || m0.auraSolar ? `<div class="orbita-esm">${'<i></i>'.repeat(7)}</div>` : ''}${m0.estrelinhas ? `<div class="orbita-estrelas">${'<i></i>'.repeat(m0.estrelinhas[0])}</div>` : ''}${c.evolucao ? '<i class="aura-evo"></i><i class="aura-evo dois"></i>' : ''}${t.evo ? '<span class="selo-evo">EVO</span>' : ''}<div class="tropa-medalhao">${c.videoRosto ? `<video src="assets/cartas/${c.videoRosto}" poster="assets/cartas/${c.id}_medalhao.png" autoplay muted loop playsinline></video>` : `<img src="assets/cartas/${c.id}_medalhao.png" alt="" />`}<b>${nivel}</b>${c.passiva && c.passiva.tipo === 'adaptar' ? '<i class="selo-adapt"></i>' : ''}</div></div><div class="tropa-sombra"></div>`;
     s.arena.appendChild(t.el);
     s.ent.push(t);
     posicionar(t);
@@ -575,6 +575,8 @@ const Batalha = (() => {
     if (m0.aneis) t.aneis = 0;
     if (m0.esmeraldas) { t.esmeraldas = m0.esmeraldas; t.el.classList.add('com-esmeraldas'); t.el.style.setProperty('--esm', m0.esmeraldas); }
     if (m0.hyperFlash) t.flashTimer = m0.hyperFlash[0];
+    if (m0.superRenasce || m0.auraSolar) t.el.classList.add('tem-orbita');
+    if (m0.momento) { t.mom = 0; t.momT = 0; }
     if (m0.duelista) t.cartaTimer = 2.2;
     if (m0.sombras) { t.intocavel = m0.sombras; t.sombra = m0.sombras; t.el.classList.add('sombra'); }
     if (m0.surgirImpacto) agendar(1, () => { if (t.vida > 0) explosaoArea(t, t, Math.round(t.dano * m0.surgirImpacto[0]), m0.surgirImpacto[1], { visual: 'impacto', cor: t.atk.v.cor, empurrar: 14 }); });
@@ -709,6 +711,14 @@ const Batalha = (() => {
         dano -= 110;
         if (dano <= 0) { numero(e, 0, 'escudo'); return 0; }
       }
+      // Sonic Relâmpago renascido: cada Esmeralda girando segura um golpe inteiro
+      if (e.superRen > 0 && e.esmeraldas > 0 && !opc.atravessa && opc.tipo !== 'queimadura' && dano >= 20) {
+        e.esmeraldas--; e.el.style.setProperty('--esm', e.esmeraldas); e.el.dataset.esm = e.esmeraldas;
+        if (e.esmeraldas <= 0) e.el.classList.remove('com-esmeraldas');
+        particulas(e.x, e.y - 6, ['#4ADE80', '#60A5FA', '#F472B6', '#FACC15', '#F87171', '#E5E7EB', '#22D3EE'][e.esmeraldas % 7], 6, 18);
+        dano -= 160;
+        if (dano <= 0) { numero(e, 0, 'escudo'); return 0; }
+      }
       // Sonic Excalibur: apara um golpe de perto e contra-ataca (a cada alguns segundos)
       if (ms.aparar && fonte && !fonte.torre && fonte.vida > 0 && dist(e, fonte) < 60 && !(e.apararAte > s.t) && e.atord <= 0) {
         e.apararAte = s.t + ms.aparar;
@@ -803,6 +813,8 @@ const Batalha = (() => {
       if (e.vida <= 0) destruirTorre(e, deTime);
     } else if (e.vida <= 0 && !e.torre && e.atk && e.atk.m && e.atk.m.renascer && (e.renasceu || 0) < e.atk.m.renascer && !e.temporario && !s.acabou) {
       renascerAdaptado(e);
+    } else if (e.vida <= 0 && !e.torre && e.atk && e.atk.m && e.atk.m.superRenasce && !e.superFeito && !e.temporario && !s.acabou) {
+      renascerSuper(e);
     } else if (e.vida <= 0 && e.fenix > 0) {
       e.fenix = 0;
       e.vida = Math.round(e.max * 0.5);
@@ -986,6 +998,8 @@ const Batalha = (() => {
     if (h.tipo === 'trunfoMurasame') trunfoMurasame(t, h);
     if (h.tipo === 'chaosControl') chaosControl(t, h);
     if (h.tipo === 'superBoost') superBoost(t, h);
+    if (h.tipo === 'loopRelampago') loopRelampago(t, h);
+    if (h.tipo === 'chaosBlast') chaosBlast(t, h);
     if (h.tipo === 'explosaoSombria') explosaoSombria(t, h);
     if (h.tipo === 'soulSurge') soulSurge(t, h);
     if (h.tipo === 'hiperRajada') hiperRajada(t, h);
@@ -1317,8 +1331,8 @@ const Batalha = (() => {
   }
 
   // corte de cena por cima da arena (aparece pra todo mundo da partida)
-  const CUTINS = ['goku_furia', 'jojo_jotaro', 'jojo_dio', 'jojo_diavolo', 'jojo_pucci', 'jojo_gyro', 'jojo_johnny', 'sonic_shadow', 'sonic_super', 'sonic_dark', 'sonic_excalibur', 'sonic_hyper', 'yugi_reino', 'ultra_sae', 'ultra_rin', 'ultra_isagi', 'ultra_anri', 'inv_mark_eve', 'inv_mark', 'inv_eve', 'inv_conquest', 'inv_omni', 'inv_anissa', 'db_goku_vegeta', 'db_gogeta_vegetto', 'db_vegetto_gogeta', 'db_ultra_ego', 'db_kaioken', 'db_goku_deus', 'db_black', 'db_evolution', 'cy_david', 'cy_adam', 'cy_adam_evo', 'cy_rubi', 'cy_silverhand', 'nz_ainz', 'nz_albedo', 'nz_shalltear', 'nz_demiurge', 'nz_sebas', 'nz_pandora', 'op_luffy', 'isagi_meta', 'kaiser_isagi'];
-  const TEXTO_CUTIN_2 = { isagi_meta: 'Metavisão!', kaiser_isagi: 'Pacto do Diabo!', sonic_shadow: 'Chaos Control!', sonic_super: 'Super Boost!', sonic_dark: 'Explosão Sombria!', sonic_excalibur: 'Soul Surge!', sonic_hyper: 'Hiper Velocidade!', yugi_reino: 'Reino das Sombras!', ultra_sae: 'Visão do Gênio!', ultra_rin: 'Flow: Destruição!', ultra_isagi: 'Direct Shot!', ultra_anri: 'Doces ou Travessuras?', inv_mark_eve: 'Juntos somos invencíveis!', inv_mark: 'Investida Invencível!', inv_eve: 'Barreira Atômica!', inv_conquest: 'Esmagar!', inv_omni: 'Fúria do Regente!', inv_anissa: 'Rajada Viltrumita!', db_goku_vegeta: 'Rivais Eternos!', db_gogeta_vegetto: 'Kamehameha Final + Big Bang!', db_vegetto_gogeta: 'Soul Punisher!', db_ultra_ego: 'Hakai!', db_kaioken: 'Kaioken x20!', db_goku_deus: 'Punho do Deus Saiyajin!', db_black: 'Ceifa Divina!', db_evolution: 'Final Flash!', cy_david: 'Sandevistan!', cy_adam: 'Rajada de Mísseis!', cy_adam_evo: 'Mísseis + Sandevistan!', cy_rubi: 'Ciberpsicose!', cy_silverhand: 'Johnny Silverhand!', nz_ainz: 'O Objetivo de Toda Vida é a Morte!', nz_albedo: 'Hermes Trismegistus!', nz_shalltear: 'Lança Purificadora!', nz_demiurge: 'Chamas do Inferno!', nz_sebas: 'Forma de Dragão!', nz_pandora: 'Doppelgänger!', op_luffy: 'Gomu Gomu no... Bajrang Gun!' };
+  const CUTINS = ['goku_furia', 'jojo_jotaro', 'jojo_dio', 'jojo_diavolo', 'jojo_pucci', 'jojo_gyro', 'jojo_johnny', 'sonic_shadow', 'sonic_super', 'sonic_dark', 'sonic_excalibur', 'sonic_hyper', 'yugi_reino', 'ultra_sae', 'ultra_rin', 'ultra_isagi', 'ultra_anri', 'inv_mark_eve', 'inv_mark', 'inv_eve', 'inv_conquest', 'inv_omni', 'inv_anissa', 'db_goku_vegeta', 'db_gogeta_vegetto', 'db_vegetto_gogeta', 'db_ultra_ego', 'db_kaioken', 'db_goku_deus', 'db_black', 'db_evolution', 'cy_david', 'cy_adam', 'cy_adam_evo', 'cy_rubi', 'cy_silverhand', 'nz_ainz', 'nz_albedo', 'nz_shalltear', 'nz_demiurge', 'nz_sebas', 'nz_pandora', 'op_luffy', 'isagi_meta', 'kaiser_isagi', 'sonic_relampago', 'sonic_renasce', 'super_sonic_solar'];
+  const TEXTO_CUTIN_2 = { sonic_relampago: 'Loop Relâmpago!', sonic_renasce: 'Super Sonic!', super_sonic_solar: 'Chaos Blast!', isagi_meta: 'Metavisão!', kaiser_isagi: 'Pacto do Diabo!', sonic_shadow: 'Chaos Control!', sonic_super: 'Super Boost!', sonic_dark: 'Explosão Sombria!', sonic_excalibur: 'Soul Surge!', sonic_hyper: 'Hiper Velocidade!', yugi_reino: 'Reino das Sombras!', ultra_sae: 'Visão do Gênio!', ultra_rin: 'Flow: Destruição!', ultra_isagi: 'Direct Shot!', ultra_anri: 'Doces ou Travessuras?', inv_mark_eve: 'Juntos somos invencíveis!', inv_mark: 'Investida Invencível!', inv_eve: 'Barreira Atômica!', inv_conquest: 'Esmagar!', inv_omni: 'Fúria do Regente!', inv_anissa: 'Rajada Viltrumita!', db_goku_vegeta: 'Rivais Eternos!', db_gogeta_vegetto: 'Kamehameha Final + Big Bang!', db_vegetto_gogeta: 'Soul Punisher!', db_ultra_ego: 'Hakai!', db_kaioken: 'Kaioken x20!', db_goku_deus: 'Punho do Deus Saiyajin!', db_black: 'Ceifa Divina!', db_evolution: 'Final Flash!', cy_david: 'Sandevistan!', cy_adam: 'Rajada de Mísseis!', cy_adam_evo: 'Mísseis + Sandevistan!', cy_rubi: 'Ciberpsicose!', cy_silverhand: 'Johnny Silverhand!', nz_ainz: 'O Objetivo de Toda Vida é a Morte!', nz_albedo: 'Hermes Trismegistus!', nz_shalltear: 'Lança Purificadora!', nz_demiurge: 'Chamas do Inferno!', nz_sebas: 'Forma de Dragão!', nz_pandora: 'Doppelgänger!', op_luffy: 'Gomu Gomu no... Bajrang Gun!' };
   const TEXTO_CUTIN = { ...TEXTO_CUTIN_2, goku_furia: "You're going to pay for this!", jojo_jotaro: 'Star Platinum: The World!', jojo_dio: 'ZA WARUDO! Toki yo tomare!', jojo_diavolo: 'King Crimson!', jojo_pucci: 'Made in Heaven!', jojo_gyro: 'Ball Breaker!', jojo_johnny: 'Tusk Act 4!' };
   const cutinRede = (qual) => { cutin(qual); if (s.rede || s.aoVivo) s.eventos.push(['c', CUTINS.indexOf(qual)]); };
   function cutin(qual) {
@@ -2232,6 +2246,14 @@ const Batalha = (() => {
         for (const e of alvos) { ferir(e, Math.round(t.dano * mult * multClasse(t, e)), t.time, t); if (!imuneA(e)) { e.atord = Math.max(e.atord, 0.5); e.el.classList.add('atordoada'); } }
       } else t.flashTimer = 0.5;
     }
+    // Sonic Relâmpago: a velocidade vai embora se ele para de bater; o Super acaba com o tempo
+    if (m.momento && t.mom > 0 && (t.momT -= dt) <= 0) setMomento(t, 0);
+    if (t.superRen > 0 && (t.superRen -= dt) <= 0) fimSuper(t);
+    // Super Sonic Radiante: aura dourada queima quem está colado
+    if (m.auraSolar && t.surgir <= 0 && (t.solarT = (t.solarT || 0) + dt) >= 0.5) {
+      t.solarT = 0;
+      for (const e of inimigosPerto(t, m.auraSolar[0])) ferir(e, Math.max(1, Math.round(t.dano * m.auraSolar[1] * multClasse(t, e) * (e.torre ? 0.3 : 1))), t.time, t, { tipo: 'queimadura', semContra: true, semEsquiva: true });
+    }
     // Yugi: compra uma carta de tempos em tempos
     if (m.duelista && (t.cartaTimer -= dt) <= 0) { t.cartaTimer = m.duelista; comprarCarta(t); }
   }
@@ -2248,6 +2270,74 @@ const Batalha = (() => {
       empurrar(alvo, t, 14);
       t.cd = Math.max(t.cd, 0.3);
     });
+  }
+  // ---------- Sonic Relâmpago ----------
+  const fatorMomento = (t, n) => 1 - t.atk.m.momento[1] * n;
+  function setMomento(t, n) {
+    const ant = t.mom || 0;
+    if (n === ant) return;
+    t.cadencia *= fatorMomento(t, n) / fatorMomento(t, ant);
+    t.mom = n;
+    t.el.dataset.mom = n;
+    t.el.classList.toggle('em-momento', n >= 4);
+  }
+  function ganharMomento(t) {
+    t.momT = 2.5;
+    if ((t.mom || 0) < t.atk.m.momento[0]) setMomento(t, (t.mom || 0) + 1);
+  }
+  function renascerSuper(e) {
+    const dur = e.atk.m.superRenasce;
+    e.superFeito = true; e.superRen = dur;
+    setMomento(e, 0);
+    e.vida = Math.round(e.max * 0.7);
+    e.dano = Math.round(e.dano * 1.5); e.danoBase = Math.round(e.danoBase * 1.5); e.vel *= 1.25; e.velBase *= 1.25;
+    e.voo = true; e.esmeraldas = 7; e.el.dataset.esm = 7; e.el.style.setProperty('--esm', 7);
+    e.atord = 0; e.congelado = 0; e.lento = 0; e.queima = 0; e.fraco = 0; e.intocavel = Math.max(e.intocavel || 0, 1.5);
+    atualizarHp(e);
+    e.el.classList.add('super-ativo', 'voando', 'com-esmeraldas', 'renascendo');
+    setTimeout(() => e.el && e.el.classList.remove('renascendo'), 1100);
+    cutinRede('sonic_renasce');
+    fxEl('fx-raio-luz', e.x, e.y, 1500); fxJ(13, e.x, e.y);
+    efeito('renascer', e.x, e.y, 900);
+    particulas(e.x, e.y, '#FFD93B', 18, 40);
+    falar(e, 'Super Sonic!', 'fala-sonic');
+    tremer(true);
+    if (e.time === 'azul') UI.toast('🌟 Sonic renasceu como Super Sonic!');
+  }
+  function fimSuper(t) {
+    t.superRen = 0;
+    t.dano = Math.round(t.dano / 1.5); t.danoBase = Math.round(t.danoBase / 1.5); t.vel /= 1.25; t.velBase /= 1.25;
+    t.voo = false; t.esmeraldas = 0;
+    t.el.classList.remove('super-ativo', 'voando', 'com-esmeraldas');
+    t.vida = Math.max(t.vida, Math.round(t.max * 0.15)); atualizarHp(t);
+    particulas(t.x, t.y, '#FFD93B', 10, 28);
+    falar(t, 'Ufa...', 'fala-sonic');
+  }
+  function loopRelampago(t, h) {
+    cutinRede('sonic_relampago');
+    t.intocavel = Math.max(t.intocavel || 0, 1.4);
+    fxEl('fx-loop', t.x, t.y, 1400); fxJ(17, t.x, t.y);
+    falar(t, 'Loop Relâmpago!', 'fala-sonic');
+    for (const e of inimigosPerto(t, 125)) { if (e.torre) continue; empurrar(e, t, -Math.max(0, Math.min(40, dist(e, t) - 14))); if (!imuneA(e)) { e.atord = Math.max(e.atord, 1.3); e.el.classList.add('atordoada'); } }
+    for (let i = 1; i <= 3; i++) agendar(i * 0.35, () => {
+      if (t.vida <= 0) return;
+      for (const e of inimigosPerto(t, 90)) ferir(e, Math.round(t.dano * 0.7 * multClasse(t, e) * (e.torre ? 0.4 : 1)), t.time, t, { semContra: true });
+      particulas(t.x, t.y, '#7DD3FC', 8, 30);
+    });
+    agendar(1.35, () => { if (t.vida > 0) explosaoArea(t, t, Math.round(t.dano * 1.1), 80, { visual: 'impacto', cor: '#38BDF8', empurrar: 26 }); });
+  }
+  function chaosBlast(t, h) {
+    cutinRede('super_sonic_solar');
+    t.intocavel = Math.max(t.intocavel || 0, 1.6);
+    t.el.classList.add('carregando-solar');
+    fxEl('fx-raio-luz', t.x, t.y, 1500); fxJ(15, t.x, t.y);
+    falar(t, 'Chaos Blast!', 'fala-sonic');
+    [[0.9, 80, 0.9], [1.25, 120, 0.9], [1.6, 165, 1.0]].forEach(([seg, raio, mult], i) => agendar(seg, () => {
+      if (t.vida <= 0) return;
+      explosaoArea(t, t, Math.round(t.dano * mult), raio, { visual: 'impacto', cor: '#FFD93B', empurrar: 18 });
+      for (const e of inimigosPerto(t, raio)) if (!e.torre && !imuneA(e)) { e.lento = 3; e.lentoPct = 0.35; e.el.classList.add('lenta'); }
+      if (i === 2) t.el.classList.remove('carregando-solar');
+    }));
   }
   function destransformar(t) {
     t.aneis = 0; t.el.classList.remove('super-forma');
@@ -2821,6 +2911,8 @@ const Batalha = (() => {
   function aplicarGolpe(a, alvo, dano) {
     const m = (a && a.atk && a.atk.m) || {};
     if (!a || !alvo) return;
+    if (m.momento) ganharMomento(a);
+    if (m.supernova && a.golpes > 0 && a.golpes % m.supernova[0] === 0) explosaoArea(a, alvo, Math.round(a.dano * m.supernova[2]), m.supernova[1], { visual: 'impacto', cor: '#FFD93B', empurrar: 10 });
     const tropa = !alvo.torre && alvo.vida > 0;
     const imune = tropa && alvo.atk && alvo.atk.m && alvo.atk.m.imune;
     if (tropa && !imune) {
@@ -3353,6 +3445,8 @@ const Batalha = (() => {
         || (h.tipo === 'golDireto' && t.alvo && dist(t, t.alvo) < 240 && (t.alvo.torre || s.ent.filter((e) => !e.torre && e.time !== t.time && e.vida > 0 && dist(e, t) < 240).length >= 2))
         || (h.tipo === 'docesTravessuras' && (s.ent.filter((e) => !e.torre && e.time !== t.time && e.vida > 0 && dist(e, t) < 120).length >= 2 || s.ent.some((e) => !e.torre && e.time === t.time && e.vida > 0 && e.vida < e.max * 0.5 && dist(e, t) < 140)))
         || (h.tipo === 'chaosControl' && s.ent.filter((e) => !e.torre && e.time !== t.time && e.vida > 0 && dist(e, t) < 160).length >= 2)
+        || (h.tipo === 'loopRelampago' && s.ent.filter((e) => !e.torre && e.time !== t.time && e.vida > 0 && dist(e, t) < 125).length >= 2)
+        || (h.tipo === 'chaosBlast' && s.ent.filter((e) => !e.torre && e.time !== t.time && e.vida > 0 && dist(e, t) < 150).length >= 2)
         || (h.tipo === 'superBoost' && t.alvo && dist(t, t.alvo) < 200 && (t.aneis || 0) < 12)
         || (h.tipo === 'explosaoSombria' && s.ent.filter((e) => !e.torre && e.time !== t.time && e.vida > 0 && dist(e, t) < 130).length >= 2)
         || (h.tipo === 'soulSurge' && t.alvo && dist(t, t.alvo) < 230 && (t.alvo.torre || s.ent.filter((e) => !e.torre && e.time !== t.time && e.vida > 0 && dist(e, t) < 230).length >= 2))
@@ -3985,7 +4079,7 @@ const Batalha = (() => {
       if ((mm && mm.nz) || t.hermes > 0 || t.dragao > 0) passivasNazarick(t, dt, mm);
       if (mm && mm.separar && !t.separou && t.vida > 0 && t.vida < t.max * mm.separar) { separarDupla(t); continue; }
       if (mm && mm.chaEncantado && (t.chaT = (t.chaT || 0) + dt) >= mm.chaEncantado[0]) { t.chaT = 0; chaEncantado(t, mm.chaEncantado); }
-      if (mm && (mm.superForma || mm.spinDash || mm.inibidores || mm.hyperFlash || mm.duelista || mm.raivaSombria)) passivasSonic(t, dt);
+      if (mm && (mm.superForma || mm.spinDash || mm.inibidores || mm.hyperFlash || mm.duelista || mm.raivaSombria || mm.momento || mm.superRenasce || mm.auraSolar)) passivasSonic(t, dt);
       if (t.temporario > 0 && (t.temporario -= dt) <= 0) { ferir(t, t.vida + 1, t.time === 'azul' ? 'vermelho' : 'azul', null, { atravessa: true, semEsquiva: true }); continue; }
       if (mm && mm.hana) robinDefesa(t, dt);
       if (t.vida <= 0) continue;

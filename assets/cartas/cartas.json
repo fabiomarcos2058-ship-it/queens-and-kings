@@ -4437,6 +4437,90 @@
     "tipo": "imperador",
     "descricao": "Nasce em Metavisão. Chutes críticos e fica mais forte a cada inimigo que cai perto."
    }
+  },
+  {
+   "id": "sonic_relampago",
+   "nome": "Sonic Relâmpago",
+   "raridade": "ultra",
+   "custo": 5,
+   "tipo": "Velocista · Renasce Super",
+   "descricao": "O mais veloz de todos: quanto mais bate, mais rápido fica. Quando cai, uma luz desce do céu e ele RENASCE como Super Sonic, com 7 Esmeraldas girando em volta dele. Exclusivo do Passe Ultra.",
+   "trofeus": 0,
+   "exclusivo": [],
+   "passeUltra": true,
+   "arena": 1,
+   "nivelInicial": 6,
+   "rosto": [
+    390,
+    560,
+    175
+   ],
+   "arte": [
+    0,
+    170,
+    736
+   ],
+   "vida": 900,
+   "dano": 180,
+   "velocidade": 100,
+   "alcance": 18,
+   "cadencia": 0.7,
+   "alvo": "tudo",
+   "danoTorre": 0.55,
+   "passiva": {
+    "nome": "Super Renascimento",
+    "tipo": "superRenasce",
+    "descricao": "Velocidade Máxima: cada golpe acelera o ataque (+5%, até 8x) e some se ele parar. Na primeira vez que cair, renasce como Super Sonic por 12s: 70% da vida, +50% de dano, voa, e 7 Esmeraldas giram em volta dele (cada uma segura um golpe). Depois volta ao normal, mas não renasce de novo."
+   },
+   "habilidade": {
+    "nome": "Loop Relâmpago",
+    "tipo": "loopRelampago",
+    "custo": 3,
+    "recarga": 16,
+    "descricao": "Corre em círculo e cria um tornado de raios que puxa os inimigos em volta, atordoa e machuca 3 vezes, terminando numa explosão. Ele fica intocável durante o loop."
+   }
+  },
+  {
+   "id": "super_sonic_solar",
+   "nome": "Super Sonic Radiante",
+   "raridade": "ultra",
+   "custo": 6,
+   "tipo": "Forma Super · Sol Dourado",
+   "descricao": "Um sol com pernas. Voa, queima tudo que chega perto com a aura dourada e a cada 5 golpes faz uma Supernova. A habilidade chama um raio de luz do céu e explode em 3 ondas. Exclusivo do Passe Ultra.",
+   "trofeus": 0,
+   "exclusivo": [],
+   "passeUltra": true,
+   "arena": 1,
+   "nivelInicial": 6,
+   "rosto": [
+    290,
+    230,
+    170
+   ],
+   "arte": [
+    0,
+    0,
+    642
+   ],
+   "vida": 1100,
+   "dano": 220,
+   "velocidade": 80,
+   "alcance": 20,
+   "cadencia": 0.9,
+   "alvo": "tudo",
+   "danoTorre": 0.5,
+   "passiva": {
+    "nome": "Aura Dourada",
+    "tipo": "auraSolar",
+    "descricao": "Voa. A aura queima os inimigos coladinhos nele o tempo todo, e a cada 5 golpes o alvo explode numa Supernova em área."
+   },
+   "habilidade": {
+    "nome": "Chaos Blast",
+    "tipo": "chaosBlast",
+    "custo": 4,
+    "recarga": 22,
+    "descricao": "Fica intocável, chama um raio de luz do céu e solta 3 ondas de energia que crescem, empurram e deixam os inimigos lentos."
+   }
   }
  ]
 }
