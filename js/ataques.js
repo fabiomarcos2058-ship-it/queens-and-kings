@@ -63,7 +63,6 @@ const Ataques = (() => {
     dark_sonic: { v: { g: 'giro', cor: '#A855F7' }, m: { raivaSombria: true, berserk: 0.35 }, d: 'Fica furioso quando um aliado cai perto.' },
     sonic_excalibur: { v: { g: 'corte', s: 'espada_trunks', cor: '#BFE8FF' }, m: { escudo: 0.2, aparar: 7 }, d: 'Corte em área, escudo e aparar com contra-ataque.' },
     sonic_relampago: { v: { g: 'giro', cor: '#38BDF8' }, m: { momento: [8, 0.05], superRenasce: 12 }, d: 'Acelera a cada golpe. Ao cair, renasce como Super Sonic com 7 Esmeraldas girando.' },
-    super_sonic_solar: { v: { g: 'impacto', cor: '#FFD93B' }, m: { auraSolar: [58, 0.1], supernova: [5, 70, 1.4], voo: true }, d: 'Aura dourada que queima e Supernova a cada 5 golpes.' },
     hyper_sonic: { v: { g: 'impacto', cor: '#F5F5FF' }, m: { esmeraldas: 7, hyperFlash: [5, 90, 0.45], voo: true }, d: '7 Esmeraldas do Caos seguram golpes. Hiper Flash atordoa em volta.' },
     yugi_moto: { v: { p: 'coringa', vel: 300, tam: 18, giro: 540, rastro: '#FFD25E' }, m: { duelista: 8 }, d: 'Joga cartas de longe e compra uma carta especial a cada 8s.' },
     anissa: { v: { g: 'soco', cor: '#E8EEF8' }, m: { combo: 3, atordoar: [0.25, 0.4], veterano: 0.1, voo: true }, d: 'Socos Viltrumitas rápidos que deixam tonto.' },

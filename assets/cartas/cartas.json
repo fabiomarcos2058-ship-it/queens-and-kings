@@ -4443,7 +4443,7 @@
    "nome": "Sonic Relâmpago",
    "raridade": "ultra",
    "custo": 5,
-   "tipo": "Velocista · Renasce Super · Evolução",
+   "tipo": "Sonic · Renasce Super · Evolução",
    "descricao": "O mais veloz de todos: quanto mais bate, mais rápido fica. Quando cai, uma luz desce do céu e ele RENASCE como Super Sonic, com 7 Esmeraldas girando em volta dele. Exclusivo do Pro Pass.",
    "trofeus": 0,
    "exclusivo": [],
@@ -4482,52 +4482,6 @@
     "ciclos": 1,
     "nome": "Sonic Relâmpago (Evolução)",
     "descricao": "Depois de jogar o Sonic uma vez, o próximo vem EVOLUÍDO: mais forte, entra com um estrondo sônico que atordoa quem está em volta, e o Super Sonic dura 18s e renasce com 90% da vida."
-   }
-  },
-  {
-   "id": "super_sonic_solar",
-   "nome": "Super Sonic Radiante",
-   "raridade": "ultra",
-   "custo": 6,
-   "tipo": "Forma Super · Sol Dourado · Evolução",
-   "descricao": "Um sol com pernas. Voa, queima tudo que chega perto com a aura dourada e a cada 5 golpes faz uma Supernova. A habilidade chama um raio de luz do céu e explode em ondas. Exclusivo do Pro Pass.",
-   "trofeus": 0,
-   "exclusivo": [],
-   "arena": 1,
-   "nivelInicial": 6,
-   "rosto": [
-    290,
-    230,
-    170
-   ],
-   "arte": [
-    0,
-    0,
-    642
-   ],
-   "vida": 1100,
-   "dano": 220,
-   "velocidade": 80,
-   "alcance": 20,
-   "cadencia": 0.9,
-   "alvo": "tudo",
-   "danoTorre": 0.5,
-   "passiva": {
-    "nome": "Aura Dourada",
-    "tipo": "auraSolar",
-    "descricao": "Voa. A aura queima os inimigos coladinhos nele o tempo todo, e a cada 5 golpes o alvo explode numa Supernova em área."
-   },
-   "habilidade": {
-    "nome": "Chaos Blast",
-    "tipo": "chaosBlast",
-    "custo": 4,
-    "recarga": 22,
-    "descricao": "Fica intocável, chama um raio de luz do céu e solta 3 ondas de energia que crescem, empurram e deixam os inimigos lentos."
-   },
-   "evolucao": {
-    "ciclos": 1,
-    "nome": "Super Sonic Radiante (Evolução)",
-    "descricao": "Depois de jogar o Super Sonic uma vez, o próximo vem EVOLUÍDO: mais forte, chega numa Supernova que empurra todo mundo, a aura é 50% maior e o Chaos Blast ganha uma 4ª onda."
    }
   }
  ]
