@@ -23,10 +23,10 @@ const Ataques = (() => {
   const NA_TORRE = { tanque: 1.1, lutador: 0.85, assassino: 0.8, atirador: 0.7, mago: 0.65, enxame: 1 };
 
   const CLASSE_DA_CARTA = {
-    tanque: ['itsuki', 'shizuku', 'gogeta_ssj4', 'goku_ssj3', 'goku_ssj4', 'goku_blue_lb', 'gogeta_ultra', 'sonic_excalibur', 'conquest', 'omni_man', 'vegeta_ultra_ego', 'gogeta_blue_solo', 'adam_smasher', 'adam_smasher_evo', 'albedo'],
-    assassino: ['bra', 'teto', 'pan_dbh', 'akame', 'mbappe', 'kashimo', 'goku_pressagio', 'diavolo', 'mita_malvada', 'akame_murasame', 'sonic', 'sonic_relampago', 'dark_sonic', 'kurona', 'goku_black_rose', 'goku_blue_kaioken_remake', 'vegetto_blue_solo', 'agente_rubi', 'david_martinez', 'lucy_kushinada', 'shalltear'],
-    atirador: ['mai', 'miku_nakano', 'pan_gt', 'riruka', 'rukia_remake', 'nino_nakano', 'gyro', 'johnny', 'roman_cyber', 'johnny_silverhand', 'pandoras_actor'],
-    mago: ['gohan_mirai', 'rukia', 'nami_last', 'hatsune_miku', 'bambietta', 'bulma', 'gojo', 'robin', 'pucci', 'mita_gentil', 'yugi_moto', 'anri_halloween', 'eve_atomica', 'ainz_ooal_gown', 'demiurge'],
+    tanque: ['ben_diamante', 'ben_enormossauro', 'ben_waybig', 'itsuki', 'shizuku', 'gogeta_ssj4', 'goku_ssj3', 'goku_ssj4', 'goku_blue_lb', 'gogeta_ultra', 'sonic_excalibur', 'conquest', 'omni_man', 'vegeta_ultra_ego', 'gogeta_blue_solo', 'adam_smasher', 'adam_smasher_evo', 'albedo'],
+    assassino: ['ben_xlr8', 'bra', 'teto', 'pan_dbh', 'akame', 'mbappe', 'kashimo', 'goku_pressagio', 'diavolo', 'mita_malvada', 'akame_murasame', 'sonic', 'sonic_relampago', 'dark_sonic', 'kurona', 'goku_black_rose', 'goku_blue_kaioken_remake', 'vegetto_blue_solo', 'agente_rubi', 'david_martinez', 'lucy_kushinada', 'shalltear'],
+    atirador: ['ben_chama', 'ben_ecoeco', 'mai', 'miku_nakano', 'pan_gt', 'riruka', 'rukia_remake', 'nino_nakano', 'gyro', 'johnny', 'roman_cyber', 'johnny_silverhand', 'pandoras_actor'],
+    mago: ['ben_contratempo', 'ben_cromatico', 'ben_gravatack', 'gohan_mirai', 'rukia', 'nami_last', 'hatsune_miku', 'bambietta', 'bulma', 'gojo', 'robin', 'pucci', 'mita_gentil', 'yugi_moto', 'anri_halloween', 'eve_atomica', 'ainz_ooal_gown', 'demiurge'],
     enxame: ['mini'],
   };
   const classeDe = (c) => {
@@ -63,6 +63,16 @@ const Ataques = (() => {
     dark_sonic: { v: { g: 'giro', cor: '#A855F7' }, m: { raivaSombria: true, berserk: 0.35 }, d: 'Fica furioso quando um aliado cai perto.' },
     sonic_excalibur: { v: { g: 'corte', s: 'espada_trunks', cor: '#BFE8FF' }, m: { escudo: 0.2, aparar: 7 }, d: 'Corte em área, escudo e aparar com contra-ataque.' },
     sonic_relampago: { v: { g: 'giro', cor: '#38BDF8' }, m: { momento: [8, 0.05], superRenasce: 12 }, d: 'Acelera a cada golpe. Ao cair, renasce como Super Sonic com 7 Esmeraldas girando.' },
+    ben10: { v: { g: 'soco', cor: '#6BFF4A' }, m: { omni: true, combo: 3 }, d: 'Omnitrix: vira um de 9 aliens com poder próprio.' },
+    ben_chama: { v: { p: 'fogo', vel: 260, tam: 20, rastro: '#FF6A1A' }, m: { queimar: [0.05, 3, '#FF4A1A', 'fogo'] }, d: 'Bolas de fogo que queimam.' },
+    ben_diamante: { v: { g: 'corte', cor: '#7FFFEA', pesado: true }, m: { escudo: 0.3, veterano: 0.2, perfura: true }, d: 'Cristal: escudo e menos dano.' },
+    ben_xlr8: { v: { g: 'corte', cor: '#38BDF8' }, m: { combo: 4, critico: [0.2, 1.8] }, d: 'Combos e críticos em velocidade absurda.' },
+    ben_enormossauro: { v: { g: 'soco', cor: '#D9A25F', pesado: true }, m: { empurrar: 20, atordoar: [0.3, 0.4], berserk: 0.3 }, d: 'Socos que arremessam e atordoam.' },
+    ben_contratempo: { v: { p: 'ki_laranja', vel: 240, tam: 16, rastro: '#FFD93B' }, m: { lentidao: [0.3, 2], moveNoTempo: true }, d: 'Energia temporal que deixa lento.' },
+    ben_ecoeco: { v: { p: 'onda', vel: 250, tam: 24, giro: 'mira' }, m: { perfura: true, atordoar: [0.2, 0.4] }, d: 'Ondas sonoras que atravessam e atordoam.' },
+    ben_cromatico: { v: { p: 'onda', vel: 260, tam: 22, giro: 'mira', rastro: '#FF5CF0' }, m: {}, d: 'Absorve dano e devolve numa descarga.' },
+    ben_gravatack: { v: { p: 'onda', vel: 200, tam: 30, giro: 'mira', rastro: '#9D8CFF' }, m: { puxar: 12 }, d: 'Puxa os inimigos pela gravidade.' },
+    ben_waybig: { v: { g: 'impacto', cor: '#FF4A4A', pesado: true }, m: { empurrar: 30, imune: true, veterano: 0.15 }, d: 'Gigante cósmico: não se atordoa.' },
     hyper_sonic: { v: { g: 'impacto', cor: '#F5F5FF' }, m: { esmeraldas: 7, hyperFlash: [5, 90, 0.45], voo: true }, d: '7 Esmeraldas do Caos seguram golpes. Hiper Flash atordoa em volta.' },
     yugi_moto: { v: { p: 'coringa', vel: 300, tam: 18, giro: 540, rastro: '#FFD25E' }, m: { duelista: 8 }, d: 'Joga cartas de longe e compra uma carta especial a cada 8s.' },
     anissa: { v: { g: 'soco', cor: '#E8EEF8' }, m: { combo: 3, atordoar: [0.25, 0.4], veterano: 0.1, voo: true }, d: 'Socos Viltrumitas rápidos que deixam tonto.' },

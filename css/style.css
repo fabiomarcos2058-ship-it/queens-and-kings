@@ -4012,3 +4012,63 @@ body.espectando .arena-grande-janela.meta-azul::after { content: ''; top: 0; lef
 @keyframes loopFx { 0% { transform: translate(-50%, -50%) rotate(0) scale(0.3); opacity: 0; } 15% { opacity: 1; } 100% { transform: translate(-50%, -50%) rotate(1080deg) scale(1.1); opacity: 0; } }
 .cutin.sonic_relampago .cutin-faixa { border-color: #38BDF8; box-shadow: 0 0 22px #38BDF8; }
 .cutin.sonic_renasce .cutin-faixa, .cutin.super_sonic_solar .cutin-faixa { border-color: #FFD93B; box-shadow: 0 0 26px #FFD93B; }
+
+/* ===== Ben 10 · Omnitrix ===== */
+.fx-omni { position: absolute; pointer-events: none; z-index: 1770; width: 22%; aspect-ratio: 1; transform: translate(-50%, -50%); border-radius: 50%; color: #6BFF4A;
+  background: radial-gradient(circle, #fff 0 14%, currentColor 30%, transparent 68%); box-shadow: 0 0 22px currentColor, inset 0 0 18px currentColor; animation: omniFlash 0.9s ease-out forwards; }
+.fx-omni::before, .fx-omni::after { content: ''; position: absolute; inset: 18%; border: 3px solid currentColor; border-radius: 50%; clip-path: polygon(0 0, 100% 0, 50% 50%, 100% 100%, 0 100%, 50% 50%); animation: omniGira 0.9s linear; }
+.fx-omni::after { inset: 34%; animation-direction: reverse; }
+@keyframes omniFlash { 0% { transform: translate(-50%, -50%) scale(0.2); opacity: 1; } 55% { transform: translate(-50%, -50%) scale(1.15); opacity: 1; } 100% { transform: translate(-50%, -50%) scale(1.5); opacity: 0; } }
+@keyframes omniGira { to { transform: rotate(360deg); } }
+.dano-num.fala-ben { font: 14px 'Lilita One', 'Fredoka', sans-serif; color: #fff; text-shadow: 2px 2px 0 #16A34A, -1px -1px 0 #000, 1px 1px 0 #000, 0 0 10px #6BFF4A; }
+.tropa.omni-alien .tropa-medalhao { box-shadow: 0 0 0 2px #6BFF4A, 0 0 10px #6BFF4A; }
+.tropa.omni-ben_chama .tropa-medalhao { box-shadow: 0 0 0 2px #FF6A1A, 0 0 14px #FF4A1A; }
+.tropa.omni-ben_diamante .tropa-medalhao { box-shadow: 0 0 0 2px #7FFFEA, 0 0 12px #7FFFEA; }
+.tropa.omni-ben_xlr8 .tropa-medalhao { box-shadow: 0 0 0 2px #38BDF8, 0 0 12px #38BDF8; }
+.tropa.omni-ben_enormossauro .tropa-medalhao { box-shadow: 0 0 0 2px #D9A25F, 0 0 10px #D9A25F; }
+.tropa.omni-ben_contratempo .tropa-medalhao { box-shadow: 0 0 0 2px #FFD93B, 0 0 14px #FFD93B; }
+.tropa.omni-ben_ecoeco .tropa-medalhao { box-shadow: 0 0 0 2px #E8F0FF, 0 0 12px #fff; }
+.tropa.omni-ben_cromatico .tropa-medalhao { box-shadow: 0 0 0 2px #FF5CF0, 0 0 10px #FF5CF0; }
+.tropa.omni-ben_gravatack .tropa-medalhao { box-shadow: 0 0 0 2px #9D8CFF, 0 0 12px #9D8CFF; }
+.tropa.omni-ben_waybig .tropa-medalhao { box-shadow: 0 0 0 2px #FF4A4A, 0 0 14px #fff; }
+.tropa.omni-gigante .tropa-corpo { transform: scale(var(--omni-esc, 1)); transform-origin: 50% 85%; transition: transform 0.4s; }
+.tropa.omni-crescido .tropa-medalhao { filter: saturate(1.4) brightness(1.15); }
+.tropa.omni-carga .tropa-medalhao { animation: omniPulsa 0.7s infinite alternate; }
+.tropa.omni-absorveu .tropa-medalhao { filter: brightness(1.8) hue-rotate(60deg); }
+@keyframes omniPulsa { from { box-shadow: 0 0 0 2px #FF5CF0, 0 0 6px #FF5CF0; } to { box-shadow: 0 0 0 3px #fff, 0 0 20px #FF5CF0; } }
+.tropa.omni-flutua .tropa-corpo { transform: translateY(-14px) rotate(8deg); transition: transform 0.4s; filter: drop-shadow(0 0 6px #9D8CFF); }
+.fx-omni-fogo, .fx-omni-cristal, .fx-omni-som, .fx-omni-grav { position: absolute; pointer-events: none; z-index: 1760; transform: translate(-50%, -50%); border-radius: 50%; aspect-ratio: 1; }
+.fx-omni-fogo { width: 34%; background: radial-gradient(circle, #fff6c0 0 12%, #FF9A1A 30%, #FF3A0A 55%, transparent 72%); animation: omniExp 0.9s ease-out forwards; }
+.fx-omni-cristal { width: 36%; background: conic-gradient(from 0deg, #7FFFEA, transparent 12%, #7FFFEA 25%, transparent 37%, #BFFFF5 50%, transparent 62%, #7FFFEA 75%, transparent 87%); animation: omniExp 0.9s ease-out forwards; }
+.fx-omni-som { width: 30%; border: 4px solid #E8F0FF; box-shadow: 0 0 12px #9FD0FF, inset 0 0 12px #9FD0FF; animation: omniExp 0.8s ease-out forwards; }
+.fx-omni-grav { width: 40%; background: radial-gradient(circle, #1B1140 0 30%, #7C5CFF 55%, transparent 72%); border: 3px dashed #C4B5FF; animation: omniGrav 1.9s ease-in-out forwards; }
+@keyframes omniExp { 0% { transform: translate(-50%, -50%) scale(0.2); opacity: 1; } 100% { transform: translate(-50%, -50%) scale(1.3); opacity: 0; } }
+@keyframes omniGrav { 0% { transform: translate(-50%, -50%) scale(0.3) rotate(0); opacity: 0; } 20% { opacity: 1; } 85% { transform: translate(-50%, -50%) scale(1) rotate(360deg); opacity: 1; } 100% { transform: translate(-50%, -50%) scale(0.2) rotate(540deg); opacity: 0; } }
+.cutin.ben_omnitrix .cutin-faixa, .cutin.ben_chama .cutin-faixa, .cutin.ben_diamante .cutin-faixa, .cutin.ben_xlr8 .cutin-faixa, .cutin.ben_enormossauro .cutin-faixa, .cutin.ben_contratempo .cutin-faixa, .cutin.ben_ecoeco .cutin-faixa, .cutin.ben_cromatico .cutin-faixa, .cutin.ben_gravatack .cutin-faixa, .cutin.ben_waybig .cutin-faixa { border-color: #6BFF4A; box-shadow: 0 0 24px #6BFF4A88; }
+.cutin.ben_omnitrix .cutin-legenda, .cutin.ben_chama .cutin-legenda, .cutin.ben_diamante .cutin-legenda, .cutin.ben_xlr8 .cutin-legenda, .cutin.ben_enormossauro .cutin-legenda, .cutin.ben_contratempo .cutin-legenda, .cutin.ben_ecoeco .cutin-legenda, .cutin.ben_cromatico .cutin-legenda, .cutin.ben_gravatack .cutin-legenda, .cutin.ben_waybig .cutin-legenda { color: #fff; text-shadow: 2px 2px 0 #16A34A, 0 0 10px #6BFF4A; }
+
+/* ===== Evento Omnitrix: Missão Galáctica ===== */
+.cartao-omni { display: flex; align-items: center; gap: 10px; width: 100%; margin: 8px 0; padding: 10px 12px; border-radius: 14px; border: 2px solid #6BFF4A; background: linear-gradient(135deg, #072a12, #0b1630 70%); color: #fff; text-align: left; position: relative; overflow: hidden; box-shadow: 0 0 14px #6BFF4A55; }
+.cartao-omni.fim { filter: grayscale(.7); }
+.cartao-omni .om-img { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; flex: none; border: 3px solid #6BFF4A; box-shadow: 0 0 12px #6BFF4A; animation: omniPulsa2 1.6s ease-in-out infinite alternate; }
+.cartao-omni .om-txt { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.cartao-omni .om-txt b { font-size: 15px; }
+.cartao-omni .om-txt small { opacity: .8; font-size: 12px; }
+.cartao-omni .om-txt span { font-size: 12px; color: #9dff7a; }
+@keyframes omniPulsa2 { from { box-shadow: 0 0 6px #6BFF4A; } to { box-shadow: 0 0 20px #6BFF4A, 0 0 4px #fff; } }
+.modal-omni .om-dial { position: relative; width: min(300px, 78vw); aspect-ratio: 1; margin: 6px auto; }
+.modal-omni .om-anel { position: absolute; inset: 9%; border-radius: 50%; border: 4px dashed #6BFF4A66; background: radial-gradient(circle, #0c3a1c 0 40%, #06150c 72%); box-shadow: inset 0 0 30px #000, 0 0 20px #6BFF4A44; animation: omniGira 40s linear infinite; }
+.modal-omni .om-no { position: absolute; width: 17%; aspect-ratio: 1; transform: translate(-50%, -50%); border-radius: 50%; padding: 0; border: 3px solid var(--cor); background: #000; box-shadow: 0 0 10px var(--cor); filter: grayscale(.85) brightness(.75); transition: transform .2s, filter .2s; }
+.modal-omni .om-no img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: block; }
+.modal-omni .om-no.tem { filter: none; }
+.modal-omni .om-no.tem::after { content: '✓'; position: absolute; right: -4px; bottom: -4px; background: #16A34A; color: #fff; border-radius: 50%; width: 16px; height: 16px; font-size: 11px; line-height: 16px; }
+.modal-omni .om-no:active { transform: translate(-50%, -50%) scale(1.15); }
+.modal-omni .om-centro { position: absolute; left: 50%; top: 50%; width: 30%; aspect-ratio: 1; transform: translate(-50%, -50%); border-radius: 50%; padding: 0; border: 4px solid #6BFF4A; background: #000; box-shadow: 0 0 16px #6BFF4A; filter: grayscale(.6); }
+.modal-omni .om-centro img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+.modal-omni .om-centro small { position: absolute; left: 50%; bottom: -8px; transform: translateX(-50%); background: #0b3d1a; color: #9dff7a; border: 2px solid #6BFF4A; border-radius: 10px; padding: 0 6px; font-size: 11px; font-weight: 800; }
+.modal-omni .om-centro.pronto, .modal-omni .om-centro.feito { filter: none; animation: omniPulsa2 1s ease-in-out infinite alternate; }
+.modal-omni .om-info { min-height: 96px; text-align: center; display: flex; flex-direction: column; gap: 4px; align-items: center; font-size: 13px; }
+.modal-omni .om-info p { margin: 2px 0; }
+.modal-omni .om-info .om-pr { color: #ffd25e; font-size: 12px; }
+.om-dna { display: grid; place-items: center; }
+.om-dna img { width: 120px; height: 120px; border-radius: 50%; border: 4px solid var(--cor, #6BFF4A); box-shadow: 0 0 24px var(--cor, #6BFF4A); animation: omniPulsa2 1s ease-in-out infinite alternate; }

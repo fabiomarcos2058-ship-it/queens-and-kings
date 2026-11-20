@@ -893,8 +893,8 @@ const Eventos = (() => {
   }
 
   // ---------- fim de uma batalha de evento ----------
-  const MASC = new Set([...FAMILIA_SONIC, YUGI]);
-  const EMOJI_REVELA = { mita_malvada: '🖤', akame_murasame: '🗡️', yugi_moto: '🃏', sonic: '💨', shadow: '🌀', super_sonic: '⭐', dark_sonic: '🟣', sonic_excalibur: '⚔️', hyper_sonic: '💎' };
+  const MASC = new Set([...FAMILIA_SONIC, YUGI, 'ben10']);
+  const EMOJI_REVELA = { mita_malvada: '🖤', akame_murasame: '🗡️', yugi_moto: '🃏', sonic: '💨', shadow: '🌀', super_sonic: '⭐', dark_sonic: '🟣', sonic_excalibur: '⚔️', hyper_sonic: '💎', ben10: '🟢' };
   function revelarNino(c, tag = 'LENDÁRIA EXCLUSIVA DE EVENTO', fala = '"Hmph… n-não é como se eu quisesse entrar no seu deck… mas já que você venceu, eu vou."') {
     if (!c || document.querySelector('.revela-nino')) return;
     const el = document.createElement('div');
@@ -947,6 +947,7 @@ const Eventos = (() => {
     const ev = r.evento || {};
     // todo evento também dá pontos (XP) do passe
     try { const pp = Passe.ganharPontos(r.resultado, r.coroas || 0); setTimeout(() => UI.toast(`🎟️ +${pp.ganho} pontos do passe${pp.subiu ? ` · nível ${Passe.nivel()}!` : ''}`), 600); } catch (e) { /* nada */ }
+    if (ev.omni) { Omnitrix.fimMissao(r, { mostrarBau, tudo }); return; }
     if (ev.chefe) { Chefe.fimLuta(r, { mostrarBau, tudo }); return; }
     if (ev.mita) { fimMita(r, { mostrarBau, tudo }); return; }
     if (ev.desafio) { fimDesafio(r, { mostrarBau, tudo }); return; }
@@ -1375,5 +1376,5 @@ const Eventos = (() => {
     if (mapaAtual) setTimeout(() => { if (mapaAtual && !document.querySelector('.ev-mapa') && !document.body.classList.contains('em-batalha')) abrirMapa(mapaAtual); }, 120);
   }
 
-  return { contarGemas, cacaProntas, vitoriaFds, html, ligar, fecharMapa, abrirLoja, ganharMedalha, fim, conferir, trocarTokens, ganharTokens, tokensHoje, MODOS, modosDeHoje, jogarModo, jogarFestival, nino };
+  return { contarGemas, cacaProntas, vitoriaFds, html, ligar, fecharMapa, abrirLoja, ganharMedalha, fim, conferir, trocarTokens, ganharTokens, tokensHoje, MODOS, modosDeHoje, jogarModo, jogarFestival, nino, revelar: revelarNino };
 })();

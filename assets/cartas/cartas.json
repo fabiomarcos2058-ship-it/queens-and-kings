@@ -4483,6 +4483,391 @@
     "nome": "Sonic Relâmpago (Evolução)",
     "descricao": "Depois de jogar o Sonic uma vez, o próximo vem EVOLUÍDO: mais forte, entra com um estrondo sônico que atordoa quem está em volta, e o Super Sonic dura 18s e renasce com 90% da vida."
    }
+  },
+  {
+   "id": "ben10",
+   "nome": "Ben 10",
+   "raridade": "lendaria",
+   "custo": 5,
+   "tipo": "Omnitrix · Herói de 10 formas",
+   "descricao": "Um garoto, um Omnitrix, dez aliens. A cada transformação ele vira um alien diferente com poder próprio: fogo, diamante, velocidade, tempo, gravidade… Exclusivo do evento Missão Galáctica.",
+   "rosto": [
+    350,
+    230,
+    120
+   ],
+   "arte": [
+    0,
+    0,
+    736
+   ],
+   "vida": 800,
+   "dano": 150,
+   "velocidade": 62,
+   "alcance": 18,
+   "cadencia": 0.9,
+   "trofeus": 0,
+   "exclusivo": [],
+   "arena": 1,
+   "alvo": "tudo",
+   "danoTorre": 0.6,
+   "evento": true,
+   "nivelInicial": 5,
+   "passiva": {
+    "nome": "Omnitrix",
+    "tipo": "omnitrix",
+    "descricao": "Usa o Omnitrix e vira um dos 9 aliens (sorteio sem repetir) por 14s. Se o alien cair, ele volta a ser o Ben com 35% da vida (até 2 vezes)."
+   },
+   "habilidade": {
+    "nome": "Omnitrix",
+    "tipo": "omnitrix",
+    "custo": 2,
+    "recarga": 9,
+    "descricao": "Vira um alien aleatório, com mecânica e habilidade próprias."
+   }
+  },
+  {
+   "id": "ben_chama",
+   "nome": "Chama",
+   "raridade": "lendaria",
+   "custo": 0,
+   "tipo": "Alien · Fogo",
+   "descricao": "Bolas de fogo que queimam.",
+   "rosto": [
+    410,
+    270,
+    115
+   ],
+   "arte": [
+    0,
+    120,
+    736
+   ],
+   "vida": 700,
+   "dano": 170,
+   "velocidade": 60,
+   "alcance": 90,
+   "cadencia": 0.9,
+   "trofeus": 0,
+   "exclusivo": [],
+   "arena": 1,
+   "alvo": "tudo",
+   "danoTorre": 0.6,
+   "corpo": true,
+   "omniAlien": true,
+   "summon": false,
+   "habilidade": {
+    "nome": "Erupção Solar",
+    "tipo": "chamaErupcao",
+    "custo": 2,
+    "recarga": 12,
+    "descricao": "Explode em fogo em volta e deixa todo mundo queimando."
+   }
+  },
+  {
+   "id": "ben_diamante",
+   "nome": "Diamante",
+   "raridade": "lendaria",
+   "custo": 0,
+   "tipo": "Alien · Cristal",
+   "descricao": "Corpo de cristal, começa com escudo.",
+   "rosto": [
+    405,
+    240,
+    160
+   ],
+   "arte": [
+    20,
+    0,
+    690
+   ],
+   "vida": 1100,
+   "dano": 150,
+   "velocidade": 48,
+   "alcance": 18,
+   "cadencia": 1.0,
+   "trofeus": 0,
+   "exclusivo": [],
+   "arena": 1,
+   "alvo": "tudo",
+   "danoTorre": 0.6,
+   "corpo": true,
+   "omniAlien": true,
+   "summon": false,
+   "habilidade": {
+    "nome": "Estilhaços de Cristal",
+    "tipo": "diamanteCristais",
+    "custo": 2,
+    "recarga": 13,
+    "descricao": "Ganha escudo e lança estilhaços que ferem e deixam lentos."
+   }
+  },
+  {
+   "id": "ben_xlr8",
+   "nome": "XLR8",
+   "raridade": "lendaria",
+   "custo": 0,
+   "tipo": "Alien · Velocidade",
+   "descricao": "Rapidíssimo, ataca em combos.",
+   "rosto": [
+    370,
+    690,
+    90
+   ],
+   "arte": [
+    0,
+    500,
+    640
+   ],
+   "vida": 600,
+   "dano": 110,
+   "velocidade": 130,
+   "alcance": 18,
+   "cadencia": 0.45,
+   "trofeus": 0,
+   "exclusivo": [],
+   "arena": 1,
+   "alvo": "tudo",
+   "danoTorre": 0.6,
+   "corpo": true,
+   "omniAlien": true,
+   "summon": false,
+   "habilidade": {
+    "nome": "Tempestade de Velocidade",
+    "tipo": "xlrTempestade",
+    "custo": 2,
+    "recarga": 12,
+    "descricao": "Corre entre os inimigos e acerta vários golpes críticos."
+   }
+  },
+  {
+   "id": "ben_enormossauro",
+   "nome": "Enormossauro",
+   "raridade": "lendaria",
+   "custo": 0,
+   "tipo": "Alien · Força",
+   "descricao": "Soca forte e arremessa longe.",
+   "rosto": [
+    495,
+    590,
+    125
+   ],
+   "arte": [
+    0,
+    200,
+    736
+   ],
+   "vida": 1300,
+   "dano": 230,
+   "velocidade": 40,
+   "alcance": 22,
+   "cadencia": 1.1,
+   "trofeus": 0,
+   "exclusivo": [],
+   "arena": 1,
+   "alvo": "tudo",
+   "danoTorre": 0.6,
+   "corpo": true,
+   "omniAlien": true,
+   "summon": false,
+   "habilidade": {
+    "nome": "Crescimento Gigante",
+    "tipo": "enormoGigante",
+    "custo": 2,
+    "recarga": 14,
+    "descricao": "Cresce, ganha vida e +50% de dano por 9s e esmaga o chão."
+   }
+  },
+  {
+   "id": "ben_contratempo",
+   "nome": "Contra-Tempo",
+   "raridade": "lendaria",
+   "custo": 0,
+   "tipo": "Alien · Tempo",
+   "descricao": "Atrasa os inimigos com energia temporal.",
+   "rosto": [
+    430,
+    250,
+    125
+   ],
+   "arte": [
+    0,
+    60,
+    736
+   ],
+   "vida": 850,
+   "dano": 140,
+   "velocidade": 55,
+   "alcance": 70,
+   "cadencia": 1.0,
+   "trofeus": 0,
+   "exclusivo": [],
+   "arena": 1,
+   "alvo": "tudo",
+   "danoTorre": 0.6,
+   "corpo": true,
+   "omniAlien": true,
+   "summon": false,
+   "habilidade": {
+    "nome": "Parar e Rebobinar",
+    "tipo": "tempoRebobinar",
+    "custo": 2,
+    "recarga": 18,
+    "descricao": "Para o tempo dos inimigos em volta e volta à vida que tinha 5s atrás."
+   }
+  },
+  {
+   "id": "ben_ecoeco",
+   "nome": "Eco Eco",
+   "raridade": "lendaria",
+   "custo": 0,
+   "tipo": "Alien · Som",
+   "descricao": "Ondas sonoras que atravessam e atordoam.",
+   "rosto": [
+    385,
+    520,
+    150
+   ],
+   "arte": [
+    0,
+    0,
+    735
+   ],
+   "vida": 520,
+   "dano": 100,
+   "velocidade": 80,
+   "alcance": 100,
+   "cadencia": 0.8,
+   "trofeus": 0,
+   "exclusivo": [],
+   "arena": 1,
+   "alvo": "tudo",
+   "danoTorre": 0.6,
+   "corpo": true,
+   "omniAlien": true,
+   "summon": false,
+   "habilidade": {
+    "nome": "Eco Infinito",
+    "tipo": "ecoClones",
+    "custo": 2,
+    "recarga": 15,
+    "descricao": "Cria 3 clones e solta um grito sônico que atordoa."
+   }
+  },
+  {
+   "id": "ben_cromatico",
+   "nome": "Cromático",
+   "raridade": "lendaria",
+   "custo": 0,
+   "tipo": "Alien · Energia",
+   "descricao": "Absorve parte do dano e devolve numa descarga.",
+   "rosto": [
+    455,
+    195,
+    120
+   ],
+   "arte": [
+    0,
+    60,
+    736
+   ],
+   "vida": 900,
+   "dano": 190,
+   "velocidade": 52,
+   "alcance": 85,
+   "cadencia": 1.1,
+   "trofeus": 0,
+   "exclusivo": [],
+   "arena": 1,
+   "alvo": "tudo",
+   "danoTorre": 0.6,
+   "corpo": true,
+   "omniAlien": true,
+   "summon": false,
+   "habilidade": {
+    "nome": "Descarga Prismática",
+    "tipo": "cromaDescarga",
+    "custo": 2,
+    "recarga": 12,
+    "descricao": "Dispara um raio arco-íris com a energia que absorveu."
+   }
+  },
+  {
+   "id": "ben_gravatack",
+   "nome": "Gravatack",
+   "raridade": "lendaria",
+   "custo": 0,
+   "tipo": "Alien · Gravidade",
+   "descricao": "Puxa os inimigos com a gravidade.",
+   "rosto": [
+    410,
+    350,
+    190
+   ],
+   "arte": [
+    100,
+    0,
+    540
+   ],
+   "vida": 1000,
+   "dano": 160,
+   "velocidade": 42,
+   "alcance": 70,
+   "cadencia": 1.0,
+   "trofeus": 0,
+   "exclusivo": [],
+   "arena": 1,
+   "alvo": "tudo",
+   "danoTorre": 0.6,
+   "corpo": true,
+   "omniAlien": true,
+   "summon": false,
+   "habilidade": {
+    "nome": "Gravidade Invertida",
+    "tipo": "gravInverter",
+    "custo": 2,
+    "recarga": 15,
+    "descricao": "Joga os inimigos pro alto e os esmaga no chão."
+   }
+  },
+  {
+   "id": "ben_waybig",
+   "nome": "Way Big",
+   "raridade": "lendaria",
+   "custo": 0,
+   "tipo": "Alien · Cósmico",
+   "descricao": "Gigante cósmico, imune a atordoamento.",
+   "rosto": [
+    385,
+    190,
+    130
+   ],
+   "arte": [
+    100,
+    0,
+    540
+   ],
+   "vida": 2000,
+   "dano": 300,
+   "velocidade": 28,
+   "alcance": 26,
+   "cadencia": 1.5,
+   "trofeus": 0,
+   "exclusivo": [],
+   "arena": 1,
+   "alvo": "tudo",
+   "danoTorre": 0.6,
+   "corpo": true,
+   "omniAlien": true,
+   "summon": false,
+   "habilidade": {
+    "nome": "Raio Cósmico",
+    "tipo": "wayRaio",
+    "custo": 2,
+    "recarga": 14,
+    "descricao": "Pisão e um raio cósmico enorme que atravessa tudo."
+   },
+   "raio": 20
   }
  ]
 }

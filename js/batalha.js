@@ -768,6 +768,7 @@ const Batalha = (() => {
     if (e.postura && emEgo(e) && dano > 0) e.ego = Math.min(15, (e.ego || 0) + 1);
     // ULTRA BALANCEAMENTO: nenhum golpe isolado tira mais que 40% da vida máxima de uma tropa (nada mata tudo de uma vez só)
     if (!e.torre && !opc.semLimite && e.max > 0 && dano > e.max * 0.4) dano = Math.round(e.max * 0.4);
+    if (e.omniAtual === 'ben_cromatico' && dano > 0) dano = omniAbsorver(e, dano);
     e.vida -= dano;
     numero(e, dano, opc.crit ? 'critico' : opc.tipo);
     // Adam Smasher (Evolução): com 30% de vida dispara sozinho Mísseis + Sandevistan, sem gastar elixir (uma vez)
@@ -811,6 +812,8 @@ const Batalha = (() => {
       const img = e.img || (e.img = s.arena.querySelector(`[data-torre="${e.id}"]`));
       if (img) { piscar(img, 'torre-levou'); }
       if (e.vida <= 0) destruirTorre(e, deTime);
+    } else if (e.vida <= 0 && !e.torre && e.omniAtual && e.omniBen && (e.omniQuedas || 0) < 2 && !e.temporario && !s.acabou) {
+      omniSalva(e);
     } else if (e.vida <= 0 && !e.torre && e.atk && e.atk.m && e.atk.m.renascer && (e.renasceu || 0) < e.atk.m.renascer && !e.temporario && !s.acabou) {
       renascerAdaptado(e);
     } else if (e.vida <= 0 && !e.torre && e.atk && e.atk.m && e.atk.m.superRenasce && !e.superFeito && !e.temporario && !s.acabou) {
@@ -1011,6 +1014,16 @@ const Batalha = (() => {
     if (h.tipo === 'soulPunisher') soulPunisher(t, h);
     if (h.tipo === 'hakai') hakai(t, h);
     if (h.tipo === 'kameKaioken') kameKaioken(t, h);
+    if (h.tipo === 'omnitrix') omnitrix(t);
+    if (h.tipo === 'chamaErupcao') chamaErupcao(t, h);
+    if (h.tipo === 'diamanteCristais') diamanteCristais(t, h);
+    if (h.tipo === 'xlrTempestade') xlrTempestade(t, h);
+    if (h.tipo === 'enormoGigante') enormoGigante(t, h);
+    if (h.tipo === 'tempoRebobinar') tempoRebobinar(t, h);
+    if (h.tipo === 'ecoClones') ecoClones(t, h);
+    if (h.tipo === 'cromaDescarga') cromaDescarga(t, h);
+    if (h.tipo === 'gravInverter') gravInverter(t, h);
+    if (h.tipo === 'wayRaio') wayRaio(t, h);
     if (h.tipo === 'punhoDeus') punhoDeus(t, h);
     if (h.tipo === 'ceifaDivina') ceifaDivina(t, h);
     if (h.tipo === 'finalFlash') finalFlash(t, h);
@@ -1331,8 +1344,8 @@ const Batalha = (() => {
   }
 
   // corte de cena por cima da arena (aparece pra todo mundo da partida)
-  const CUTINS = ['goku_furia', 'jojo_jotaro', 'jojo_dio', 'jojo_diavolo', 'jojo_pucci', 'jojo_gyro', 'jojo_johnny', 'sonic_shadow', 'sonic_super', 'sonic_dark', 'sonic_excalibur', 'sonic_hyper', 'yugi_reino', 'ultra_sae', 'ultra_rin', 'ultra_isagi', 'ultra_anri', 'inv_mark_eve', 'inv_mark', 'inv_eve', 'inv_conquest', 'inv_omni', 'inv_anissa', 'db_goku_vegeta', 'db_gogeta_vegetto', 'db_vegetto_gogeta', 'db_ultra_ego', 'db_kaioken', 'db_goku_deus', 'db_black', 'db_evolution', 'cy_david', 'cy_adam', 'cy_adam_evo', 'cy_rubi', 'cy_silverhand', 'nz_ainz', 'nz_albedo', 'nz_shalltear', 'nz_demiurge', 'nz_sebas', 'nz_pandora', 'op_luffy', 'isagi_meta', 'kaiser_isagi', 'sonic_relampago', 'sonic_renasce', 'super_sonic_solar'];
-  const TEXTO_CUTIN_2 = { sonic_relampago: 'Loop Relâmpago!', sonic_renasce: 'Super Sonic!', super_sonic_solar: 'Chaos Blast!', isagi_meta: 'Metavisão!', kaiser_isagi: 'Pacto do Diabo!', sonic_shadow: 'Chaos Control!', sonic_super: 'Super Boost!', sonic_dark: 'Explosão Sombria!', sonic_excalibur: 'Soul Surge!', sonic_hyper: 'Hiper Velocidade!', yugi_reino: 'Reino das Sombras!', ultra_sae: 'Visão do Gênio!', ultra_rin: 'Flow: Destruição!', ultra_isagi: 'Direct Shot!', ultra_anri: 'Doces ou Travessuras?', inv_mark_eve: 'Juntos somos invencíveis!', inv_mark: 'Investida Invencível!', inv_eve: 'Barreira Atômica!', inv_conquest: 'Esmagar!', inv_omni: 'Fúria do Regente!', inv_anissa: 'Rajada Viltrumita!', db_goku_vegeta: 'Rivais Eternos!', db_gogeta_vegetto: 'Kamehameha Final + Big Bang!', db_vegetto_gogeta: 'Soul Punisher!', db_ultra_ego: 'Hakai!', db_kaioken: 'Kaioken x20!', db_goku_deus: 'Punho do Deus Saiyajin!', db_black: 'Ceifa Divina!', db_evolution: 'Final Flash!', cy_david: 'Sandevistan!', cy_adam: 'Rajada de Mísseis!', cy_adam_evo: 'Mísseis + Sandevistan!', cy_rubi: 'Ciberpsicose!', cy_silverhand: 'Johnny Silverhand!', nz_ainz: 'O Objetivo de Toda Vida é a Morte!', nz_albedo: 'Hermes Trismegistus!', nz_shalltear: 'Lança Purificadora!', nz_demiurge: 'Chamas do Inferno!', nz_sebas: 'Forma de Dragão!', nz_pandora: 'Doppelgänger!', op_luffy: 'Gomu Gomu no... Bajrang Gun!' };
+  const CUTINS = ['goku_furia', 'jojo_jotaro', 'jojo_dio', 'jojo_diavolo', 'jojo_pucci', 'jojo_gyro', 'jojo_johnny', 'sonic_shadow', 'sonic_super', 'sonic_dark', 'sonic_excalibur', 'sonic_hyper', 'yugi_reino', 'ultra_sae', 'ultra_rin', 'ultra_isagi', 'ultra_anri', 'inv_mark_eve', 'inv_mark', 'inv_eve', 'inv_conquest', 'inv_omni', 'inv_anissa', 'db_goku_vegeta', 'db_gogeta_vegetto', 'db_vegetto_gogeta', 'db_ultra_ego', 'db_kaioken', 'db_goku_deus', 'db_black', 'db_evolution', 'cy_david', 'cy_adam', 'cy_adam_evo', 'cy_rubi', 'cy_silverhand', 'nz_ainz', 'nz_albedo', 'nz_shalltear', 'nz_demiurge', 'nz_sebas', 'nz_pandora', 'op_luffy', 'isagi_meta', 'kaiser_isagi', 'sonic_relampago', 'sonic_renasce', 'super_sonic_solar', 'ben_omnitrix', 'ben_chama', 'ben_diamante', 'ben_xlr8', 'ben_enormossauro', 'ben_contratempo', 'ben_ecoeco', 'ben_cromatico', 'ben_gravatack', 'ben_waybig'];
+  const TEXTO_CUTIN_2 = { ben_omnitrix: 'É hora de ação!', ben_chama: 'Chama!', ben_diamante: 'Diamante!', ben_xlr8: 'XLR8!', ben_enormossauro: 'Enormossauro!', ben_contratempo: 'Contra-Tempo!', ben_ecoeco: 'Eco Eco!', ben_cromatico: 'Cromático!', ben_gravatack: 'Gravatack!', ben_waybig: 'Way Big!', sonic_relampago: 'Loop Relâmpago!', sonic_renasce: 'Super Sonic!', super_sonic_solar: 'Chaos Blast!', isagi_meta: 'Metavisão!', kaiser_isagi: 'Pacto do Diabo!', sonic_shadow: 'Chaos Control!', sonic_super: 'Super Boost!', sonic_dark: 'Explosão Sombria!', sonic_excalibur: 'Soul Surge!', sonic_hyper: 'Hiper Velocidade!', yugi_reino: 'Reino das Sombras!', ultra_sae: 'Visão do Gênio!', ultra_rin: 'Flow: Destruição!', ultra_isagi: 'Direct Shot!', ultra_anri: 'Doces ou Travessuras?', inv_mark_eve: 'Juntos somos invencíveis!', inv_mark: 'Investida Invencível!', inv_eve: 'Barreira Atômica!', inv_conquest: 'Esmagar!', inv_omni: 'Fúria do Regente!', inv_anissa: 'Rajada Viltrumita!', db_goku_vegeta: 'Rivais Eternos!', db_gogeta_vegetto: 'Kamehameha Final + Big Bang!', db_vegetto_gogeta: 'Soul Punisher!', db_ultra_ego: 'Hakai!', db_kaioken: 'Kaioken x20!', db_goku_deus: 'Punho do Deus Saiyajin!', db_black: 'Ceifa Divina!', db_evolution: 'Final Flash!', cy_david: 'Sandevistan!', cy_adam: 'Rajada de Mísseis!', cy_adam_evo: 'Mísseis + Sandevistan!', cy_rubi: 'Ciberpsicose!', cy_silverhand: 'Johnny Silverhand!', nz_ainz: 'O Objetivo de Toda Vida é a Morte!', nz_albedo: 'Hermes Trismegistus!', nz_shalltear: 'Lança Purificadora!', nz_demiurge: 'Chamas do Inferno!', nz_sebas: 'Forma de Dragão!', nz_pandora: 'Doppelgänger!', op_luffy: 'Gomu Gomu no... Bajrang Gun!' };
   const TEXTO_CUTIN = { ...TEXTO_CUTIN_2, goku_furia: "You're going to pay for this!", jojo_jotaro: 'Star Platinum: The World!', jojo_dio: 'ZA WARUDO! Toki yo tomare!', jojo_diavolo: 'King Crimson!', jojo_pucci: 'Made in Heaven!', jojo_gyro: 'Ball Breaker!', jojo_johnny: 'Tusk Act 4!' };
   const cutinRede = (qual) => { cutin(qual); if (s.rede || s.aoVivo) s.eventos.push(['c', CUTINS.indexOf(qual)]); };
   function cutin(qual) {
@@ -2219,6 +2232,176 @@ const Batalha = (() => {
 
   // =================== Família Sonic + Yugi ===================
   const inimigosPerto = (t, r) => s.ent.filter((e) => !e.torre && e.time !== t.time && e.vida > 0 && !(e.banido > 0) && !e.acoplado && dist(e, t) < r + e.raio);
+  // =================== BEN 10: Omnitrix (um herói, nove aliens) ===================
+  const ALIENS_OMNI = ['ben_chama', 'ben_diamante', 'ben_xlr8', 'ben_enormossauro', 'ben_contratempo', 'ben_ecoeco', 'ben_cromatico', 'ben_gravatack', 'ben_waybig'];
+  const OMNI_DUR = 14;
+  const OMNI_FALA = { ben_chama: 'Chama!', ben_diamante: 'Diamante!', ben_xlr8: 'XLR8!', ben_enormossauro: 'Enormossauro!', ben_contratempo: 'Contra-Tempo!', ben_ecoeco: 'Eco Eco!', ben_cromatico: 'Cromático!', ben_gravatack: 'Gravatack!', ben_waybig: 'WAY BIG!' };
+  const OMNI_COR = { ben_chama: '#FF6A1A', ben_diamante: '#7FFFEA', ben_xlr8: '#38BDF8', ben_enormossauro: '#D9A25F', ben_contratempo: '#FFD93B', ben_ecoeco: '#E8F0FF', ben_cromatico: '#FF5CF0', ben_gravatack: '#9D8CFF', ben_waybig: '#FF4A4A' };
+  const OMNI_GIGANTE = { ben_waybig: 1.9, ben_enormossauro: 1.25, ben_diamante: 1.15 };
+
+  // troca a tropa (a mesma!) por outra carta: vida em %, stats, ataque, habilidade, rosto
+  function omniMorph(t, c, ratio, opc = {}) {
+    if (!t || !t.el || !c) return;
+    const f = t.f || 1;
+    if (!t.omniBen) t.omniBen = { carta: t.carta, atk: t.atk, habilidade: t.habilidade };
+    const volta = c === t.omniBen.carta;
+    const r = Math.max(0.05, Math.min(1, ratio != null ? ratio : t.vida / t.max));
+    t.carta = c;
+    t.max = Math.round(c.vida * f); t.vida = Math.max(1, Math.round(t.max * r));
+    t.dano = t.danoBase = Math.round(c.dano * f);
+    t.vel = t.velBase = c.velocidade; t.alcance = c.alcance; t.cadencia = c.cadencia; t.area = c.area || 0;
+    t.alvoTipo = c.alvo || 'tudo';
+    t.atk = volta ? t.omniBen.atk : Ataques.de(c);
+    t.classe = Ataques.classeDe(c);
+    t.habilidade = volta ? t.omniBen.habilidade : c.habilidade;
+    const m = t.atk.m || {};
+    t.voo = !!m.voo; t.raio = c.raio || 13;
+    t.escudo = t.escudoMax = m.escudo ? Math.round(t.max * m.escudo) : 0;
+    t.atord = 0; t.lento = 0; t.queima = 0; t.fraco = 0; t.congelado = 0;
+    t.gigT = 0; t.carga = 0; t.hist = [];
+    t.cd = 0.3; t.recarga = volta ? (opc.recarga != null ? opc.recarga : 5) : 1.5;
+    const cl = t.el.classList;
+    cl.remove('atordoada', 'lenta', 'presa', 'queimando', 'omni-alien', 'omni-gigante', 'omni-crescido', 'omni-carga', 'parada-tempo', ...ALIENS_OMNI.map((a) => 'omni-' + a));
+    cl.toggle('com-escudo', !!t.escudo);
+    cl.toggle('voando', t.voo);
+    if (!volta) { cl.add('omni-alien', 'omni-' + c.id); if (OMNI_GIGANTE[c.id]) { cl.add('omni-gigante'); t.el.style.setProperty('--omni-esc', OMNI_GIGANTE[c.id]); } }
+    const img = t.el.querySelector('.tropa-medalhao img');
+    if (img) img.src = `assets/cartas/${c.id}_medalhao.png`;
+    t.omniAtual = volta ? null : c.id; t.omniT = volta ? 0 : OMNI_DUR;
+    const cx = document.getElementById('habilidades'); if (cx) cx.dataset.ids = '';
+    atualizarHp(t);
+    const cor = volta ? '#6BFF4A' : OMNI_COR[c.id];
+    fxEl('fx-omni', t.x, t.y, 900, { color: cor });
+    particulas(t.x, t.y, cor, 14, 34);
+    tremer();
+  }
+  function sortearAlien(t) {
+    if (!t.omniSaco || !t.omniSaco.length) { t.omniSaco = embaralhar(ALIENS_OMNI); if (t.omniUlt && t.omniSaco[t.omniSaco.length - 1] === t.omniUlt) t.omniSaco.unshift(t.omniSaco.pop()); }
+    return t.omniSaco.pop();
+  }
+  function omnitrix(t) {
+    if (t.omniAtual) return;
+    const id = sortearAlien(t);
+    const c = Estado.carta(id);
+    if (!c) return;
+    t.omniUlt = id; t.omniVistos = t.omniVistos || {};
+    if (!t.omniUsos) cutinRede('ben_omnitrix'); else if (!t.omniVistos[id]) cutinRede(id);
+    t.omniUsos = (t.omniUsos || 0) + 1; t.omniVistos[id] = 1;
+    omniMorph(t, c, null);
+    falar(t, OMNI_FALA[id], 'fala-ben');
+  }
+  function omniVoltar(t, ratio, fala) {
+    if (!t.omniAtual || !t.omniBen) return;
+    omniMorph(t, t.omniBen.carta, ratio);
+    if (fala) falar(t, fala, 'fala-ben');
+  }
+  // o alien caiu: o Omnitrix salva o Ben (no máximo 2 vezes)
+  function omniSalva(e) {
+    e.omniQuedas = (e.omniQuedas || 0) + 1;
+    omniVoltar(e, 0.35, 'Omnitrix: emergência!');
+    e.intocavel = 1; e.atord = 0;
+    e.recarga = 4;
+    efeito('renascer', e.x, e.y, 900);
+  }
+  function passivasOmni(t, dt) {
+    if ((t.omniT -= dt) <= 0) { omniVoltar(t, null, 'Tempo esgotado!'); return; }
+    if (t.gigT > 0 && (t.gigT -= dt) <= 0) { t.dano = t.danoBase; t.el.classList.remove('omni-crescido'); t.el.style.setProperty('--omni-esc', OMNI_GIGANTE.ben_enormossauro); }
+    if (t.omniAtual === 'ben_contratempo' && (t.histT = (t.histT || 0) + dt) >= 1) { t.histT = 0; t.hist.push(t.vida); if (t.hist.length > 5) t.hist.shift(); }
+    if (t.omniAtual === 'ben_cromatico') t.el.classList.toggle('omni-carga', (t.carga || 0) > t.max * 0.25);
+  }
+  // Cromático: guarda parte do dano que leva
+  function omniAbsorver(e, dano) {
+    const ab = Math.round(dano * 0.4);
+    e.carga = Math.min(e.max * 2, (e.carga || 0) + ab);
+    e.el.classList.add('omni-absorveu'); setTimeout(() => e.el && e.el.classList.remove('omni-absorveu'), 200);
+    return Math.round(dano * 0.8);
+  }
+
+  function chamaErupcao(t, h) {
+    falar(t, 'Erupção Solar!', 'fala-ben');
+    fxEl('fx-omni-fogo', t.x, t.y, 900);
+    explosaoArea(t, t, Math.round(t.dano * 2.2), 105, { visual: 'impacto', cor: '#FF6A1A', empurrar: 12 });
+    for (const e of inimigosPerto(t, 110)) { e.queima = 4; e.queimaDps = Math.max(e.queimaDps || 0, t.dano * 0.4); e.queimaCor = '#FF4A1A'; e.queimaFonte = t.time; e.el.classList.add('queimando'); }
+  }
+  function diamanteCristais(t, h) {
+    falar(t, 'Estilhaços!', 'fala-ben');
+    t.escudo = t.escudoMax = Math.round(t.max * 0.4); t.el.classList.add('com-escudo');
+    fxEl('fx-omni-cristal', t.x, t.y, 900);
+    for (const e of inimigosPerto(t, 120)) {
+      ferir(e, Math.round(t.dano * 2 * multClasse(t, e)), t.time, t);
+      if (e.vida > 0 && !imuneA(e)) { e.lento = 3; e.lentoPct = 0.4; e.el.classList.add('lenta'); }
+    }
+    explosaoArea(t, t, 0, 120, { visual: 'impacto', cor: '#7FFFEA' });
+  }
+  function xlrTempestade(t, h) {
+    falar(t, 'Tempestade!', 'fala-ben');
+    const alvos = embaralhar(inimigosPerto(t, 260)).slice(0, 4);
+    if (!alvos.length && t.alvo && t.alvo.vida > 0) alvos.push(t.alvo);
+    if (!alvos.length) return;
+    t.intocavel = Math.max(t.intocavel || 0, 1.5);
+    for (let i = 0; i < 8; i++) agendar(0.15 + i * 0.16, () => {
+      if (!s || s.acabou || t.vida <= 0 || t.omniAtual !== 'ben_xlr8') return;
+      const a = alvos.filter((e) => e.vida > 0)[i % Math.max(1, alvos.filter((e) => e.vida > 0).length)];
+      if (!a) return;
+      teleportar(t, a);
+      golpeVisual(t, a, { g: 'corte', cor: '#38BDF8' });
+      ferir(a, Math.round(t.dano * 1.4 * multClasse(t, a)), t.time, t, { crit: i % 3 === 2 });
+    });
+  }
+  function enormoGigante(t, h) {
+    falar(t, 'GRRRR!', 'fala-ben');
+    t.gigT = 9; t.dano = Math.round(t.danoBase * 1.5);
+    t.el.classList.add('omni-crescido'); t.el.style.setProperty('--omni-esc', 1.6);
+    curar(t, Math.round(t.max * 0.25));
+    explosaoArea(t, t, Math.round(t.dano * 1.6), 95, { visual: 'impacto', cor: '#D9A25F', empurrar: 22, atordoar: 1 });
+  }
+  function tempoRebobinar(t, h) {
+    falar(t, 'Parar o tempo!', 'fala-ben');
+    fxEl('fx-nz-relogio', t.x, t.y, 2200);
+    for (const e of inimigosPerto(t, 250)) if (!imuneA(e)) { e.atord = Math.max(e.atord, 2.2); e.el.classList.add('parada-tempo'); }
+    const melhor = Math.max(t.vida, ...(t.hist || []));
+    agendar(0.7, () => {
+      if (!s || s.acabou || t.vida <= 0) return;
+      t.vida = Math.min(t.max, Math.max(t.vida, melhor)); atualizarHp(t);
+      efeito('cura', t.x, t.y, 800); particulas(t.x, t.y, '#FFD93B', 12, 28);
+      falar(t, 'Rebobinar!', 'fala-ben');
+    });
+  }
+  function ecoClones(t, h) {
+    falar(t, 'Eco Eco!', 'fala-ben');
+    for (const lado of [-1, 0, 1]) {
+      const cl = donoDe(criarTropa(t.time, t.carta, Math.max(16, Math.min(W - 16, t.x + lado * 24)), t.y + (lado ? 8 : -10), (t.f || 1) * 0.45, t.nivel), t.dono);
+      cl.habilidade = null; cl.el.classList.remove('campea'); cl.temporario = 10; cl.invocado = true; cl.surgir = 0.3;
+      if (t.alvo && t.alvo.vida > 0) cl.alvo = t.alvo;
+    }
+    fxEl('fx-omni-som', t.x, t.y, 800);
+    for (const e of inimigosPerto(t, 130)) { ferir(e, Math.round(t.dano * 1.2), t.time, t); if (e.vida > 0 && !imuneA(e)) { e.atord = Math.max(e.atord, 1.2); e.el.classList.add('atordoada'); } }
+  }
+  function cromaDescarga(t, h) {
+    falar(t, 'Descarga!', 'fala-ben');
+    const dano = Math.round(t.dano * 1.4 + (t.carga || 0) * 1.2);
+    t.carga = 0; t.el.classList.remove('omni-carga');
+    kamehameha(t, dano, { tipo: 2, comp: 380, larg: 46, torreMult: 0.35, atraso: 0.5 });
+    fxEl('fx-gojo-carga', t.x, t.y - 6, 600);
+  }
+  function gravInverter(t, h) {
+    falar(t, 'Gravidade!', 'fala-ben');
+    fxEl('fx-omni-grav', t.x, t.y, 1900);
+    const alvos = inimigosPerto(t, 170);
+    for (const e of alvos) { if (!imuneA(e)) { e.atord = Math.max(e.atord, 1.8); e.el.classList.add('atordoada', 'omni-flutua'); } }
+    agendar(1.8, () => {
+      if (!s || s.acabou) return;
+      tremer(true);
+      for (const e of alvos) { if (e.el) e.el.classList.remove('omni-flutua'); if (e.vida > 0) ferir(e, Math.round(t.dano * 1.6 * multClasse(t, e)), t.time, t); }
+    });
+  }
+  function wayRaio(t, h) {
+    falar(t, 'RAIO CÓSMICO!', 'fala-ben');
+    explosaoArea(t, t, Math.round(t.dano * 0.8), 80, { visual: 'impacto', cor: '#FF4A4A', empurrar: 18 });
+    kamehameha(t, Math.round(t.dano * 1.7), { tipo: 2, comp: 460, larg: 56, torreMult: 0.4, atraso: 0.6 });
+    fxEl('fx-gojo-carga', t.x, t.y - 10, 700);
+  }
+
   function passivasSonic(t, dt) {
     const m = t.atk.m;
     // Super Sonic: os anéis vão acabando com o tempo
@@ -3039,7 +3222,7 @@ const Batalha = (() => {
     if (tipo === 'esferas') {
       const n = v.n || 2;
       for (let i = 0; i < n; i++) setTimeout(() => s && voarSprite(v.s || 'ki_amarelo', { x: a.x + (i - (n - 1) / 2) * 6, y: a.y - 6 }, alvo, 0.16, 11), i * 70);
-      setTimeout(() => s && fxEl('fx-soco', alvo.x, alvo.y, 320, { '--cor': cor }), 150);
+      setTimeout(() => s && fxEl('fx-soco', alvo.x, alvo.y, 320, { color: cor }), 150);
       return;
     }
     if (tipo === 'raio') {
@@ -3049,7 +3232,7 @@ const Batalha = (() => {
       const pts = Array.from({ length: 7 }, (_, i) => `${(i / 6) * L},${i === 0 || i === 6 ? 0 : (Math.random() - 0.5) * 14}`).join(' ');
       el.innerHTML = `<svg width="${L}" height="20" viewBox="0 -10 ${L} 20" style="overflow:visible"><polyline points="${pts}" fill="none" stroke="${cor}" stroke-width="4" stroke-linejoin="round" opacity="0.6"/><polyline points="${pts}" fill="none" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/></svg>`;
       el.style.transform = `rotate(${ang}deg)`;
-      fxEl('fx-soco', alvo.x, alvo.y, 260, { '--cor': cor });
+      fxEl('fx-soco', alvo.x, alvo.y, 260, { color: cor });
       return;
     }
     if (tipo === 'impacto') {
@@ -3072,7 +3255,7 @@ const Batalha = (() => {
     if (tipo === 'giro') {
       const e2 = fxEl('fx-giro', mx, my, 320, { '--ang': `${ang}deg` });
       if (e2) e2.style.backgroundImage = `url(${spriteUrl(v.s)})`;
-      fxEl('fx-soco', alvo.x, alvo.y, 260, { '--cor': cor });
+      fxEl('fx-soco', alvo.x, alvo.y, 260, { color: cor });
       return;
     }
     if (tipo === 'chute') {
@@ -3081,12 +3264,12 @@ const Batalha = (() => {
       return;
     }
     if (tipo === 'palma') {
-      const e2 = fxEl('fx-palma', alvo.x, alvo.y, 360, { '--cor': cor });
+      const e2 = fxEl('fx-palma', alvo.x, alvo.y, 360, { color: cor });
       if (e2 && v.s) e2.style.backgroundImage = `url(${spriteUrl(v.s)})`;
       return;
     }
     // soco
-    fxEl(`fx-soco${v.pesado ? ' pesado' : ''}`, mx + (alvo.x - mx) * 0.6, my + (alvo.y - my) * 0.6, 300, { '--cor': cor });
+    fxEl(`fx-soco${v.pesado ? ' pesado' : ''}`, mx + (alvo.x - mx) * 0.6, my + (alvo.y - my) * 0.6, 300, { color: cor });
     if (v.pesado) tremer();
   }
   function golpeVisual(a, alvo, v) {
@@ -3443,6 +3626,11 @@ const Batalha = (() => {
         || (h.tipo === 'tempoMorte' && (s.ent.filter((e) => !e.torre && e.time !== t.time && e.vida > 0 && dist(e, t) < 300).length >= 3 || s.ent.some((e) => !e.torre && e.time !== t.time && e.vida > t.dano * 4 && dist(e, t) < 300)))
         || (h.tipo === 'hermes' && (s.ent.filter((e) => !e.torre && e.time !== t.time && e.vida > 0 && dist(e, t) < 150).length >= 2 || (perto && t.vida < t.max * 0.6)))
         || ((h.tipo === 'einherjar' || h.tipo === 'formaDragao') && perto)
+        || (h.tipo === 'omnitrix' && !t.omniAtual && (perto || (t.alvo && dist(t, t.alvo) < 220)))
+        || (['chamaErupcao', 'diamanteCristais', 'enormoGigante', 'ecoClones', 'gravInverter'].includes(h.tipo) && s.ent.filter((e) => !e.torre && e.time !== t.time && e.vida > 0 && dist(e, t) < 130).length >= 1)
+        || (h.tipo === 'xlrTempestade' && s.ent.some((e) => !e.torre && e.time !== t.time && e.vida > 0 && dist(e, t) < 240))
+        || (h.tipo === 'tempoRebobinar' && (t.vida < t.max * 0.55 || s.ent.filter((e) => !e.torre && e.time !== t.time && e.vida > 0 && dist(e, t) < 220).length >= 3))
+        || ((h.tipo === 'cromaDescarga' || h.tipo === 'wayRaio') && t.alvo && dist(t, t.alvo) < 260)
         || (h.tipo === 'chamasInferno' && s.ent.filter((e) => !e.torre && e.time !== t.time && e.vida > 0 && dist(e, t) < 260).length >= 2)
         || (h.tipo === 'imitacao' && perto)
         || (h.tipo === 'bajrangGun' && (s.ent.filter((e) => !e.torre && e.time !== t.time && e.vida > 0 && dist(e, t) < 240).length >= 2 || (t.alvo && t.alvo.torre && dist(t, t.alvo) < 120)))
@@ -4096,6 +4284,7 @@ const Batalha = (() => {
       if (mm && mm.chaEncantado && (t.chaT = (t.chaT || 0) + dt) >= mm.chaEncantado[0]) { t.chaT = 0; chaEncantado(t, mm.chaEncantado); }
       if (mm && (mm.superForma || mm.spinDash || mm.inibidores || mm.hyperFlash || mm.duelista || mm.raivaSombria || mm.momento || mm.superRenasce || mm.auraSolar)) passivasSonic(t, dt);
       if (t.temporario > 0 && (t.temporario -= dt) <= 0) { ferir(t, t.vida + 1, t.time === 'azul' ? 'vermelho' : 'azul', null, { atravessa: true, semEsquiva: true }); continue; }
+      if (t.omniAtual) passivasOmni(t, dt);
       if (mm && mm.hana) robinDefesa(t, dt);
       if (t.vida <= 0) continue;
       if (t.intocavel > 0) t.intocavel -= dt;
@@ -4358,5 +4547,5 @@ const Batalha = (() => {
   }
 
   // _teste: usado só pelos testes automáticos de balanceamento
-  return { iniciar, iniciarConvidado, iniciarEspectador, espectadorFim, sairEspectador, aoSairEspectador: (f) => (ao_esp = f), receberEstado, comandoRemoto, adversarioSaiu, fechar, vencerAgora, _estado: () => s, _teste: { jogar, criarTropa, gemeosEntram, ativarHabilidade, passo } };
+  return { iniciar, iniciarConvidado, iniciarEspectador, espectadorFim, sairEspectador, aoSairEspectador: (f) => (ao_esp = f), receberEstado, comandoRemoto, adversarioSaiu, fechar, vencerAgora, _estado: () => s, _teste: { jogar, criarTropa, gemeosEntram, ativarHabilidade, passo, ferir } };
 })();
