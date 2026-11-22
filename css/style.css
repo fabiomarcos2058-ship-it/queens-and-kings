@@ -2889,7 +2889,7 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 .sm-banner.t-db::before { background: conic-gradient(from var(--ang), #FFC21A, #FF6A00, #C04BFF, #3FC4FF, #FFC21A); }
 .sm-banner.t-db .smb-painel { flex: 0.85; }
 .sm-banner.t-db .smb-painel.centro { flex: 1.5; z-index: 2; clip-path: polygon(14% 0, 86% 0, 100% 100%, 0 100%); filter: drop-shadow(0 0 10px #FF8A00); }
-.sm-banner.t-db .smb-painel.centro img { animation: painelRespira 5s ease-in-out infinite alternate; object-position: 50% 30%; }
+.sm-banner.t-db .smb-painel.centro img { animation: painelRespira 5s ease-in-out infinite alternate; object-position: 50% 48%; }
 .sm-banner.t-db .smb-painel.centro::before { content: 'DESTAQUE'; position: absolute; top: 8px; left: 50%; transform: translateX(-50%); z-index: 3; font: 10px 'Lilita One', sans-serif; letter-spacing: 1.5px; padding: 2px 8px; border-radius: 6px; color: #2a0a00; background: linear-gradient(90deg, #FFE45C, #FF8A00); }
 .sm-banner.t-db .smb-painel span { bottom: 34%; font-size: 10px; text-shadow: 0 2px 4px #000, 0 0 8px #FF8A00; }
 .sm-banner.t-db .smb-painel:not(.centro) span { display: none; }
@@ -2915,7 +2915,7 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 .cutin.db_gogeta_vegetto .cutin-faixa, .cutin.db_evolution .cutin-faixa { border-color: #3FC4FF; box-shadow: 0 0 22px #3FC4FF, 0 0 40px #1E6BFF88; }
 .cutin.db_kaioken .cutin-faixa { border-color: #FF2E5E; box-shadow: 0 0 22px #FF2E5E, 0 0 40px #3FC4FF88; }
 .cutin.db_goku_deus .cutin-faixa { border-color: #FF4B3A; box-shadow: 0 0 22px #FF4B3A; }
-.cutin.db_goku_vegeta .cutin-faixa img, .cutin.db_gogeta_vegetto .cutin-faixa img, .cutin.db_vegetto_gogeta .cutin-faixa img { object-position: 50% 30%; }
+.cutin.db_goku_vegeta .cutin-faixa img, .cutin.db_gogeta_vegetto .cutin-faixa img, .cutin.db_vegetto_gogeta .cutin-faixa img { object-position: 50% 48%; }
 /* posturas do Goku & Vegeta */
 .tropa.postura-instinto .tropa-medalhao { box-shadow: 0 0 0 3px #E8F4FF, 0 0 16px 6px #9FC8FFcc; }
 .tropa.postura-ego .tropa-medalhao { box-shadow: 0 0 0 3px #C04BFF, 0 0 16px 6px #C04BFFcc; }
@@ -3255,7 +3255,7 @@ html.leve .titulo.com-arte .qk-logo .qk-nome, html.leve .qk-nome { filter: none;
 .cutin[class*="nz_"] .cutin-faixa::after { border-color: #FFD25E; }
 .cutin[class*="nz_"] .cutin-legenda { font-family: 'Cinzel Decorative', 'Lilita One', serif; font-weight: 900; color: #F3E0FF; text-shadow: 3px 3px 0 #3A0F5C, -1px -1px 0 #000, 1px 1px 0 #000, 0 0 14px #B15CFF; }
 .cutin.nz_albedo .cutin-faixa img { object-position: 50% 6%; }
-.cutin.nz_shalltear .cutin-faixa img, .cutin.nz_sebas .cutin-faixa img { object-position: 50% 30%; }
+.cutin.nz_shalltear .cutin-faixa img, .cutin.nz_sebas .cutin-faixa img { object-position: 50% 48%; }
 .cutin.nz_demiurge .cutin-faixa img { object-position: 50% 28%; }
 .cutin.nz_demiurge .cutin-faixa { border-color: #FF4A1A; box-shadow: 0 0 22px #FF2A00, 0 0 40px #FF4A1A88; }
 .cutin.nz_shalltear .cutin-faixa { border-color: #FF2A5C; box-shadow: 0 0 22px #FF2A5C, 0 0 40px #8A0030aa; }
@@ -4072,3 +4072,47 @@ body.espectando .arena-grande-janela.meta-azul::after { content: ''; top: 0; lef
 .modal-omni .om-info .om-pr { color: #ffd25e; font-size: 12px; }
 .om-dna { display: grid; place-items: center; }
 .om-dna img { width: 120px; height: 120px; border-radius: 50%; border: 4px solid var(--cor, #6BFF4A); box-shadow: 0 0 24px var(--cor, #6BFF4A); animation: omniPulsa2 1s ease-in-out infinite alternate; }
+
+/* ===== Super Quarteto: Revezamento Chaos ===== */
+.dano-num.fala-quarteto { font: 15px 'Lilita One', 'Fredoka', sans-serif; color: #fff7c2; text-shadow: 2px 2px 0 #B45309, -1px -1px 0 #000, 0 0 12px #FFD93B; }
+.tropa.q-relevo .tropa-medalhao { box-shadow: 0 0 0 3px #FFD93B, 0 0 12px #FFD93B; }
+.tropa.q-q_sonic .tropa-medalhao { box-shadow: 0 0 0 3px #38BDF8, 0 0 14px #FFD93B; }
+.tropa.q-q_shadow .tropa-medalhao { box-shadow: 0 0 0 3px #FF4A3A, 0 0 14px #FFD93B; }
+.tropa.q-q_silver .tropa-medalhao { box-shadow: 0 0 0 3px #7FFFEA, 0 0 14px #FFD93B; }
+.tropa.q-q_amy .tropa-medalhao { box-shadow: 0 0 0 3px #FF8FD0, 0 0 14px #FFD93B; }
+.tropa.q-dourado .tropa-corpo { filter: drop-shadow(0 0 6px #FFD93B) brightness(1.15); animation: qOnda 0.8s ease-in-out infinite alternate; }
+@keyframes qOnda { to { filter: drop-shadow(0 0 12px #fff) brightness(1.35); } }
+.fx-q-sync { position: absolute; pointer-events: none; z-index: 1780; width: 46%; aspect-ratio: 1; transform: translate(-50%, -50%); border-radius: 50%; background: conic-gradient(from 0deg, #38BDF8, #FF4A3A, #7FFFEA, #FF8FD0, #38BDF8); -webkit-mask: radial-gradient(circle, transparent 52%, #000 54% 64%, transparent 66%); mask: radial-gradient(circle, transparent 52%, #000 54% 64%, transparent 66%); box-shadow: 0 0 30px #FFD93B; animation: qSync 1.4s ease-out forwards; }
+@keyframes qSync { 0% { transform: translate(-50%, -50%) scale(0.2) rotate(0); opacity: 1; } 100% { transform: translate(-50%, -50%) scale(1.6) rotate(360deg); opacity: 0; } }
+.cutin.q_sonic .cutin-faixa, .cutin.q_shadow .cutin-faixa, .cutin.q_silver .cutin-faixa, .cutin.q_amy .cutin-faixa, .cutin.q_hyper .cutin-faixa { border-color: #FFD93B; box-shadow: 0 0 26px #FFD93B88; }
+.cutin.q_sonic .cutin-legenda, .cutin.q_shadow .cutin-legenda, .cutin.q_silver .cutin-legenda, .cutin.q_amy .cutin-legenda, .cutin.q_hyper .cutin-legenda { color: #fff7c2; text-shadow: 2px 2px 0 #B45309, 0 0 12px #FFD93B; }
+
+/* ===== Evento Esmeraldas do Caos ===== */
+.cartao-esm { display: flex; align-items: center; gap: 10px; width: 100%; margin: 8px 0; padding: 10px 12px; border-radius: 14px; border: 2px solid #FFD93B; background: linear-gradient(135deg, #3a2a05, #140a30 70%); color: #fff; text-align: left; position: relative; overflow: hidden; box-shadow: 0 0 16px #FFD93B55; }
+.cartao-esm.fim { filter: grayscale(.7); }
+.cartao-esm .es-img { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; flex: none; border: 3px solid #FFD93B; box-shadow: 0 0 14px #FFD93B; animation: omniPulsa2 1.4s ease-in-out infinite alternate; }
+.cartao-esm .es-txt { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.cartao-esm .es-txt b { font-size: 15px; }
+.cartao-esm .es-txt small { opacity: .8; font-size: 12px; }
+.cartao-esm .es-txt span { font-size: 12px; color: #FFE27A; }
+.modal-esm .es-banner { position: relative; height: 120px; border-radius: 12px; overflow: hidden; border: 2px solid #FFD93B; box-shadow: 0 0 16px #FFD93B66; }
+.modal-esm .es-banner img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 48%; }
+.modal-esm .es-banner b { position: absolute; left: 8px; bottom: 6px; font: 18px 'Lilita One', 'Fredoka', sans-serif; color: #fff7c2; text-shadow: 2px 2px 0 #B45309, 0 0 10px #000; }
+.modal-esm .es-aneis { margin: 10px 0 4px; text-align: center; font-size: 13px; }
+.modal-esm .es-trilha { position: relative; height: 12px; margin: 10px 14px 24px; border-radius: 8px; background: #0b0820; border: 2px solid #FFD93B88; }
+.modal-esm .es-trilha > i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 6px; background: linear-gradient(90deg, #FFB703, #FFE27A); box-shadow: 0 0 8px #FFD93B; }
+.modal-esm .es-marco { position: absolute; top: -9px; transform: translateX(-50%); text-align: center; }
+.modal-esm .es-marco i { display: block; width: 24px; height: 24px; line-height: 24px; border-radius: 50%; background: #2b1c06; border: 2px solid #FFD93B; font-style: normal; font-size: 12px; }
+.modal-esm .es-marco.pego i { background: #16A34A; border-color: #9dff7a; }
+.modal-esm .es-marco small { font-size: 10px; opacity: .8; }
+.modal-esm .es-aneis > small { opacity: .75; font-size: 11px; }
+.modal-esm .es-gemas { display: flex; justify-content: center; gap: 6px; margin: 10px 0; flex-wrap: wrap; }
+.modal-esm .es-gema { position: relative; width: 38px; height: 44px; padding: 0; background: none; border: 0; filter: grayscale(1) brightness(.55); }
+.modal-esm .es-gema i { position: absolute; inset: 0; clip-path: polygon(50% 0, 100% 30%, 100% 70%, 50% 100%, 0 70%, 0 30%); background: linear-gradient(135deg, #fff, var(--cor) 45%, #000 140%); }
+.modal-esm .es-gema small { position: absolute; left: 0; right: 0; top: 14px; text-align: center; font-weight: 800; color: #000; text-shadow: 0 0 3px #fff; }
+.modal-esm .es-gema.feita { filter: drop-shadow(0 0 6px var(--cor)); }
+.modal-esm .es-gema.atual { filter: drop-shadow(0 0 8px var(--cor)) brightness(1.1); animation: omniPulsa2 1s ease-in-out infinite alternate; }
+.modal-esm .es-gema.final { width: 46px; height: 52px; }
+.modal-esm .es-info { min-height: 100px; text-align: center; display: flex; flex-direction: column; gap: 4px; align-items: center; font-size: 13px; }
+.modal-esm .es-info p { margin: 2px 0; }
+.modal-esm .es-info .es-pr { color: #ffd25e; font-size: 12px; }

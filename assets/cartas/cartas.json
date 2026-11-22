@@ -4868,6 +4868,169 @@
     "descricao": "Pisão e um raio cósmico enorme que atravessa tudo."
    },
    "raio": 20
+  },
+  {
+   "id": "super_quarteto",
+   "nome": "Super Quarteto",
+   "raridade": "lendaria",
+   "custo": 6,
+   "tipo": "Revezamento Chaos · Time de 4 heróis",
+   "descricao": "Sonic, Shadow, Silver e Amy num só card! Só um herói luta por vez, cada um com sua própria vida. Toque pra REVEZAR: quem entra faz um golpe de chegada diferente e quem sai se recupera no banco. Se os 4 entrarem em sequência, vem a SUPER SINCRONIA! Exclusivo do evento Esmeraldas do Caos.",
+   "rosto": [
+    308,
+    782,
+    115
+   ],
+   "arte": [
+    0,
+    180,
+    736
+   ],
+   "vida": 850,
+   "dano": 170,
+   "velocidade": 120,
+   "alcance": 18,
+   "cadencia": 0.5,
+   "trofeus": 0,
+   "exclusivo": [],
+   "arena": 1,
+   "alvo": "tudo",
+   "danoTorre": 0.6,
+   "evento": true,
+   "nivelInicial": 5,
+   "relevo": true,
+   "passiva": {
+    "nome": "Revezamento Chaos",
+    "tipo": "relevo",
+    "descricao": "4 heróis, 4 barras de vida. Quem fica no banco recupera vida e, se um herói cai, o próximo entra na hora. Entrar faz um golpe especial. Os 4 heróis entrando em 25s liberam a Super Sincronia: os 4 lutam juntos e ficam intocáveis por 3s."
+   },
+   "habilidade": {
+    "nome": "Revezar",
+    "tipo": "revezar",
+    "custo": 1,
+    "recarga": 3,
+    "descricao": "Troca o herói. Quem entra faz um golpe de chegada diferente."
+   }
+  },
+  {
+   "id": "q_sonic",
+   "nome": "Super Sonic",
+   "raridade": "lendaria",
+   "custo": 0,
+   "tipo": "Herói · Velocidade",
+   "descricao": "Combos rápidos e críticos. Chega com o Ataque Teleguiado.",
+   "rosto": [
+    469,
+    358,
+    176
+   ],
+   "arte": [
+    0,
+    0,
+    736
+   ],
+   "vida": 850,
+   "dano": 170,
+   "velocidade": 120,
+   "alcance": 18,
+   "cadencia": 0.5,
+   "trofeus": 0,
+   "exclusivo": [],
+   "arena": 1,
+   "alvo": "tudo",
+   "danoTorre": 0.6,
+   "corpo": true,
+   "relevoHeroi": true
+  },
+  {
+   "id": "q_shadow",
+   "nome": "Super Shadow",
+   "raridade": "lendaria",
+   "custo": 0,
+   "tipo": "Herói · Controle do Caos",
+   "descricao": "Rouba vida ao bater. Chega parando o tempo.",
+   "rosto": [
+    445,
+    561,
+    106
+   ],
+   "arte": [
+    0,
+    0,
+    736
+   ],
+   "vida": 1100,
+   "dano": 220,
+   "velocidade": 85,
+   "alcance": 20,
+   "cadencia": 0.8,
+   "trofeus": 0,
+   "exclusivo": [],
+   "arena": 1,
+   "alvo": "tudo",
+   "danoTorre": 0.6,
+   "corpo": true,
+   "relevoHeroi": true
+  },
+  {
+   "id": "q_silver",
+   "nome": "Super Silver",
+   "raridade": "lendaria",
+   "custo": 0,
+   "tipo": "Herói · Psicocinese",
+   "descricao": "Ataque à distância que atravessa. Chega levantando todo mundo.",
+   "rosto": [
+    345,
+    535,
+    203
+   ],
+   "arte": [
+    0,
+    0,
+    736
+   ],
+   "vida": 800,
+   "dano": 130,
+   "velocidade": 70,
+   "alcance": 95,
+   "cadencia": 1.0,
+   "trofeus": 0,
+   "exclusivo": [],
+   "arena": 1,
+   "alvo": "tudo",
+   "danoTorre": 0.6,
+   "corpo": true,
+   "relevoHeroi": true
+  },
+  {
+   "id": "q_amy",
+   "nome": "Super Amy",
+   "raridade": "lendaria",
+   "custo": 0,
+   "tipo": "Herói · Martelo Piko",
+   "descricao": "Escudo e cura. Chega com um martelaço e protege os aliados.",
+   "rosto": [
+    205,
+    344,
+    206
+   ],
+   "arte": [
+    0,
+    0,
+    736
+   ],
+   "vida": 1000,
+   "dano": 140,
+   "velocidade": 75,
+   "alcance": 22,
+   "cadencia": 0.9,
+   "trofeus": 0,
+   "exclusivo": [],
+   "arena": 1,
+   "alvo": "tudo",
+   "danoTorre": 0.6,
+   "corpo": true,
+   "relevoHeroi": true
   }
  ]
 }

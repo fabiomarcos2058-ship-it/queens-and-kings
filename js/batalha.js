@@ -577,6 +577,7 @@ const Batalha = (() => {
     if (m0.hyperFlash) t.flashTimer = m0.hyperFlash[0];
     if (m0.superRenasce || m0.auraSolar) t.el.classList.add('tem-orbita');
     if (m0.momento) { t.mom = 0; t.momT = 0; }
+    if (c.relevo) iniciarRelevo(t);
     if (m0.duelista) t.cartaTimer = 2.2;
     if (m0.sombras) { t.intocavel = m0.sombras; t.sombra = m0.sombras; t.el.classList.add('sombra'); }
     if (m0.surgirImpacto) agendar(1, () => { if (t.vida > 0) explosaoArea(t, t, Math.round(t.dano * m0.surgirImpacto[0]), m0.surgirImpacto[1], { visual: 'impacto', cor: t.atk.v.cor, empurrar: 14 }); });
@@ -812,6 +813,8 @@ const Batalha = (() => {
       const img = e.img || (e.img = s.arena.querySelector(`[data-torre="${e.id}"]`));
       if (img) { piscar(img, 'torre-levou'); }
       if (e.vida <= 0) destruirTorre(e, deTime);
+    } else if (e.vida <= 0 && !e.torre && e.rel && !e.temporario && !s.acabou && relevoMorreu(e)) {
+      /* o próximo herói entrou */
     } else if (e.vida <= 0 && !e.torre && e.omniAtual && e.omniBen && (e.omniQuedas || 0) < 2 && !e.temporario && !s.acabou) {
       omniSalva(e);
     } else if (e.vida <= 0 && !e.torre && e.atk && e.atk.m && e.atk.m.renascer && (e.renasceu || 0) < e.atk.m.renascer && !e.temporario && !s.acabou) {
@@ -1015,6 +1018,7 @@ const Batalha = (() => {
     if (h.tipo === 'hakai') hakai(t, h);
     if (h.tipo === 'kameKaioken') kameKaioken(t, h);
     if (h.tipo === 'omnitrix') omnitrix(t);
+    if (h.tipo === 'revezar') revezar(t);
     if (h.tipo === 'chamaErupcao') chamaErupcao(t, h);
     if (h.tipo === 'diamanteCristais') diamanteCristais(t, h);
     if (h.tipo === 'xlrTempestade') xlrTempestade(t, h);
@@ -1344,8 +1348,8 @@ const Batalha = (() => {
   }
 
   // corte de cena por cima da arena (aparece pra todo mundo da partida)
-  const CUTINS = ['goku_furia', 'jojo_jotaro', 'jojo_dio', 'jojo_diavolo', 'jojo_pucci', 'jojo_gyro', 'jojo_johnny', 'sonic_shadow', 'sonic_super', 'sonic_dark', 'sonic_excalibur', 'sonic_hyper', 'yugi_reino', 'ultra_sae', 'ultra_rin', 'ultra_isagi', 'ultra_anri', 'inv_mark_eve', 'inv_mark', 'inv_eve', 'inv_conquest', 'inv_omni', 'inv_anissa', 'db_goku_vegeta', 'db_gogeta_vegetto', 'db_vegetto_gogeta', 'db_ultra_ego', 'db_kaioken', 'db_goku_deus', 'db_black', 'db_evolution', 'cy_david', 'cy_adam', 'cy_adam_evo', 'cy_rubi', 'cy_silverhand', 'nz_ainz', 'nz_albedo', 'nz_shalltear', 'nz_demiurge', 'nz_sebas', 'nz_pandora', 'op_luffy', 'isagi_meta', 'kaiser_isagi', 'sonic_relampago', 'sonic_renasce', 'super_sonic_solar', 'ben_omnitrix', 'ben_chama', 'ben_diamante', 'ben_xlr8', 'ben_enormossauro', 'ben_contratempo', 'ben_ecoeco', 'ben_cromatico', 'ben_gravatack', 'ben_waybig'];
-  const TEXTO_CUTIN_2 = { ben_omnitrix: 'É hora de ação!', ben_chama: 'Chama!', ben_diamante: 'Diamante!', ben_xlr8: 'XLR8!', ben_enormossauro: 'Enormossauro!', ben_contratempo: 'Contra-Tempo!', ben_ecoeco: 'Eco Eco!', ben_cromatico: 'Cromático!', ben_gravatack: 'Gravatack!', ben_waybig: 'Way Big!', sonic_relampago: 'Loop Relâmpago!', sonic_renasce: 'Super Sonic!', super_sonic_solar: 'Chaos Blast!', isagi_meta: 'Metavisão!', kaiser_isagi: 'Pacto do Diabo!', sonic_shadow: 'Chaos Control!', sonic_super: 'Super Boost!', sonic_dark: 'Explosão Sombria!', sonic_excalibur: 'Soul Surge!', sonic_hyper: 'Hiper Velocidade!', yugi_reino: 'Reino das Sombras!', ultra_sae: 'Visão do Gênio!', ultra_rin: 'Flow: Destruição!', ultra_isagi: 'Direct Shot!', ultra_anri: 'Doces ou Travessuras?', inv_mark_eve: 'Juntos somos invencíveis!', inv_mark: 'Investida Invencível!', inv_eve: 'Barreira Atômica!', inv_conquest: 'Esmagar!', inv_omni: 'Fúria do Regente!', inv_anissa: 'Rajada Viltrumita!', db_goku_vegeta: 'Rivais Eternos!', db_gogeta_vegetto: 'Kamehameha Final + Big Bang!', db_vegetto_gogeta: 'Soul Punisher!', db_ultra_ego: 'Hakai!', db_kaioken: 'Kaioken x20!', db_goku_deus: 'Punho do Deus Saiyajin!', db_black: 'Ceifa Divina!', db_evolution: 'Final Flash!', cy_david: 'Sandevistan!', cy_adam: 'Rajada de Mísseis!', cy_adam_evo: 'Mísseis + Sandevistan!', cy_rubi: 'Ciberpsicose!', cy_silverhand: 'Johnny Silverhand!', nz_ainz: 'O Objetivo de Toda Vida é a Morte!', nz_albedo: 'Hermes Trismegistus!', nz_shalltear: 'Lança Purificadora!', nz_demiurge: 'Chamas do Inferno!', nz_sebas: 'Forma de Dragão!', nz_pandora: 'Doppelgänger!', op_luffy: 'Gomu Gomu no... Bajrang Gun!' };
+  const CUTINS = ['goku_furia', 'jojo_jotaro', 'jojo_dio', 'jojo_diavolo', 'jojo_pucci', 'jojo_gyro', 'jojo_johnny', 'sonic_shadow', 'sonic_super', 'sonic_dark', 'sonic_excalibur', 'sonic_hyper', 'yugi_reino', 'ultra_sae', 'ultra_rin', 'ultra_isagi', 'ultra_anri', 'inv_mark_eve', 'inv_mark', 'inv_eve', 'inv_conquest', 'inv_omni', 'inv_anissa', 'db_goku_vegeta', 'db_gogeta_vegetto', 'db_vegetto_gogeta', 'db_ultra_ego', 'db_kaioken', 'db_goku_deus', 'db_black', 'db_evolution', 'cy_david', 'cy_adam', 'cy_adam_evo', 'cy_rubi', 'cy_silverhand', 'nz_ainz', 'nz_albedo', 'nz_shalltear', 'nz_demiurge', 'nz_sebas', 'nz_pandora', 'op_luffy', 'isagi_meta', 'kaiser_isagi', 'sonic_relampago', 'sonic_renasce', 'super_sonic_solar', 'ben_omnitrix', 'ben_chama', 'ben_diamante', 'ben_xlr8', 'ben_enormossauro', 'ben_contratempo', 'ben_ecoeco', 'ben_cromatico', 'ben_gravatack', 'ben_waybig', 'q_sonic', 'q_shadow', 'q_silver', 'q_amy', 'q_hyper'];
+  const TEXTO_CUTIN_2 = { q_sonic: 'Ataque Teleguiado!', q_shadow: 'Controle do Caos!', q_silver: 'Psicocinese!', q_amy: 'Martelo Piko!', q_hyper: 'SUPER SINCRONIA!', ben_omnitrix: 'É hora de ação!', ben_chama: 'Chama!', ben_diamante: 'Diamante!', ben_xlr8: 'XLR8!', ben_enormossauro: 'Enormossauro!', ben_contratempo: 'Contra-Tempo!', ben_ecoeco: 'Eco Eco!', ben_cromatico: 'Cromático!', ben_gravatack: 'Gravatack!', ben_waybig: 'Way Big!', sonic_relampago: 'Loop Relâmpago!', sonic_renasce: 'Super Sonic!', super_sonic_solar: 'Chaos Blast!', isagi_meta: 'Metavisão!', kaiser_isagi: 'Pacto do Diabo!', sonic_shadow: 'Chaos Control!', sonic_super: 'Super Boost!', sonic_dark: 'Explosão Sombria!', sonic_excalibur: 'Soul Surge!', sonic_hyper: 'Hiper Velocidade!', yugi_reino: 'Reino das Sombras!', ultra_sae: 'Visão do Gênio!', ultra_rin: 'Flow: Destruição!', ultra_isagi: 'Direct Shot!', ultra_anri: 'Doces ou Travessuras?', inv_mark_eve: 'Juntos somos invencíveis!', inv_mark: 'Investida Invencível!', inv_eve: 'Barreira Atômica!', inv_conquest: 'Esmagar!', inv_omni: 'Fúria do Regente!', inv_anissa: 'Rajada Viltrumita!', db_goku_vegeta: 'Rivais Eternos!', db_gogeta_vegetto: 'Kamehameha Final + Big Bang!', db_vegetto_gogeta: 'Soul Punisher!', db_ultra_ego: 'Hakai!', db_kaioken: 'Kaioken x20!', db_goku_deus: 'Punho do Deus Saiyajin!', db_black: 'Ceifa Divina!', db_evolution: 'Final Flash!', cy_david: 'Sandevistan!', cy_adam: 'Rajada de Mísseis!', cy_adam_evo: 'Mísseis + Sandevistan!', cy_rubi: 'Ciberpsicose!', cy_silverhand: 'Johnny Silverhand!', nz_ainz: 'O Objetivo de Toda Vida é a Morte!', nz_albedo: 'Hermes Trismegistus!', nz_shalltear: 'Lança Purificadora!', nz_demiurge: 'Chamas do Inferno!', nz_sebas: 'Forma de Dragão!', nz_pandora: 'Doppelgänger!', op_luffy: 'Gomu Gomu no... Bajrang Gun!' };
   const TEXTO_CUTIN = { ...TEXTO_CUTIN_2, goku_furia: "You're going to pay for this!", jojo_jotaro: 'Star Platinum: The World!', jojo_dio: 'ZA WARUDO! Toki yo tomare!', jojo_diavolo: 'King Crimson!', jojo_pucci: 'Made in Heaven!', jojo_gyro: 'Ball Breaker!', jojo_johnny: 'Tusk Act 4!' };
   const cutinRede = (qual) => { cutin(qual); if (s.rede || s.aoVivo) s.eventos.push(['c', CUTINS.indexOf(qual)]); };
   function cutin(qual) {
@@ -2232,6 +2236,137 @@ const Batalha = (() => {
 
   // =================== Família Sonic + Yugi ===================
   const inimigosPerto = (t, r) => s.ent.filter((e) => !e.torre && e.time !== t.time && e.vida > 0 && !(e.banido > 0) && !e.acoplado && dist(e, t) < r + e.raio);
+  // =================== SUPER QUARTETO: Revezamento Chaos (4 heróis, 4 barras de vida) ===================
+  const RELEVO = ['q_sonic', 'q_shadow', 'q_silver', 'q_amy'];
+  const RELEVO_FALA = { q_sonic: 'Sonic!', q_shadow: 'Shadow!', q_silver: 'Silver!', q_amy: 'Amy!' };
+  const RELEVO_COR = { q_sonic: '#38BDF8', q_shadow: '#FF4A3A', q_silver: '#7FFFEA', q_amy: '#FF8FD0' };
+  const RELEVO_NOME = { q_sonic: 'Sonic', q_shadow: 'Shadow', q_silver: 'Silver', q_amy: 'Amy' };
+
+  function relevoProximo(t) {
+    const r = t.rel, i = RELEVO.indexOf(r.atual);
+    for (let k = 1; k < 4; k++) { const id = RELEVO[(i + k) % 4]; if (r.hp[id] > 0) return id; }
+    return null;
+  }
+  function relevoHab(t) {
+    const p = relevoProximo(t);
+    t.habilidade = Object.assign({}, t.rel.hab0, { nome: p ? `Revezar: ${RELEVO_NOME[p]}` : 'Sem reserva' });
+    const cx = document.getElementById('habilidades'); if (cx) cx.dataset.ids = '';
+  }
+  function iniciarRelevo(t) {
+    t.rel = { atual: 'q_sonic', hp: { q_sonic: 1, q_shadow: 1, q_silver: 1, q_amy: 1 }, queda: {}, tags: [{ id: 'q_sonic', t: 0 }], hab0: t.habilidade, vistos: { q_sonic: 1 } };
+    t.el.classList.add('q-relevo', 'q-q_sonic');
+    relevoHab(t);
+  }
+  // troca o herói em campo: a vida de quem sai fica guardada em %, quem entra volta com a dele
+  function relevoTroca(t, novoId, emergencia) {
+    const r = t.rel;
+    if (!r || novoId === r.atual) return;
+    const c = Estado.carta(novoId); if (!c) return;
+    const f = t.f || 1;
+    r.hp[r.atual] = emergencia ? 0 : Math.max(0.02, t.vida / t.max);
+    if (emergencia) r.queda[r.atual] = 14;
+    const velho = r.atual;
+    r.atual = novoId;
+    const ratio = Math.max(0.05, r.hp[novoId]);
+    t.carta = c;
+    t.max = Math.round(c.vida * f); t.vida = Math.max(1, Math.round(t.max * ratio));
+    t.dano = t.danoBase = Math.round(c.dano * f);
+    t.vel = t.velBase = c.velocidade; t.alcance = c.alcance; t.cadencia = c.cadencia; t.area = c.area || 0;
+    t.atk = Ataques.de(c); t.classe = Ataques.classeDe(c);
+    const m = t.atk.m || {};
+    t.voo = !!m.voo;
+    t.escudo = t.escudoMax = m.escudo ? Math.round(t.max * m.escudo) : 0;
+    t.atord = 0; t.lento = 0; t.queima = 0; t.fraco = 0;
+    t.cd = 0.25; t.recarga = emergencia ? 0 : 3;
+    const cl = t.el.classList;
+    cl.remove(...RELEVO.map((x) => 'q-' + x)); cl.add('q-' + novoId);
+    cl.toggle('com-escudo', !!t.escudo);
+    const img = t.el.querySelector('.tropa-medalhao img');
+    if (img) img.src = `assets/cartas/${novoId}_medalhao.png`;
+    relevoHab(t);
+    atualizarHp(t);
+    t.relUlt = s.t;
+    const cor = RELEVO_COR[novoId];
+    fxEl('fx-omni', t.x, t.y, 900, { color: cor });
+    particulas(t.x, t.y, cor, 14, 34);
+    falar(t, RELEVO_FALA[novoId], 'fala-quarteto');
+    if (!r.vistos[novoId]) { r.vistos[novoId] = 1; cutinRede(novoId); }
+    relevoEntrada(t, novoId);
+    // Super Sincronia: os 4 heróis entraram em sequência (25s)
+    r.tags.push({ id: novoId, t: s.t });
+    r.tags = r.tags.filter((g) => s.t - g.t < 25);
+    if (new Set(r.tags.map((g) => g.id)).size >= 4) { r.tags = []; agendar(0.5, () => { if (s && !s.acabou && t.vida > 0) superSincronia(t); }); }
+  }
+  function revezar(t) {
+    if (!t.rel) return;
+    const p = relevoProximo(t);
+    if (!p) { falar(t, 'Sem reserva!', 'fala-quarteto'); return; }
+    relevoTroca(t, p, false);
+  }
+  // o herói em campo caiu: o próximo entra na hora (se sobrar alguém)
+  function relevoMorreu(e) {
+    const r = e.rel;
+    r.hp[r.atual] = 0; r.queda[r.atual] = 14;
+    let melhor = null;
+    for (const id of RELEVO) if (id !== r.atual && r.hp[id] > 0 && (!melhor || r.hp[id] > r.hp[melhor])) melhor = id;
+    if (!melhor) return false;
+    r.atual = RELEVO.find((x) => x === r.atual); // mantém para relevoTroca
+    relevoTroca(e, melhor, true);
+    e.intocavel = Math.max(e.intocavel || 0, 1.2);
+    falar(e, 'Revezamento de emergência!', 'fala-quarteto');
+    return true;
+  }
+  function passivasRelevo(t, dt) {
+    const r = t.rel;
+    for (const id of RELEVO) {
+      if (id === r.atual) continue;
+      if (r.hp[id] > 0) r.hp[id] = Math.min(1, r.hp[id] + 0.05 * dt);       // descansando no banco: +5%/s
+      else if (r.queda[id] != null && (r.queda[id] -= dt) <= 0) { r.hp[id] = 0.3; r.queda[id] = null; }  // caído: volta com 30% depois de 14s
+    }
+    if ((t.relHud = (t.relHud || 0) + dt) > 0.25) { t.relHud = 0; t.el.style.setProperty('--q-reserva', RELEVO.filter((id) => id !== r.atual).map((id) => Math.round(r.hp[id] * 100) + '%').join(',')); }
+  }
+  function relevoEntrada(t, id) {
+    const inim = () => inimigosPerto(t, 240);
+    if (id === 'q_sonic') { // Ataque Teleguiado: salta entre até 5 inimigos
+      const alvos = embaralhar(inim()).slice(0, 5);
+      if (!alvos.length && t.alvo && t.alvo.vida > 0) alvos.push(t.alvo);
+      t.intocavel = Math.max(t.intocavel || 0, 1);
+      alvos.forEach((a, i) => agendar(0.1 + i * 0.13, () => {
+        if (!s || s.acabou || t.vida <= 0 || t.rel.atual !== 'q_sonic' || a.vida <= 0) return;
+        teleportar(t, a); golpeVisual(t, a, { g: 'giro', cor: '#FFD93B' });
+        ferir(a, Math.round(t.dano * 1.1 * multClasse(t, a)), t.time, t);
+      }));
+    } else if (id === 'q_shadow') { // Controle do Caos: para o tempo
+      fxEl('fx-nz-relogio', t.x, t.y, 2000);
+      for (const e of inimigosPerto(t, 220)) if (!imuneA(e)) { e.atord = Math.max(e.atord, 1.8); e.el.classList.add('parada-tempo'); }
+      agendar(0.6, () => { if (!s || s.acabou || t.vida <= 0) return; for (const e of inimigosPerto(t, 220)) ferir(e, Math.round(t.dano * 1.3 * multClasse(t, e)), t.time, t); explosaoArea(t, t, 0, 200, { visual: 'impacto', cor: '#FF4A3A' }); });
+    } else if (id === 'q_silver') { // Psicocinese: levanta todo mundo e arremessa
+      fxEl('fx-omni-grav', t.x, t.y, 1700);
+      const alvos = inimigosPerto(t, 180);
+      for (const e of alvos) if (!imuneA(e)) { e.atord = Math.max(e.atord, 1.6); e.el.classList.add('atordoada', 'omni-flutua'); }
+      agendar(1.6, () => { if (!s || s.acabou) return; tremer(true); for (const e of alvos) { if (e.el) e.el.classList.remove('omni-flutua'); if (e.vida > 0) { ferir(e, Math.round(t.dano * 1.8 * multClasse(t, e)), t.time, t); empurrar(e, t, 26); } } });
+    } else if (id === 'q_amy') { // Martelo Piko: martelaço + escudo nos aliados + cura
+      explosaoArea(t, t, Math.round(t.dano * 1.5), 95, { visual: 'impacto', cor: '#FF8FD0', empurrar: 14 });
+      for (const a of aliadosPerto(t, 150)) { a.escudo = (a.escudo || 0) + Math.round(a.max * 0.2); a.escudoMax = Math.max(a.escudoMax || 0, a.escudo); a.el.classList.add('com-escudo'); }
+      curar(t, Math.round(t.max * 0.15));
+    }
+  }
+  function superSincronia(t) {
+    cutinRede('q_hyper');
+    falar(t, 'SUPER SINCRONIA!', 'fala-quarteto');
+    t.intocavel = Math.max(t.intocavel || 0, 3);
+    fxEl('fx-q-sync', t.x, t.y, 1400);
+    tremer(true);
+    RELEVO.filter((id) => id !== t.rel.atual).forEach((id, i) => {
+      const c = Estado.carta(id); if (!c) return;
+      const cl = donoDe(criarTropa(t.time, c, Math.max(16, Math.min(W - 16, t.x + (i - 1) * 30)), t.y + (i % 2 ? 12 : -12), (t.f || 1) * 0.85, t.nivel), t.dono);
+      cl.habilidade = null; cl.temporario = 9; cl.invocado = true; cl.surgir = 0.3; cl.intocavel = 3;
+      cl.el.classList.remove('campea'); cl.el.classList.add('q-dourado', 'q-' + id);
+      if (t.alvo && t.alvo.vida > 0) cl.alvo = t.alvo;
+    });
+    explosaoArea(t, t, Math.round(t.dano * 2.4), 150, { visual: 'impacto', cor: '#FFD93B', empurrar: 20, atordoar: 1.2 });
+  }
+
   // =================== BEN 10: Omnitrix (um herói, nove aliens) ===================
   const ALIENS_OMNI = ['ben_chama', 'ben_diamante', 'ben_xlr8', 'ben_enormossauro', 'ben_contratempo', 'ben_ecoeco', 'ben_cromatico', 'ben_gravatack', 'ben_waybig'];
   const OMNI_DUR = 14;
@@ -3626,6 +3761,7 @@ const Batalha = (() => {
         || (h.tipo === 'tempoMorte' && (s.ent.filter((e) => !e.torre && e.time !== t.time && e.vida > 0 && dist(e, t) < 300).length >= 3 || s.ent.some((e) => !e.torre && e.time !== t.time && e.vida > t.dano * 4 && dist(e, t) < 300)))
         || (h.tipo === 'hermes' && (s.ent.filter((e) => !e.torre && e.time !== t.time && e.vida > 0 && dist(e, t) < 150).length >= 2 || (perto && t.vida < t.max * 0.6)))
         || ((h.tipo === 'einherjar' || h.tipo === 'formaDragao') && perto)
+        || (h.tipo === 'revezar' && (t.vida < t.max * 0.45 || s.t - (t.relUlt || 0) > 11) && s.ent.some((e) => !e.torre && e.time !== t.time && e.vida > 0 && dist(e, t) < 240))
         || (h.tipo === 'omnitrix' && !t.omniAtual && (perto || (t.alvo && dist(t, t.alvo) < 220)))
         || (['chamaErupcao', 'diamanteCristais', 'enormoGigante', 'ecoClones', 'gravInverter'].includes(h.tipo) && s.ent.filter((e) => !e.torre && e.time !== t.time && e.vida > 0 && dist(e, t) < 130).length >= 1)
         || (h.tipo === 'xlrTempestade' && s.ent.some((e) => !e.torre && e.time !== t.time && e.vida > 0 && dist(e, t) < 240))
@@ -4285,6 +4421,7 @@ const Batalha = (() => {
       if (mm && (mm.superForma || mm.spinDash || mm.inibidores || mm.hyperFlash || mm.duelista || mm.raivaSombria || mm.momento || mm.superRenasce || mm.auraSolar)) passivasSonic(t, dt);
       if (t.temporario > 0 && (t.temporario -= dt) <= 0) { ferir(t, t.vida + 1, t.time === 'azul' ? 'vermelho' : 'azul', null, { atravessa: true, semEsquiva: true }); continue; }
       if (t.omniAtual) passivasOmni(t, dt);
+      if (t.rel) passivasRelevo(t, dt);
       if (mm && mm.hana) robinDefesa(t, dt);
       if (t.vida <= 0) continue;
       if (t.intocavel > 0) t.intocavel -= dt;

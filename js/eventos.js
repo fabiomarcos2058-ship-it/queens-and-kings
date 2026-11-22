@@ -893,8 +893,8 @@ const Eventos = (() => {
   }
 
   // ---------- fim de uma batalha de evento ----------
-  const MASC = new Set([...FAMILIA_SONIC, YUGI, 'ben10']);
-  const EMOJI_REVELA = { mita_malvada: '🖤', akame_murasame: '🗡️', yugi_moto: '🃏', sonic: '💨', shadow: '🌀', super_sonic: '⭐', dark_sonic: '🟣', sonic_excalibur: '⚔️', hyper_sonic: '💎', ben10: '🟢' };
+  const MASC = new Set([...FAMILIA_SONIC, YUGI, 'ben10', 'super_quarteto']);
+  const EMOJI_REVELA = { mita_malvada: '🖤', akame_murasame: '🗡️', yugi_moto: '🃏', sonic: '💨', shadow: '🌀', super_sonic: '⭐', dark_sonic: '🟣', sonic_excalibur: '⚔️', hyper_sonic: '💎', ben10: '🟢', super_quarteto: '💎' };
   function revelarNino(c, tag = 'LENDÁRIA EXCLUSIVA DE EVENTO', fala = '"Hmph… n-não é como se eu quisesse entrar no seu deck… mas já que você venceu, eu vou."') {
     if (!c || document.querySelector('.revela-nino')) return;
     const el = document.createElement('div');
@@ -904,7 +904,7 @@ const Eventos = (() => {
         <div class="rn-palco">${Cartas.html(c, { mini: true })}</div>
         <b>${esc(c.nome)}</b>
         <p>${fala}</p>
-        <button class="btn-modal principal">${MASC.has(c.id) ? 'Bem-vindo' : 'Bem-vinda'}, ${esc(FAMILIA_SONIC.includes(c.id) ? c.nome : c.nome.split(' ')[0])}! ${EMOJI_REVELA[c.id] || '🎀'}</button></div>`;
+        <button class="btn-modal principal">${MASC.has(c.id) ? 'Bem-vindo' : 'Bem-vinda'}, ${esc((FAMILIA_SONIC.includes(c.id) || c.id === 'super_quarteto') ? c.nome : c.nome.split(' ')[0])}! ${EMOJI_REVELA[c.id] || '🎀'}</button></div>`;
     $('app').appendChild(el);
     try { navigator.vibrate && navigator.vibrate([80, 50, 160]); } catch (e) { /* nada */ }
     el.querySelector('button').onclick = () => { el.classList.add('sumir'); setTimeout(() => el.remove(), 300); };
@@ -947,6 +947,7 @@ const Eventos = (() => {
     const ev = r.evento || {};
     // todo evento também dá pontos (XP) do passe
     try { const pp = Passe.ganharPontos(r.resultado, r.coroas || 0); setTimeout(() => UI.toast(`🎟️ +${pp.ganho} pontos do passe${pp.subiu ? ` · nível ${Passe.nivel()}!` : ''}`), 600); } catch (e) { /* nada */ }
+    if (ev.esm) { Esmeraldas.fimFase(r, { mostrarBau, tudo }); return; }
     if (ev.omni) { Omnitrix.fimMissao(r, { mostrarBau, tudo }); return; }
     if (ev.chefe) { Chefe.fimLuta(r, { mostrarBau, tudo }); return; }
     if (ev.mita) { fimMita(r, { mostrarBau, tudo }); return; }

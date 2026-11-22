@@ -23,9 +23,9 @@ const Ataques = (() => {
   const NA_TORRE = { tanque: 1.1, lutador: 0.85, assassino: 0.8, atirador: 0.7, mago: 0.65, enxame: 1 };
 
   const CLASSE_DA_CARTA = {
-    tanque: ['ben_diamante', 'ben_enormossauro', 'ben_waybig', 'itsuki', 'shizuku', 'gogeta_ssj4', 'goku_ssj3', 'goku_ssj4', 'goku_blue_lb', 'gogeta_ultra', 'sonic_excalibur', 'conquest', 'omni_man', 'vegeta_ultra_ego', 'gogeta_blue_solo', 'adam_smasher', 'adam_smasher_evo', 'albedo'],
-    assassino: ['ben_xlr8', 'bra', 'teto', 'pan_dbh', 'akame', 'mbappe', 'kashimo', 'goku_pressagio', 'diavolo', 'mita_malvada', 'akame_murasame', 'sonic', 'sonic_relampago', 'dark_sonic', 'kurona', 'goku_black_rose', 'goku_blue_kaioken_remake', 'vegetto_blue_solo', 'agente_rubi', 'david_martinez', 'lucy_kushinada', 'shalltear'],
-    atirador: ['ben_chama', 'ben_ecoeco', 'mai', 'miku_nakano', 'pan_gt', 'riruka', 'rukia_remake', 'nino_nakano', 'gyro', 'johnny', 'roman_cyber', 'johnny_silverhand', 'pandoras_actor'],
+    tanque: ['q_amy', 'ben_diamante', 'ben_enormossauro', 'ben_waybig', 'itsuki', 'shizuku', 'gogeta_ssj4', 'goku_ssj3', 'goku_ssj4', 'goku_blue_lb', 'gogeta_ultra', 'sonic_excalibur', 'conquest', 'omni_man', 'vegeta_ultra_ego', 'gogeta_blue_solo', 'adam_smasher', 'adam_smasher_evo', 'albedo'],
+    assassino: ['super_quarteto', 'q_sonic', 'q_shadow', 'ben_xlr8', 'bra', 'teto', 'pan_dbh', 'akame', 'mbappe', 'kashimo', 'goku_pressagio', 'diavolo', 'mita_malvada', 'akame_murasame', 'sonic', 'sonic_relampago', 'dark_sonic', 'kurona', 'goku_black_rose', 'goku_blue_kaioken_remake', 'vegetto_blue_solo', 'agente_rubi', 'david_martinez', 'lucy_kushinada', 'shalltear'],
+    atirador: ['q_silver', 'ben_chama', 'ben_ecoeco', 'mai', 'miku_nakano', 'pan_gt', 'riruka', 'rukia_remake', 'nino_nakano', 'gyro', 'johnny', 'roman_cyber', 'johnny_silverhand', 'pandoras_actor'],
     mago: ['ben_contratempo', 'ben_cromatico', 'ben_gravatack', 'gohan_mirai', 'rukia', 'nami_last', 'hatsune_miku', 'bambietta', 'bulma', 'gojo', 'robin', 'pucci', 'mita_gentil', 'yugi_moto', 'anri_halloween', 'eve_atomica', 'ainz_ooal_gown', 'demiurge'],
     enxame: ['mini'],
   };
@@ -63,6 +63,11 @@ const Ataques = (() => {
     dark_sonic: { v: { g: 'giro', cor: '#A855F7' }, m: { raivaSombria: true, berserk: 0.35 }, d: 'Fica furioso quando um aliado cai perto.' },
     sonic_excalibur: { v: { g: 'corte', s: 'espada_trunks', cor: '#BFE8FF' }, m: { escudo: 0.2, aparar: 7 }, d: 'Corte em área, escudo e aparar com contra-ataque.' },
     sonic_relampago: { v: { g: 'giro', cor: '#38BDF8' }, m: { momento: [8, 0.05], superRenasce: 12 }, d: 'Acelera a cada golpe. Ao cair, renasce como Super Sonic com 7 Esmeraldas girando.' },
+    super_quarteto: { v: { g: 'giro', cor: '#FFD93B' }, m: { combo: 3, critico: [0.15, 1.7], relevo: true }, d: 'Revezamento Chaos: 4 heróis, 4 barras de vida.' },
+    q_sonic: { v: { g: 'giro', cor: '#FFD93B' }, m: { combo: 4, critico: [0.2, 1.8] }, d: 'Combos rápidos e críticos.' },
+    q_shadow: { v: { g: 'chute', cor: '#FF4A3A' }, m: { vampiro: 0.25, empurrar: 10 }, d: 'Rouba vida ao bater.' },
+    q_silver: { v: { p: 'esfera', vel: 240, tam: 22, rastro: '#BFFFF0' }, m: { perfura: true }, d: 'Psicocinese que atravessa.' },
+    q_amy: { v: { g: 'impacto', cor: '#FF8FD0', pesado: true }, m: { escudo: 0.2, regen: 0.01 }, d: 'Martelo Piko com escudo.' },
     ben10: { v: { g: 'soco', cor: '#6BFF4A' }, m: { omni: true, combo: 3 }, d: 'Omnitrix: vira um de 9 aliens com poder próprio.' },
     ben_chama: { v: { p: 'fogo', vel: 260, tam: 20, rastro: '#FF6A1A' }, m: { queimar: [0.05, 3, '#FF4A1A', 'fogo'] }, d: 'Bolas de fogo que queimam.' },
     ben_diamante: { v: { g: 'corte', cor: '#7FFFEA', pesado: true }, m: { escudo: 0.3, veterano: 0.2, perfura: true }, d: 'Cristal: escudo e menos dano.' },

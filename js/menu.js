@@ -1967,11 +1967,12 @@
         <div class="passe-linha"><span class="passe-nivel">${nv}</span><div class="ev-barra passe-barra"><i style="width:${nv >= Passe.NIVEIS ? 100 : ((p.pontos % Passe.PONTOS_NIVEL) / Passe.PONTOS_NIVEL) * 100}%"></i><small>${nv >= Passe.NIVEIS ? 'Completo!' : `${p.pontos % Passe.PONTOS_NIVEL}/${Passe.PONTOS_NIVEL}`}</small></div><span class="passe-tipo">${p.ultra ? 'ULTRA' : p.plus ? 'PLUS' : 'FREE'}</span></div>
         ${pend ? `<span class="passe-pendente">${pend} prêmio${pend > 1 ? 's' : ''} para pegar!</span>` : ''}
       </button>` +
-      Omnitrix.cartaoHtml() + Chefe.cartaoHtml() + Torneio.cartaoHtml() +
+      Esmeraldas.cartaoHtml() + Omnitrix.cartaoHtml() + Chefe.cartaoHtml() + Torneio.cartaoHtml() +
       `<div id="eventos-novos">${Eventos.html(extras)}</div>`;
 
     $('abrir-passe').onclick = telaPasse;
     $('abrir-chefe').onclick = () => Chefe.abrir({ iniciar: jogarEvento, mostrarBau, tudo: () => { tudo(); irPara('eventos'); } });
+    $('abrir-esm').onclick = () => Esmeraldas.abrir({ iniciar: jogarEvento, mostrarBau, tudo: () => { tudo(); irPara('eventos'); } });
     $('abrir-omni').onclick = () => Omnitrix.abrir({ iniciar: jogarEvento, mostrarBau, tudo: () => { tudo(); irPara('eventos'); } });
     Torneio.ligar({ fimBatalha: fimDeBatalha, tudo: () => { tudo(); irPara('eventos'); } });
     $('abrir-torneio').onclick = () => Torneio.menu();

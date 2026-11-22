@@ -32,6 +32,7 @@ const Titulos = (() => {
     invocador: { nome: 'Invocador Ultra', ic: '🌀', raro: 'lendario', como: 'Consiga um personagem Ultra no Summon', prog: () => [(D().summon && D().summon.ultras) || 0, 1] },
     farao: { nome: 'Duelista do Faraó', ic: '🃏', raro: 'lendario', como: 'Complete o Duelo do Faraó', tem: () => !!(D().desafios && D().desafios.yugi && D().desafios.yugi.completo) },
     corredor: { nome: 'Mais Rápido do Multiverso', ic: '💨', raro: 'lendario', como: 'Complete a Corrida do Sonic', tem: () => !!(D().desafios && D().desafios.sonic && D().desafios.sonic.completo) },
+    mestre_chaos: { nome: 'Mestre do Caos', ic: '💎', raro: 'lendario', como: 'Reúna as 7 Esmeraldas e libere a Hiper Forma', tem: () => (D().titulosGanhos || []).includes('mestre_chaos') },
     cacador_chefao: { nome: 'Caçador do Chefão', ic: '👹', raro: 'lendario', como: 'Ajude todo mundo a derrubar o Chefão Mundial', tem: () => (D().titulosGanhos || []).includes('cacador_chefao') },
     campeao_torneio: { nome: 'Campeão do Torneio', ic: '🏆', raro: 'mitico', como: 'Vença um Torneio entre amigos (ganha também a moldura de campeão)', tem: () => (D().titulosGanhos || []).includes('campeao_torneio') },
     mitas: { nome: 'Dentro do Jogo', ic: '🎮', raro: 'lendario', como: 'Consiga as duas Mitas', tem: () => Estado.tem('mita_gentil') && Estado.tem('mita_malvada') },
