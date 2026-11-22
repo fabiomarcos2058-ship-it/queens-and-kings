@@ -44,6 +44,7 @@ const Atualizacao = (() => {
   function mostrarTela() {
     if (mostrando) return;
     mostrando = true;
+    try { Avisos.notificar('atualizacao', '✨ Nova versão do Queens and Kings!', 'Abra o jogo para atualizar.', 'versao'); } catch (e) { /* nada */ }
     document.querySelectorAll('.modal-fundo').forEach((m) => m.remove());
     const el = document.createElement('div');
     el.className = 'tela-atualizar';

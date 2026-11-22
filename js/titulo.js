@@ -58,11 +58,14 @@ const Titulo = (() => {
           <div class="tt-raios"></div><div class="tt-sombra"></div>` : fundoFaixas()}
         <div class="titulo-logo qk-logo">${logoReal()}</div>
         ${b ? `<div class="tt-banner"><small>✦ BANNER EM DESTAQUE ✦</small><b>${b.nome}</b><span>${b.sub} · ⏳ ${b.tempo}</span></div>` : ''}
+        ${typeof Instalar !== 'undefined' && !Instalar.instalado() ? '<button class="tt-instalar" id="tt-instalar">📲 Instalar o jogo</button>' : ''}
         <div class="titulo-toque"><i></i><span>TOQUE PARA COMEÇAR</span><i></i></div>
         <div class="titulo-rodape"><span>Fangame sem fins lucrativos · personagens pertencem aos seus autores</span>${versao ? `<em>v.${versao}</em>` : ''}</div>
         ${Array.from({ length: 22 }, (_, i) => `<i class="titulo-brilho" style="--x:${(i * 37) % 100}%;--d:${((i * 0.37) % 6).toFixed(2)}s;--t:${(0.6 + (i % 4) * 0.25).toFixed(2)}"></i>`).join('')}
         <div class="tt-flash"></div>`;
       document.getElementById('app').appendChild(el);
+      const bi = el.querySelector('#tt-instalar');
+      if (bi) bi.onclick = (ev) => { ev.stopPropagation(); Instalar.abrir(); };
       el.onclick = () => {
         if (el.classList.contains('saindo')) return;
         el.classList.add('saindo');

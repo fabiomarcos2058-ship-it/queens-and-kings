@@ -189,11 +189,13 @@ const Som = (() => {
           <small>Cole o link de uma playlist, álbum ou música (Spotify → Compartilhar → Copiar link). Enquanto ela estiver ligada, a música do jogo fica quieta.</small>
           <input type="url" id="som-sp" placeholder="https://open.spotify.com/playlist/..." value="${cfg.spotify ? String(cfg.spotify).replace(/"/g, '') : ''}" />
           <div class="som-sp-botoes"><button class="btn-peq" id="som-sp-ok">Usar</button><button class="btn-peq perigo" id="som-sp-tirar">Tirar</button></div>
-          <small class="aviso">Sem Premium/sem login, o Spotify toca só uma prévia de 30s de cada música.</small></div>`,
+          <small class="aviso">Sem Premium/sem login, o Spotify toca só uma prévia de 30s de cada música.</small></div>
+        <div class="som-spotify"><b>🔔 Avisos</b><div id="som-avisos"></div></div>`,
       botoes: [{ texto: 'Fechar', classe: 'principal' }],
     });
     const el = md.el;
     iniciar();
+    try { Avisos.secao(el.querySelector('#som-avisos')); } catch (e) { /* nada */ }
     el.querySelector('#som-mus').onchange = (e) => { cfg.musica = e.target.checked; salvar(); aplicarVolumes(); };
     el.querySelector('#som-sfx').onchange = (e) => { cfg.efeitos = e.target.checked; salvar(); aplicarVolumes(); tocar('botao'); };
     el.querySelector('#som-vmus').oninput = (e) => { cfg.volMus = +e.target.value; salvar(); aplicarVolumes(); };

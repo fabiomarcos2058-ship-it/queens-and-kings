@@ -132,6 +132,28 @@ const Amigos = (() => {
     try { fb().deleteDoc(ref(uid(), 'convites', de)).catch(() => {}); } catch (e) { /* sem conexão */ }
   };
 
+  // ---------- Avisar quando um amigo fica online ----------
+  // Escuta o perfil de cada amigo (até 25). O "visto" é atualizado a cada 2 min, então só avisa na virada de offline para online.
+  let pararAmigos = [], reescanear = null;
+  const baseOnline = {}, ultimoAviso = {};
+  async function vigiarAmigos() {
+    const f = fb(); if (!f || !uid()) return;
+    pararAmigos.forEach((p) => p && p()); pararAmigos = [];
+    let ids = [];
+    try { ids = (await f.getDocs(col(uid(), 'amigos'))).docs.map((x) => x.id).slice(0, 25); } catch (e) { return; }
+    ids.forEach((id) => {
+      pararAmigos.push(f.onSnapshot(ref(id), (snap) => {
+        if (!snap.exists()) return;
+        const p = snap.data(), on = online(p), antes = baseOnline[id];
+        baseOnline[id] = on;
+        if (antes === undefined || antes || !on) return; // 1ª leitura ou já estava online: só guarda
+        if (Date.now() - (ultimoAviso[id] || 0) < 30 * 60 * 1000) return; // no máximo 1 aviso por amigo a cada 30 min
+        ultimoAviso[id] = Date.now();
+        try { Avisos.notificar('amigos', `👥 ${p.nome || 'Um amigo'} está online!`, 'Que tal um x1? ⚔️', 'amigo-' + id); } catch (e) { /* nada */ }
+      }, () => {}));
+    });
+  }
+
   // ---------- Ouvir pedidos e convites ----------
   function ouvir({ aoMudarPedidos, aoConvite }) {
     if (!fb() || !uid() || pararPedidos) return;
@@ -143,6 +165,7 @@ const Amigos = (() => {
       const idade = c.t ? Date.now() - c.t : 0;
       if (idade > 90 * 1000) { apagarConvite(c.de); return; }
       convitesVistos.add(c.codigo);
+      try { Avisos.notificar('convites', '⚔️ Convite de x1!', `${c.nome || 'Um amigo'} chamou você pra lutar`, 'convite-' + c.de); } catch (e) { /* nada */ }
       aoConvite(c);
     };
     X1.rt().then(({ m, r }) => {
@@ -161,13 +184,15 @@ const Amigos = (() => {
       });
     }, () => {});
     publicar();
+    vigiarAmigos(); reescanear = setInterval(vigiarAmigos, 10 * 60 * 1000); // pega amigos novos
     batimento = setInterval(() => { if (uid() && document.visibilityState === 'visible') f.updateDoc(ref(uid()), { visto: f.serverTimestamp() }).catch(() => {}); }, 2 * 60 * 1000); // a cada 2 min (cada batida é uma gravação no Firebase)
   }
 
   function parar() {
     [pararPedidos, pararConvites, pararConvitesRt].forEach((p) => p && p());
     pararPedidos = pararConvites = pararConvitesRt = null;
-    clearInterval(batimento);
+    clearInterval(batimento); clearInterval(reescanear);
+    pararAmigos.forEach((p) => p && p()); pararAmigos = [];
   }
 
   return { publicar, ver, buscar, online, situacao, pedir, aceitar, recusar, cancelarPedido, remover, listar, convidar, apagarConvite, ouvir, parar };
