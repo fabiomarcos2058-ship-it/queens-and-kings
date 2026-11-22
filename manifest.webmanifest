@@ -1,0 +1,17 @@
+{
+  "name": "Queens and Kings – Batalha dos Multiversos",
+  "short_name": "Queens & Kings",
+  "description": "Fangame de batalhas de cartas dos multiversos.",
+  "lang": "pt-BR",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#1d2350",
+  "theme_color": "#1d2350",
+  "icons": [
+    { "src": "assets/pwa/icone-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "assets/pwa/icone-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "assets/pwa/icone-mask-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

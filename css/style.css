@@ -4116,3 +4116,9 @@ body.espectando .arena-grande-janela.meta-azul::after { content: ''; top: 0; lef
 .modal-esm .es-info { min-height: 100px; text-align: center; display: flex; flex-direction: column; gap: 4px; align-items: center; font-size: 13px; }
 .modal-esm .es-info p { margin: 2px 0; }
 .modal-esm .es-info .es-pr { color: #ffd25e; font-size: 12px; }
+
+/* ===== Instalar o jogo (PWA) ===== */
+.btn-instalar { animation: omniPulsa2 1.6s ease-in-out infinite alternate; }
+.inst-passos { text-align: left; margin: 8px 0 6px 18px; padding: 0; font-size: 13px; line-height: 1.5; }
+.inst-passos li { margin-bottom: 6px; }
+.inst-ic { display: inline-block; padding: 0 5px; border-radius: 6px; background: #ffffff22; }
