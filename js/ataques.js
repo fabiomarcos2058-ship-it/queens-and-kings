@@ -23,10 +23,10 @@ const Ataques = (() => {
   const NA_TORRE = { tanque: 1.1, lutador: 0.85, assassino: 0.8, atirador: 0.7, mago: 0.65, enxame: 1 };
 
   const CLASSE_DA_CARTA = {
-    tanque: ['q_amy', 'ben_diamante', 'ben_enormossauro', 'ben_waybig', 'itsuki', 'shizuku', 'gogeta_ssj4', 'goku_ssj3', 'goku_ssj4', 'goku_blue_lb', 'gogeta_ultra', 'sonic_excalibur', 'conquest', 'omni_man', 'vegeta_ultra_ego', 'gogeta_blue_solo', 'adam_smasher', 'adam_smasher_evo', 'albedo'],
-    assassino: ['super_quarteto', 'q_sonic', 'q_shadow', 'ben_xlr8', 'bra', 'teto', 'pan_dbh', 'akame', 'mbappe', 'kashimo', 'goku_pressagio', 'diavolo', 'mita_malvada', 'akame_murasame', 'sonic', 'sonic_relampago', 'dark_sonic', 'kurona', 'goku_black_rose', 'goku_blue_kaioken_remake', 'vegetto_blue_solo', 'agente_rubi', 'david_martinez', 'lucy_kushinada', 'shalltear'],
+    tanque: ['gohan_beast', 'gt_gohan', 'gohan_trunks', 'q_amy', 'ben_diamante', 'ben_enormossauro', 'ben_waybig', 'itsuki', 'shizuku', 'gogeta_ssj4', 'goku_ssj3', 'goku_ssj4', 'goku_blue_lb', 'gogeta_ultra', 'sonic_excalibur', 'conquest', 'omni_man', 'vegeta_ultra_ego', 'gogeta_blue_solo', 'adam_smasher', 'adam_smasher_evo', 'albedo'],
+    assassino: ['gt_trunks', 'trunks_furia', 'trunks_futuro', 'goten', 'goten_ssj', 'trunks_kid', 'super_quarteto', 'q_sonic', 'q_shadow', 'ben_xlr8', 'bra', 'teto', 'pan_dbh', 'akame', 'mbappe', 'kashimo', 'goku_pressagio', 'diavolo', 'mita_malvada', 'akame_murasame', 'sonic', 'sonic_relampago', 'dark_sonic', 'kurona', 'goku_black_rose', 'goku_blue_kaioken_remake', 'vegetto_blue_solo', 'agente_rubi', 'david_martinez', 'lucy_kushinada', 'shalltear'],
     atirador: ['q_silver', 'ben_chama', 'ben_ecoeco', 'mai', 'miku_nakano', 'pan_gt', 'riruka', 'rukia_remake', 'nino_nakano', 'gyro', 'johnny', 'roman_cyber', 'johnny_silverhand', 'pandoras_actor'],
-    mago: ['ben_contratempo', 'ben_cromatico', 'ben_gravatack', 'gohan_mirai', 'rukia', 'nami_last', 'hatsune_miku', 'bambietta', 'bulma', 'gojo', 'robin', 'pucci', 'mita_gentil', 'yugi_moto', 'anri_halloween', 'eve_atomica', 'ainz_ooal_gown', 'demiurge'],
+    mago: ['gotenks_ssj3', 'gotenks_ssj', 'gotenks_base', 'trunks_kid_ssj', 'ben_contratempo', 'ben_cromatico', 'ben_gravatack', 'gohan_mirai', 'rukia', 'nami_last', 'hatsune_miku', 'bambietta', 'bulma', 'gojo', 'robin', 'pucci', 'mita_gentil', 'yugi_moto', 'anri_halloween', 'eve_atomica', 'ainz_ooal_gown', 'demiurge'],
     enxame: ['mini'],
   };
   const classeDe = (c) => {
@@ -108,6 +108,20 @@ const Ataques = (() => {
     gogeta_vegetto_blue: { v: { g: 'soco', cor: '#3FC4FF', pesado: true }, m: { voo: true }, d: 'Entram dois: Gogeta e Vegetto. Dividem o dano e focam o mesmo alvo.' },
     gogeta_blue_solo: { v: { g: 'soco', cor: '#3FC4FF', pesado: true }, m: { empurrar: 8, voo: true }, d: 'Soco pesado. Divide o dano com o Vegetto.' },
     vegetto_blue_solo: { v: { g: 'corte', s: 'espada_vegito', cor: '#5CE1FF' }, m: { voo: true }, d: 'Espada Espiritual rápida. Divide o dano com o Gogeta.' },
+    // ----- Híbridos Saiyajins -----
+    gohan_trunks: { v: { g: 'soco', cor: '#5CE1FF', pesado: true }, m: { voo: true }, d: 'Entram dois: Gohan e Trunks. Dividem o dano e focam o mesmo alvo. Se o Gohan cair primeiro, o Trunks vira o Trunks Fúria.' },
+    gt_gohan: { v: { g: 'soco', cor: '#5CE1FF', pesado: true }, m: { empurrar: 8, voo: true }, d: 'Soco pesado. Divide o dano com o Trunks.' },
+    gt_trunks: { v: { g: 'corte', cor: '#C38BFF' }, m: { critico: [0.2, 1.7], voo: true }, d: 'Espada rápida. Divide o dano com o Gohan.' },
+    trunks_furia: { v: { g: 'corte', cor: '#FFD93B', pesado: true }, m: { berserk: 0.3, critico: [0.3, 2], voo: true }, d: 'Bate mais rápido quanto menos vida tem e 30% de crítico.' },
+    gohan_beast: { v: { g: 'soco', cor: '#E8E8FF', pesado: true }, m: { berserk: 0.3, critico: [0.25, 2.2], voo: true }, d: 'Poder Bestial: mais rápido machucado e 25% de crítico.' },
+    gotenks_ssj3: { v: { g: 'soco', cor: '#FFC21A', pesado: true }, m: { especial: [4, 1.8, 36, 'explosao'], explosaoFinal: [3, 80], voo: true }, d: 'Explosão a cada 4 golpes. Quando cai, se explode (Kamikaze).' },
+    gotenks_ssj: { v: { g: 'palma', cor: '#FFD25E' }, m: { especial: [4, 1.8, 34, 'explosao'], voo: true }, d: 'A cada 4 golpes, a Rosquinha Galáctica explode em área.' },
+    trunks_futuro: { v: { g: 'corte', cor: '#9FD8FF' }, m: { critico: [0.3, 2], voo: true }, d: '30% de chance de crítico com a espada.' },
+    gotenks_base: { v: { g: 'soco', cor: '#B57BFF' }, m: { critico: [0.2, 1.8], voo: true }, d: '20% de chance de crítico.' },
+    goten_ssj: { v: { g: 'soco', cor: '#FFD25E' }, m: { critico: [0.25, 1.8], voo: true }, d: '25% de chance de crítico.' },
+    goten: { v: { g: 'soco', cor: '#FF9A3A' }, m: { escudo: 0.1 }, d: 'Nasce com escudo de 10% da vida.' },
+    trunks_kid: { v: { g: 'soco', cor: '#C9B8FF' }, m: { critico: [0.25, 1.8] }, d: '25% de chance de crítico.' },
+    trunks_kid_ssj: { v: { g: 'soco', cor: '#FFD25E' }, m: { especial: [5, 1.6, 30, 'explosao'], voo: true }, d: 'A cada 5 golpes, uma explosão de ki em área.' },
     vegetto_gogeta: { v: { g: 'corte', s: 'espada_vegito', cor: '#C38BFF' }, m: { alternar: true, voo: true }, d: 'Espada (atravessa escudo, não dá pra desviar) e Punho (atordoa) se alternam.' },
     zaphir: { v: { g: 'soco', cor: '#8B6CFF' }, m: { regen: 0.008, voo: true }, d: 'Regenera vida sozinho enquanto luta.' },
     zaphir_carmesim: { v: { g: 'soco', cor: '#FF3A2A', pesado: true }, m: { berserk: 0.45, vampiro: 0.2, voo: true }, d: 'Bate mais rápido quanto menos vida tem e rouba vida.' },

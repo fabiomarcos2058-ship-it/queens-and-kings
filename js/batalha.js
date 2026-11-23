@@ -833,7 +833,7 @@ const Batalha = (() => {
       if (e.isca) borboletas(e);
       if (!e.torre && e.atk && e.atk.m && (e.atk.m.renascerForma || e.formaGoku) && (e.formaGoku || 0) < 2 && !e.temporario) transformarGoku(e);
       if (e.atk && e.atk.m && e.atk.m.explosaoFinal) explosaoFinal(e);
-      if (e.gemeo && e.gemeo.vida > 0) furiaFusao(e.gemeo, e);
+      if (e.gemeo && e.gemeo.vida > 0) { if (e.carta && e.carta.id === 'gt_gohan' && e.gemeo.carta && e.gemeo.carta.id === 'gt_trunks') furiaTrunks(e.gemeo, e); else furiaFusao(e.gemeo, e); }
       for (const o of s.ent) if (o !== e && !o.torre && o.time === e.time && o.vida > 0 && o.atk && o.atk.m && o.atk.m.raivaSombria && dist(o, e) < 170) enfurecer(o);
       // Isagi (Ultra): devora o campo, cada inimigo que cai perto deixa ele mais forte
       if (!e.torre) for (const o of s.ent) if (!o.torre && o.time !== e.time && o.vida > 0 && o.atk && o.atk.m && o.atk.m.devorar && dist(o, e) < 180 && (o.devorar || 0) < o.atk.m.devorar) { o.devorar = (o.devorar || 0) + 1; o.el.classList.add('devorando'); particulas(o.x, o.y, '#5EC8FF', 5, 16); }
@@ -1348,8 +1348,8 @@ const Batalha = (() => {
   }
 
   // corte de cena por cima da arena (aparece pra todo mundo da partida)
-  const CUTINS = ['goku_furia', 'jojo_jotaro', 'jojo_dio', 'jojo_diavolo', 'jojo_pucci', 'jojo_gyro', 'jojo_johnny', 'sonic_shadow', 'sonic_super', 'sonic_dark', 'sonic_excalibur', 'sonic_hyper', 'yugi_reino', 'ultra_sae', 'ultra_rin', 'ultra_isagi', 'ultra_anri', 'inv_mark_eve', 'inv_mark', 'inv_eve', 'inv_conquest', 'inv_omni', 'inv_anissa', 'db_goku_vegeta', 'db_gogeta_vegetto', 'db_vegetto_gogeta', 'db_ultra_ego', 'db_kaioken', 'db_goku_deus', 'db_black', 'db_evolution', 'cy_david', 'cy_adam', 'cy_adam_evo', 'cy_rubi', 'cy_silverhand', 'nz_ainz', 'nz_albedo', 'nz_shalltear', 'nz_demiurge', 'nz_sebas', 'nz_pandora', 'op_luffy', 'isagi_meta', 'kaiser_isagi', 'sonic_relampago', 'sonic_renasce', 'super_sonic_solar', 'ben_omnitrix', 'ben_chama', 'ben_diamante', 'ben_xlr8', 'ben_enormossauro', 'ben_contratempo', 'ben_ecoeco', 'ben_cromatico', 'ben_gravatack', 'ben_waybig', 'q_sonic', 'q_shadow', 'q_silver', 'q_amy', 'q_hyper'];
-  const TEXTO_CUTIN_2 = { q_sonic: 'Ataque Teleguiado!', q_shadow: 'Controle do Caos!', q_silver: 'Psicocinese!', q_amy: 'Martelo Piko!', q_hyper: 'SUPER SINCRONIA!', ben_omnitrix: 'É hora de ação!', ben_chama: 'Chama!', ben_diamante: 'Diamante!', ben_xlr8: 'XLR8!', ben_enormossauro: 'Enormossauro!', ben_contratempo: 'Contra-Tempo!', ben_ecoeco: 'Eco Eco!', ben_cromatico: 'Cromático!', ben_gravatack: 'Gravatack!', ben_waybig: 'Way Big!', sonic_relampago: 'Loop Relâmpago!', sonic_renasce: 'Super Sonic!', super_sonic_solar: 'Chaos Blast!', isagi_meta: 'Metavisão!', kaiser_isagi: 'Pacto do Diabo!', sonic_shadow: 'Chaos Control!', sonic_super: 'Super Boost!', sonic_dark: 'Explosão Sombria!', sonic_excalibur: 'Soul Surge!', sonic_hyper: 'Hiper Velocidade!', yugi_reino: 'Reino das Sombras!', ultra_sae: 'Visão do Gênio!', ultra_rin: 'Flow: Destruição!', ultra_isagi: 'Direct Shot!', ultra_anri: 'Doces ou Travessuras?', inv_mark_eve: 'Juntos somos invencíveis!', inv_mark: 'Investida Invencível!', inv_eve: 'Barreira Atômica!', inv_conquest: 'Esmagar!', inv_omni: 'Fúria do Regente!', inv_anissa: 'Rajada Viltrumita!', db_goku_vegeta: 'Rivais Eternos!', db_gogeta_vegetto: 'Kamehameha Final + Big Bang!', db_vegetto_gogeta: 'Soul Punisher!', db_ultra_ego: 'Hakai!', db_kaioken: 'Kaioken x20!', db_goku_deus: 'Punho do Deus Saiyajin!', db_black: 'Ceifa Divina!', db_evolution: 'Final Flash!', cy_david: 'Sandevistan!', cy_adam: 'Rajada de Mísseis!', cy_adam_evo: 'Mísseis + Sandevistan!', cy_rubi: 'Ciberpsicose!', cy_silverhand: 'Johnny Silverhand!', nz_ainz: 'O Objetivo de Toda Vida é a Morte!', nz_albedo: 'Hermes Trismegistus!', nz_shalltear: 'Lança Purificadora!', nz_demiurge: 'Chamas do Inferno!', nz_sebas: 'Forma de Dragão!', nz_pandora: 'Doppelgänger!', op_luffy: 'Gomu Gomu no... Bajrang Gun!' };
+  const CUTINS = ['goku_furia', 'jojo_jotaro', 'jojo_dio', 'jojo_diavolo', 'jojo_pucci', 'jojo_gyro', 'jojo_johnny', 'sonic_shadow', 'sonic_super', 'sonic_dark', 'sonic_excalibur', 'sonic_hyper', 'yugi_reino', 'ultra_sae', 'ultra_rin', 'ultra_isagi', 'ultra_anri', 'inv_mark_eve', 'inv_mark', 'inv_eve', 'inv_conquest', 'inv_omni', 'inv_anissa', 'db_goku_vegeta', 'db_gogeta_vegetto', 'db_vegetto_gogeta', 'db_ultra_ego', 'db_kaioken', 'db_goku_deus', 'db_black', 'db_evolution', 'cy_david', 'cy_adam', 'cy_adam_evo', 'cy_rubi', 'cy_silverhand', 'nz_ainz', 'nz_albedo', 'nz_shalltear', 'nz_demiurge', 'nz_sebas', 'nz_pandora', 'op_luffy', 'isagi_meta', 'kaiser_isagi', 'sonic_relampago', 'sonic_renasce', 'super_sonic_solar', 'ben_omnitrix', 'ben_chama', 'ben_diamante', 'ben_xlr8', 'ben_enormossauro', 'ben_contratempo', 'ben_ecoeco', 'ben_cromatico', 'ben_gravatack', 'ben_waybig', 'q_sonic', 'q_shadow', 'q_silver', 'q_amy', 'q_hyper', 'hb_dupla', 'hb_furia'];
+  const TEXTO_CUTIN_2 = { q_sonic: 'Ataque Teleguiado!', q_shadow: 'Controle do Caos!', q_silver: 'Psicocinese!', q_amy: 'Martelo Piko!', q_hyper: 'SUPER SINCRONIA!', hb_dupla: 'Kamehameha do Futuro!', hb_furia: 'TRUNKS FÚRIA!', ben_omnitrix: 'É hora de ação!', ben_chama: 'Chama!', ben_diamante: 'Diamante!', ben_xlr8: 'XLR8!', ben_enormossauro: 'Enormossauro!', ben_contratempo: 'Contra-Tempo!', ben_ecoeco: 'Eco Eco!', ben_cromatico: 'Cromático!', ben_gravatack: 'Gravatack!', ben_waybig: 'Way Big!', sonic_relampago: 'Loop Relâmpago!', sonic_renasce: 'Super Sonic!', super_sonic_solar: 'Chaos Blast!', isagi_meta: 'Metavisão!', kaiser_isagi: 'Pacto do Diabo!', sonic_shadow: 'Chaos Control!', sonic_super: 'Super Boost!', sonic_dark: 'Explosão Sombria!', sonic_excalibur: 'Soul Surge!', sonic_hyper: 'Hiper Velocidade!', yugi_reino: 'Reino das Sombras!', ultra_sae: 'Visão do Gênio!', ultra_rin: 'Flow: Destruição!', ultra_isagi: 'Direct Shot!', ultra_anri: 'Doces ou Travessuras?', inv_mark_eve: 'Juntos somos invencíveis!', inv_mark: 'Investida Invencível!', inv_eve: 'Barreira Atômica!', inv_conquest: 'Esmagar!', inv_omni: 'Fúria do Regente!', inv_anissa: 'Rajada Viltrumita!', db_goku_vegeta: 'Rivais Eternos!', db_gogeta_vegetto: 'Kamehameha Final + Big Bang!', db_vegetto_gogeta: 'Soul Punisher!', db_ultra_ego: 'Hakai!', db_kaioken: 'Kaioken x20!', db_goku_deus: 'Punho do Deus Saiyajin!', db_black: 'Ceifa Divina!', db_evolution: 'Final Flash!', cy_david: 'Sandevistan!', cy_adam: 'Rajada de Mísseis!', cy_adam_evo: 'Mísseis + Sandevistan!', cy_rubi: 'Ciberpsicose!', cy_silverhand: 'Johnny Silverhand!', nz_ainz: 'O Objetivo de Toda Vida é a Morte!', nz_albedo: 'Hermes Trismegistus!', nz_shalltear: 'Lança Purificadora!', nz_demiurge: 'Chamas do Inferno!', nz_sebas: 'Forma de Dragão!', nz_pandora: 'Doppelgänger!', op_luffy: 'Gomu Gomu no... Bajrang Gun!' };
   const TEXTO_CUTIN = { ...TEXTO_CUTIN_2, goku_furia: "You're going to pay for this!", jojo_jotaro: 'Star Platinum: The World!', jojo_dio: 'ZA WARUDO! Toki yo tomare!', jojo_diavolo: 'King Crimson!', jojo_pucci: 'Made in Heaven!', jojo_gyro: 'Ball Breaker!', jojo_johnny: 'Tusk Act 4!' };
   const cutinRede = (qual) => { cutin(qual); if (s.rede || s.aoVivo) s.eventos.push(['c', CUTINS.indexOf(qual)]); };
   function cutin(qual) {
@@ -1868,8 +1868,30 @@ const Batalha = (() => {
     fxEl('fx-db-aura', o.x, o.y, 900); fxJ(29, o.x, o.y);
     particulas(o.x, o.y, '#5CE1FF', 14, 30);
   }
+  // Gohan caiu primeiro: o Trunks perde a cabeça e vira o Trunks Fúria (a mesma tropa, com a carta nova)
+  function furiaTrunks(o, caiu) {
+    const c = Estado.carta('trunks_furia');
+    o.gemeo = null; o.segue = null; caiu.gemeo = null;
+    if (!c || !o.el) return furiaFusao(o, caiu);
+    const f = o.f || 1, r = Math.max(0.05, Math.min(1, o.vida / o.max));
+    o.carta = c; o.max = Math.round(c.vida * f); o.vida = Math.min(o.max, Math.round(o.max * (r + 0.4)));
+    o.dano = o.danoBase = Math.round(c.dano * f);
+    o.vel = o.velBase = c.velocidade; o.alcance = c.alcance; o.cadencia = c.cadencia; o.area = c.area || 0;
+    o.atk = Ataques.de(c); o.classe = Ataques.classeDe(c);
+    o.habilidade = c.habilidade; o.recarga = 0; o.surgir = 0;
+    const m = o.atk.m || {}; o.voo = !!m.voo; o.furiaFusao = false;
+    o.atord = 0; o.lento = 0; o.queima = 0; o.fraco = 0;
+    o.el.classList.add('campea', 'trunks-furia'); o.el.classList.remove('furia-fusao', 'atordoada', 'lenta');
+    const img = o.el.querySelector('.tropa-medalhao img'); if (img) img.src = `assets/cartas/${c.id}_medalhao.png`;
+    const cx = document.getElementById('habilidades'); if (cx) cx.dataset.ids = '';
+    atualizarHp(o);
+    cutinRede('hb_furia');
+    falar(o, 'GOHAAAAN!!!', 'fala-db');
+    fxEl('fx-db-aura', o.x, o.y, 900); fxJ(29, o.x, o.y);
+    particulas(o.x, o.y, '#FFD93B', 16, 36); tremer(true);
+  }
   function fusaoDupla(t, h) {
-    cutinRede('db_gogeta_vegetto');
+    cutinRede(h.cutin || 'db_gogeta_vegetto');
     const alvo = maisForte(t, 290), mult = h.mult || 2.2;
     const quem = [t]; if (t.gemeo && t.gemeo.vida > 0) quem.push(t.gemeo);
     if (!alvo) { quem.forEach((q, i) => kamehameha(q, Math.round(q.dano * mult), { tipo: i ? 13 : 14, comp: 340, torreMult: 0.35, atraso: 0.4 })); return; }

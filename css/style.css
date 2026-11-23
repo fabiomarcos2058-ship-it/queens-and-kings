@@ -4123,3 +4123,12 @@ body.espectando .arena-grande-janela.meta-azul::after { content: ''; top: 0; lef
 .inst-passos li { margin-bottom: 6px; }
 .inst-ic { display: inline-block; padding: 0 5px; border-radius: 6px; background: #ffffff22; }
 .tt-instalar { position: absolute; left: 50%; bottom: 21%; transform: translateX(-50%); z-index: 5; padding: 9px 18px; border-radius: 20px; font: 700 14px 'Fredoka', sans-serif; color: #3A1E00; background: linear-gradient(#FFF4C2, #FFD54F 60%, #E8A317); border: 2px solid #3A1E00; box-shadow: 0 4px 0 #8a5a00, 0 0 16px #FFD54F88; animation: omniPulsa2 1.6s ease-in-out infinite alternate; }
+
+/* ===== Híbridos Saiyajins ===== */
+.cutin.hb_dupla::before, .cutin.hb_furia::before { background: radial-gradient(circle at 50% 45%, #7a5cff55, #10042acc 75%); }
+.cutin.hb_dupla .cutin-faixa { border-color: #5CE1FF; box-shadow: 0 0 22px #5CE1FF, 0 0 40px #FF5CF488; }
+.cutin.hb_dupla .cutin-legenda { color: #D8F6FF; text-shadow: 3px 3px 0 #1d2f6a, -1px -1px 0 #000, 1px 1px 0 #000, 0 0 12px #5CE1FF; }
+.cutin.hb_furia::before { background: radial-gradient(circle at 50% 45%, #ffd93b66, #2a1000cc 75%); }
+.cutin.hb_furia .cutin-faixa { border-color: #FFD93B; box-shadow: 0 0 26px #FFD93B, 0 0 50px #FF3A1A99; }
+.cutin.hb_furia .cutin-legenda { color: #FFF1A8; text-shadow: 3px 3px 0 #7a1a00, -1px -1px 0 #000, 1px 1px 0 #000, 0 0 14px #FF3A1A; }
+.tropa.trunks-furia .tropa-medalhao { box-shadow: 0 0 0 3px #FFD93B, 0 0 22px 9px #FF8A1A; animation: flowPulsa 0.3s ease-in-out infinite alternate; }

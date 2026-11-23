@@ -5031,6 +5031,495 @@
    "danoTorre": 0.6,
    "corpo": true,
    "relevoHeroi": true
+  },
+  {
+   "id": "gohan_trunks",
+   "nome": "Gohan & Trunks do Futuro",
+   "raridade": "ultra",
+   "custo": 7,
+   "tipo": "Ultra · Híbridos Saiyajins",
+   "descricao": "Os dois guerreiros do futuro chegam juntos, em dois corpos. Dividem o dano e focam o mesmo alvo. Se o Gohan cair primeiro, o Trunks perde a cabeça e vira o Trunks Fúria!",
+   "vida": 1125,
+   "dano": 211,
+   "velocidade": 86,
+   "alcance": 18,
+   "cadencia": 0.8,
+   "danoTorre": 0.55,
+   "passiva": {
+    "nome": "Laço do Futuro",
+    "tipo": "gemeos",
+    "descricao": "Entram os dois: Gohan (soco pesado, menos vida) e Trunks (espada rápida, mais vida). Metade do dano que um leva vai pro outro e os dois focam o mesmo inimigo. Se o Trunks cair, o Gohan entra em Fúria. Se o GOHAN cair primeiro, o Trunks se transforma em Trunks Fúria: cura 40%, ganha o poder da carta Fúria e solta a habilidade na hora."
+   },
+   "habilidade": {
+    "nome": "Kamehameha do Futuro",
+    "tipo": "fusaoDupla",
+    "custo": 4,
+    "recarga": 20,
+    "mult": 2.2,
+    "cutin": "hb_dupla",
+    "descricao": "Gohan solta um Kamehameha azul e Trunks uma rajada rosa no mesmo alvo. Onde os dois raios se encontram, uma explosão enorme."
+   },
+   "trofeus": 0,
+   "exclusivo": [],
+   "summon": true,
+   "alvo": "tudo",
+   "arena": 1,
+   "rosto": [
+    310,
+    420,
+    190
+   ],
+   "arte": [
+    0,
+    150,
+    675
+   ],
+   "gemeos": [
+    "gt_gohan",
+    "gt_trunks"
+   ]
+  },
+  {
+   "id": "gt_gohan",
+   "nome": "Gohan Super Saiyajin 2",
+   "raridade": "ultra",
+   "custo": 7,
+   "tipo": "Híbrido Saiyajin",
+   "descricao": "Gohan do futuro.",
+   "vida": 1000,
+   "dano": 205,
+   "velocidade": 86,
+   "alcance": 18,
+   "cadencia": 0.85,
+   "danoTorre": 0.55,
+   "passiva": {
+    "nome": "Laço do Futuro",
+    "tipo": "gemeos",
+    "descricao": "Divide o dano com o Trunks."
+   },
+   "trofeus": 0,
+   "exclusivo": [],
+   "summon": true,
+   "alvo": "tudo",
+   "arena": 1,
+   "rosto": [
+    205,
+    505,
+    95
+   ],
+   "arte": [
+    0,
+    50,
+    420
+   ],
+   "corpo": true
+  },
+  {
+   "id": "gt_trunks",
+   "nome": "Trunks Super Saiyajin",
+   "raridade": "ultra",
+   "custo": 7,
+   "tipo": "Híbrido Saiyajin",
+   "descricao": "Trunks do futuro.",
+   "vida": 1250,
+   "dano": 195,
+   "velocidade": 92,
+   "alcance": 18,
+   "cadencia": 0.7,
+   "danoTorre": 0.55,
+   "passiva": {
+    "nome": "Laço do Futuro",
+    "tipo": "gemeos",
+    "descricao": "Divide o dano com o Gohan."
+   },
+   "trofeus": 0,
+   "exclusivo": [],
+   "summon": true,
+   "alvo": "tudo",
+   "arena": 1,
+   "rosto": [
+    410,
+    335,
+    95
+   ],
+   "arte": [
+    255,
+    150,
+    420
+   ],
+   "corpo": true
+  },
+  {
+   "id": "trunks_furia",
+   "nome": "Trunks Fúria",
+   "raridade": "lendaria",
+   "custo": 6,
+   "tipo": "Super Saiyajin Furioso",
+   "descricao": "Trunks cego de raiva. Bate forte, bate rápido e não perdoa ninguém. É a forma que ele assume quando o Gohan cai.",
+   "vida": 1400,
+   "dano": 245,
+   "velocidade": 90,
+   "alcance": 18,
+   "cadencia": 0.72,
+   "danoTorre": 0.55,
+   "passiva": {
+    "nome": "Raiva Saiyajin",
+    "tipo": "furiaTrunks",
+    "descricao": "Ataca mais rápido quanto menos vida tem (até 30%) e 30% de chance de golpe crítico (x2)."
+   },
+   "habilidade": {
+    "nome": "Espadada da Fúria",
+    "tipo": "golpes",
+    "custo": 3,
+    "recarga": 14,
+    "mult": 2.6,
+    "descricao": "Os próximos 3 golpes saem com a espada em fúria (2,6x de dano)."
+   },
+   "trofeus": 0,
+   "exclusivo": [],
+   "summon": true,
+   "alvo": "tudo",
+   "arena": 1,
+   "rosto": [
+    445,
+    583,
+    125
+   ],
+   "arte": [
+    0,
+    300,
+    720
+   ]
+  },
+  {
+   "id": "gohan_beast",
+   "nome": "Gohan Beast",
+   "raridade": "ultra",
+   "custo": 6,
+   "tipo": "Ultra · Potencial Liberado",
+   "descricao": "O poder adormecido do Gohan despertou. Quanto mais machucado, mais rápido e mais forte ele bate.",
+   "vida": 1500,
+   "dano": 235,
+   "velocidade": 86,
+   "alcance": 18,
+   "cadencia": 0.85,
+   "danoTorre": 0.55,
+   "passiva": {
+    "nome": "Poder Bestial",
+    "tipo": "bestial",
+    "descricao": "Ataca até 30% mais rápido quanto menos vida tem e 25% de chance de golpe crítico (x2,2)."
+   },
+   "habilidade": {
+    "nome": "Kamehameha Besta",
+    "tipo": "kamehameha",
+    "custo": 4,
+    "recarga": 20,
+    "dano": 900,
+    "descricao": "Dispara um Kamehameha que atravessa tudo em linha reta (metade do dano nas torres)."
+   },
+   "trofeus": 0,
+   "exclusivo": [],
+   "summon": true,
+   "alvo": "tudo",
+   "arena": 1,
+   "rosto": [
+    410,
+    418,
+    105
+   ],
+   "arte": [
+    0,
+    120,
+    736
+   ]
+  },
+  {
+   "id": "gotenks_ssj3",
+   "nome": "Gotenks Super Saiyajin 3",
+   "raridade": "ultra",
+   "custo": 6,
+   "tipo": "Ultra · Fusão Travessa",
+   "descricao": "A fusão mais zoeira e mais explosiva. Bate em área e, quando cai, se explode levando todo mundo junto.",
+   "vida": 1380,
+   "dano": 250,
+   "velocidade": 90,
+   "alcance": 18,
+   "cadencia": 0.8,
+   "danoTorre": 0.55,
+   "passiva": {
+    "nome": "Kamikaze Fantasma",
+    "tipo": "kamikaze",
+    "descricao": "A cada 4 golpes, uma explosão de ki em área (1,8x). Quando cai, se explode: 3x de dano em área grande e atordoa quem sobrar."
+   },
+   "habilidade": {
+    "nome": "Ataque Fantasma",
+    "tipo": "golpes",
+    "custo": 3,
+    "recarga": 14,
+    "mult": 2.8,
+    "descricao": "Os próximos 3 golpes saem com a força total do SSJ3 (2,8x de dano)."
+   },
+   "trofeus": 0,
+   "exclusivo": [],
+   "summon": true,
+   "alvo": "tudo",
+   "arena": 1,
+   "rosto": [
+    230,
+    625,
+    120
+   ],
+   "arte": [
+    0,
+    350,
+    736
+   ]
+  },
+  {
+   "id": "gotenks_ssj",
+   "nome": "Gotenks Super Saiyajin",
+   "raridade": "lendaria",
+   "custo": 5,
+   "tipo": "Fusão Travessa",
+   "descricao": "Fusão de Goten e Trunks. Solta a Rosquinha Galáctica em área.",
+   "vida": 1180,
+   "dano": 205,
+   "velocidade": 88,
+   "alcance": 18,
+   "cadencia": 0.85,
+   "danoTorre": 0.55,
+   "passiva": {
+    "nome": "Rosquinha Galáctica",
+    "tipo": "especial",
+    "descricao": "A cada 4 golpes, a esfera de ki explode em área (1,8x)."
+   },
+   "trofeus": 0,
+   "exclusivo": [],
+   "summon": true,
+   "alvo": "tudo",
+   "arena": 1,
+   "rosto": [
+    360,
+    610,
+    95
+   ],
+   "arte": [
+    30,
+    300,
+    680
+   ]
+  },
+  {
+   "id": "trunks_futuro",
+   "nome": "Trunks do Futuro",
+   "raridade": "lendaria",
+   "custo": 5,
+   "tipo": "Espadachim do Futuro",
+   "descricao": "Veio do futuro com a espada na mão. Cortes rápidos e críticos.",
+   "vida": 1230,
+   "dano": 215,
+   "velocidade": 90,
+   "alcance": 18,
+   "cadencia": 0.8,
+   "danoTorre": 0.55,
+   "passiva": {
+    "nome": "Fio da Espada",
+    "tipo": "criticoTrunks",
+    "descricao": "30% de chance de golpe crítico (x2)."
+   },
+   "habilidade": {
+    "nome": "Corte do Futuro",
+    "tipo": "golpes",
+    "custo": 3,
+    "recarga": 15,
+    "mult": 2.5,
+    "descricao": "Os próximos 3 golpes saem com a espada (2,5x de dano)."
+   },
+   "trofeus": 0,
+   "exclusivo": [],
+   "summon": true,
+   "alvo": "tudo",
+   "arena": 1,
+   "rosto": [
+    412,
+    632,
+    110
+   ],
+   "arte": [
+    0,
+    250,
+    720
+   ]
+  },
+  {
+   "id": "gotenks_base",
+   "nome": "Gotenks",
+   "raridade": "epica",
+   "custo": 4,
+   "tipo": "Fusão Travessa",
+   "descricao": "A fusão de Goten e Trunks. Brincalhão e forte.",
+   "vida": 960,
+   "dano": 170,
+   "velocidade": 88,
+   "alcance": 18,
+   "cadencia": 0.85,
+   "danoTorre": 0.55,
+   "passiva": {
+    "nome": "Pose de Fusão",
+    "tipo": "criticoG",
+    "descricao": "20% de chance de golpe crítico (x1,8)."
+   },
+   "trofeus": 0,
+   "exclusivo": [],
+   "summon": true,
+   "alvo": "tudo",
+   "arena": 1,
+   "rosto": [
+    362,
+    340,
+    105
+   ],
+   "arte": [
+    0,
+    0,
+    557
+   ]
+  },
+  {
+   "id": "goten_ssj",
+   "nome": "Goten Super Saiyajin",
+   "raridade": "epica",
+   "custo": 3,
+   "tipo": "Híbrido Saiyajin",
+   "descricao": "O caçula do Goku, já Super Saiyajin. Rápido e cheio de energia.",
+   "vida": 700,
+   "dano": 135,
+   "velocidade": 92,
+   "alcance": 18,
+   "cadencia": 0.8,
+   "danoTorre": 0.55,
+   "passiva": {
+    "nome": "Energia de Criança",
+    "tipo": "criticoG",
+    "descricao": "25% de chance de golpe crítico (x1,8)."
+   },
+   "trofeus": 0,
+   "exclusivo": [],
+   "summon": true,
+   "alvo": "tudo",
+   "arena": 1,
+   "rosto": [
+    205,
+    585,
+    115
+   ],
+   "arte": [
+    20,
+    150,
+    640
+   ]
+  },
+  {
+   "id": "goten",
+   "nome": "Goten",
+   "raridade": "epica",
+   "custo": 2,
+   "tipo": "Híbrido Saiyajin",
+   "descricao": "O filho caçula do Goku. Pequeno e muito veloz.",
+   "vida": 520,
+   "dano": 100,
+   "velocidade": 94,
+   "alcance": 18,
+   "cadencia": 0.8,
+   "danoTorre": 0.55,
+   "passiva": {
+    "nome": "Pulinho",
+    "tipo": "escudoG",
+    "descricao": "Nasce com escudo de 10% da vida."
+   },
+   "trofeus": 0,
+   "exclusivo": [],
+   "summon": true,
+   "alvo": "tudo",
+   "arena": 1,
+   "rosto": [
+    230,
+    240,
+    120
+   ],
+   "arte": [
+    0,
+    40,
+    478
+   ]
+  },
+  {
+   "id": "trunks_kid",
+   "nome": "Trunks Criança",
+   "raridade": "epica",
+   "custo": 2,
+   "tipo": "Híbrido Saiyajin",
+   "descricao": "O filho do Vegeta com a Bulma. Atrevido e confiante.",
+   "vida": 540,
+   "dano": 100,
+   "velocidade": 92,
+   "alcance": 18,
+   "cadencia": 0.8,
+   "danoTorre": 0.55,
+   "passiva": {
+    "nome": "Atrevimento",
+    "tipo": "criticoG",
+    "descricao": "25% de chance de golpe crítico (x1,8)."
+   },
+   "trofeus": 0,
+   "exclusivo": [],
+   "summon": true,
+   "alvo": "tudo",
+   "arena": 1,
+   "rosto": [
+    415,
+    215,
+    120
+   ],
+   "arte": [
+    30,
+    30,
+    660
+   ]
+  },
+  {
+   "id": "trunks_kid_ssj",
+   "nome": "Trunks Criança SSJ",
+   "raridade": "epica",
+   "custo": 3,
+   "tipo": "Híbrido Saiyajin",
+   "descricao": "O pequeno príncipe, agora Super Saiyajin e cheio de pose.",
+   "vida": 720,
+   "dano": 138,
+   "velocidade": 92,
+   "alcance": 18,
+   "cadencia": 0.8,
+   "danoTorre": 0.55,
+   "passiva": {
+    "nome": "Explosão do Principezinho",
+    "tipo": "especial",
+    "descricao": "A cada 5 golpes, uma explosão de ki em área (1,6x)."
+   },
+   "trofeus": 0,
+   "exclusivo": [],
+   "summon": true,
+   "alvo": "tudo",
+   "arena": 1,
+   "rosto": [
+    390,
+    375,
+    125
+   ],
+   "arte": [
+    0,
+    100,
+    736
+   ]
   }
  ]
 }

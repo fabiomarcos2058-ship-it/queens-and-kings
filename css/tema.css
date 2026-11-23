@@ -86,3 +86,16 @@ html, body { background: #0d1030; }
 .coroa-bau .cb-abrir { padding: 7px 14px; border-radius: 12px; font-weight: 800; background: #FAC775; color: #412402; border-bottom: 4px solid #BA7517; animation: pulsa 1s ease-in-out infinite; }
 .coroa-bau.pronto { border-color: #FFD54F; box-shadow: 0 0 14px #FFD54F66, 0 4px 0 #0a0d2b; }
 .coroa-bau.pego { opacity: .65; }
+
+/* ----- Texturas novas das cartas Ultra (4 estilos: prisma, galáxia, cristal, energia) ----- */
+.carta.ultra .ultra-tex { position: absolute; inset: 0; border-radius: 7px; pointer-events: none; z-index: 1; background-size: 160% 160%; background-position: 0% 0%; mix-blend-mode: overlay; opacity: .95; animation: ultraTexAnda 9s ease-in-out infinite alternate; }
+.carta.ultra .ultra-tex.tx0 { background-image: url(../assets/texturas/ultra_prisma.jpg); }
+.carta.ultra .ultra-tex.tx1 { background-image: url(../assets/texturas/ultra_galaxia.jpg); }
+.carta.ultra .ultra-tex.tx2 { background-image: url(../assets/texturas/ultra_cristal.jpg); }
+.carta.ultra .ultra-tex.tx3 { background-image: url(../assets/texturas/ultra_energia.jpg); }
+.carta.ultra .ultra-tex::after { content: ''; position: absolute; inset: 0; border-radius: 7px; background: linear-gradient(120deg, transparent 35%, #ffffff55 50%, transparent 65%); background-size: 250% 100%; animation: espelhoBrilha 4.5s linear infinite; mix-blend-mode: overlay; }
+@keyframes ultraTexAnda { to { background-position: 100% 100%; } }
+.carta.ultra:not(.vivo) .ultra-tex, .carta.ultra:not(.vivo) .ultra-tex::after { animation: none; }
+html.leve .carta.ultra .ultra-tex { animation: none; opacity: .6; }
+/* a textura também aparece na faixa do nome, como um vidro lapidado */
+.carta.ultra .ultra-tex::before { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 26%; background: inherit; background-size: 260% 260%; mix-blend-mode: normal; opacity: .55; border-radius: 0 0 7px 7px; filter: saturate(1.3); }

@@ -35,7 +35,7 @@ const Cartas = (() => {
       ${mini ? '' : `<span class="nome-3d">${c.nome}</span>`}
       ${c.habilidade ? '<span class="selo-hab" title="Tem habilidade especial">⚡</span>' : ''}
       ${c.passiva ? `<span class="selo-hab passiva" title="Tem habilidade passiva">${c.passiva.tipo === 'esquiva' ? '✨' : '🧩'}</span>` : ''}
-      ${evo ? '<i class="evo-borda"></i><span class="evo-selo">EVO</span>' : ''}${c.evento ? '<span class="selo-evento">EVENTO</span>' : ''}${c.raridade === 'ultra' ? `${vivo && !leve ? '<video class="ultra-video" src="assets/ui/moldura_ultra.mp4" autoplay muted loop playsinline preload="auto" disablepictureinpicture></video>' : ''}<i class="ultra-holo"></i><i class="ultra-borda"></i><span class="selo-evento selo-ultra">ULTRA</span>` : c.summon ? '<span class="selo-evento selo-summon">SUMMON</span>' : ''}
+      ${evo ? '<i class="evo-borda"></i><span class="evo-selo">EVO</span>' : ''}${c.evento ? '<span class="selo-evento">EVENTO</span>' : ''}${c.raridade === 'ultra' ? `${vivo && !leve ? '<video class="ultra-video" src="assets/ui/moldura_ultra.mp4" autoplay muted loop playsinline preload="auto" disablepictureinpicture></video>' : ''}<i class="ultra-tex tx${[...c.id].reduce((a, ch) => a + ch.charCodeAt(0), 0) % 4}"></i><i class="ultra-holo"></i><i class="ultra-borda"></i><span class="selo-evento selo-ultra">ULTRA</span>` : c.summon ? '<span class="selo-evento selo-summon">SUMMON</span>' : ''}
       ${c.efeito === 'estrelinhas' ? `<i class="carta-estrelinhas">${[[12,18,11,0],[78,10,9,0.5],[60,34,13,1.1],[22,52,9,1.6],[86,58,12,0.8],[40,72,10,2.1],[70,84,9,0.3],[8,82,12,1.4],[50,12,8,1.9]].map(([x, y, sz, d]) => `<i style="--x:${x}%;--y:${y}%;--s:${sz}px;--d:${d}s"></i>`).join('')}</i>` : ''}
       ${zkHtml}${extra}
     </div>`;

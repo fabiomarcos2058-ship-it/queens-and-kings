@@ -168,6 +168,28 @@ const Summon = (() => {
     chances: { ultra: 0.02, lendaria: 0.18, epica: 0.8 },
     // garantia do destaque: o Ainz vem com certeza na 200ª invocação sem ele neste banner
     pityDestaque: 200,
+  }, {
+    id: 'hibridos',
+    nome: 'HÍBRIDOS SAIYAJINS',
+    sub: 'Sangue Saiyajin, Coração Terráqueo',
+    tema: 'db',
+    logo: 'db',
+    fim: new Date(2026, 11, 7, 23, 59, 59), // 07/12/2026
+    arte: 'assets/summon/hibridos.jpg',
+    titulo: 'assets/titulo/hibridos.jpg',
+    mini: 'assets/summon/hibridos_mini.jpg',
+    centro: 'gohan_trunks',
+    destaque: ['gohan_trunks', 'gohan_beast', 'gotenks_ssj3', 'trunks_furia'],
+    pool: {
+      ultra: ['gohan_trunks', 'gohan_beast', 'gotenks_ssj3'],
+      lendaria: ['trunks_furia', 'trunks_futuro', 'gotenks_ssj'],
+      epica: ['gotenks_base', 'goten_ssj', 'trunks_kid_ssj', 'trunks_kid', 'goten'],
+    },
+    // Gohan & Trunks é o mais difícil de vir
+    pesos: { gohan_trunks: 1, gohan_beast: 2.5, gotenks_ssj3: 2.5 },
+    chances: { ultra: 0.025, lendaria: 0.2, epica: 0.775 },
+    // garantia do destaque: Gohan & Trunks vem com certeza na 180ª invocação sem ele neste banner
+    pityDestaque: 180,
   }];
   // só os banners que ainda não acabaram
   const ativos = () => BANNERS.filter((b) => b.fim.getTime() > Date.now() && (!b.inicio || b.inicio.getTime() <= Date.now()));
