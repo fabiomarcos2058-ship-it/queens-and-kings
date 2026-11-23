@@ -5520,6 +5520,123 @@
     100,
     736
    ]
+  },
+  {
+   "id": "sobreviventes",
+   "nome": "Trunks & Gohan: Sobreviventes",
+   "raridade": "ultra",
+   "custo": 6,
+   "tipo": "Ultra · Ruínas do Futuro",
+   "descricao": "Os últimos guerreiros do futuro, feridos mas de pé. Entram os dois, dividem o dano e, quando um cai, o outro luta com toda a raiva de quem não tem mais nada a perder.",
+   "vida": 1150,
+   "dano": 205,
+   "velocidade": 86,
+   "alcance": 18,
+   "cadencia": 0.82,
+   "danoTorre": 0.55,
+   "passiva": {
+    "nome": "Últimos Sobreviventes",
+    "tipo": "gemeos",
+    "descricao": "Entram os dois: Trunks (espada, crítico) e Gohan (soco pesado, nasce com escudo). Dividem o dano e focam o mesmo inimigo. Se um cair, o outro entra em Fúria: cura 30%, +60% de dano e ataca 25% mais rápido."
+   },
+   "habilidade": {
+    "nome": "Ataque das Ruínas",
+    "tipo": "fusaoDupla",
+    "custo": 4,
+    "recarga": 20,
+    "mult": 2.2,
+    "cutin": "hb_ruinas",
+    "descricao": "Trunks e Gohan disparam juntos no mesmo alvo e, onde os raios se encontram, uma explosão enorme."
+   },
+   "trofeus": 0,
+   "exclusivo": [],
+   "summon": true,
+   "alvo": "tudo",
+   "arena": 1,
+   "rosto": [
+    390,
+    390,
+    300
+   ],
+   "arte": [
+    0,
+    0,
+    736
+   ],
+   "gemeos": [
+    "sv_trunks",
+    "sv_gohan"
+   ]
+  },
+  {
+   "id": "sv_trunks",
+   "nome": "Trunks Super Saiyajin (Ruínas)",
+   "raridade": "ultra",
+   "custo": 6,
+   "tipo": "Sobrevivente",
+   "descricao": "Trunks do futuro.",
+   "vida": 1100,
+   "dano": 200,
+   "velocidade": 92,
+   "alcance": 18,
+   "cadencia": 0.72,
+   "danoTorre": 0.55,
+   "passiva": {
+    "nome": "Últimos Sobreviventes",
+    "tipo": "gemeos",
+    "descricao": "Divide o dano com o Gohan."
+   },
+   "trofeus": 0,
+   "exclusivo": [],
+   "summon": true,
+   "alvo": "tudo",
+   "arena": 1,
+   "rosto": [
+    260,
+    260,
+    90
+   ],
+   "arte": [
+    0,
+    0,
+    500
+   ],
+   "corpo": true
+  },
+  {
+   "id": "sv_gohan",
+   "nome": "Gohan Super Saiyajin 2 (Ruínas)",
+   "raridade": "ultra",
+   "custo": 6,
+   "tipo": "Sobrevivente",
+   "descricao": "Gohan do futuro.",
+   "vida": 1200,
+   "dano": 205,
+   "velocidade": 84,
+   "alcance": 18,
+   "cadencia": 0.88,
+   "danoTorre": 0.55,
+   "passiva": {
+    "nome": "Últimos Sobreviventes",
+    "tipo": "gemeos",
+    "descricao": "Divide o dano com o Trunks."
+   },
+   "trofeus": 0,
+   "exclusivo": [],
+   "summon": true,
+   "alvo": "tudo",
+   "arena": 1,
+   "rosto": [
+    520,
+    520,
+    90
+   ],
+   "arte": [
+    236,
+    300,
+    500
+   ],
+   "corpo": true
   }
  ]
 }

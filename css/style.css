@@ -4132,3 +4132,6 @@ body.espectando .arena-grande-janela.meta-azul::after { content: ''; top: 0; lef
 .cutin.hb_furia .cutin-faixa { border-color: #FFD93B; box-shadow: 0 0 26px #FFD93B, 0 0 50px #FF3A1A99; }
 .cutin.hb_furia .cutin-legenda { color: #FFF1A8; text-shadow: 3px 3px 0 #7a1a00, -1px -1px 0 #000, 1px 1px 0 #000, 0 0 14px #FF3A1A; }
 .tropa.trunks-furia .tropa-medalhao { box-shadow: 0 0 0 3px #FFD93B, 0 0 22px 9px #FF8A1A; animation: flowPulsa 0.3s ease-in-out infinite alternate; }
+.cutin.hb_ruinas::before { background: radial-gradient(circle at 50% 45%, #8a8a9a55, #0a0a14cc 75%); }
+.cutin.hb_ruinas .cutin-faixa { border-color: #FFD25E; box-shadow: 0 0 22px #FFD25E, 0 0 40px #5C6B8A88; }
+.cutin.hb_ruinas .cutin-legenda { color: #FFF1C2; text-shadow: 3px 3px 0 #3a2a00, -1px -1px 0 #000, 1px 1px 0 #000, 0 0 12px #FFD25E; }

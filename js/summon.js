@@ -179,14 +179,14 @@ const Summon = (() => {
     titulo: 'assets/titulo/hibridos.jpg',
     mini: 'assets/summon/hibridos_mini.jpg',
     centro: 'gohan_trunks',
-    destaque: ['gohan_trunks', 'gohan_beast', 'gotenks_ssj3', 'trunks_furia'],
+    destaque: ['gohan_trunks', 'sobreviventes', 'gohan_beast', 'gotenks_ssj3', 'trunks_furia'],
     pool: {
-      ultra: ['gohan_trunks', 'gohan_beast', 'gotenks_ssj3'],
+      ultra: ['gohan_trunks', 'sobreviventes', 'gohan_beast', 'gotenks_ssj3'],
       lendaria: ['trunks_furia', 'trunks_futuro', 'gotenks_ssj'],
       epica: ['gotenks_base', 'goten_ssj', 'trunks_kid_ssj', 'trunks_kid', 'goten'],
     },
     // Gohan & Trunks é o mais difícil de vir
-    pesos: { gohan_trunks: 1, gohan_beast: 2.5, gotenks_ssj3: 2.5 },
+    pesos: { gohan_trunks: 1, sobreviventes: 1.5, gohan_beast: 2.5, gotenks_ssj3: 2.5 },
     chances: { ultra: 0.025, lendaria: 0.2, epica: 0.775 },
     // garantia do destaque: Gohan & Trunks vem com certeza na 180ª invocação sem ele neste banner
     pityDestaque: 180,
