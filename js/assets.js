@@ -5,10 +5,12 @@
 // ele aparece no jogo automaticamente, sem mexer no código.
 const Assets = (() => {
   const cache = {};
+  const TEM_PNG = new Set(["ui/torre_logo", "ui/aba_eventos", "ui/aba_loja", "ui/aura_zenkai"]);
 
   function url(name) {
     if (!cache[name]) {
-      cache[name] = new Promise((resolve) => {
+      if (!TEM_PNG.has(name) && name.startsWith('ui/')) cache[name] = Promise.resolve(`assets/${name}.svg`);
+      else cache[name] = new Promise((resolve) => {
         const img = new Image();
         img.onload = () => resolve(`assets/${name}.png`);
         img.onerror = () => resolve(`assets/${name}.svg`);

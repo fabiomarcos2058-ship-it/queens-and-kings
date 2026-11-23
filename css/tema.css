@@ -1,0 +1,88 @@
+/* ============================================================
+   TEMA "Royale Limpo" — camada final de visual (carrega depois do style.css)
+   Ideia: menos enfeite, mais clareza. Fundo azul-noite macio, painéis de vidro com borda dourada fininha,
+   botões grandes e gordinhos (estilo Clash Royale), tipografia mais legível e espaços consistentes.
+   ============================================================ */
+:root {
+  --qk-fundo1: #232a68; --qk-fundo2: #151a45; --qk-painel: #1b2058; --qk-painel2: #12163f;
+  --qk-ouro: #FFD54F; --qk-ouro2: #F2B23E; --qk-borda: #ffffff22; --qk-brilho: #ffffff14;
+  --qk-raio: 16px; --qk-sombra: 0 6px 0 #0a0d2b, 0 10px 18px #0006;
+}
+html, body { background: #0d1030; }
+#app {
+  background: radial-gradient(120% 55% at 50% 0%, #3a43a0 0, transparent 62%), radial-gradient(90% 40% at 100% 100%, #5a3ca0 0, transparent 60%), linear-gradient(180deg, var(--qk-fundo1), var(--qk-fundo2) 75%);
+}
+.telas-janela { background: none; }
+.tela { padding: 14px 14px 36px; scrollbar-width: none; }
+.tela::-webkit-scrollbar { display: none; }
+
+/* ----- Barra de cima ----- */
+.topbar { background: linear-gradient(180deg, #1a1f55ee, #141845ee); border-bottom: 2px solid #ffffff18; box-shadow: 0 4px 14px #0005; padding: 8px 12px; }
+.moeda { background: linear-gradient(#0c0f33, #171c4e); border: 2px solid #ffffff1f; box-shadow: inset 0 2px 0 #ffffff12; padding: 3px 12px 3px 6px; font-size: 15px; font-weight: 700; }
+.nome { font-weight: 700; letter-spacing: .2px; }
+.btn-som { background: linear-gradient(#2a3180, #1b2058) !important; border: 2px solid #ffffff24; box-shadow: 0 3px 0 #0a0d2b; }
+
+/* ----- Abas de baixo: barra limpa, aba ativa destacada por baixo ----- */
+.abas { background: linear-gradient(180deg, #171c4f, #0f1238); border-top: 2px solid #ffffff1c; box-shadow: 0 -6px 18px #0006; gap: 2px; padding: 6px 6px calc(6px + env(safe-area-inset-bottom)); }
+.abas button { background: none; box-shadow: none; border-radius: 14px; color: #9fb4e8; font-weight: 600; transition: background .2s, color .2s; }
+.abas button.ativa { background: linear-gradient(#4b56c4, #2f3894); box-shadow: 0 0 0 2px #8f98e8 inset, 0 4px 0 #0a0d2b; transform: none; flex: 1.25; color: #fff; }
+.abas button.ativa .ic-aba { transform: scale(1.15); filter: drop-shadow(0 2px 3px #0008); }
+
+/* ----- Títulos de seção: simples, com barrinha dourada ----- */
+.titulo-secao { text-shadow: none; margin: 18px 0 10px; }
+.titulo-secao span { background: none; box-shadow: none; transform: none; padding: 0 0 0 12px; position: relative; font-size: 18px; font-weight: 700; letter-spacing: .3px; }
+.titulo-secao span::before { content: ''; position: absolute; left: 0; top: 3px; bottom: 3px; width: 5px; border-radius: 3px; background: linear-gradient(var(--qk-ouro), var(--qk-ouro2)); }
+
+/* ----- Painéis e cartões: vidro com borda fininha ----- */
+.painel-deck, .painel-torres, .arena-card, .trofeus, .slot-bau, .loja-banner {
+  background: linear-gradient(180deg, #232a72cc, #151a4acc); border: 2px solid var(--qk-borda); box-shadow: inset 0 2px 0 var(--qk-brilho), var(--qk-sombra);
+}
+.arena-card { border-radius: 20px; border-color: #ffffff2b; }
+.trofeus { border-radius: 16px; }
+.slot-bau { border-radius: 14px; }
+.painel-deck { border-radius: 16px; }
+
+/* ----- Botões grandes (gordinhos) ----- */
+.btn-jogar { border-radius: 20px; border-bottom-width: 7px; font-weight: 800; letter-spacing: .5px; text-shadow: 0 2px 0 #fff6; box-shadow: 0 8px 18px #0007; }
+.btn-ranq, .btn-summon, .btn-x1, .btn-top { border-radius: 16px; box-shadow: 0 4px 0 #0a0d2b, 0 8px 14px #0005; }
+.btn-modal { border-radius: 14px; font-weight: 800; box-shadow: 0 2px 6px #0004; }
+.btn-modal:active, .btn-peq:active { transform: translateY(3px); border-bottom-width: 1px; }
+.i2-bolha { filter: drop-shadow(0 4px 6px #0006); }
+
+/* ----- Modais: mais limpos ----- */
+.modal-fundo { background: radial-gradient(circle at 50% 40%, #0b0e30aa, #05061acc); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); }
+.modal { border-radius: 22px; background: linear-gradient(180deg, #2a3190, #171c58); border: 3px solid #ffffff30; box-shadow: 0 10px 0 #0a0d2b, 0 20px 40px #000a; }
+.modal h2, .modal > b:first-child { letter-spacing: .3px; }
+.aviso { color: #b9c8f2; line-height: 1.35; }
+
+/* ----- Cartas e grades: espaço respirando ----- */
+.grade-3, .grade-4 { gap: 10px 8px; }
+.cartao, .cartao-esm, .cartao-omni { border-radius: 18px; }
+
+/* ----- Detalhes que tiravam a atenção ----- */
+.tt-instalar, .btn-instalar { animation-duration: 2.4s; }
+.i2-luzes i { opacity: .6; }
+
+/* ----- Trilha de troféus ----- */
+.trofeus { position: relative; }
+.trofeus.tem-premio::after { content: '🎁 Prêmio!'; position: absolute; right: -6px; top: -10px; background: #E24B4A; color: #fff; font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 10px; border: 2px solid #fff; animation: pulsa 1s ease-in-out infinite; }
+.tr-premios { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; margin-top: 10px; }
+.tr-premio { display: flex; flex-direction: column; gap: 1px; align-items: flex-start; padding: 6px 9px; border-radius: 10px; background: #0d1030aa; border: 2px solid #ffffff1a; color: #cdd7f7; font-size: 12px; text-align: left; }
+.tr-premio b { font-size: 13px; color: #fff; }
+.tr-premio span { font-size: 11px; color: #ffd98a; }
+.tr-premio.pego { opacity: .5; }
+.tr-premio.pego span { color: #8be3b0; }
+.tr-premio.pode { border-color: #5DCAA5; background: linear-gradient(#1d6b55, #134a3b); box-shadow: 0 0 10px #5DCAA588; animation: pulsa 1.4s ease-in-out infinite; }
+.tr-premio:disabled:not(.pego) { filter: grayscale(.4) brightness(.8); }
+#tr-todos { width: 100%; margin: 8px 0; flex: none; }
+
+/* ----- Baú da Coroa ----- */
+.coroa-bau { display: flex; align-items: center; gap: 10px; margin: 10px 0 4px; padding: 8px 12px; border-radius: 14px; background: linear-gradient(180deg, #232a72cc, #151a4acc); border: 2px solid #ffffff22; box-shadow: 0 4px 0 #0a0d2b; }
+.coroa-bau .cb-ic { font-size: 26px; filter: drop-shadow(0 2px 2px #0008); }
+.coroa-bau .cb-mid { flex: 1; display: flex; flex-direction: column; gap: 4px; font-size: 13px; }
+.coroa-bau .cb-barra { height: 10px; border-radius: 6px; background: #0b0e30; border: 1px solid #ffffff22; overflow: hidden; }
+.coroa-bau .cb-barra i { display: block; height: 100%; background: linear-gradient(90deg, #FFB703, #FFE27A); border-radius: 6px; transition: width .4s; }
+.coroa-bau .cb-n { font-weight: 800; font-size: 14px; color: #FFE27A; min-width: 44px; text-align: right; }
+.coroa-bau .cb-abrir { padding: 7px 14px; border-radius: 12px; font-weight: 800; background: #FAC775; color: #412402; border-bottom: 4px solid #BA7517; animation: pulsa 1s ease-in-out infinite; }
+.coroa-bau.pronto { border-color: #FFD54F; box-shadow: 0 0 14px #FFD54F66, 0 4px 0 #0a0d2b; }
+.coroa-bau.pego { opacity: .65; }

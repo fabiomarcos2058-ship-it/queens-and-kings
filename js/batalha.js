@@ -4073,6 +4073,17 @@ const Batalha = (() => {
       if (t.tx !== x || t.ty !== y) { t.ox = t.x; t.oy = t.y; t.tx = x; t.ty = y; t.lerp = 0; }
       if (vida < t.vida) { piscar(t.el, 'levou'); numero(t, t.vida - vida); }
       if (vida !== t.vidaVista || max !== t.maxVisto) { t.vida = vida; t.max = max; t.vidaVista = vida; t.maxVisto = max; atualizarHp(t); }
+      // heróis que se transformam (Ben 10, Super Quarteto): o convidado também troca o rosto e o brilho
+      if (t.carta && t.carta.id !== cartaId) {
+        const c2 = Estado.carta(cartaId);
+        if (c2) {
+          t.carta = c2;
+          const img = t.el.querySelector('.tropa-medalhao img'); if (img) img.src = `assets/cartas/${cartaId}_medalhao.png`;
+          t.el.classList.remove('omni-alien', 'omni-gigante', ...ALIENS_OMNI.map((x) => 'omni-' + x), ...RELEVO.map((x) => 'q-' + x));
+          if (ALIENS_OMNI.includes(cartaId)) { t.el.classList.add('omni-alien', 'omni-' + cartaId); if (OMNI_GIGANTE[cartaId]) { t.el.classList.add('omni-gigante'); t.el.style.setProperty('--omni-esc', OMNI_GIGANTE[cartaId]); } }
+          if (RELEVO.includes(cartaId)) t.el.classList.add('q-relevo', 'q-' + cartaId);
+        }
+      }
       t.recarga = recarga;
       // convidado: só mexe nas classes quando o estado da tropa mudou (eram ~50 trocas por tropa, 10x por segundo)
       if (flags === t.flagsVistas && f2 === t.f2Visto) continue;

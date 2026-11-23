@@ -328,6 +328,8 @@
     const atual = Arena.daQtd(d().recorde), prox = Arena.ARENAS[atual.n] || null;
     const p = prox ? (d().trofeus - atual.trofeus) / (prox.trofeus - atual.trofeus) : 1;
     $('trofeus-barra').style.width = `${Math.max(0, Math.min(100, p * 100))}%`;
+    desenharCoroaBau();
+    document.querySelector('.trofeus').classList.toggle('tem-premio', Trilha.prontos().length > 0);
     $('trofeus-prox').textContent = prox ? `Próxima arena: ${fmt(prox.trofeus)} · toque para ver` : 'Você chegou na última arena! · toque para ver';
     const card = document.querySelector('.arena-card');
     card.querySelector('.arena-nome').innerHTML = `<span>Arena ${atual.n}</span>${atual.nome}`;
@@ -456,19 +458,41 @@
 
   function caminho() {
     const atual = Arena.daQtd(d().recorde);
-    UI.modal({
-      titulo: 'Caminho das arenas',
-      classe: 'modal-caminho modal-arenas',
-      html: `<p class="aviso">Ganhe troféus para chegar nas próximas arenas. Cada arena libera novas cartas, mas elas só aparecem nos <b>baús</b>. Quando você chega numa arena, seus troféus não caem mais abaixo do portão dela.</p>
-        <div class="caminho-arenas">${[...Arena.ARENAS].reverse().map((a) => {
+    const A = Arena.ARENAS;
+    const pegar = (lista) => {
+      const r = Trilha.pegar(lista);
+      if (!r.ouro && !r.gemas && !r.baus.length) return;
+      topo(); telaBatalha();
+      r.baus.forEach((b, i) => setTimeout(() => mostrarBau(b, Estado.abrirBau(b)), 400 + i * 600));
+      UI.toast(`Prêmios: ${r.ouro ? r.ouro + ' 🪙 ' : ''}${r.gemas ? r.gemas + ' 💎 ' : ''}${r.baus.length ? r.baus.length + ' baú(s)' : ''}`);
+    };
+    const html = () => {
+      const prontos = Trilha.prontos();
+      return `<p class="aviso">Cada 100 troféus de recorde dá um prêmio. Cada arena libera novas cartas, mas elas só aparecem nos <b>baús</b>. Seus troféus não caem abaixo do portão da arena.</p>
+        ${prontos.length ? `<button class="btn-modal principal" id="tr-todos">🎁 Pegar tudo (${prontos.length})</button>` : ''}
+        <div class="caminho-arenas">${[...A].reverse().map((a) => {
           const ok = d().recorde >= a.trofeus, aqui = a.id === atual.id;
+          const prox = A[a.n] || null, fim = prox ? prox.trofeus : Trilha.MAX + 1;
           const cs = Estado.catalogo().filter((c) => (c.arena || 1) === a.n && !c.exclusivo);
+          const marcos = Trilha.passos().filter((t) => t >= a.trofeus && t < fim && t > 0).reverse();
           return `<div class="marco-arena${ok ? ' ok' : ''}${aqui ? ' aqui' : ''}" style="--cor:${a.cor}">
             <div class="ma-topo"><div class="ma-img${ok ? '' : ' trancada'}" style="background-image:url(assets/arenas/${a.id}_mini.jpg)">${ok ? '' : '<span>🔒</span>'}</div>
               <div class="ma-info"><small>Arena ${a.n}${aqui ? ' · você está aqui' : ''}</small><b>${a.nome}</b><span><i class="ic-trofeu"></i>${fmt(a.trofeus)}</span><em>${a.desc}</em></div></div>
-            <div class="marco-cartas">${cs.map((c) => `<div class="marco-carta${Estado.tem(c.id) ? '' : ok ? ' falta' : ' trancada'}">${ok ? Cartas.html(c, { mini: true }) : '<div class="carta-silhueta">🔒</div>'}<small>${ok ? c.nome : '???'}</small></div>`).join('')}</div></div>`;
-        }).join('')}</div>`,
-    });
+            <div class="marco-cartas">${cs.map((c) => `<div class="marco-carta${Estado.tem(c.id) ? '' : ok ? ' falta' : ' trancada'}">${ok ? Cartas.html(c, { mini: true }) : '<div class="carta-silhueta">🔒</div>'}<small>${ok ? c.nome : '???'}</small></div>`).join('')}</div>
+            ${marcos.length ? `<div class="tr-premios">${marcos.map((t) => {
+              const rw = Trilha.recompensa(t), pego = Trilha.pegos().includes(t), pode = !pego && d().recorde >= t;
+              return `<button class="tr-premio${pego ? ' pego' : pode ? ' pode' : ''}" data-t="${t}" ${pode ? '' : 'disabled'}><b>🏆 ${fmt(t)}</b><span>${pego ? '✓ pego' : Trilha.texto(rw)}</span></button>`;
+            }).join('')}</div>` : ''}
+          </div>`;
+        }).join('')}</div>`;
+    };
+    const md = UI.modal({ titulo: 'Trilha de troféus', classe: 'modal-caminho modal-arenas', html: html() });
+    const ligar = () => {
+      const todos = md.el.querySelector('#tr-todos');
+      if (todos) todos.onclick = () => { pegar(Trilha.prontos()); md.fechar(); };
+      md.el.querySelectorAll('.tr-premio.pode').forEach((b) => (b.onclick = () => { pegar([+b.dataset.t]); md.fechar(); caminho(); }));
+    };
+    ligar();
   }
 
   let iniciando = false;
@@ -1051,7 +1075,23 @@
     });
   }
 
+  // ---------- Baú da Coroa (10 coroas por dia, como no Clash Royale) ----------
+  function coroaBauDados() {
+    const c = d().coroaBau;
+    if (!c || c.dia !== hojeTxt()) d().coroaBau = { dia: hojeTxt(), n: 0, pego: false };
+    return d().coroaBau;
+  }
+  function desenharCoroaBau() {
+    const el = $('coroa-bau'); if (!el) return;
+    const c = coroaBauDados(), pronto = c.n >= 10 && !c.pego;
+    el.className = 'coroa-bau' + (pronto ? ' pronto' : c.pego ? ' pego' : '');
+    el.innerHTML = `<span class="cb-ic">👑</span><div class="cb-mid"><b>Baú da Coroa</b><div class="cb-barra"><i style="width:${Math.min(100, c.n * 10)}%"></i></div></div>
+      ${pronto ? '<button class="cb-abrir" id="cb-abrir">Abrir!</button>' : `<span class="cb-n">${c.pego ? '✓ pego' : `${Math.min(10, c.n)}/10`}</span>`}`;
+    const b = $('cb-abrir');
+    if (b) b.onclick = () => { c.pego = true; Estado.salvar(); desenharCoroaBau(); mostrarBau('prata', Estado.abrirBau('prata')); };
+  }
   function fimDeBatalha(r) {
+    if (!r.tutorial && !(r.evento && r.evento.deck) && r.coroas > 0) { const c = coroaBauDados(); c.n = Math.min(10, c.n + r.coroas); Estado.salvar(); }
     // primeira vitória do dia: +20 💎 (qualquer modo)
     if (r.resultado === 'vitoria' && !r.tutorial && d().primeiraVitoria !== hojeTxt()) {
       d().primeiraVitoria = hojeTxt(); d().gemas += 20; Estado.salvar();

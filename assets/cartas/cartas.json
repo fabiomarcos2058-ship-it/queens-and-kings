@@ -307,7 +307,7 @@
    "custo": 2,
    "tipo": "Rápida",
    "descricao": "Pequena, veloz e cheia de energia.",
-   "trofeus": 0,
+   "trofeus": 400,
    "rosto": [
     405,
     330,
@@ -324,7 +324,7 @@
    "alcance": 16,
    "cadencia": 0.8,
    "alvo": "tudo",
-   "arena": 1,
+   "arena": 2,
    "danoTorre": 1.04
   },
   {
@@ -350,7 +350,7 @@
    "alcance": 16,
    "cadencia": 0.9,
    "alvo": "tudo",
-   "trofeus": 0,
+   "trofeus": 1000,
    "habilidade": {
     "nome": "Cura Suave",
     "custo": 2,
@@ -358,7 +358,7 @@
     "recarga": 10,
     "descricao": "Recupera metade da vida."
    },
-   "arena": 1,
+   "arena": 3,
    "danoTorre": 0.72
   },
   {
@@ -368,7 +368,7 @@
    "custo": 4,
    "tipo": "Dano em área",
    "descricao": "Controla o clima e acerta raios em vários inimigos.",
-   "trofeus": 0,
+   "trofeus": 400,
    "rosto": [
     470,
     380,
@@ -386,7 +386,7 @@
    "cadencia": 1.6,
    "alvo": "tudo",
    "area": 36,
-   "arena": 1,
+   "arena": 2,
    "danoTorre": 1.12
   },
   {
@@ -412,8 +412,8 @@
    "alcance": 18,
    "cadencia": 1.0,
    "alvo": "tudo",
-   "trofeus": 0,
-   "arena": 1,
+   "trofeus": 400,
+   "arena": 2,
    "danoTorre": 0.77
   },
   {
@@ -423,13 +423,13 @@
    "custo": 3,
    "tipo": "Barril",
    "descricao": "Jogue em qualquer lugar: o barril quebra e solta 3 minis bem pequenininhas e rápidas.",
-   "trofeus": 0,
+   "trofeus": 400,
    "imagem": "barril.jpg",
    "barril": {
     "tropa": "mini",
     "qtd": 3
    },
-   "arena": 1
+   "arena": 2
   },
   {
    "id": "pan_gt",
@@ -438,7 +438,7 @@
    "custo": 3,
    "tipo": "Atiradora",
    "descricao": "Dispara rajadas de energia de longe.",
-   "trofeus": 0,
+   "trofeus": 400,
    "rosto": [
     330,
     235,
@@ -455,7 +455,7 @@
    "alcance": 76,
    "cadencia": 1.0,
    "alvo": "tudo",
-   "arena": 1,
+   "arena": 2,
    "danoTorre": 0.33
   },
   {
@@ -465,7 +465,7 @@
    "custo": 4,
    "tipo": "Dano em área",
    "descricao": "Ondas de som que atingem todos por perto.",
-   "trofeus": 400,
+   "trofeus": 1000,
    "rosto": [
     300,
     250,
@@ -483,7 +483,7 @@
    "cadencia": 1.5,
    "alvo": "tudo",
    "area": 40,
-   "arena": 2,
+   "arena": 3,
    "danoTorre": 1.12
   },
   {
@@ -509,7 +509,7 @@
    "alcance": 18,
    "cadencia": 1.1,
    "alvo": "tudo",
-   "trofeus": 400,
+   "trofeus": 1800,
    "habilidade": {
     "nome": "Corte Fatal",
     "custo": 2,
@@ -518,7 +518,7 @@
     "descricao": "Os próximos 3 golpes causam 2,5x de dano.",
     "mult": 2.5
    },
-   "arena": 2,
+   "arena": 4,
    "danoTorre": 0.75
   },
   {
@@ -591,8 +591,8 @@
    "alcance": 18,
    "cadencia": 1.0,
    "alvo": "tudo",
-   "trofeus": 400,
-   "arena": 2,
+   "trofeus": 1800,
+   "arena": 4,
    "danoTorre": 0.46
   },
   {
@@ -602,7 +602,7 @@
    "custo": 3,
    "tipo": "Atiradora",
    "descricao": "Atrevida e rápida no gatilho.",
-   "trofeus": 400,
+   "trofeus": 1000,
    "rosto": [
     400,
     300,
@@ -619,7 +619,7 @@
    "alcance": 78,
    "cadencia": 0.9,
    "alvo": "tudo",
-   "arena": 2,
+   "arena": 3,
    "danoTorre": 0.81
   },
   {
@@ -645,7 +645,7 @@
    "alcance": 16,
    "cadencia": 1.05,
    "alvo": "tudo",
-   "trofeus": 400,
+   "trofeus": 1000,
    "habilidade": {
     "nome": "Potencial Despertado",
     "custo": 2,
@@ -654,7 +654,7 @@
     "recarga": 14,
     "descricao": "Por 5s ataca mais rápido, anda mais rápido e causa +30% de dano."
    },
-   "arena": 2,
+   "arena": 3,
    "danoTorre": 0.5
   },
   {
@@ -664,7 +664,7 @@
    "custo": 4,
    "tipo": "Lutadora",
    "descricao": "Confiante e forte, derruba quem estiver na frente.",
-   "trofeus": 400,
+   "trofeus": 1800,
    "rosto": [
     205,
     255,
@@ -681,7 +681,7 @@
    "alcance": 16,
    "cadencia": 1.0,
    "alvo": "tudo",
-   "arena": 2,
+   "arena": 4,
    "danoTorre": 0.47
   },
   {
@@ -691,7 +691,7 @@
    "custo": 5,
    "tipo": "Explosiva",
    "descricao": "Tudo o que ela acerta explode em área.",
-   "trofeus": 1000,
+   "trofeus": 2400,
    "rosto": [
     420,
     230,
@@ -717,7 +717,7 @@
     "recarga": 15,
     "descricao": "Se for derrotada nos próximos 10s, volta com metade da vida."
    },
-   "arena": 3,
+   "arena": 5,
    "danoTorre": 1.01
   },
   {
@@ -743,7 +743,7 @@
    "alcance": 20,
    "cadencia": 1.1,
    "alvo": "tudo",
-   "trofeus": 1000,
+   "trofeus": 2400,
    "habilidade": {
     "nome": "Corte Dimensional",
     "custo": 2,
@@ -752,7 +752,7 @@
     "descricao": "Os próximos 3 golpes causam 2,5x de dano.",
     "mult": 2.5
    },
-   "arena": 3,
+   "arena": 5,
    "danoTorre": 0.56
   },
   {
@@ -779,8 +779,8 @@
    "cadencia": 1.8,
    "alvo": "tudo",
    "area": 32,
-   "trofeus": 1000,
-   "arena": 3,
+   "trofeus": 2400,
+   "arena": 5,
    "danoTorre": 0.83
   },
   {
@@ -790,7 +790,7 @@
    "custo": 6,
    "tipo": "Lutadora lendária",
    "descricao": "Transformada, causa dano enorme em área ao redor.",
-   "trofeus": 1000,
+   "trofeus": 3600,
    "rosto": [
     255,
     200,
@@ -816,7 +816,7 @@
     "recarga": 12,
     "descricao": "Por 6s ataca mais rápido, anda mais rápido e causa +30% de dano."
    },
-   "arena": 3,
+   "arena": 7,
    "danoTorre": 0.63
   },
   {
@@ -843,7 +843,7 @@
    "cadencia": 1.2,
    "alvo": "tudo",
    "area": 25,
-   "trofeus": 1000,
+   "trofeus": 3000,
    "habilidade": {
     "nome": "Final Kamehameha",
     "custo": 3,
@@ -852,7 +852,7 @@
     "recarga": 16,
     "descricao": "Por 6s ataca mais rápido, anda mais rápido e causa +30% de dano."
    },
-   "arena": 3,
+   "arena": 6,
    "danoTorre": 0.3
   },
   {
@@ -926,7 +926,7 @@
    "custo": 5,
    "tipo": "Lutador elétrico",
    "descricao": "Golpes elétricos que acertam em área. Perigoso em qualquer briga.",
-   "trofeus": 1000,
+   "trofeus": 2400,
    "rosto": [
     330,
     690,
@@ -952,7 +952,7 @@
     "duracao": 6,
     "descricao": "Por 6s ataca mais rápido, anda mais rápido e causa +30% de dano."
    },
-   "arena": 3,
+   "arena": 5,
    "danoTorre": 0.82
   },
   {
@@ -962,7 +962,7 @@
    "custo": 5,
    "tipo": "Atiradora de gelo",
    "descricao": "Ataca de longe com gelo e pode congelar as tropas inimigas em volta.",
-   "trofeus": 1000,
+   "trofeus": 2400,
    "rosto": [
     400,
     740,
@@ -990,7 +990,7 @@
     "dano": 120,
     "descricao": "Congela as tropas inimigas perto do alvo por 2s (elas não andam nem atacam)."
    },
-   "arena": 3,
+   "arena": 5,
    "danoTorre": 0.95
   },
   {
@@ -1000,7 +1000,7 @@
    "custo": 6,
    "tipo": "Fusão lendária",
    "descricao": "A fusão de Goku e Vegeta em Super Saiyajin. Golpes rápidos e devastadores.",
-   "trofeus": 1800,
+   "trofeus": 3000,
    "rosto": [
     375,
     520,
@@ -1025,7 +1025,7 @@
     "descricao": "Os próximos 3 golpes causam 2,2x de dano.",
     "mult": 2.2
    },
-   "arena": 4,
+   "arena": 6,
    "danoTorre": 0.37
   },
   {
@@ -1035,7 +1035,7 @@
    "custo": 7,
    "tipo": "Fusão lendária",
    "descricao": "Muita vida e golpes em área. Lento, mas quase impossível de parar.",
-   "trofeus": 1800,
+   "trofeus": 3600,
    "rosto": [
     365,
     500,
@@ -1061,7 +1061,7 @@
     "dano": 760,
     "descricao": "Dispara um Kamehameha que atravessa tudo em linha reta (metade do dano nas torres)."
    },
-   "arena": 4,
+   "arena": 7,
    "danoTorre": 0.65
   },
   {
@@ -1071,7 +1071,7 @@
    "custo": 6,
    "tipo": "Fusão lendária",
    "descricao": "Rápido para o tamanho e com a Espada Espiritual sempre pronta.",
-   "trofeus": 1800,
+   "trofeus": 3000,
    "rosto": [
     320,
     190,
@@ -1096,7 +1096,7 @@
     "descricao": "Os próximos 3 golpes causam 2,2x de dano.",
     "mult": 2.2
    },
-   "arena": 4,
+   "arena": 6,
    "danoTorre": 0.48
   },
   {
@@ -1106,7 +1106,7 @@
    "custo": 7,
    "tipo": "Fusão lendária",
    "descricao": "O Gogeta mais forte: muito dano em área e uma fúria que destrói torres.",
-   "trofeus": 1800,
+   "trofeus": 3600,
    "rosto": [
     405,
     420,
@@ -1132,7 +1132,7 @@
     "duracao": 7,
     "descricao": "Por 7s ataca mais rápido, anda mais rápido e causa +30% de dano."
    },
-   "arena": 4,
+   "arena": 7,
    "danoTorre": 0.42
   },
   {
@@ -1142,7 +1142,7 @@
    "custo": 3,
    "tipo": "Lutador Saiyajin",
    "descricao": "O Goku de sempre: equilibrado e confiável.",
-   "trofeus": 0,
+   "trofeus": 400,
    "rosto": [
     380,
     320,
@@ -1159,7 +1159,7 @@
    "alcance": 18,
    "cadencia": 1.0,
    "alvo": "tudo",
-   "arena": 1,
+   "arena": 2,
    "danoTorre": 0.73
   },
   {
@@ -1204,7 +1204,7 @@
    "custo": 4,
    "tipo": "Super Saiyajin 2",
    "descricao": "Rápido e cheio de raios. Golpes fortes em sequência.",
-   "trofeus": 400,
+   "trofeus": 1000,
    "rosto": [
     440,
     640,
@@ -1229,7 +1229,7 @@
     "descricao": "Os próximos 3 golpes causam 2,5x de dano.",
     "mult": 2.5
    },
-   "arena": 2,
+   "arena": 3,
    "danoTorre": 0.76
   },
   {
@@ -1239,7 +1239,7 @@
    "custo": 5,
    "tipo": "Super Saiyajin 3",
    "descricao": "Muito forte e resistente, mas lento: gasta muita energia.",
-   "trofeus": 1000,
+   "trofeus": 1800,
    "rosto": [
     380,
     470,
@@ -1265,7 +1265,7 @@
     "dano": 760,
     "descricao": "Dispara um Kamehameha que atravessa tudo em linha reta (metade do dano nas torres)."
    },
-   "arena": 3,
+   "arena": 4,
    "danoTorre": 0.44
   },
   {
@@ -1275,7 +1275,7 @@
    "custo": 5,
    "tipo": "Deus Super Saiyajin",
    "descricao": "O poder divino: se recupera no meio da luta.",
-   "trofeus": 1000,
+   "trofeus": 2400,
    "rosto": [
     285,
     250,
@@ -1299,7 +1299,7 @@
     "recarga": 14,
     "descricao": "Recupera metade da vida."
    },
-   "arena": 3,
+   "arena": 5,
    "danoTorre": 0.41
   },
   {
@@ -1309,7 +1309,7 @@
    "custo": 6,
    "tipo": "Super Saiyajin 4",
    "descricao": "A forma primitiva de GT. Muita vida e golpes em área.",
-   "trofeus": 1000,
+   "trofeus": 3000,
    "rosto": [
     350,
     455,
@@ -1335,7 +1335,7 @@
     "dano": 760,
     "descricao": "Dispara um Kamehameha que atravessa tudo em linha reta (metade do dano nas torres)."
    },
-   "arena": 3,
+   "arena": 6,
    "danoTorre": 0.65
   },
   {
@@ -1345,7 +1345,7 @@
    "custo": 6,
    "tipo": "Super Saiyajin Blue",
    "descricao": "Controle perfeito do ki divino: golpes certeiros.",
-   "trofeus": 1000,
+   "trofeus": 3600,
    "rosto": [
     370,
     320,
@@ -1370,7 +1370,7 @@
     "descricao": "Os próximos 3 golpes causam 2,2x de dano.",
     "mult": 2.2
    },
-   "arena": 3,
+   "arena": 7,
    "danoTorre": 0.55
   },
   {
@@ -1380,7 +1380,7 @@
    "custo": 6,
    "tipo": "Blue + Kaioken",
    "descricao": "Arrisca tudo: o Kaioken x10 multiplica a velocidade e o dano.",
-   "trofeus": 1800,
+   "trofeus": 3000,
    "rosto": [
     380,
     760,
@@ -1405,7 +1405,7 @@
     "duracao": 7,
     "descricao": "Por 7s ataca mais rápido, anda mais rápido e causa +30% de dano."
    },
-   "arena": 4,
+   "arena": 6,
    "danoTorre": 0.34
   },
   {
@@ -1415,7 +1415,7 @@
    "custo": 7,
    "tipo": "Blue sem limites",
    "descricao": "Passou do próprio limite: o Goku Blue mais forte, em área.",
-   "trofeus": 1800,
+   "trofeus": 3600,
    "rosto": [
     395,
     700,
@@ -1441,7 +1441,7 @@
     "duracao": 7,
     "descricao": "Por 7s ataca mais rápido, anda mais rápido e causa +30% de dano."
    },
-   "arena": 4,
+   "arena": 7,
    "danoTorre": 0.6
   },
   {
@@ -1451,7 +1451,7 @@
    "custo": 6,
    "tipo": "Instinto Superior",
    "descricao": "O corpo desvia sozinho: às vezes os ataques simplesmente erram.",
-   "trofeus": 1800,
+   "trofeus": 3600,
    "rosto": [
     370,
     200,
@@ -1474,7 +1474,7 @@
     "chance": 0.25,
     "descricao": "Desvia sozinho de 25% dos ataques (inclusive das torres)."
    },
-   "arena": 4,
+   "arena": 7,
    "danoTorre": 0.35
   },
   {
@@ -1484,7 +1484,7 @@
    "custo": 7,
    "tipo": "Instinto Superior Completo",
    "descricao": "O ápice: quando ativa o Instinto, quase nada consegue acertar.",
-   "trofeus": 1800,
+   "trofeus": 3600,
    "rosto": [
     230,
     330,
@@ -1511,7 +1511,7 @@
     "furia": true,
     "descricao": "Por 5s desvia de 80% dos ataques e fica em fúria (+30% de dano e mais rápido)."
    },
-   "arena": 4,
+   "arena": 7,
    "danoTorre": 0.49
   },
   {
@@ -1725,8 +1725,8 @@
    "raridade": "lendaria",
    "custo": 6,
    "tipo": "Vampiro · Stand",
-   "trofeus": 1800,
-   "arena": 4,
+   "trofeus": 3000,
+   "arena": 6,
    "rosto": [
     235,
     150,
@@ -1765,8 +1765,8 @@
    "raridade": "lendaria",
    "custo": 5,
    "tipo": "Assassino · Stand",
-   "trofeus": 1000,
-   "arena": 3,
+   "trofeus": 1800,
+   "arena": 4,
    "rosto": [
     470,
     470,
@@ -1804,8 +1804,8 @@
    "raridade": "lendaria",
    "custo": 5,
    "tipo": "Suporte · Stand",
-   "trofeus": 1000,
-   "arena": 3,
+   "trofeus": 2400,
+   "arena": 5,
    "rosto": [
     178,
     150,
@@ -1843,8 +1843,8 @@
    "raridade": "epica",
    "custo": 4,
    "tipo": "Atirador · Rotação",
-   "trofeus": 400,
-   "arena": 2,
+   "trofeus": 1000,
+   "arena": 3,
    "rosto": [
     390,
     430,
@@ -1883,8 +1883,8 @@
    "raridade": "epica",
    "custo": 4,
    "tipo": "Atirador · Stand",
-   "trofeus": 400,
-   "arena": 2,
+   "trofeus": 1000,
+   "arena": 3,
    "rosto": [
     420,
     650,
@@ -2012,8 +2012,8 @@
    "raridade": "epica",
    "custo": 3,
    "tipo": "Velocista",
-   "trofeus": 400,
-   "arena": 2,
+   "trofeus": 1000,
+   "arena": 3,
    "descricao": "O mais rápido do jogo. Dá Spin Dash em quem está longe e junta anéis a cada golpe.",
    "rosto": [
     300,
@@ -2044,8 +2044,8 @@
    "raridade": "lendaria",
    "custo": 5,
    "tipo": "Forma de Vida Suprema",
-   "trofeus": 1000,
-   "arena": 3,
+   "trofeus": 1800,
+   "arena": 4,
    "descricao": "A cada 3 golpes atira Chaos Spears em até 3 inimigos. Com pouca vida, tira os limitadores e fica muito mais forte.",
    "rosto": [
     225,
@@ -2084,8 +2084,8 @@
    "raridade": "lendaria",
    "custo": 6,
    "tipo": "Forma Super",
-   "trofeus": 1000,
-   "arena": 3,
+   "trofeus": 3000,
+   "arena": 6,
    "descricao": "Voa e é INVENCÍVEL enquanto tiver anéis. Os anéis acabam com o tempo e com os golpes que ele leva. Sem anéis, volta a ser o Sonic normal.",
    "rosto": [
     240,
@@ -2125,8 +2125,8 @@
    "raridade": "lendaria",
    "custo": 5,
    "tipo": "Fúria Sombria",
-   "trofeus": 1800,
-   "arena": 4,
+   "trofeus": 2400,
+   "arena": 5,
    "descricao": "Quanto mais machucado, mais rápido ataca. Fica furioso quando um aliado cai perto dele.",
    "rosto": [
     240,
@@ -2165,8 +2165,8 @@
    "raridade": "lendaria",
    "custo": 6,
    "tipo": "Cavaleiro do Vento",
-   "trofeus": 1800,
-   "arena": 4,
+   "trofeus": 3000,
+   "arena": 6,
    "descricao": "Cavaleiro com armadura: tem escudo, corta em área e apara golpes de perto com contra-ataque.",
    "rosto": [
     235,
@@ -2206,8 +2206,8 @@
    "raridade": "lendaria",
    "custo": 7,
    "tipo": "Forma Hiper",
-   "trofeus": 1800,
-   "arena": 4,
+   "trofeus": 3600,
+   "arena": 7,
    "descricao": "O Sonic mais forte. 7 Esmeraldas do Caos amortecem golpes por ele, e o Hiper Flash atordoa tudo em volta.",
    "rosto": [
     330,
