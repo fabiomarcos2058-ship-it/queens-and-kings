@@ -26,7 +26,7 @@ const Ataques = (() => {
     tanque: ['sv_gohan', 'sobreviventes', 'gohan_beast', 'gt_gohan', 'gohan_trunks', 'q_amy', 'ben_diamante', 'ben_enormossauro', 'ben_waybig', 'itsuki', 'shizuku', 'gogeta_ssj4', 'goku_ssj3', 'goku_ssj4', 'goku_blue_lb', 'gogeta_ultra', 'sonic_excalibur', 'conquest', 'omni_man', 'vegeta_ultra_ego', 'gogeta_blue_solo', 'adam_smasher', 'adam_smasher_evo', 'albedo'],
     assassino: ['sv_trunks', 'gt_trunks', 'trunks_furia', 'trunks_futuro', 'goten', 'goten_ssj', 'trunks_kid', 'super_quarteto', 'q_sonic', 'q_shadow', 'ben_xlr8', 'bra', 'teto', 'pan_dbh', 'akame', 'mbappe', 'kashimo', 'goku_pressagio', 'diavolo', 'mita_malvada', 'akame_murasame', 'sonic', 'sonic_relampago', 'dark_sonic', 'kurona', 'goku_black_rose', 'goku_blue_kaioken_remake', 'vegetto_blue_solo', 'agente_rubi', 'david_martinez', 'lucy_kushinada', 'shalltear'],
     atirador: ['q_silver', 'ben_chama', 'ben_ecoeco', 'mai', 'miku_nakano', 'pan_gt', 'riruka', 'rukia_remake', 'nino_nakano', 'gyro', 'johnny', 'roman_cyber', 'johnny_silverhand', 'pandoras_actor'],
-    mago: ['gotenks_ssj3', 'gotenks_ssj', 'gotenks_base', 'trunks_kid_ssj', 'ben_contratempo', 'ben_cromatico', 'ben_gravatack', 'gohan_mirai', 'rukia', 'nami_last', 'hatsune_miku', 'bambietta', 'bulma', 'gojo', 'robin', 'pucci', 'mita_gentil', 'yugi_moto', 'anri_halloween', 'eve_atomica', 'ainz_ooal_gown', 'demiurge'],
+    mago: ['makima', 'gotenks_ssj3', 'gotenks_ssj', 'gotenks_base', 'trunks_kid_ssj', 'ben_contratempo', 'ben_cromatico', 'ben_gravatack', 'gohan_mirai', 'rukia', 'nami_last', 'hatsune_miku', 'bambietta', 'bulma', 'gojo', 'robin', 'pucci', 'mita_gentil', 'yugi_moto', 'anri_halloween', 'eve_atomica', 'ainz_ooal_gown', 'demiurge'],
     enxame: ['mini'],
   };
   const classeDe = (c) => {
@@ -110,6 +110,7 @@ const Ataques = (() => {
     vegetto_blue_solo: { v: { g: 'corte', s: 'espada_vegito', cor: '#5CE1FF' }, m: { voo: true }, d: 'Espada Espiritual rápida. Divide o dano com o Gogeta.' },
     // ----- Híbridos Saiyajins -----
     gohan_trunks: { v: { g: 'soco', cor: '#5CE1FF', pesado: true }, m: { voo: true }, d: 'Entram dois: Gohan e Trunks. Dividem o dano e focam o mesmo alvo. Se o Gohan cair primeiro, o Trunks vira o Trunks Fúria.' },
+    makima: { v: { p: 'fogo', vel: 220, tam: 16, rastro: '#E8324A' }, m: { contrato: true }, d: 'Domina inimigos e repassa metade do dano que leva pra eles.' },
     sobreviventes: { v: { g: 'soco', cor: '#FFD25E', pesado: true }, m: { voo: true }, d: 'Entram dois: Trunks e Gohan. Dividem o dano e, se um cair, o outro entra em fúria.' },
     sv_trunks: { v: { g: 'corte', cor: '#9FD8FF' }, m: { critico: [0.25, 1.8], voo: true }, d: 'Espada rápida. Divide o dano com o Gohan.' },
     sv_gohan: { v: { g: 'soco', cor: '#FFC21A', pesado: true }, m: { escudo: 0.15, voo: true }, d: 'Soco pesado, nasce com escudo. Divide o dano com o Trunks.' },

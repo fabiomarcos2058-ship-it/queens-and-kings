@@ -107,6 +107,9 @@ const Batalha = (() => {
       if (evento.elixirInicial) { s.azul.elixir = s.vermelho.elixir = evento.elixirInicial; }
       if (evento.nivelIAMais) s.nivelIA = Math.max(1, Math.min(Estado.NIVEL_CARTA_MAX, s.nivelIA + evento.nivelIAMais));
       if (evento.cartasViradas) s.viradas = true;
+      if (evento.controleIA) s.controleIA = { cada: evento.controleIA.cada / (evento.controleX || 1), dur: evento.controleIA.dur };
+      if (evento.meuElixirMult) s.meuElixirMult = evento.meuElixirMult;
+      if (evento.torresFracas) for (const q of s.ent) if (q.torre && q.time === 'azul') { q.max = Math.round(q.max * evento.torresFracas); q.vida = q.max; }
       if (evento.chefe) { // Chefão Mundial: as torres do chefe aguentam muito e o dano total vira a contribuição do jogador
         s.chefe = true;
         s.chefeTorres = s.ent.filter((q) => q.torre && q.time === 'vermelho');
@@ -761,6 +764,15 @@ const Batalha = (() => {
       const g = guardiaDe(e);
       if (g) { const parte = Math.floor(dano * (e.atk && e.atk.m && e.atk.m.graspHeart ? 0.5 : 0.2)); dano -= parte; ferir(g, parte, deTime, fonte, { dividido: true, semEsquiva: true, semContra: true, atravessa: true }); }
     }
+    // Makima (Contrato de Equivalência): metade do dano vai pro inimigo mais forte que ela controla
+    if (e.atk && e.atk.m && e.atk.m.contrato && !opc.dividido && !opc.refletido && dano > 1) {
+      const servo = s.ent.filter((x) => x.contratoDe === e && x.hackeado > 0 && x.vida > 0).sort((a, b) => b.vida - a.vida)[0];
+      if (servo) {
+        const parte = Math.floor(dano / 2); dano -= parte;
+        fxEl('fx-hack', servo.x, servo.y, 500);
+        ferir(servo, parte, deTime, fonte, { dividido: true, semEsquiva: true, semContra: true, atravessa: true, ignoraEscudo: true });
+      }
+    }
     // Gogeta & Vegetto: metade do dano vai pro parceiro
     if (e.gemeo && e.gemeo.vida > 0 && !opc.dividido && dano > 1 && dist(e, e.gemeo) < 230) {
       const metade = Math.floor(dano / 2); dano -= metade;
@@ -833,6 +845,7 @@ const Batalha = (() => {
       if (e.isca) borboletas(e);
       if (!e.torre && e.atk && e.atk.m && (e.atk.m.renascerForma || e.formaGoku) && (e.formaGoku || 0) < 2 && !e.temporario) transformarGoku(e);
       if (e.atk && e.atk.m && e.atk.m.explosaoFinal) explosaoFinal(e);
+      if (e.contratoDe && e.contratoDe.vida > 0) curar(e.contratoDe, e.contratoDe.max * 0.1);
       if (e.gemeo && e.gemeo.vida > 0) { if (e.carta && e.carta.id === 'gt_gohan' && e.gemeo.carta && e.gemeo.carta.id === 'gt_trunks') furiaTrunks(e.gemeo, e); else furiaFusao(e.gemeo, e); }
       for (const o of s.ent) if (o !== e && !o.torre && o.time === e.time && o.vida > 0 && o.atk && o.atk.m && o.atk.m.raivaSombria && dist(o, e) < 170) enfurecer(o);
       // Isagi (Ultra): devora o campo, cada inimigo que cai perto deixa ele mais forte
@@ -1014,6 +1027,7 @@ const Batalha = (() => {
     if (h.tipo === 'juntos') juntosInvenciveis(t, h);
     if (h.tipo === 'rivaisEternos') rivaisEternos(t, h);
     if (h.tipo === 'fusaoDupla') fusaoDupla(t, h);
+    if (h.tipo === 'controleTotal') controleTotal(t, h);
     if (h.tipo === 'soulPunisher') soulPunisher(t, h);
     if (h.tipo === 'hakai') hakai(t, h);
     if (h.tipo === 'kameKaioken') kameKaioken(t, h);
@@ -1348,8 +1362,8 @@ const Batalha = (() => {
   }
 
   // corte de cena por cima da arena (aparece pra todo mundo da partida)
-  const CUTINS = ['goku_furia', 'jojo_jotaro', 'jojo_dio', 'jojo_diavolo', 'jojo_pucci', 'jojo_gyro', 'jojo_johnny', 'sonic_shadow', 'sonic_super', 'sonic_dark', 'sonic_excalibur', 'sonic_hyper', 'yugi_reino', 'ultra_sae', 'ultra_rin', 'ultra_isagi', 'ultra_anri', 'inv_mark_eve', 'inv_mark', 'inv_eve', 'inv_conquest', 'inv_omni', 'inv_anissa', 'db_goku_vegeta', 'db_gogeta_vegetto', 'db_vegetto_gogeta', 'db_ultra_ego', 'db_kaioken', 'db_goku_deus', 'db_black', 'db_evolution', 'cy_david', 'cy_adam', 'cy_adam_evo', 'cy_rubi', 'cy_silverhand', 'nz_ainz', 'nz_albedo', 'nz_shalltear', 'nz_demiurge', 'nz_sebas', 'nz_pandora', 'op_luffy', 'isagi_meta', 'kaiser_isagi', 'sonic_relampago', 'sonic_renasce', 'super_sonic_solar', 'ben_omnitrix', 'ben_chama', 'ben_diamante', 'ben_xlr8', 'ben_enormossauro', 'ben_contratempo', 'ben_ecoeco', 'ben_cromatico', 'ben_gravatack', 'ben_waybig', 'q_sonic', 'q_shadow', 'q_silver', 'q_amy', 'q_hyper', 'hb_dupla', 'hb_furia', 'hb_ruinas'];
-  const TEXTO_CUTIN_2 = { q_sonic: 'Ataque Teleguiado!', q_shadow: 'Controle do Caos!', q_silver: 'Psicocinese!', q_amy: 'Martelo Piko!', q_hyper: 'SUPER SINCRONIA!', hb_dupla: 'Kamehameha do Futuro!', hb_furia: 'TRUNKS FÚRIA!', hb_ruinas: 'Ataque das Ruínas!', ben_omnitrix: 'É hora de ação!', ben_chama: 'Chama!', ben_diamante: 'Diamante!', ben_xlr8: 'XLR8!', ben_enormossauro: 'Enormossauro!', ben_contratempo: 'Contra-Tempo!', ben_ecoeco: 'Eco Eco!', ben_cromatico: 'Cromático!', ben_gravatack: 'Gravatack!', ben_waybig: 'Way Big!', sonic_relampago: 'Loop Relâmpago!', sonic_renasce: 'Super Sonic!', super_sonic_solar: 'Chaos Blast!', isagi_meta: 'Metavisão!', kaiser_isagi: 'Pacto do Diabo!', sonic_shadow: 'Chaos Control!', sonic_super: 'Super Boost!', sonic_dark: 'Explosão Sombria!', sonic_excalibur: 'Soul Surge!', sonic_hyper: 'Hiper Velocidade!', yugi_reino: 'Reino das Sombras!', ultra_sae: 'Visão do Gênio!', ultra_rin: 'Flow: Destruição!', ultra_isagi: 'Direct Shot!', ultra_anri: 'Doces ou Travessuras?', inv_mark_eve: 'Juntos somos invencíveis!', inv_mark: 'Investida Invencível!', inv_eve: 'Barreira Atômica!', inv_conquest: 'Esmagar!', inv_omni: 'Fúria do Regente!', inv_anissa: 'Rajada Viltrumita!', db_goku_vegeta: 'Rivais Eternos!', db_gogeta_vegetto: 'Kamehameha Final + Big Bang!', db_vegetto_gogeta: 'Soul Punisher!', db_ultra_ego: 'Hakai!', db_kaioken: 'Kaioken x20!', db_goku_deus: 'Punho do Deus Saiyajin!', db_black: 'Ceifa Divina!', db_evolution: 'Final Flash!', cy_david: 'Sandevistan!', cy_adam: 'Rajada de Mísseis!', cy_adam_evo: 'Mísseis + Sandevistan!', cy_rubi: 'Ciberpsicose!', cy_silverhand: 'Johnny Silverhand!', nz_ainz: 'O Objetivo de Toda Vida é a Morte!', nz_albedo: 'Hermes Trismegistus!', nz_shalltear: 'Lança Purificadora!', nz_demiurge: 'Chamas do Inferno!', nz_sebas: 'Forma de Dragão!', nz_pandora: 'Doppelgänger!', op_luffy: 'Gomu Gomu no... Bajrang Gun!' };
+  const CUTINS = ['goku_furia', 'jojo_jotaro', 'jojo_dio', 'jojo_diavolo', 'jojo_pucci', 'jojo_gyro', 'jojo_johnny', 'sonic_shadow', 'sonic_super', 'sonic_dark', 'sonic_excalibur', 'sonic_hyper', 'yugi_reino', 'ultra_sae', 'ultra_rin', 'ultra_isagi', 'ultra_anri', 'inv_mark_eve', 'inv_mark', 'inv_eve', 'inv_conquest', 'inv_omni', 'inv_anissa', 'db_goku_vegeta', 'db_gogeta_vegetto', 'db_vegetto_gogeta', 'db_ultra_ego', 'db_kaioken', 'db_goku_deus', 'db_black', 'db_evolution', 'cy_david', 'cy_adam', 'cy_adam_evo', 'cy_rubi', 'cy_silverhand', 'nz_ainz', 'nz_albedo', 'nz_shalltear', 'nz_demiurge', 'nz_sebas', 'nz_pandora', 'op_luffy', 'isagi_meta', 'kaiser_isagi', 'sonic_relampago', 'sonic_renasce', 'super_sonic_solar', 'ben_omnitrix', 'ben_chama', 'ben_diamante', 'ben_xlr8', 'ben_enormossauro', 'ben_contratempo', 'ben_ecoeco', 'ben_cromatico', 'ben_gravatack', 'ben_waybig', 'q_sonic', 'q_shadow', 'q_silver', 'q_amy', 'q_hyper', 'hb_dupla', 'hb_furia', 'hb_ruinas', 'mk_controle', 'mk_domina'];
+  const TEXTO_CUTIN_2 = { q_sonic: 'Ataque Teleguiado!', q_shadow: 'Controle do Caos!', q_silver: 'Psicocinese!', q_amy: 'Martelo Piko!', q_hyper: 'SUPER SINCRONIA!', hb_dupla: 'Kamehameha do Futuro!', hb_furia: 'TRUNKS FÚRIA!', hb_ruinas: 'Ataque das Ruínas!', mk_controle: 'CONTROLE!', mk_domina: 'Ajoelhem.', ben_omnitrix: 'É hora de ação!', ben_chama: 'Chama!', ben_diamante: 'Diamante!', ben_xlr8: 'XLR8!', ben_enormossauro: 'Enormossauro!', ben_contratempo: 'Contra-Tempo!', ben_ecoeco: 'Eco Eco!', ben_cromatico: 'Cromático!', ben_gravatack: 'Gravatack!', ben_waybig: 'Way Big!', sonic_relampago: 'Loop Relâmpago!', sonic_renasce: 'Super Sonic!', super_sonic_solar: 'Chaos Blast!', isagi_meta: 'Metavisão!', kaiser_isagi: 'Pacto do Diabo!', sonic_shadow: 'Chaos Control!', sonic_super: 'Super Boost!', sonic_dark: 'Explosão Sombria!', sonic_excalibur: 'Soul Surge!', sonic_hyper: 'Hiper Velocidade!', yugi_reino: 'Reino das Sombras!', ultra_sae: 'Visão do Gênio!', ultra_rin: 'Flow: Destruição!', ultra_isagi: 'Direct Shot!', ultra_anri: 'Doces ou Travessuras?', inv_mark_eve: 'Juntos somos invencíveis!', inv_mark: 'Investida Invencível!', inv_eve: 'Barreira Atômica!', inv_conquest: 'Esmagar!', inv_omni: 'Fúria do Regente!', inv_anissa: 'Rajada Viltrumita!', db_goku_vegeta: 'Rivais Eternos!', db_gogeta_vegetto: 'Kamehameha Final + Big Bang!', db_vegetto_gogeta: 'Soul Punisher!', db_ultra_ego: 'Hakai!', db_kaioken: 'Kaioken x20!', db_goku_deus: 'Punho do Deus Saiyajin!', db_black: 'Ceifa Divina!', db_evolution: 'Final Flash!', cy_david: 'Sandevistan!', cy_adam: 'Rajada de Mísseis!', cy_adam_evo: 'Mísseis + Sandevistan!', cy_rubi: 'Ciberpsicose!', cy_silverhand: 'Johnny Silverhand!', nz_ainz: 'O Objetivo de Toda Vida é a Morte!', nz_albedo: 'Hermes Trismegistus!', nz_shalltear: 'Lança Purificadora!', nz_demiurge: 'Chamas do Inferno!', nz_sebas: 'Forma de Dragão!', nz_pandora: 'Doppelgänger!', op_luffy: 'Gomu Gomu no... Bajrang Gun!' };
   const TEXTO_CUTIN = { ...TEXTO_CUTIN_2, goku_furia: "You're going to pay for this!", jojo_jotaro: 'Star Platinum: The World!', jojo_dio: 'ZA WARUDO! Toki yo tomare!', jojo_diavolo: 'King Crimson!', jojo_pucci: 'Made in Heaven!', jojo_gyro: 'Ball Breaker!', jojo_johnny: 'Tusk Act 4!' };
   const cutinRede = (qual) => { cutin(qual); if (s.rede || s.aoVivo) s.eventos.push(['c', CUTINS.indexOf(qual)]); };
   function cutin(qual) {
@@ -1889,6 +1903,43 @@ const Batalha = (() => {
     falar(o, 'GOHAAAAN!!!', 'fala-db');
     fxEl('fx-db-aura', o.x, o.y, 900); fxJ(29, o.x, o.y);
     particulas(o.x, o.y, '#FFD93B', 16, 36); tremer(true);
+  }
+  // ---------- MAKIMA: Controle ----------
+  const ctrlLivre = (e) => (e.ctrlLivreAte || 0) > s.t;
+  function controlar(alvo, dono, seg) {
+    if (!alvo || alvo.torre || alvo.vida <= 0 || alvo.hackeado > 0 || imuneA(alvo) || ctrlLivre(alvo)) return false;
+    hackear(alvo, seg);
+    alvo.contratoDe = dono; alvo.ctrlSeg = seg;
+    alvo.el.classList.add('controlada');
+    fxEl('fx-hack', alvo.x, alvo.y, 800); fxJ(35, alvo.x, alvo.y);
+    particulas(alvo.x, alvo.y, '#E8324A', 10, 26);
+    return true;
+  }
+  function soltarControle(e) { // chamado quando o tempo de controle acaba
+    e.el.classList.remove('controlada');
+    e.contratoDe = null; e.ctrlLivreAte = s.t + 6; // depois de solto, fica imune por 6s
+  }
+  function controleTotal(t, h) {
+    cutinRede('mk_domina');
+    const n = h.n || 2, seg = h.seg || 8;
+    const alvos = s.ent.filter((e) => !e.torre && e.time !== t.time && e.vida > 0 && !e.acoplado && dist(e, t) < 230 + e.raio).sort((a, b) => b.vida - a.vida);
+    let feitos = 0;
+    for (const e of alvos) { if (feitos >= n) break; if (controlar(e, t, seg)) { feitos++; falar(e, 'Sim, Makima…', 'fala-mk'); } }
+    falar(t, feitos ? 'Ajoelhem.' : 'Não tem ninguém digno.', 'fala-mk');
+    fxEl('fx-db-aura', t.x, t.y, 900); particulas(t.x, t.y, '#E8324A', 14, 34);
+  }
+  // Evento Contrato da Makima: a Makima inimiga toma de você a tropa mais forte
+  function controleDoEvento(dt) {
+    const c = s.controleIA; if (!c) return;
+    if ((s.ctrlT = (s.ctrlT == null ? c.cada : s.ctrlT) - dt) > 0) return;
+    s.ctrlT = c.cada;
+    const alvo = s.ent.filter((e) => !e.torre && e.time === 'azul' && e.vida > 0 && !(e.hackeado > 0) && !e.acoplado && e.surgir <= 0).sort((a, b) => b.vida - a.vida)[0];
+    if (!alvo) return;
+    if (controlar(alvo, null, c.dur)) {
+      cutinRede('mk_controle');
+      UI.toast(`👁️ A Makima controlou ${alvo.carta.nome}!`);
+      falar(alvo, 'Eu… obedeço…', 'fala-mk');
+    }
   }
   function fusaoDupla(t, h) {
     cutinRede(h.cutin || 'db_gogeta_vegetto');
@@ -3774,6 +3825,7 @@ const Batalha = (() => {
         || ((h.tipo === 'kamehameha' || h.tipo === 'vazioPurpura') && t.alvo && dist(t, t.alvo) < 240)
         || (h.tipo === 'esquiva' && perto && t.vida < t.max * 0.8)
         || (h.tipo === 'chuvaEstrelas' && s.ent.filter((e) => !e.torre && e.time !== t.time && e.vida > 0 && dist(e, t) < 240).length >= 3)
+        || (h.tipo === 'controleTotal' && s.ent.some((e) => !e.torre && e.time !== t.time && e.vida > 0 && dist(e, t) < 210 && !(e.hackeado > 0) && e.vida > t.dano * 2))
         || (h.tipo === 'mitaJoga' && L.fila.slice(0, 4).some((id) => { const c = Estado.carta(id); return !c.feitico && !c.barril && c.custo >= 4; }))
         || (h.tipo === 'juntos' && t.alvo && dist(t, t.alvo) < 240)
         || ((h.tipo === 'rivaisEternos' || h.tipo === 'fusaoDupla' || h.tipo === 'finalFlash' || h.tipo === 'kameKaioken') && t.alvo && dist(t, t.alvo) < 250 && (t.alvo.torre || t.alvo.vida > t.dano * 2 || s.ent.filter((e) => !e.torre && e.time !== t.time && e.vida > 0 && dist(e, t) < 250).length >= 2))
@@ -4393,7 +4445,7 @@ const Batalha = (() => {
     if (typeof Som !== 'undefined' && !s.tutorial) Som.musica(resta <= 60 ? 'final' : 'batalha');
     const acel = s.aceleraTempo && s.t < s.aceleraTempo.ate ? s.aceleraTempo.dono : null; // Made in Heaven
     if (!s.sinSaiyajin) s.sinSaiyajin = sinergiaSaiyajin();
-    for (const quem of LADOS) if (s[quem]) s[quem].elixir = Math.min(maxEl(quem), s[quem].elixir + ganho * (quem === acel ? 1.7 : 1) * (s.fluxo && s.fluxo.includes(quem) ? 3 : 1) * (s.sinSaiyajin[timeDe(quem)] ? Ataques.SINERGIA_SAIYAJIN.elixir : 1));
+    for (const quem of LADOS) if (s[quem]) s[quem].elixir = Math.min(maxEl(quem), s[quem].elixir + ganho * (quem === 'azul' && s.meuElixirMult ? s.meuElixirMult : 1) * (quem === acel ? 1.7 : 1) * (s.fluxo && s.fluxo.includes(quem) ? 3 : 1) * (s.sinSaiyajin[timeDe(quem)] ? Ataques.SINERGIA_SAIYAJIN.elixir : 1));
     marcarTempo();
     if (Mod.flag('elixirInfinito')) s.azul.elixir = 10;
 
@@ -4420,6 +4472,7 @@ const Batalha = (() => {
       if (t.abobora > 0 && (t.abobora -= dt) <= 0) t.el.classList.remove('abobora');
       if (t.esquiva > 0 && (t.esquiva -= dt) <= 0) t.el.classList.remove('aura-instinto');
     }
+    controleDoEvento(dt);
     s.habTimer -= dt;
     if (s.habTimer <= 0) { s.habTimer = 0.2; desenharHabilidades(); }
     rodarAgenda();
@@ -4588,7 +4641,7 @@ const Batalha = (() => {
   }
 
   function atualizarStatus(t, dt) {
-    if (t.hackeado > 0 && (t.hackeado -= dt) <= 0) desHackear(t);
+    if (t.hackeado > 0 && (t.hackeado -= dt) <= 0) { desHackear(t); if (t.ctrlSeg) { t.ctrlSeg = 0; soltarControle(t); } }
     if (t.ferida > 0) {
       if (t.feridaVida > 0 && t.vida > t.feridaVida) { t.vida = t.feridaVida; atualizarHp(t); }
       t.feridaAcum = (t.feridaAcum || 0) + t.max * 0.03 * dt;

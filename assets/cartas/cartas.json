@@ -5637,6 +5637,52 @@
     500
    ],
    "corpo": true
+  },
+  {
+   "id": "makima",
+   "nome": "Makima",
+   "raridade": "lendaria",
+   "custo": 6,
+   "tipo": "Diabo do Controle · Evento",
+   "trofeus": 0,
+   "exclusivo": [],
+   "nivelInicial": 5,
+   "evento": true,
+   "video": "videos/makima.mp4",
+   "videoRosto": "videos/makima_rosto.mp4",
+   "rosto": [
+    300,
+    250,
+    140
+   ],
+   "arte": [
+    72,
+    0,
+    432
+   ],
+   "descricao": "Ela não luta: ela manda. Ajoelha os inimigos mais fortes e os faz lutar do lado dela, e tudo que a machuca é repassado pra quem ela controla. Exclusiva do evento Contrato da Makima.",
+   "vida": 1150,
+   "dano": 175,
+   "velocidade": 56,
+   "alcance": 70,
+   "cadencia": 1.0,
+   "alvo": "tudo",
+   "arena": 1,
+   "danoTorre": 0.5,
+   "passiva": {
+    "nome": "Contrato de Equivalência",
+    "tipo": "contrato",
+    "descricao": "Enquanto controlar inimigos, metade de todo dano que ela receberia vai pra um deles (sempre pro mais forte). Quando um controlado cai, ela cura 10% da vida."
+   },
+   "habilidade": {
+    "nome": "Ajoelhem.",
+    "tipo": "controleTotal",
+    "custo": 4,
+    "recarga": 20,
+    "n": 2,
+    "seg": 8,
+    "descricao": "Domina os 2 inimigos mais fortes perto dela por 8s: eles lutam do lado dela (sem atacar torres). Quem já foi dominado fica imune por um tempo."
+   }
   }
  ]
 }
