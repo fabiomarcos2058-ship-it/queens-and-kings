@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
   <meta name="theme-color" content="#1d2350" />
-  <meta name="versao-pagina" content="1795439162" />
+  <meta name="versao-pagina" content="1795478297" />
   <meta http-equiv="Cache-Control" content="no-cache" />
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="icon" type="image/png" href="assets/pwa/icone-192.png" />
@@ -17,8 +17,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Great+Vibes&family=Fredoka:wght@400;500;600;700&family=Lilita+One&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/style.css?v=1795439162" />
-  <link rel="stylesheet" href="css/tema.css?v=1795439162" />
+  <link rel="stylesheet" href="css/style.css?v=1795478297" />
+  <link rel="stylesheet" href="css/tema.css?v=1795478297" />
 </head>
 <body>
   <div id="app">
@@ -47,11 +47,18 @@
           <div class="loja-banner"><b>Loja</b><span>Novas ofertas em <i id="loja-tempo">--:--:--</i></span></div>
           <button class="btn-summon na-loja" id="loja-summon"></button>
           <div id="loja-presente"></div>
+          <div id="lx-passe"></div>
+          <div class="loja-secao"><h2 class="fita dourada"><span>Pacotes especiais</span></h2>
+            <p class="loja-dica">Renovam em <i id="lx-tempo">--:--:--</i></p><div id="lx-pacotes"></div></div>
           <div class="loja-secao"><h2 class="fita"><span>Ofertas do dia</span></h2>
             <div class="grade-3 ofertas" id="ofertas"></div></div>
           <div class="loja-secao"><h2 class="fita azul"><span>Baús</span></h2>
             <p class="loja-dica">Cartas novas só saem de baús!</p>
             <div class="grade-3" id="loja-baus"></div></div>
+          <div class="loja-secao"><h2 class="fita"><span>Loja de Troca</span></h2>
+            <div id="lx-troca"></div></div>
+          <div class="loja-secao"><h2 class="fita azul"><span>Emotes</span></h2>
+            <div id="lx-emotes"></div></div>
           <div class="loja-secao"><h2 class="fita dourada"><span>Ouro</span></h2>
             <div class="grade-3" id="loja-ouro"></div></div>
           <p class="aviso">Tudo aqui é de mentirinha: o jogo não tem compras com dinheiro real. Ganhe gemas subindo de nível, no passe e abrindo baús.</p>
@@ -190,7 +197,7 @@
       tema.rel = 'stylesheet';
       tema.href = 'css/tema.css?v=' + v;
       document.head.appendChild(tema);
-      for (const f of ['assets', 'estado', 'ui', 'som', 'arena', 'trilha', 'cartas', 'ataques', 'batalha', 'titulo', 'conta', 'cla', 'passe', 'ranque', 'ranqueui', 'mod', 'atualizacao', 'x1', 'amigos', 'presentes', 'premios', 'inventario', 'golsummon', 'lutasummon', 'summon', 'td', 'titulos', 'missoes', 'chefe', 'omnitrix', 'esmeraldas', 'contrato', 'torneio', 'eventos', 'aovivo', 'tutorial', 'menu', 'instalar', 'avisos']) {
+      for (const f of ['assets', 'estado', 'ui', 'lojaextra', 'som', 'arena', 'trilha', 'cartas', 'ataques', 'batalha', 'titulo', 'conta', 'cla', 'passe', 'ranque', 'ranqueui', 'mod', 'atualizacao', 'x1', 'amigos', 'presentes', 'premios', 'inventario', 'golsummon', 'lutasummon', 'summon', 'td', 'titulos', 'missoes', 'chefe', 'omnitrix', 'esmeraldas', 'contrato', 'torneio', 'eventos', 'aovivo', 'tutorial', 'menu', 'instalar', 'avisos']) {
         await new Promise((ok) => {
           const el = document.createElement('script');
           el.src = 'js/' + f + '.js?v=' + v;

@@ -169,7 +169,9 @@ const Batalha = (() => {
     { id: 'akame', carta: 'akame', txt: 'Eliminar.' }, { id: 'bulma', carta: 'bulma', txt: 'Gênia, eu sei.' },
   ];
   // personagens: só aparecem se você tem a carta
-  const emotesLiberados = () => EMOTES.filter((e) => !e.carta || Estado.tem(e.carta));
+  // emotes da loja (comprados com gemas) entram na mesma lista, para a rede também reconhecer
+  try { for (const e of LojaExtra.EMOTES_LOJA) EMOTES.push({ id: e.id, ic: e.ic, txt: e.txt, loja: true }); } catch (e) { /* nada */ }
+  const emotesLiberados = () => EMOTES.filter((e) => (!e.carta || Estado.tem(e.carta)) && (!e.loja || (Estado.d.lx && (Estado.d.lx.emotes || []).includes(e.id))));
   function mostrarEmote(ladoTela, id) {
     typeof Som !== 'undefined' && Som.tocar('emote');
     const e = EMOTES.find((x) => x.id === id);

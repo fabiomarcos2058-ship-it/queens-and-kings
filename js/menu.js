@@ -1092,6 +1092,7 @@
   }
   function fimDeBatalha(r) {
     if (!r.tutorial && !(r.evento && r.evento.deck) && r.coroas > 0) { const c = coroaBauDados(); c.n = Math.min(10, c.n + r.coroas); Estado.salvar(); }
+    if (!r.tutorial) { try { LojaExtra.darFichas(r.resultado === 'vitoria' ? 3 : 1); } catch (e) { /* nada */ } }
     // primeira vitória do dia: +20 💎 (qualquer modo)
     if (r.resultado === 'vitoria' && !r.tutorial && d().primeiraVitoria !== hojeTxt()) {
       d().primeiraVitoria = hojeTxt(); d().gemas += 20; Estado.salvar();
@@ -1437,6 +1438,7 @@
         botoes: [{ texto: 'Cancelar', classe: 'secundario' }, { texto: 'Comprar', classe: 'principal', desativado: d().gemas < g, motivo: 'Gemas insuficientes',
           acao: () => { d().gemas -= g; d().ouro += o; Estado.salvar(); UI.toast(`+${fmt(o)} de ouro!`); tudo(); } }] });
     }));
+    try { LojaExtra.desenhar({ mostrarBau, tudo, abrirPasse: () => telaPasse() }); } catch (e) { console.error(e); }
     Assets.fill($('loja-baus').closest('.tela'));
   }
 

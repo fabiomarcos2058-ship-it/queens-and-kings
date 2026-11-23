@@ -99,3 +99,17 @@ html, body { background: #0d1030; }
 html.leve .carta.ultra .ultra-tex { animation: none; opacity: .6; }
 /* a textura também aparece na faixa do nome, como um vidro lapidado */
 .carta.ultra .ultra-tex::before { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 26%; background: inherit; background-size: 260% 260%; mix-blend-mode: normal; opacity: .55; border-radius: 0 0 7px 7px; filter: saturate(1.3); }
+
+/* ---- Loja: pacotes, troca, emotes, passe ---- */
+.lx-grade{display:grid;gap:8px}
+.lx-pacote,.lx-emote,.lx-passe{display:flex;align-items:center;gap:10px;width:100%;padding:10px 12px;border-radius:16px;border:2px solid rgba(255,255,255,.18);background:linear-gradient(180deg,rgba(255,255,255,.12),rgba(255,255,255,.04));color:inherit;text-align:left;font:inherit}
+.lx-pacote{border-color:#ffd24d;box-shadow:0 0 14px rgba(255,210,77,.25)}
+.lx-pacote div,.lx-emote div,.lx-passe div{flex:1;display:flex;flex-direction:column}
+.lx-pacote small,.lx-passe small{opacity:.8;font-size:.78rem}
+.lx-ic{font-size:1.9rem}
+.lx-preco{padding:6px 12px;border-radius:12px;background:#ffd24d;color:#3a2a00;font-weight:800;white-space:nowrap}
+.lx-pacote.comprado,.lx-emote.comprado{opacity:.55;filter:grayscale(.5)}
+.lx-pacote.comprado .lx-preco,.lx-emote.comprado .lx-preco{background:#6d7a8a;color:#fff}
+.lx-passe{margin:8px 0;border-color:#c77dff;background:linear-gradient(90deg,rgba(199,125,255,.35),rgba(255,92,244,.18))}
+.lx-fichas{display:flex;flex-direction:column;align-items:center;margin:4px 0 8px;font-weight:700}
+.lx-fichas small{opacity:.75;font-weight:400;font-size:.75rem}
