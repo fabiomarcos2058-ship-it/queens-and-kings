@@ -4490,12 +4490,13 @@ const Batalha = (() => {
         moverPara(t, t.alvo, dt);
       }
     }
-    // afasta tropas grudadas
+    // afasta tropas inimigas grudadas (aliadas passam uma pela outra)
     // (o Roman preso num aliado não entra na conta: ele empurrava o aliado sem parar até o canto da arena)
     const tropas = s.ent.filter((e) => !e.torre && !e.acoplado);
     for (let i = 0; i < tropas.length; i++) {
       for (let j = i + 1; j < tropas.length; j++) {
         const a = tropas[i], b = tropas[j];
+        if (a.time === b.time) continue; // aliadas se atravessam (só inimigas se empurram)
         const d0 = dist(a, b), min = a.raio + b.raio;
         if (d0 < min) {
           // empurra cada uma metade da sobreposição (a conta usa a distância de ANTES de mover;
