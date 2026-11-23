@@ -1320,19 +1320,19 @@
     200,
     560
    ],
-   "vida": 1417,
-   "dano": 262,
+   "vida": 1200,
+   "dano": 215,
    "velocidade": 46,
    "alcance": 18,
    "cadencia": 1.15,
    "alvo": "tudo",
-   "area": 28,
+   "area": 24,
    "habilidade": {
     "nome": "Kamehameha 10x",
     "tipo": "kamehameha",
     "custo": 3,
-    "recarga": 16,
-    "dano": 760,
+    "recarga": 20,
+    "dano": 540,
     "descricao": "Dispara um Kamehameha que atravessa tudo em linha reta (metade do dano nas torres)."
    },
    "arena": 6,
@@ -3260,8 +3260,8 @@
    "custo": 5,
    "tipo": "Saiyajin Primitivo",
    "descricao": "O poder primitivo do Super Saiyajin 4. Quanto mais machucado, mais rápido bate, e rouba vida.",
-   "vida": 1257,
-   "dano": 210,
+   "vida": 1080,
+   "dano": 185,
    "velocidade": 82,
    "alcance": 18,
    "cadencia": 0.95,
@@ -3269,7 +3269,7 @@
    "passiva": {
     "nome": "Poder Primitivo",
     "tipo": "primitivo",
-    "descricao": "Ataca mais rápido quanto menos vida tem (até 45%) e cura 15% do dano que causa."
+    "descricao": "Ataca mais rápido quanto menos vida tem (até 25%) e cura 8% do dano que causa."
    },
    "trofeus": 0,
    "exclusivo": [],

@@ -117,7 +117,7 @@ const Ataques = (() => {
     goku_deus_remake: { v: { g: 'palma', cor: '#FF4B3A', s: 'ki_vermelho' }, m: { kiDivino: [110, 0.015, 0.15], imune: true, voo: true }, d: 'Aura que cura e fortalece os aliados. Imune a atordoar e lentidão.' },
     goku_black_rose: { v: { g: 'corte', cor: '#FF5CC8' }, m: { laminaDivina: 3, perfura: true, voo: true }, d: 'Corte que atravessa e deixa uma ferida que não deixa curar.' },
     vegeta_evolution: { v: { g: 'soco', cor: '#3B6BFF' }, m: { escudo: 0.2, orgulho: [10, 0.1, 6], voo: true }, d: 'Escudo que volta. Quando quebra, evolui: +30% de dano.' },
-    vegeta_ssj4: { v: { g: 'soco', cor: '#E8303A', pesado: true }, m: { berserk: 0.45, vampiro: 0.15 }, d: 'Bate mais rápido quanto menos vida tem e rouba vida.' },
+    vegeta_ssj4: { v: { g: 'soco', cor: '#E8303A', pesado: true }, m: { berserk: 0.25, vampiro: 0.08 }, d: 'Bate mais rápido quanto menos vida tem e rouba vida.' },
     vegeta_blue: { v: { g: 'soco', cor: '#3FC4FF' }, m: { galick: 4, voo: true }, d: 'A cada 4 golpes, um Galick Gun em linha.' },
     vegeta_deus: { v: { g: 'palma', cor: '#FF4B3A', s: 'ki_vermelho' }, m: { regen: 0.03, imune: true }, d: 'Cura 3% a cada golpe. Imune a atordoar e lentidão.' },
     majin_vegeta: { v: { g: 'soco', cor: '#FFD25E', pesado: true }, m: { explosaoFinal: [3, 75] }, d: 'Quando cai, se explode levando todo mundo junto.' },
@@ -158,7 +158,7 @@ const Ataques = (() => {
     goku_ssj2: { v: { g: 'raio', cor: '#FFE45C' }, m: { atordoar: [0.15, 0.45] }, d: 'Socos eletrizados que podem atordoar.' },
     goku_ssj3: { v: { g: 'impacto', cor: '#FFC21A', s: 'punho', pesado: true }, m: { especial: [4, 2.5, 36, 'punho'] }, d: 'A cada 4 golpes, o Punho do Dragão em área.' },
     goku_deus: { v: { g: 'palma', cor: '#FF4B3A', s: 'ki_vermelho' }, m: { regen: 0.03 }, d: 'Ki divino: recupera 3% da vida a cada golpe.' },
-    goku_ssj4: { v: { g: 'soco', cor: '#E8303A', pesado: true }, m: { vampiro: 0.2 }, d: 'Poder primitivo: cura 20% do dano que causa.' },
+    goku_ssj4: { v: { g: 'soco', cor: '#E8303A', pesado: true }, m: { vampiro: 0.1 }, d: 'Poder primitivo: cura 10% do dano que causa.' },
     goku_blue: { v: { g: 'esferas', cor: '#3FC4FF', s: 'ki_azul', n: 3 }, m: { rajada: 3 }, d: 'Rajada de 3 esferas de ki azul.' },
     goku_blue_kaioken: { v: { g: 'soco', cor: '#FF2E2E' }, m: { kaioken: [0.02, 0.45] }, d: 'Kaioken: +45% de dano, mas perde 2% da vida a cada golpe.' },
     goku_blue_lb: { v: { g: 'impacto', cor: '#3FC4FF', s: 'ki_azul' }, m: { surgirImpacto: [1.5, 55] }, d: 'Chega quebrando tudo: uma explosão quando entra na arena.' },
@@ -183,12 +183,12 @@ const Ataques = (() => {
   // Passiva do nível 12 (Treino Saiyajin): Vegeta SSJ4 e Goku SSJ4. Sobrescreve/soma as mecânicas quando a carta está no nível 12.
   const NIVEL_PASSIVA = 12;
   const PASSIVA12 = {
-    vegeta_ssj4: { nome: 'Orgulho do Rei Saiyajin', m: { berserk: 0.7, vampiro: 0.3, ultraEgo: true, escudo: 0.2 },
-      d: 'Bate até 70% mais rápido quanto mais machucado, cura 30% do dano, nasce com escudo de 20% da vida e, quando cairia, volta uma vez com 35% da vida.' },
-    goku_ssj4: { nome: 'Instinto Primitivo Total', m: { vampiro: 0.3, regen: 0.012, escudo: 0.3, critico: [0.3, 2], ultraEgo: true },
-      d: 'Cura 30% do dano, regenera vida o tempo todo, nasce com escudo de 30% da vida, 30% de chance de golpe crítico (x2) e, quando cairia, volta uma vez com 35% da vida.' },
+    vegeta_ssj4: { nome: 'Orgulho do Rei Saiyajin', m: { berserk: 0.4, vampiro: 0.15, ultraEgo: true, escudo: 0.12 },
+      d: 'Bate até 40% mais rápido quanto mais machucado, cura 15% do dano, nasce com escudo de 12% da vida e, quando cairia, volta uma vez com 35% da vida.' },
+    goku_ssj4: { nome: 'Instinto Primitivo Total', m: { vampiro: 0.15, regen: 0.006, escudo: 0.18, critico: [0.2, 1.8], ultraEgo: true },
+      d: 'Cura 15% do dano, regenera um pouco de vida, nasce com escudo de 18% da vida, 20% de chance de golpe crítico (x1,8) e, quando cairia, volta uma vez com 35% da vida.' },
   };
-  const SINERGIA_SAIYAJIN = { ids: ['vegeta_ssj4', 'goku_ssj4'], elixir: 1.2 };
+  const SINERGIA_SAIYAJIN = { ids: ['vegeta_ssj4', 'goku_ssj4'], elixir: 1.1 };
   const passiva12 = (id) => PASSIVA12[id] || null;
   const com12 = (atk, id) => (PASSIVA12[id] ? { ...atk, m: { ...(atk.m || {}), ...PASSIVA12[id].m }, d: PASSIVA12[id].d } : atk);
 
