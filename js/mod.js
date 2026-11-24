@@ -133,6 +133,7 @@ const Mod = (() => {
         ['Reiniciar todos os eventos (Makima, Esmeraldas, Omnitrix)', () => { delete d.mk; delete d.esm; delete d.omni; }],
       ]],
       ['☁️ Nuvem', [
+        ['🔍 Achar contas e restaurar progresso (nuvem)', () => { inspecionarContas(); }],
         ['Restaurar a cópia de segurança desta conta', async () => { try { UI.toast((await Conta.restaurarBackup()) ? '✅ Cópia restaurada!' : 'Esta conta ainda não tem cópia de segurança.'); } catch (e) { UI.toast('Não consegui ler a nuvem agora.'); } }],
       ]],
       ['📊 Estatísticas e histórico', [
@@ -145,6 +146,48 @@ const Mod = (() => {
         ['Colar um save (JSON)', () => { const t = prompt('Cole o save em JSON:'); if (!t) return; try { const o = JSON.parse(t); if (!o || !o.colecao) throw 0; Estado.importar(o); Estado.salvar(); UI.toast('Save carregado!'); } catch (e) { UI.toast('JSON inválido'); } }],
       ]],
     ];
+  }
+
+
+  // ---------- Contas na nuvem: achar uma conta que perdeu o progresso e restaurar ----------
+  async function inspecionarContas() {
+    const f = Conta.fb();
+    if (!f || !Conta.uid()) { UI.toast('Entre na sua conta primeiro.'); return; }
+    let snap;
+    try { snap = await f.getDocs(f.collection(f.db, 'jogadores')); } catch (e) { UI.toast('Não consegui ler as contas agora.'); return; }
+    const ler = (txt) => { try { return txt ? JSON.parse(txt) : null; } catch (e) { return null; } };
+    const resumo = (x) => x ? { tr: x.trofeus || 0, rec: x.recorde || 0, v: x.vitorias || 0, c: Object.values(x.colecao || {}).filter((k) => k.tem).length, gm: x.gemas || 0 } : null;
+    const linhas = snap.docs.map((x) => { const v = x.data(); const dd = ler(v.dados), bk = ler(v.backup);
+      return { uid: x.id, nome: v.nome || (dd && dd.nome) || '?', quando: v.atualizado && v.atualizado.toDate ? v.atualizado.toDate().toLocaleString('pt-BR') : '?', dd, bk, a: resumo(dd), b: resumo(bk) }; })
+      .sort((a, b) => a.nome.localeCompare(b.nome));
+    const fmt = (r) => r ? `🏆${r.tr} (recorde ${r.rec}) · ${r.v} vitórias · ${r.c} cartas · ${r.gm}💎` : '—';
+    const m = UI.modal({
+      titulo: '🔍 Contas na nuvem', classe: 'modal-mod',
+      html: `<p class="aviso">${linhas.length} contas. Cada uma mostra o que está salvo AGORA e a cópia de segurança (se tiver). Ache a conta antiga (com troféus) e a conta nova (a que ele usa hoje).</p>
+        <input id="ct-busca" class="mod-busca" placeholder="Buscar por nome…" />
+        <div id="ct-lista" style="max-height:52vh;overflow:auto"></div>`,
+      botoes: [{ texto: 'Fechar' }],
+    });
+    const lista = m.el.querySelector('#ct-lista');
+    const desenhar = () => {
+      const q = norm(m.el.querySelector('#ct-busca').value);
+      lista.innerHTML = linhas.map((l, i) => ({ l, i })).filter(({ l }) => !q || norm(l.nome).includes(q)).map(({ l, i }) => `<div class="mod-det" style="padding:8px;margin:6px 0">
+        <b>#${i + 1} ${l.nome.replace(/[<>&]/g, '')}</b> <small>· ${l.uid.slice(0, 6)}… · salvo em ${l.quando}</small><br/>
+        <small>Agora: ${fmt(l.a)}</small>${l.b ? `<br/><small>Cópia: ${fmt(l.b)}</small>` : ''}<br/>
+        <button class="btn-modal" data-ct="${i}" data-w="dd">Enviar este save</button>${l.b ? ` <button class="btn-modal" data-ct="${i}" data-w="bk">Enviar a cópia</button>` : ''}</div>`).join('') || '<p>Nenhuma conta.</p>';
+    };
+    desenhar();
+    m.el.querySelector('#ct-busca').oninput = desenhar;
+    lista.onclick = async (ev) => {
+      const b = ev.target.closest('[data-ct]'); if (!b) return;
+      const l = linhas[+b.dataset.ct], fonte = b.dataset.w === 'bk' ? l.bk : l.dd;
+      if (!fonte) return;
+      const n = parseInt(prompt(`Enviar o save de "${l.nome}" (${fmt(resumo(fonte))}) para qual conta? Digite o número # da conta que vai RECEBER:`) || '', 10);
+      const alvo = linhas[n - 1];
+      if (!alvo) return;
+      if (!confirm(`Vai SUBSTITUIR o progresso de "${alvo.nome}" (#${n}) pelo save de "${l.nome}". Confirmar?`)) return;
+      try { await Presentes.enviar(alvo.uid, { tipo: 'save', dados: JSON.stringify(fonte) }); UI.toast(`✅ Enviado! "${alvo.nome}" recebe quando abrir o jogo logado.`); } catch (e) { UI.toast('Não consegui enviar: ' + (e.code || e.message || e)); }
+    };
   }
 
   function abrir() {

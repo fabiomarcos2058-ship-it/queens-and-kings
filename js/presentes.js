@@ -27,6 +27,7 @@ const Presentes = (() => {
 
   // texto bonitinho do presente
   function descrever(p) {
+    if (p.tipo === 'save') return '♻️ Sua conta foi restaurada pela criadora!';
     if (p.tipo === 'remover') {
       const c = p.carta && Estado.carta(p.carta);
       return { carta: `🗑️ Tirar a carta ${c ? c.nome : p.carta}`, nivel: `⬇️ ${c ? c.nome : p.carta} para o nível ${p.nivel}`, ouro: `🗑️ Tirar ${UI.fmt(p.qtd)} de ouro`,
@@ -66,6 +67,18 @@ const Presentes = (() => {
   function aplicar(p) {
     const d = Estado.d;
     if (p.tipo === 'remover') return remover(p);
+    if (p.tipo === 'save') {
+      // restaura o save inteiro (usado quando uma conta perdeu o progresso por erro do jogo)
+      let novo = null;
+      try { novo = JSON.parse(p.dados); } catch (e) { return false; }
+      if (!novo || typeof novo !== 'object') return false;
+      const antes = d.presentesRecebidos || [];
+      Estado.importar(novo);
+      Estado.d.conta = { tipo: 'conta', email: Conta.email() };
+      Estado.d.presentesRecebidos = [...antes, p.id].slice(-200);
+      Estado.recarregarCatalogo();
+      return true;
+    }
     if (p.tipo === 'ajustar') {
       const n = (v) => Math.max(0, Math.min(99999999, Math.round(+v || 0)));
       if (p.trofeus !== undefined) { d.trofeus = n(p.trofeus); d.recorde = Math.max(d.recorde || 0, d.trofeus); } // recorde sobe junto (libera as arenas)
