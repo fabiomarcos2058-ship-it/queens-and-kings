@@ -1143,6 +1143,32 @@ const Eventos = (() => {
         if (Conta.salvarAgora) Conta.salvarAgora().catch(() => {});
         setTimeout(() => revelarNino(c, 'PRESENTE DA CRIADORA', 'Desculpa pelo bug do festival! Toma a Nino, já no nível 4 💜'), 900);
       }
+      // reparo do Samuel (24/11): um erro no login gravou um save vazio por cima da conta dele.
+      // Troféus = os que o clã ainda mostrava (1.203). Cartas voltam no nível 5 (igual ao reparo do Enzo) + compensação.
+      if (uid === SAMUEL && !(d.presentesEspeciais || []).includes('reparo-samuel-24-11') && (d.vitorias || 0) < 5 && (d.trofeus || 0) < 300) {
+        d.presentesEspeciais = [...(d.presentesEspeciais || []), 'reparo-samuel-24-11'];
+        let voltaram = 0;
+        for (const c of Estado.catalogo()) {
+          if (c.token || c.summon || c.raridade === 'ultra') continue;
+          const col = d.colecao[c.id] || (d.colecao[c.id] = { nivel: 1, copias: 0, tem: false });
+          if (!col.tem) { col.tem = true; col.nivel = Math.max(col.nivel || 1, 5); voltaram++; }
+        }
+        if (Estado.carta('goku_ui')) { const g = d.colecao.goku_ui || (d.colecao.goku_ui = { nivel: 1, copias: 0, tem: false }); g.tem = true; g.nivel = Math.max(g.nivel || 1, 5); }
+        d.trofeus = Math.max(d.trofeus || 0, 1203); d.recorde = Math.max(d.recorde || 0, 1203);
+        d.ouro += 20000; d.gemas += 2000; Estado.darCoringa('universal', 80);
+        try { Passe.dados().ultra = true; } catch (e) { /* nada */ }
+        d.deck = [];
+        for (const c of Estado.catalogo()) if (d.deck.length < 8 && Estado.tem(c.id) && !c.token && c.raridade !== 'ultra' && !c.summon) d.deck.push(c.id);
+        Estado.salvar();
+        if (Conta.salvarAgora) Conta.salvarAgora().catch(() => {});
+        // volta pro clã (a conta dele ainda consta como membro lá)
+        try { const f = Conta.fb(); f.getDocs(f.collection(f.db, 'clas')).then((sn) => { const doc = sn.docs.find((x) => x.data().membros && x.data().membros[SAMUEL]); if (doc) { d.cla = { id: doc.id, nome: doc.data().nome }; Estado.salvar(); if (window.MenuAPI) window.MenuAPI.tudo(); } }).catch(() => {}); } catch (e) { /* nada */ }
+        setTimeout(() => UI.modal({
+          titulo: '💜 Sua conta foi reparada',
+          html: `<p>Um erro no login do jogo apagou o seu progresso. A culpa foi do jogo, não sua. Desculpa mesmo!</p><p><b>${voltaram} cartas</b> voltaram (nível 5), seus <b>1.203 🏆</b> estão de volta e o Passe Ultra também.<br>De compensação: <b>20.000 🪙 · 2.000 💎 · 80 coringas</b>.</p>`,
+          botoes: [{ texto: 'Valeu! 🎉', classe: 'principal', acao: () => { if (window.MenuAPI) window.MenuAPI.tudo(); } }],
+        }), 1200);
+      }
       for (const k of Object.keys(DESAFIOS)) {
         const fd = dadosDesafio(k);
         if (fd.emJogo) { fd.emJogo = false; if (fd.l >= DESAFIOS[k].vidas) fd.ativo = false; Estado.salvar(); }
