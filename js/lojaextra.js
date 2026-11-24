@@ -12,6 +12,7 @@ const LojaExtra = (() => {
     if (x.pacotes.dia !== hoje()) { x.pacotes.dia = hoje(); x.pacotes.comprados = []; }
     if (!x.troca || x.troca.dia !== hoje()) x.troca = { dia: hoje(), compradas: [] };
     if (!Array.isArray(x.emotes)) x.emotes = [];
+    if (!Array.isArray(x.skins)) x.skins = [];
     return x;
   }
 
@@ -31,6 +32,18 @@ const LojaExtra = (() => {
     { id: 'x_estrela', ic: '🌟', txt: 'Brilhei!', preco: 100 },
   ];
   const meusEmotes = () => EMOTES_LOJA.filter((e) => lx().emotes.includes(e.id));
+
+  // ---------- skins de torre (só as suas torres, de baixo) ----------
+  const SKINS = [
+    { id: 'ouro', ic: '🏆', nome: 'Torre Dourada', preco: 150 },
+    { id: 'rubi', ic: '❤️', nome: 'Torre Rubi', preco: 100 },
+    { id: 'esmeralda', ic: '💚', nome: 'Torre Esmeralda', preco: 100 },
+    { id: 'gelo', ic: '❄️', nome: 'Torre de Gelo', preco: 120 },
+    { id: 'sakura', ic: '🌸', nome: 'Torre Sakura', preco: 120 },
+    { id: 'sombria', ic: '🌑', nome: 'Torre Sombria', preco: 200 },
+    { id: 'arcoiris', ic: '🌈', nome: 'Torre Arco-íris', preco: 350 },
+  ];
+  const skinAtiva = () => lx().skin || null;
 
   // ---------- pacotes especiais (1 vez por dia cada, com contagem regressiva) ----------
   const PACOTES = [
@@ -89,6 +102,10 @@ const LojaExtra = (() => {
       return `<button class="lx-emote${tem ? ' comprado' : ''}" data-e="${e.id}"><span class="lx-ic">${e.ic}</span><div><b>${e.txt}</b></div><span class="lx-preco">${tem ? '✓' : `<i class="ic-gema"></i>${e.preco}`}</span></button>`;
     }).join('')}</div>`;
   }
+  function htmlSkins() {
+    const at = skinAtiva(), tem = (k) => lx().skins.includes(k);
+    return `<div class="lx-grade lx-skins"><button class="lx-skin${!at ? ' ativa' : ''}" data-s=""><span class="lx-ic">🏰</span><div><b>Torre clássica</b></div><span class="lx-preco">${!at ? 'Em uso' : 'Usar'}</span></button>${SKINS.map((k) => `<button class="lx-skin${at === k.id ? ' ativa' : ''}${tem(k.id) ? '' : ' bloq'}" data-s="${k.id}"><span class="lx-ic lx-sk-${k.id}">${k.ic}</span><div><b>${k.nome}</b></div><span class="lx-preco">${at === k.id ? 'Em uso' : tem(k.id) ? 'Usar' : `<i class="ic-gema"></i>${k.preco}`}</span></button>`).join('')}</div>`;
+  }
   function htmlPasse() {
     const p = Passe.dados(), nv = Passe.nivel();
     return `<button class="lx-passe" id="lx-abrir-passe"><span class="lx-ic">🎟️</span><div><b>Passe da Temporada</b><small>Nível ${nv} · ⏳ ${Passe.tempoRestante()}</small></div><span class="lx-preco">Abrir</span></button>`;
@@ -101,6 +118,7 @@ const LojaExtra = (() => {
     set('lx-pacotes', htmlPacotes());
     set('lx-troca', htmlTroca());
     set('lx-emotes', htmlEmotes());
+    set('lx-skins', htmlSkins());
     const t = document.getElementById('lx-tempo'); if (t) t.textContent = tempoPacotes();
     const bp = document.getElementById('lx-abrir-passe'); if (bp) bp.onclick = () => ctx.abrirPasse && ctx.abrirPasse();
 
@@ -126,6 +144,14 @@ const LojaExtra = (() => {
       UI.modal({ titulo: 'Trocar fichas?', html: `<div class="compra">${Cartas.html(c, { mini: true })}<p><b>${o.copias} cópias</b> de ${esc(c.nome)} por ${o.preco} 🔁</p></div>`,
         botoes: [{ texto: 'Cancelar', classe: 'secundario' }, { texto: 'Trocar', classe: 'principal', desativado: fichas() < o.preco, motivo: 'Fichas insuficientes',
           acao: () => { lx().fichas -= o.preco; d().colecao[o.id].copias += o.copias; lx().troca.compradas.push(o.i); Estado.salvar(); UI.toast(`+${o.copias} ${c.nome}!`); ctx.tudo(); } }] });
+    }));
+    document.querySelectorAll('#lx-skins [data-s]').forEach((el) => (el.onclick = () => {
+      const k = SKINS.find((x) => x.id === el.dataset.s);
+      const usar = () => { lx().skin = k ? k.id : null; Estado.salvar(); document.querySelectorAll('.arena').forEach((a) => { a.className = a.className.replace(/\bskin-\S+/g, '').trim(); if (k) a.classList.add(`skin-${k.id}`); }); UI.toast(k ? `${k.ic} ${k.nome} equipada!` : 'Torre clássica equipada'); ctx.tudo(); };
+      if (!k || lx().skins.includes(k.id)) return usar();
+      UI.modal({ titulo: k.nome, html: `<p style="font-size:2.4rem;margin:.2rem">${k.ic}</p><p>Muda o visual das <b>suas</b> torres na batalha.</p>`,
+        botoes: [{ texto: 'Cancelar', classe: 'secundario' }, { texto: `Comprar · ${k.preco} 💎`, classe: 'principal', desativado: d().gemas < k.preco, motivo: 'Gemas insuficientes',
+          acao: () => { d().gemas -= k.preco; lx().skins.push(k.id); usar(); } }] });
     }));
     document.querySelectorAll('#lx-emotes [data-e]').forEach((el) => (el.onclick = () => {
       const e = EMOTES_LOJA.find((x) => x.id === el.dataset.e);

@@ -55,6 +55,8 @@ const Arena = (() => {
     fundo.style.backgroundImage = `url(assets/arenas/${a.id}${mini ? '_mini' : ''}.jpg?v=${window.VERSAO_JOGO || 1})`;
     el.appendChild(fundo);
     torres.forEach((p) => el.appendChild(peca(p)));
+    el.className = el.className.replace(/\bskin-\S+/g, '').trim();
+    try { const sk = Estado.d && Estado.d.lx && Estado.d.lx.skin; if (sk) el.classList.add(`skin-${sk}`); } catch (e) { /* nada */ }
     if (ambiente) {
       const camada = document.createElement('div');
       camada.className = `ambiente amb-${a.ambiente}`;
