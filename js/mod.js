@@ -5,7 +5,7 @@ const CRIADORES = ['TxtfHnU2BXbcWpHkOSlDZQRpYNw1'];
 const BOT_APELAO = ['ZwrffaFMcidTzZAGCMJNXOtuuOh2', 'EwnFPrCPFUMawnc6dttsQQ98yII2'];
 
 const Mod = (() => {
-  const flags = { elixirInfinito: false, torresInvenciveis: false, danoX5: false, iaParada: false, recargaZero: false, tropasInvenciveis: false, vel: 1 };
+  const flags = { elixirInfinito: false, torresInvenciveis: false, danoX5: false, iaParada: false, recargaZero: false, tropasInvenciveis: false, invocacaoGratis: false, vel: 1 };
   const ehCriador = () => !!Conta.uid() && CRIADORES.includes(Conta.uid());
   const flag = (k) => ehCriador() && flags[k];
   const vel = () => (ehCriador() ? flags.vel : 1);
@@ -62,9 +62,24 @@ const Mod = (() => {
         ['Liberar Plus e Ultra', () => { const p = Passe.dados(); p.plus = true; p.ultra = true; }],
         ['Completar o passe', () => { Passe.dados().pontos = Passe.NIVEIS * Passe.PONTOS_NIVEL; }],
       ]],
-      ['🃏 Coringas e tokens', [
+      ['🃏 Coringas', [
         ['+50 de cada coringa', () => { Object.keys(Estado.CORINGAS).forEach((t) => Estado.darCoringa(t, 50)); }],
-        ['+1000 tokens', () => { d.tokens = (d.tokens || 0) + 1000; }],
+        ['+500 de cada coringa', () => { Object.keys(Estado.CORINGAS).forEach((t) => Estado.darCoringa(t, 500)); }],
+      ]],
+      ['🪙 Tokens e medalhas', [
+        ['+1.000 tokens', () => { d.tokens = (d.tokens || 0) + 1000; }],
+        ['+10.000 tokens', () => { d.tokens = (d.tokens || 0) + 10000; }],
+        ['+100.000 tokens', () => { d.tokens = (d.tokens || 0) + 100000; }],
+        ['Zerar tokens', () => { d.tokens = 0; }],
+        ['+500 medalhas de cada tipo', () => { const m = d.medalhas || (d.medalhas = {}); ['saiyajin', 'estelar', 'heroi'].forEach((k) => { m[k] = (m[k] || 0) + 500; }); }],
+        ['+5.000 medalhas de cada tipo', () => { const m = d.medalhas || (d.medalhas = {}); ['saiyajin', 'estelar', 'heroi'].forEach((k) => { m[k] = (m[k] || 0) + 5000; }); }],
+        ['+1.000 medalhas Saiyajin', () => { const m = d.medalhas || (d.medalhas = {}); m.saiyajin = (m.saiyajin || 0) + 1000; }],
+        ['+1.000 medalhas Estelar', () => { const m = d.medalhas || (d.medalhas = {}); m.estelar = (m.estelar || 0) + 1000; }],
+        ['+1.000 medalhas de Herói', () => { const m = d.medalhas || (d.medalhas = {}); m.heroi = (m.heroi || 0) + 1000; }],
+        ['Zerar medalhas', () => { d.medalhas = {}; }],
+        ['Renovar a Caça aos Tokens de hoje', () => { d.tokensDia = null; }],
+        ['Renovar pacotes da Loja de Troca dos eventos', () => { delete d.pacotesLoja; }],
+        ['+1.000 fichas de troca da loja', () => LojaExtra.darFichas(1000)],
       ]],
       ['🏅 Pro Pass (Ranqueada)', [
         ['+5 níveis do Pro Pass', () => { const r = Ranque.dados(); r.xp = Math.min(Ranque.PASSE_NIVEIS * Ranque.PASSE_XP, (r.xp || 0) + 5 * Ranque.PASSE_XP); }],
@@ -94,12 +109,27 @@ const Mod = (() => {
       ]],
       ['🌀 Invocação (Summon)', [
         ['+10.000 gemas', () => { d.gemas += 10000; }],
-        ['Zerar a garantia (pity)', () => { d.summon = { total: 0, ultras: 0, hist: [] }; }],
+        ['+100.000 gemas', () => { d.gemas += 100000; }],
+        ['Próxima invocação = Ultra (banner atual)', () => { const b = Summon.banner(), p = Summon.dados().b[b.id] || (Summon.dados().b[b.id] = { semUltra: 0, semDestaque: 0 }); p.semUltra = Summon.PITY - 1; if (b.pityDestaque) p.semDestaque = b.pityDestaque - 1; }],
+        ['Próxima invocação = personagem destaque', () => { const b = Summon.banner(), p = Summon.dados().b[b.id] || (Summon.dados().b[b.id] = { semUltra: 0, semDestaque: 0 }); p.semUltra = Summon.PITY - 1; p.semDestaque = (b.pityDestaque || 1) - 1; }],
+        ['Receber TODAS as cartas do banner atual', () => { const p = Summon.pool(); Object.values(p).flat().forEach((id) => { const c = Estado.carta(id) || Estado.todasCartas().find((x) => x.id === id); if (c) darCarta(c, 5, 20); }); }],
+        ['Receber TODAS as Ultra e de invocação', () => { Estado.todasCartas().filter((c) => c.raridade === 'ultra' || c.summon).forEach((c) => darCarta(c, 5, 20)); }],
+        ['Receber só as Ultra novas (evento ULTRAS)', () => { Estado.todasCartas().filter((c) => c.novo && c.raridade === 'ultra').forEach((c) => darCarta(c, 9, 50)); }],
+        ['Zerar contador e garantia de invocações', () => { d.summon = { total: 0, ultras: 0, hist: [], b: {} }; }],
+        ['Limpar histórico de invocações', () => { Summon.dados().hist = []; }],
       ]],
       ['🎪 Eventos', [
         ['Contrato da Makima: liberar fase final', () => { Contrato.dados().fase = 6; }],
         ['Contrato da Makima: +500 pontos de Obediência', () => { Contrato.dados().pts += 500; }],
         ['Dar a Makima agora', () => { const c = Estado.todasCartas().find((x) => x.id === 'makima'); if (c) darCarta(c, 5, 10); }],
+        ['Esmeraldas do Caos: liberar as 7 esmeraldas', () => { Esmeraldas.dados().fase = 7; }],
+        ['Esmeraldas do Caos: +500 anéis', () => { Esmeraldas.dados().aneis += 500; }],
+        ['Esmeraldas do Caos: dar o Super Quarteto', () => { ['q_sonic', 'q_shadow', 'q_silver', 'q_amy', 'super_quarteto'].forEach((id) => { const c = Estado.todasCartas().find((x) => x.id === id); if (c) darCarta(c, 5, 10); }); }],
+        ['Omnitrix: liberar os 9 aliens', () => { Omnitrix.dados().dna = ['ben_chama', 'ben_diamante', 'ben_xlr8', 'ben_enormossauro', 'ben_contratempo', 'ben_ecoeco', 'ben_cromatico', 'ben_gravatack', 'ben_waybig']; }],
+        ['Omnitrix: dar o Ben 10', () => { const c = Estado.todasCartas().find((x) => x.id === 'ben10'); if (c) darCarta(c, 5, 10); }],
+        ['Chefão Mundial: renovar tentativas e prêmio', () => { const c = Chefe.dados(); c.tent = 0; c.pego = false; }],
+        ['Festival da Nino: renovar tentativas', () => { const n = Eventos.nino(); n.tentativas = 0; }],
+        ['Renovar missões diárias e semanais', () => { d.missoes = null; }],
         ['Reiniciar todos os eventos (Makima, Esmeraldas, Omnitrix)', () => { delete d.mk; delete d.esm; delete d.omni; }],
       ]],
       ['📊 Estatísticas e histórico', [
@@ -130,6 +160,7 @@ const Mod = (() => {
           ${interruptor('iaParada', 'Oponente parado')}
           ${interruptor('tropasInvenciveis', 'Minhas tropas invencíveis')}
           ${interruptor('recargaZero', 'Habilidades sem recarga')}
+          ${interruptor('invocacaoGratis', 'Invocações de graça (Summon)')}
           <div class="mod-vel">Velocidade da batalha: ${[1, 2, 3].map((v) => `<button class="btn-peq ${flags.vel === v ? 'ativo' : ''}" data-vel="${v}">${v}x</button>`).join('')}</div>
           <button class="btn-peq" id="mod-vencer">👑 Vencer a batalha agora</button>
         </div>

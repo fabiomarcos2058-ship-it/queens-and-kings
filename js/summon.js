@@ -497,7 +497,7 @@ const Summon = (() => {
   let animando = false;
   async function invocar(n) {
     if (animando) return;
-    const preco = precoDe(n);
+    const preco = (typeof Mod !== 'undefined' && Mod.flag('invocacaoGratis')) ? 0 : precoDe(n);
     if (Estado.d.gemas < preco) { UI.toast(`Faltam ${preco - Estado.d.gemas} 💎 para invocar ${n}x`); return; }
     if (banner().zenkai ? !idsZenkai().length : !pool().ultra.length) { UI.toast('Banner indisponível agora'); return; }
     animando = true;
