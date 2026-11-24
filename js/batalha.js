@@ -992,7 +992,8 @@ const Batalha = (() => {
     if (t.dono === 'azul' && typeof Missoes !== 'undefined' && !s.tutorial) Missoes.contar('habilidades', 1);
     efeito(`ativou ${t.time}`, t.x, t.y, 700);
     if (s.rede || s.aoVivo) s.eventos.push(['a', Math.round(t.x), Math.round(t.y), t.time === 'azul' ? 0 : 1]);
-    executarHab(t, h);
+    cutinCarta = cartaComCutinProprio(t.carta) ? { id: t.carta.id, nome: h.nome } : null;
+    try { executarHab(t, h); } finally { cutinCarta = null; }
     if (t.dono === 'azul') UI.toast(`⚡ ${h.nome}!`);
     return true;
   }
@@ -1284,7 +1285,7 @@ const Batalha = (() => {
     t.el.classList.add('carregando-kame');
     if (t.furiaN >= 3) t.el.classList.add('forte');
     cutin('goku_furia');
-    if (s.rede || s.aoVivo) s.eventos.push(['c', 0]);
+    if (s.rede || s.aoVivo) s.eventos.push(evCutin('goku_furia'));
   }
   function soltarFuria(t) {
     t.el.classList.remove('carregando-kame', 'forte');
@@ -1368,13 +1369,19 @@ const Batalha = (() => {
   const CUTINS = ['goku_furia', 'jojo_jotaro', 'jojo_dio', 'jojo_diavolo', 'jojo_pucci', 'jojo_gyro', 'jojo_johnny', 'sonic_shadow', 'sonic_super', 'sonic_dark', 'sonic_excalibur', 'sonic_hyper', 'yugi_reino', 'ultra_sae', 'ultra_rin', 'ultra_isagi', 'ultra_anri', 'inv_mark_eve', 'inv_mark', 'inv_eve', 'inv_conquest', 'inv_omni', 'inv_anissa', 'db_goku_vegeta', 'db_gogeta_vegetto', 'db_vegetto_gogeta', 'db_ultra_ego', 'db_kaioken', 'db_goku_deus', 'db_black', 'db_evolution', 'cy_david', 'cy_adam', 'cy_adam_evo', 'cy_rubi', 'cy_silverhand', 'nz_ainz', 'nz_albedo', 'nz_shalltear', 'nz_demiurge', 'nz_sebas', 'nz_pandora', 'op_luffy', 'isagi_meta', 'kaiser_isagi', 'sonic_relampago', 'sonic_renasce', 'super_sonic_solar', 'ben_omnitrix', 'ben_chama', 'ben_diamante', 'ben_xlr8', 'ben_enormossauro', 'ben_contratempo', 'ben_ecoeco', 'ben_cromatico', 'ben_gravatack', 'ben_waybig', 'q_sonic', 'q_shadow', 'q_silver', 'q_amy', 'q_hyper', 'hb_dupla', 'hb_furia', 'hb_ruinas', 'mk_controle', 'mk_domina'];
   const TEXTO_CUTIN_2 = { q_sonic: 'Ataque Teleguiado!', q_shadow: 'Controle do Caos!', q_silver: 'Psicocinese!', q_amy: 'Martelo Piko!', q_hyper: 'SUPER SINCRONIA!', hb_dupla: 'Kamehameha do Futuro!', hb_furia: 'TRUNKS FÚRIA!', hb_ruinas: 'Ataque das Ruínas!', mk_controle: 'CONTROLE!', mk_domina: 'Ajoelhem.', ben_omnitrix: 'É hora de ação!', ben_chama: 'Chama!', ben_diamante: 'Diamante!', ben_xlr8: 'XLR8!', ben_enormossauro: 'Enormossauro!', ben_contratempo: 'Contra-Tempo!', ben_ecoeco: 'Eco Eco!', ben_cromatico: 'Cromático!', ben_gravatack: 'Gravatack!', ben_waybig: 'Way Big!', sonic_relampago: 'Loop Relâmpago!', sonic_renasce: 'Super Sonic!', super_sonic_solar: 'Chaos Blast!', isagi_meta: 'Metavisão!', kaiser_isagi: 'Pacto do Diabo!', sonic_shadow: 'Chaos Control!', sonic_super: 'Super Boost!', sonic_dark: 'Explosão Sombria!', sonic_excalibur: 'Soul Surge!', sonic_hyper: 'Hiper Velocidade!', yugi_reino: 'Reino das Sombras!', ultra_sae: 'Visão do Gênio!', ultra_rin: 'Flow: Destruição!', ultra_isagi: 'Direct Shot!', ultra_anri: 'Doces ou Travessuras?', inv_mark_eve: 'Juntos somos invencíveis!', inv_mark: 'Investida Invencível!', inv_eve: 'Barreira Atômica!', inv_conquest: 'Esmagar!', inv_omni: 'Fúria do Regente!', inv_anissa: 'Rajada Viltrumita!', db_goku_vegeta: 'Rivais Eternos!', db_gogeta_vegetto: 'Kamehameha Final + Big Bang!', db_vegetto_gogeta: 'Soul Punisher!', db_ultra_ego: 'Hakai!', db_kaioken: 'Kaioken x20!', db_goku_deus: 'Punho do Deus Saiyajin!', db_black: 'Ceifa Divina!', db_evolution: 'Final Flash!', cy_david: 'Sandevistan!', cy_adam: 'Rajada de Mísseis!', cy_adam_evo: 'Mísseis + Sandevistan!', cy_rubi: 'Ciberpsicose!', cy_silverhand: 'Johnny Silverhand!', nz_ainz: 'O Objetivo de Toda Vida é a Morte!', nz_albedo: 'Hermes Trismegistus!', nz_shalltear: 'Lança Purificadora!', nz_demiurge: 'Chamas do Inferno!', nz_sebas: 'Forma de Dragão!', nz_pandora: 'Doppelgänger!', op_luffy: 'Gomu Gomu no... Bajrang Gun!' };
   const TEXTO_CUTIN = { ...TEXTO_CUTIN_2, goku_furia: "You're going to pay for this!", jojo_jotaro: 'Star Platinum: The World!', jojo_dio: 'ZA WARUDO! Toki yo tomare!', jojo_diavolo: 'King Crimson!', jojo_pucci: 'Made in Heaven!', jojo_gyro: 'Ball Breaker!', jojo_johnny: 'Tusk Act 4!' };
-  const cutinRede = (qual) => { cutin(qual); if (s.rede || s.aoVivo) s.eventos.push(['c', CUTINS.indexOf(qual)]); };
+  // cartas novas (Ultras do evento e exclusivas) usam a própria arte no corte de cena, não a de outro personagem
+  let cutinCarta = null;
+  const cartaComCutinProprio = (c) => !!c && (c.id === 'nikki_freeman' || (c.novo && c.raridade === 'ultra'));
+  const evCutin = (qual) => (cutinCarta ? ['c', -1, cutinCarta.id, cutinCarta.nome] : ['c', CUTINS.indexOf(qual)]);
+  const cutinRede = (qual) => { cutin(qual); if (s.rede || s.aoVivo) s.eventos.push(evCutin(qual)); };
   function cutin(qual) {
     const jan = document.querySelector('.arena-grande-janela');
     if (!jan || jan.querySelector('.cutin')) return;
     const el = document.createElement('div');
-    el.className = `cutin ${qual}`;
-    el.innerHTML = `<div class="cutin-linhas"></div><div class="cutin-faixa"><img src="assets/cutins/${qual}.jpg?v=${window.VERSAO_JOGO || 1}" alt="" /></div><div class="cutin-legenda">${TEXTO_CUTIN[qual]}</div>`;
+    el.className = cutinCarta ? 'cutin cutin-carta' : `cutin ${qual}`;
+    const cc = cutinCarta;
+    const img = cc ? `assets/cartas/${cc.id}.jpg?v=${window.VERSAO_JOGO || 1}` : `assets/cutins/${qual}.jpg?v=${window.VERSAO_JOGO || 1}`;
+    el.innerHTML = `<div class="cutin-linhas"></div><div class="cutin-faixa"><img src="${img}" alt="" /></div><div class="cutin-legenda">${cc ? String(cc.nome).replace(/[<>&]/g, '') + '!' : TEXTO_CUTIN[qual]}</div>`;
     jan.appendChild(el);
     try { navigator.vibrate && navigator.vibrate([40, 40, 90]); } catch (e) { /* nada */ }
     setTimeout(() => el.classList.add('saindo'), 1300);
@@ -4245,7 +4252,7 @@ const Batalha = (() => {
       } else if (ev[0] === 'm') {
         cenaMeta(!!ev[1]);
       } else if (ev[0] === 'c') {
-        cutin(CUTINS[ev[1]] || 'goku_furia');
+        if (ev[1] === -1) { cutinCarta = { id: ev[2], nome: ev[3] }; try { cutin('goku_furia'); } finally { cutinCarta = null; } } else cutin(CUTINS[ev[1]] || 'goku_furia');
       } else if (ev[0] === 'd') {
         dominioVisual(mx(ev[1]), my(ev[2]), mt(ev[3]));
       } else if (ev[0] === 'a') {

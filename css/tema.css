@@ -163,3 +163,6 @@ html.leve .carta.ultra .ultra-tex { animation: none; opacity: .6; }
 .carta.ultra .ultra-moldura { position: absolute; inset: 0; z-index: 3; pointer-events: none; background: url(../assets/ui/ultra_moldura.png) center / 100% 100% no-repeat; border-radius: 7px; }
 .carta.ultra img.ultra-novo { position: absolute; inset: auto; left: 1%; top: 11%; width: 34%; height: auto; object-fit: contain; mask-image: none; border-radius: 0; z-index: 4; pointer-events: none; filter: drop-shadow(0 1px 2px #000a); }
 .carta.ultra .nome-3d { z-index: 5; }
+
+/* corte de cena das cartas novas: usa a arte da própria carta */
+.cutin.cutin-carta .cutin-faixa img { object-position: 50% 18%; }
