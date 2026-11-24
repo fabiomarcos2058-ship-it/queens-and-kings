@@ -132,6 +132,9 @@ const Mod = (() => {
         ['Renovar missões diárias e semanais', () => { d.missoes = null; }],
         ['Reiniciar todos os eventos (Makima, Esmeraldas, Omnitrix)', () => { delete d.mk; delete d.esm; delete d.omni; }],
       ]],
+      ['☁️ Nuvem', [
+        ['Restaurar a cópia de segurança desta conta', async () => { try { UI.toast((await Conta.restaurarBackup()) ? '✅ Cópia restaurada!' : 'Esta conta ainda não tem cópia de segurança.'); } catch (e) { UI.toast('Não consegui ler a nuvem agora.'); } }],
+      ]],
       ['📊 Estatísticas e histórico', [
         ['Zerar estatísticas', () => { delete d.est; }],
         ['Limpar histórico de batalhas', () => { d.historico = []; }],

@@ -34,9 +34,17 @@ const Conta = (() => {
   // ---------- Nuvem ----------
   const docJogador = () => fb.doc(fb.db, 'jogadores', usuario.uid);
 
+  // nuvemLida: só vira true depois que a nuvem respondeu de verdade (existe ou confirmadamente não existe).
+  // Enquanto for false NADA é gravado, pra um save vazio nunca apagar a conta de ninguém.
+  let nuvemLida = false, backupPendente = null;
   async function baixarDaNuvem() {
     const snap = await fb.getDoc(docJogador());
-    return snap.exists() ? JSON.parse(snap.data().dados) : null;
+    nuvemLida = true;
+    if (!snap.exists()) return null;
+    const bruto = snap.data().dados;
+    // guarda uma cópia do que veio da nuvem, pra poder restaurar se algo der errado
+    backupPendente = bruto && bruto.length < 400000 ? bruto : null;
+    return JSON.parse(bruto);
   }
 
   // Cada gravação conta no limite diário do Firebase (20 mil no plano grátis).
@@ -54,8 +62,14 @@ const Conta = (() => {
     clearTimeout(timerNuvem); timerNuvem = null;
     const d = Estado.d, uid = usuario.uid;
     try {
+      if (!nuvemLida) {
+        // a leitura inicial falhou: tenta de novo; se não der, NÃO grava (evita apagar o progresso da nuvem)
+        try { const n = await comPrazo(baixarDaNuvem(), 10000); if (n && progresso(n) > progresso(JSON.parse(JSON.stringify(d))) + 0) { Estado.importar(mesclarCartas(n, JSON.parse(JSON.stringify(d)))); } } catch (e) { /* segue abaixo */ }
+        if (!nuvemLida) throw new Error('nuvem não lida');
+      }
       const dados = JSON.stringify(d);
-      await gravarSeMudou('jogador', dados, () => fb.setDoc(docJogador(), { dados, atualizado: fb.serverTimestamp(), nome: d.nome }));
+      await gravarSeMudou('jogador', dados, () => fb.setDoc(docJogador(), backupPendente ? { dados, atualizado: fb.serverTimestamp(), nome: d.nome, backup: backupPendente, backupEm: fb.serverTimestamp() } : { dados, atualizado: fb.serverTimestamp(), nome: d.nome }, { merge: true }));
+      backupPendente = null;
       avisouFalha = false;
       // top global (contas que usaram o mod menu ficam de fora, pra ser justo)
       if (!d.modUsado) {
@@ -135,6 +149,7 @@ const Conta = (() => {
 
   async function aoEntrar(u, { perguntar = false } = {}) {
     usuario = u;
+    nuvemLida = false; backupPendente = null;
     let nuvem = null;
     try { nuvem = await comPrazo(baixarDaNuvem(), 10000); } catch (e) { console.warn('Erro ao ler a nuvem:', e.code || e); }
     if (nuvem) {
@@ -338,5 +353,14 @@ const Conta = (() => {
     location.reload();
   }
 
-  return { tela, ativo, logado, email, verificarSessao, sair, salvarComGoogle, fb: () => fb, uid: () => (usuario ? usuario.uid : null), salvarAgora: enviarParaNuvem, topGlobal, topRanque };
+  // restaura a cópia de segurança guardada na nuvem (a versão que a conta tinha antes da última sessão)
+  async function restaurarBackup() {
+    if (!usuario) return false;
+    const snap = await fb.getDoc(docJogador());
+    const b = snap.exists() && snap.data().backup;
+    if (!b) return false;
+    Estado.importar(JSON.parse(b)); ultimo = {}; await enviarParaNuvem();
+    return true;
+  }
+  return { restaurarBackup, tela, ativo, logado, email, verificarSessao, sair, salvarComGoogle, fb: () => fb, uid: () => (usuario ? usuario.uid : null), salvarAgora: enviarParaNuvem, topGlobal, topRanque };
 })();
