@@ -127,3 +127,23 @@ html.leve .carta.ultra .ultra-tex { animation: none; opacity: .6; }
 .arena.skin-sombria [data-torre$="-azul"]{filter:grayscale(.7) brightness(.55) contrast(1.3) drop-shadow(0 0 8px #9b4dff)}
 .arena.skin-arcoiris [data-torre$="-azul"]{animation:lxArco 4s linear infinite}
 @keyframes lxArco{from{filter:hue-rotate(0) saturate(1.6) drop-shadow(0 0 6px #fff)}to{filter:hue-rotate(360deg) saturate(1.6) drop-shadow(0 0 6px #fff)}}
+
+/* ---- Estatísticas ---- */
+.perfil-duplo{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}
+.perfil-duplo .btn-historico{margin:0}
+.es-grade{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:10px}
+.es-caixa{display:flex;flex-direction:column;align-items:center;padding:10px 6px;border-radius:14px;background:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,.05));border:1px solid rgba(255,255,255,.15)}
+.es-caixa span{font-size:1.3rem}.es-caixa b{font-size:1.35rem}.es-caixa small{opacity:.75;font-size:.72rem;text-align:center}
+.es-titulo{margin:12px 0 6px;font-weight:800;color:#ffd24d;text-align:left}
+.es-fita{display:flex;gap:4px;flex-wrap:wrap}
+.es-fita i{width:24px;height:24px;border-radius:8px;display:grid;place-items:center;font-style:normal;font-weight:800;font-size:.75rem;background:#6d7a8a}
+.es-fita i.vitoria{background:#1d9e75}.es-fita i.derrota{background:#d9455b}
+.es-carta,.es-modo{display:flex;align-items:center;gap:8px;margin:5px 0;text-align:left}
+.es-carta img{width:38px;height:38px;border-radius:50%;object-fit:cover}
+.es-carta>div{flex:1}.es-carta small,.es-modo small{opacity:.8;white-space:nowrap;font-size:.72rem}
+.es-modo span{width:96px;font-size:.8rem}.es-modo .es-barra{flex:1}
+.es-barra{height:8px;border-radius:6px;background:rgba(255,255,255,.15);overflow:hidden;margin-top:3px}
+.es-barra i{display:block;height:100%;background:linear-gradient(90deg,#5EE6C8,#ffd24d)}
+
+/* Avisos (toast) longos quebram linha em vez de vazar pela tela */
+.toast{white-space:normal!important;width:max-content;max-width:calc(100% - 28px);text-align:center;line-height:1.3;box-shadow:0 6px 18px #0008}

@@ -141,7 +141,7 @@
               <button class="btn-modal btn-google" id="btn-salvar-google"><b>G</b> Salvar na conta Google</button>
               <button class="btn-modal secundario" id="btn-entrar-conta">Criar conta ou entrar com e-mail</button></div>`}</div>
         ${(() => { const rq = Ranque.dados(), f = Ranque.info(rq.pts); return `<button class="perfil-ranque" id="perfil-ranque" style="--cor:${f.p.cor}">${RanqueUI.emblema(f.i, 64, { raios: false })}<div><b>${f.nome}</b><small>${UI.fmt(rq.pts)} PR · melhor: ${Ranque.info(rq.melhorSempre || rq.pts).nome}</small></div><span>›</span></button>`; })()}
-        <button class="btn-modal secundario btn-historico" id="perfil-historico">📜 Histórico de batalhas</button>
+        <div class="perfil-duplo"><button class="btn-modal secundario btn-historico" id="perfil-historico">📜 Histórico</button><button class="btn-modal secundario btn-historico" id="perfil-estat">📊 Estatísticas</button></div>
         <div class="estatisticas">
           <div><b>${UI.fmt(d().trofeus)}</b><span>Troféus</span></div>
           <div><b>${UI.fmt(d().recorde)}</b><span>Recorde</span></div>
@@ -200,6 +200,7 @@
     el.querySelector('#perfil-mold').onclick = () => Titulos.escolherMoldura(refazCartao);
     el.querySelector('#perfil-ranque').onclick = () => { m.fechar(); RanqueUI.abrir(); };
     el.querySelector('#perfil-historico').onclick = () => RanqueUI.historico();
+    el.querySelector('#perfil-estat').onclick = () => Estat.abrir();
     el.querySelectorAll('[data-conq]').forEach((b) => (b.onclick = () => { if (pegarConquistas([b.dataset.conq])) { b.outerHTML = '<span class="estado">✓</span>'; atualizarGifts(); } }));
     el.querySelectorAll('[data-av]').forEach((b) => (b.onclick = () => {
       d().avatar = b.dataset.av;

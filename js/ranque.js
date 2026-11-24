@@ -369,6 +369,7 @@ const Ranque = (() => {
   function registrar(e) {
     const d = Estado.d;
     d.historico = [{ t: Date.now(), ...e }, ...(d.historico || [])].slice(0, 40);
+    try { Estat.contar(e); } catch (err) { /* nada */ }
     Estado.salvar();
   }
   const historico = () => Estado.d.historico || [];
