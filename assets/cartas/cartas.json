@@ -6674,6 +6674,52 @@
     720
    ],
    "novo": true
+  },
+  {
+   "id": "nikki_freeman",
+   "intransferivel": true,
+   "nome": "Nikki Freeman",
+   "raridade": "lendaria",
+   "custo": 5,
+   "tipo": "Lendária exclusiva da Ally",
+   "descricao": "Exclusiva da Ally, pra sempre na conta. Com essa cara fechada ninguém aguenta: cada olhar de desprezo pode deixar o inimigo travado.",
+   "trofeus": 0,
+   "exclusivo": [
+    "TxtfHnU2BXbcWpHkOSlDZQRpYNw1"
+   ],
+   "nivelInicial": 9,
+   "rosto": [
+    380,
+    430,
+    150
+   ],
+   "arte": [
+    0,
+    40,
+    735
+   ],
+   "vida": 1150,
+   "dano": 255,
+   "velocidade": 72,
+   "alcance": 18,
+   "cadencia": 0.85,
+   "alvo": "tudo",
+   "area": 0,
+   "danoTorre": 0.6,
+   "passiva": {
+    "nome": "Olhar de Desprezo",
+    "tipo": "ataques_nikki_freeman",
+    "descricao": "25% de chance de atordoar o alvo por 1s e 20% de crítico (x2)."
+   },
+   "habilidade": {
+    "nome": "Bico Emburrado",
+    "tipo": "esmagar",
+    "custo": 3,
+    "recarga": 16,
+    "mult": 2.6,
+    "descricao": "Fecha a cara, salta no inimigo mais forte e esmaga: dano em área e atordoa por 1,2s."
+   },
+   "arena": 1
   }
  ]
 }
