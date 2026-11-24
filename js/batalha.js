@@ -999,6 +999,7 @@ const Batalha = (() => {
   }
   // efeito de cada habilidade (separado pra o Pandora's Actor conseguir imitar)
   function executarHab(t, h) {
+    if (h.tipo === 'sig') sigHab(t, h);
     if (h.tipo === 'golpes') { t.golpesFortes = 3; t.multGolpes = h.mult || 2.5; t.el.classList.add('aura-golpes'); }
     if (h.tipo === 'furia') { t.furia = h.duracao || 6; t.el.classList.add('aura-furia'); }
     if (h.tipo === 'fenix') { t.fenix = h.duracao || 10; t.el.classList.add('aura-fenix'); }
@@ -2247,6 +2248,61 @@ const Batalha = (() => {
     };
     if (alvo) { teleportar(t, alvo); agendar(0.2, bater); } else bater();
   }
+
+  // =================== Habilidades únicas das Ultras do evento + Nikki Freeman ===================
+  const fxc = (cl, x, y, ms, cor, tam) => { const el = fxEl(cl, x, y, ms); if (el) { el.style.setProperty('--cor', cor); if (tam) el.style.width = `${tam}%`; } return el; };
+  const sigFortes = (t, n, r = 900) => inimigosPerto(t, r).sort((a, b) => b.vida - a.vida).slice(0, n);
+  const sigAtord = (e, seg) => { if (e.torre || imuneA(e)) return; e.atord = Math.max(e.atord, seg); e.el.classList.add('atordoada'); };
+  const sigLento = (e, seg, pct) => { if (e.torre || imuneA(e)) return; e.lento = Math.max(e.lento, seg); e.lentoPct = Math.max(e.lentoPct, pct); e.el.classList.add('lenta'); };
+  const sigFraco = (e, seg, pct) => { if (e.torre || imuneA(e)) return; e.fraco = Math.max(e.fraco || 0, seg); e.fracoPct = Math.max(e.fracoPct || 0, pct); e.el.classList.add('enfraquecida'); };
+  const sigQueima = (e, t, seg, mult, cor) => { if (e.torre) return; e.queima = Math.max(e.queima, seg); e.queimaDps = Math.max(e.queimaDps || 0, t.dano * mult); e.queimaCor = cor; e.queimaFonte = t.time; e.el.classList.add('queimando'); };
+  const sigEscuro = (ms) => { if (!s.arena) return; s.arena.classList.add('sig-escuro'); setTimeout(() => s.arena && s.arena.classList.remove('sig-escuro'), ms); };
+  const sigDepois = (seg, fn) => agendar(seg, () => { if (s && !s.acabou) fn(); });
+  const sigCura = (t, pct) => { t.vida = Math.min(t.max, t.vida + Math.round(t.max * pct)); atualizarHp(t); particulas(t.x, t.y, '#97F4B0', 10, 26); };
+  const sigEscudo = (t, pct) => { t.escudo = Math.max(t.escudo || 0, Math.round(t.max * pct)); t.escudoMax = Math.max(t.escudoMax || 0, t.escudo); t.el.classList.add('com-escudo'); };
+  // uma "rajada" de explosões em sequência sobre alvos (meteoros, cortes, nóvas)
+  function sigSequencia(t, alvos, mult, raio, cor, passo, opc = {}) {
+    alvos.forEach((al, i) => sigDepois(0.15 + i * passo, () => {
+      if (t.vida <= 0 || al.vida <= 0) return;
+      fxc(opc.fx || 'fx-sig-pilar', al.x, al.y, 700, cor);
+      explosaoArea(t, al, Math.round(t.dano * mult), raio, { visual: opc.visual || 'impacto', cor, empurrar: opc.empurrar || 0, atordoar: opc.atordoar || 0 });
+      if (opc.depois) opc.depois(al);
+    }));
+  }
+  const SIG = {
+    // Nikki: a cara fechada que paralisa o campo inteiro
+    nikki_freeman: (t, h) => {
+      sigEscuro(1600); fxc('fx-sig-anel', t.x, t.y, 1100, '#FF3D6E', 150); fxc('fx-sig-olhar', t.x, t.y - 4, 1300, '#FF3D6E', 44);
+      sigEscudo(t, 0.25); t.furia = 5; t.el.classList.add('aura-furia'); sacudir();
+      for (const e of inimigosPerto(t, 190)) { sigAtord(e, 1.6); sigFraco(e, 6, 0.4); fxc('fx-sig-coracao', e.x, e.y - 8, 1100, '#FF3D6E', 9); }
+      const alvo = sigFortes(t, 1, 260)[0];
+      sigDepois(1.1, () => { if (t.vida <= 0) return; if (alvo && alvo.vida > 0) teleportar(t, alvo); explosaoArea(t, t, Math.round(t.dano * (h.mult || 2.8)), 70, { visual: 'impacto', cor: '#FF3D6E', empurrar: 20, atordoar: 1.2 }); fxc('fx-sig-anel', t.x, t.y, 800, '#FFB3C8', 70); tremer(true); });
+    },
+    ul_black_rose: (t, h) => { const al = sigFortes(t, 1, 300)[0]; if (al) teleportar(t, al); sigEscuro(1200); const cx = al ? al.x : t.x, cy = al ? al.y : t.y; for (let i = 0; i < 5; i++) sigDepois(0.12 + i * 0.13, () => { if (t.vida <= 0) return; const ox = (i - 2) * 16, oy = ((i % 2) ? -1 : 1) * 10; fxc('fx-sig-risco', cx + ox, cy + oy, 450, '#FF5CC8', 22); explosaoArea(t, { x: cx + ox, y: cy + oy }, Math.round(t.dano * (h.mult || 0.8)), 42, { visual: 'impacto', cor: '#FF5CC8' }); if (al && al.vida > 0) sigQueima(al, t, 4, 0.25, '#FF5CC8'); }); },
+    ul_goku_ui: (t, h) => { t.intocavel = Math.max(t.intocavel || 0, 3.2); t.el.classList.add('aura-esquiva'); fxc('fx-sig-anel', t.x, t.y, 900, '#D8E6FF', 60); for (let i = 1; i <= 5; i++) sigDepois(i * 0.55, () => { if (t.vida <= 0) return; fxc('fx-sig-anel', t.x, t.y, 600, '#BFD4FF', 36); explosaoArea(t, t, Math.round(t.dano * (h.mult || 0.9)), 62, { visual: 'impacto', cor: '#D8E6FF', empurrar: 10 }); }); },
+    ul_goku_namek: (t, h) => { t.furia = 6; t.el.classList.add('aura-furia'); sacudir(); for (let i = 0; i < 4; i++) sigDepois(i * 0.9, () => { if (t.vida <= 0) return; fxc('fx-sig-anel', t.x, t.y, 800, '#7CFF8A', 90); fxc('fx-sig-pilar', t.x, t.y, 800, '#FFE45C'); explosaoArea(t, t, Math.round(t.dano * (h.mult || 1.3)), 85, { visual: 'impacto', cor: '#7CFF8A', empurrar: 16 }); }); },
+    ul_vegito_blue: (t, h) => { sigEscuro(1000); fxc('fx-sig-estrela', t.x, t.y, 900, '#4FB4FF', 50); kamehameha(t, Math.round(t.dano * (h.mult || 3.4)), { tipo: 2, comp: 440, larg: 62, torreMult: 0.35, atraso: 0.6, aoAcertar: (e) => sigLento(e, 3, 0.4) }); },
+    ul_gogeta_ssj: (t, h) => { sigCura(t, 0.12); sigSequencia(t, sigFortes(t, 4), h.mult || 1.8, 55, '#FFE45C', 0.3, { fx: 'fx-sig-estrela' }); },
+    ul_vegito_ssj: (t, h) => { const al = sigFortes(t, 1, 320)[0]; if (al) teleportar(t, al); for (let i = 0; i < 3; i++) sigDepois(0.15 + i * 0.22, () => { if (t.vida <= 0) return; fxc('fx-sig-risco', t.x + (i - 1) * 14, t.y, 420, '#FFE45C', 20); explosaoArea(t, al && al.vida > 0 ? al : t, Math.round(t.dano * (h.mult || 1.1)), 44, { visual: 'impacto', cor: '#FFE45C', atordoar: i === 2 ? 1.0 : 0 }); }); },
+    ul_goku_ssj: (t, h) => { t.furia = 6; t.golpesFortes = 4; t.multGolpes = h.mult || 2.2; t.el.classList.add('aura-furia', 'aura-golpes'); sigEscuro(900); fxc('fx-sig-pilar', t.x, t.y, 1000, '#FFE45C'); fxc('fx-sig-anel', t.x, t.y, 900, '#FFE45C', 80); sacudir(); },
+    ul_gogeta_blue_pronto: (t, h) => { sigEscudo(t, 0.2); sigSequencia(t, sigFortes(t, 2), h.mult || 2.2, 50, '#4FB4FF', 0.35, { fx: 'fx-sig-risco', atordoar: 0.8, depois: (al) => { if (t.vida > 0) teleportar(t, al); } }); },
+    ul_majin_vegeta: (t, h) => { sigEscuro(1100); fxc('fx-sig-anel', t.x, t.y, 1100, '#FF5CF4', 130); sigDepois(0.55, () => { if (t.vida <= 0) return; explosaoArea(t, t, Math.round(t.dano * (h.mult || 3.4)), 120, { visual: 'impacto', cor: '#FF5CF4', empurrar: 28, atordoar: 1.0 }); fxc('fx-sig-estrela', t.x, t.y, 900, '#FF5CF4', 70); tremer(true); t.vida = Math.max(1, t.vida - Math.round(t.max * 0.12)); atualizarHp(t); }); },
+    ul_gogeta_blue_extremo: (t, h) => { sigEscuro(1100); fxc('fx-sig-estrela', t.x, t.y, 1000, '#4FB4FF', 60); const a0 = melhorDirecao(t); if (a0 == null) return; [-0.4, 0, 0.4].forEach((d, i) => sigDepois(i * 0.2, () => { if (t.vida > 0) kamehameha(t, Math.round(t.dano * (h.mult || 2)), { ang: a0 + d, tipo: 1, comp: 380, larg: 40, torreMult: 0.3, atraso: 0.4 }); })); },
+    ul_turles: (t, h) => { sigCura(t, 0.4); for (const e of aliadosPerto(t, 110)) if (e !== t) sigCura(e, 0.15); t.furia = 4; t.el.classList.add('aura-furia'); fxc('fx-sig-anel', t.x, t.y, 1000, '#7CFF8A', 100); fxc('fx-sig-coracao', t.x, t.y - 10, 1000, '#7CFF8A', 12); },
+    ul_hit: (t, h) => { sigEscuro(2000); fxc('fx-sig-anel', t.x, t.y, 1200, '#B07CFF', 120); for (const e of inimigosPerto(t, 150)) { sigAtord(e, 2.2); fxc('fx-sig-relogio', e.x, e.y - 8, 1400, '#B07CFF', 9); } const al = sigFortes(t, 1, 300)[0]; sigDepois(0.8, () => { if (t.vida <= 0) return; if (al && al.vida > 0) { teleportar(t, al); explosaoArea(t, al, Math.round(t.dano * (h.mult || 2.8)), 46, { visual: 'impacto', cor: '#B07CFF' }); } }); },
+    ul_freeza: (t, h) => { const al = sigFortes(t, 1, 320)[0]; if (!al) return; sigEscuro(1500); const cx = al.x, cy = al.y; const bola = fxc('fx-sig-esfera', cx, cy - 30, 1500, '#FF5CC8', 26); sigDepois(1.3, () => { fxc('fx-sig-estrela', cx, cy, 900, '#FF5CC8', 110); explosaoArea(t, { x: cx, y: cy }, Math.round(t.dano * (h.mult || 3.6)), 110, { visual: 'impacto', cor: '#FF5CC8', empurrar: 22 }); tremer(true); }); },
+    ul_janemba: (t, h) => { sigEscuro(2500); fxc('fx-sig-anel', t.x, t.y, 1400, '#FF3B3B', 190); for (const e of inimigosPerto(t, 200)) { sigLento(e, 5, 0.6); sigFraco(e, 5, 0.3); sigQueima(e, t, 5, 0.22, '#FF3B3B'); fxc('fx-sig-pilar', e.x, e.y, 900, '#FF3B3B'); } },
+    ul_vegeta_ssj4: (t, h) => { sigEscuro(1000); fxc('fx-sig-estrela', t.x, t.y, 900, '#FF8A3B', 50); kamehameha(t, Math.round(t.dano * (h.mult || 3.4)), { tipo: 2, comp: 430, larg: 58, torreMult: 0.35, atraso: 0.55, aoAcertar: (e) => sigQueima(e, t, 4, 0.3, '#FF8A3B') }); },
+    ul_cooler: (t, h) => { sigEscuro(1700); sigSequencia(t, sigFortes(t, 3), h.mult || 2.1, 70, '#FF8A3B', 0.45, { fx: 'fx-sig-esfera', empurrar: 14 }); },
+    ul_cell: (t, h) => { sigCura(t, 0.6); sigEscudo(t, 0.15); sigEscuro(800); fxc('fx-sig-estrela', t.x, t.y, 900, '#FFFFFF', 90); for (const e of inimigosPerto(t, 120)) sigAtord(e, 1.4); fxc('fx-sig-anel', t.x, t.y, 900, '#B8FF7C', 110); },
+    ul_omega: (t, h) => { sigEscudo(t, 0.2); fxc('fx-sig-anel', t.x, t.y, 900, '#FFB03B', 70); rajadaMisseis(t, h); sigDepois(0.8, () => { if (t.vida > 0) rajadaMisseis(t, h); }); },
+    ul_broly: (t, h) => { t.furia = 8; t.golpesFortes = 3; t.multGolpes = h.mult || 3; t.el.classList.add('aura-furia', 'aura-golpes'); sigEscuro(1300); fxc('fx-sig-pilar', t.x, t.y, 1200, '#7CFF4A'); fxc('fx-sig-anel', t.x, t.y, 1000, '#7CFF4A', 120); for (const e of inimigosPerto(t, 110)) empurrar(e, t, 26); sacudir(); },
+    ul_freeza_dourado: (t, h) => { t.fenix = 10; t.el.classList.add('aura-fenix'); sigEscuro(1000); fxc('fx-sig-estrela', t.x, t.y, 1000, '#FFD25E', 60); kamehameha(t, Math.round(t.dano * (h.mult || 2.8)), { tipo: 1, comp: 400, larg: 44, torreMult: 0.35, atraso: 0.5 }); },
+    ul_gogeta_ssj4: (t, h) => { sigEscuro(1700); sigSequencia(t, sigFortes(t, 4), h.mult || 1.9, 62, '#FF5A2A', 0.32, { fx: 'fx-sig-esfera', empurrar: 12, depois: (al) => sigQueima(al, t, 3, 0.25, '#FF5A2A') }); },
+    ul_zamasu: (t, h) => { t.fenix = 10; t.el.classList.add('aura-fenix'); sigEscuro(1200); const al = sigFortes(t, 1, 300)[0]; if (al) teleportar(t, al); for (let i = 0; i < 3; i++) sigDepois(0.2 + i * 0.2, () => { if (t.vida <= 0) return; fxc('fx-sig-risco', t.x + (i - 1) * 16, t.y, 450, '#D8A0FF', 24); explosaoArea(t, al && al.vida > 0 ? al : t, Math.round(t.dano * (h.mult || 1.2)), 48, { visual: 'impacto', cor: '#D8A0FF' }); if (al && al.vida > 0) sigFraco(al, 5, 0.25); }); },
+    ul_vegeta_saga: (t, h) => { sigEscuro(1200); t.furia = 4; t.el.classList.add('aura-furia'); fxc('fx-sig-estrela', t.x, t.y, 1000, '#7CC4FF', 70); kamehameha(t, Math.round(t.dano * (h.mult || 3.6)), { tipo: 2, comp: 460, larg: 66, torreMult: 0.4, atraso: 0.7, aoAcertar: (e) => sigLento(e, 3, 0.35) }); },
+  };
+  function sigHab(t, h) { const f = SIG[t.carta.id]; if (!f) return; cutinRede('goku_furia'); f(t, h); }
 
   // =================== Ultras do Blue Lock + Anri (Halloween) ===================
   const aliadosPerto = (t, r) => s.ent.filter((e) => !e.torre && e.time === t.time && e.vida > 0 && dist(e, t) < r + e.raio);

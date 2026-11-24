@@ -166,3 +166,25 @@ html.leve .carta.ultra .ultra-tex { animation: none; opacity: .6; }
 
 /* corte de cena das cartas novas: usa a arte da própria carta */
 .cutin.cutin-carta .cutin-faixa img { object-position: 50% 18%; }
+
+/* ===== Habilidades únicas (Ultras do evento e Nikki): efeitos coloridos por --cor ===== */
+.fx-sig-anel, .fx-sig-estrela, .fx-sig-pilar, .fx-sig-risco, .fx-sig-esfera, .fx-sig-coracao, .fx-sig-olhar, .fx-sig-relogio { position: absolute; pointer-events: none; z-index: 1765; transform: translate(-50%, -50%); --cor: #fff; }
+.fx-sig-anel { width: 40%; aspect-ratio: 1; border-radius: 50%; border: 4px solid var(--cor); box-shadow: 0 0 18px var(--cor), inset 0 0 22px var(--cor); background: radial-gradient(circle, transparent 55%, color-mix(in srgb, var(--cor) 35%, transparent) 100%); animation: sigAnel 0.9s ease-out forwards; }
+@keyframes sigAnel { 0% { transform: translate(-50%, -50%) scale(0.1); opacity: 1; } 70% { opacity: 0.9; } 100% { transform: translate(-50%, -50%) scale(1); opacity: 0; } }
+.fx-sig-estrela { width: 36%; aspect-ratio: 1; background: conic-gradient(from 0deg, var(--cor) 0 6%, transparent 6% 12.5%, var(--cor) 12.5% 18%, transparent 18% 25%, var(--cor) 25% 31%, transparent 31% 37.5%, var(--cor) 37.5% 43%, transparent 43% 50%, var(--cor) 50% 56%, transparent 56% 62.5%, var(--cor) 62.5% 68%, transparent 68% 75%, var(--cor) 75% 81%, transparent 81% 87.5%, var(--cor) 87.5% 93%, transparent 93% 100%); -webkit-mask: radial-gradient(circle, #000 0 18%, transparent 70%); mask: radial-gradient(circle, #000 0 18%, transparent 70%); filter: drop-shadow(0 0 10px var(--cor)); animation: sigEstrela 0.9s ease-out forwards; }
+@keyframes sigEstrela { 0% { transform: translate(-50%, -50%) scale(0.2) rotate(0); opacity: 1; } 100% { transform: translate(-50%, -50%) scale(1.4) rotate(70deg); opacity: 0; } }
+.fx-sig-pilar { width: 11%; height: 70%; background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--cor) 85%, #fff) 45%, var(--cor) 70%, transparent); border-radius: 50% 50% 0 0; filter: blur(1px) drop-shadow(0 0 12px var(--cor)); transform-origin: 50% 100%; animation: sigPilar 0.7s ease-out forwards; }
+@keyframes sigPilar { 0% { transform: translate(-50%, -85%) scaleY(0.1) scaleX(0.4); opacity: 0; } 25% { opacity: 1; } 100% { transform: translate(-50%, -85%) scaleY(1) scaleX(1.5); opacity: 0; } }
+.fx-sig-risco { width: 24%; height: 6px; background: linear-gradient(90deg, transparent, #fff 20%, var(--cor) 60%, transparent); border-radius: 4px; box-shadow: 0 0 12px var(--cor); animation: sigRisco 0.45s ease-out forwards; }
+@keyframes sigRisco { 0% { transform: translate(-90%, -50%) rotate(-35deg) scaleX(0.2); opacity: 1; } 100% { transform: translate(-10%, -50%) rotate(-35deg) scaleX(1.2); opacity: 0; } }
+.fx-sig-esfera { width: 20%; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff 0 12%, var(--cor) 40%, color-mix(in srgb, var(--cor) 40%, #000) 100%); box-shadow: 0 0 26px var(--cor), 0 0 60px var(--cor); animation: sigEsfera 1.3s ease-in forwards; }
+@keyframes sigEsfera { 0% { transform: translate(-50%, -50%) scale(0.2); opacity: 0.2; } 80% { transform: translate(-50%, -50%) scale(1.5); opacity: 1; } 100% { transform: translate(-50%, -50%) scale(2.3); opacity: 0; } }
+.fx-sig-coracao { width: 9%; aspect-ratio: 1; background: var(--cor); clip-path: path('M12 21s-8-5.4-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 5.6-8 11-8 11z'); filter: drop-shadow(0 0 8px var(--cor)); animation: sigCoracao 1.1s ease-out forwards; }
+@keyframes sigCoracao { 0% { transform: translate(-50%, -20%) scale(0.3); opacity: 0; } 25% { opacity: 1; } 100% { transform: translate(-50%, -260%) scale(1.3); opacity: 0; } }
+.fx-sig-olhar { width: 44%; height: 12%; background: radial-gradient(ellipse at 50% 50%, #fff 0 8%, var(--cor) 24%, transparent 70%); box-shadow: 0 0 30px var(--cor); border-radius: 50%; animation: sigOlhar 1.3s ease-out forwards; }
+@keyframes sigOlhar { 0% { transform: translate(-50%, -50%) scaleX(0.1) scaleY(0.6); opacity: 0; } 20% { transform: translate(-50%, -50%) scaleX(1) scaleY(1); opacity: 1; } 100% { transform: translate(-50%, -50%) scaleX(1.8) scaleY(0.3); opacity: 0; } }
+.fx-sig-relogio { width: 9%; aspect-ratio: 1; border-radius: 50%; border: 3px solid var(--cor); box-shadow: 0 0 10px var(--cor); background: conic-gradient(var(--cor) 0 25%, transparent 25% 100%); animation: sigRelogio 1.4s linear forwards; }
+@keyframes sigRelogio { 0% { transform: translate(-50%, -50%) rotate(0); opacity: 0; } 15% { opacity: 1; } 100% { transform: translate(-50%, -50%) rotate(720deg); opacity: 0; } }
+.arena.sig-escuro::after { content: ''; position: absolute; inset: 0; z-index: 1750; pointer-events: none; background: radial-gradient(circle at 50% 50%, transparent 28%, #000b 100%); animation: sigEscuro 1.4s ease-out both; }
+@keyframes sigEscuro { 0% { opacity: 0; } 20% { opacity: 1; } 80% { opacity: 1; } 100% { opacity: 0; } }
+html.leve .arena.sig-escuro::after { animation: none; opacity: .6; }
