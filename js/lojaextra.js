@@ -163,5 +163,5 @@ const LojaExtra = (() => {
   }
   setInterval(() => { const t = document.getElementById('lx-tempo'); if (t) t.textContent = tempoPacotes(); }, 1000);
 
-  return { desenhar, darFichas, fichas, meusEmotes, EMOTES_LOJA };
+  return { desenhar, darFichas, fichas, meusEmotes, EMOTES_LOJA, SKINS };
 })();

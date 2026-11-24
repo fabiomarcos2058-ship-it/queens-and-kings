@@ -653,6 +653,7 @@ const Batalha = (() => {
   function ferir(e, dano, deTime, fonte = null, opc = {}) {
     if (e.vida <= 0) return 0;
     if (e.torre && e.time === 'azul' && Mod.flag('torresInvenciveis')) return 0;
+    if (!e.torre && e.time === 'azul' && Mod.flag('tropasInvenciveis')) return 0;
     // esquiva (Instinto Superior): o golpe erra
     if (!e.torre && e.carta && !opc.semEsquiva) {
       const pv = e.carta.passiva;
@@ -987,7 +988,7 @@ const Batalha = (() => {
     const L = jogadorDe(t);
     if (!h || t.vida <= 0 || t.recarga > 0 || L.elixir < h.custo || t.surgir > 0) return false;
     L.elixir -= h.custo;
-    t.recarga = h.recarga || 10;
+    t.recarga = (t.dono === 'azul' && Mod.flag('recargaZero')) ? 0 : (h.recarga || 10);
     if (t.dono === 'azul' && typeof Missoes !== 'undefined' && !s.tutorial) Missoes.contar('habilidades', 1);
     efeito(`ativou ${t.time}`, t.x, t.y, 700);
     if (s.rede || s.aoVivo) s.eventos.push(['a', Math.round(t.x), Math.round(t.y), t.time === 'azul' ? 0 : 1]);

@@ -5,11 +5,34 @@ const CRIADORES = ['TxtfHnU2BXbcWpHkOSlDZQRpYNw1'];
 const BOT_APELAO = ['ZwrffaFMcidTzZAGCMJNXOtuuOh2', 'EwnFPrCPFUMawnc6dttsQQ98yII2'];
 
 const Mod = (() => {
-  const flags = { elixirInfinito: false, torresInvenciveis: false, danoX5: false, iaParada: false, vel: 1 };
+  const flags = { elixirInfinito: false, torresInvenciveis: false, danoX5: false, iaParada: false, recargaZero: false, tropasInvenciveis: false, vel: 1 };
   const ehCriador = () => !!Conta.uid() && CRIADORES.includes(Conta.uid());
   const flag = (k) => ehCriador() && flags[k];
   const vel = () => (ehCriador() ? flags.vel : 1);
   let aoMudar = () => {};
+
+
+  const hojeTxt = () => { const a = new Date(); return `${a.getFullYear()}-${a.getMonth() + 1}-${a.getDate()}`; };
+  const norm = (t) => String(t || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  // pergunta um nome e devolve a carta (qualquer uma, até as de evento e exclusivas)
+  function escolherCarta() {
+    const q = prompt('Nome (ou parte do nome) da carta:');
+    if (!q) return null;
+    const ach = Estado.todasCartas().filter((c) => norm(c.nome).includes(norm(q)) || norm(c.id).includes(norm(q)));
+    if (!ach.length) { UI.toast('Nenhuma carta encontrada'); return null; }
+    if (ach.length === 1) return ach[0];
+    const lista = ach.slice(0, 12);
+    const n = prompt(`Qual delas?\n${lista.map((c, i) => `${i + 1}. ${c.nome}`).join('\n')}`, '1');
+    return lista[(+n || 0) - 1] || null;
+  }
+  function darCarta(c, nivel, copias) {
+    const d = Estado.d;
+    const col = d.colecao[c.id] || (d.colecao[c.id] = { tem: false, nivel: 1, copias: 0 });
+    col.tem = true; col.nivel = Math.max(col.nivel || 1, nivel); col.copias = (col.copias || 0) + copias;
+    if (c.exclusivo && !(d.cartasExtras || []).includes(c.id)) d.cartasExtras = [...(d.cartasExtras || []), c.id];
+    if (d.esgotadas) d.esgotadas = d.esgotadas.filter((x) => x !== c.id);
+    try { Estado.recarregarCatalogo(); } catch (e) { /* nada */ }
+  }
 
   function marcar() { Estado.d.modUsado = true; Estado.salvar(); aoMudar(); }
 
@@ -48,6 +71,46 @@ const Mod = (() => {
         ['Liberar o Pro Pass (grátis)', () => { Ranque.dados().pro = true; }],
         ['Completar o Pro Pass', () => { const r = Ranque.dados(); r.pro = true; r.xp = Ranque.PASSE_NIVEIS * Ranque.PASSE_XP; }],
       ]],
+      ['🔎 Carta específica', [
+        ['Dar uma carta (escolher nome e nível)', () => {
+          const c = escolherCarta(); if (!c) return;
+          const nv = Math.max(1, Math.min(Estado.NIVEL_CARTA_MAX, Math.round(+prompt(`Nível de ${c.nome} (1-${Estado.NIVEL_CARTA_MAX}):`, '5') || 1)));
+          darCarta(c, nv, 50); UI.toast(`✔ ${c.nome} nível ${nv}`);
+        }],
+        ['Dar TODAS as de evento, invocação e exclusivas', () => { Estado.todasCartas().filter((c) => c.evento || c.summon || c.passeUltra || c.exclusivo).forEach((c) => darCarta(c, 5, 10)); }],
+        ['Tirar uma carta', () => { const c = escolherCarta(); if (!c) return; const col = d.colecao[c.id]; if (col) { col.tem = false; col.copias = 0; col.nivel = 1; } d.deck = d.deck.filter((x) => x !== c.id); }],
+      ]],
+      ['🏆 Troféus e arena', [
+        ['+500 troféus', () => { d.trofeus += 500; d.recorde = Math.max(d.recorde, d.trofeus); }],
+        ['+2.000 troféus', () => { d.trofeus += 2000; d.recorde = Math.max(d.recorde, d.trofeus); }],
+        ['−500 troféus', () => { d.trofeus = Math.max(0, d.trofeus - 500); }],
+        ['Encher o Baú da Coroa (10 coroas)', () => { d.coroaBau = { dia: hojeTxt(), n: 10, pego: false }; }],
+        ['Renovar presente grátis do dia', () => { d.presente = null; d.presenteDiario = null; }],
+      ]],
+      ['🛒 Loja', [
+        ['+500 fichas de troca', () => LojaExtra.darFichas(500)],
+        ['Liberar todos os emotes e skins', () => { const x = d.lx || (d.lx = {}); x.emotes = LojaExtra.EMOTES_LOJA.map((e) => e.id); x.skins = LojaExtra.SKINS.map((k) => k.id); }],
+        ['Renovar pacotes e Loja de Troca', () => { const x = d.lx || (d.lx = {}); x.pacotes = { dia: '', comprados: [], once: [] }; x.troca = { dia: '', compradas: [] }; d.ofertas = { dia: '', compradas: [] }; d.troca = { dia: '', n: 0 }; }],
+      ]],
+      ['🌀 Invocação (Summon)', [
+        ['+10.000 gemas', () => { d.gemas += 10000; }],
+        ['Zerar a garantia (pity)', () => { d.summon = { total: 0, ultras: 0, hist: [] }; }],
+      ]],
+      ['🎪 Eventos', [
+        ['Contrato da Makima: liberar fase final', () => { Contrato.dados().fase = 6; }],
+        ['Contrato da Makima: +500 pontos de Obediência', () => { Contrato.dados().pts += 500; }],
+        ['Dar a Makima agora', () => { const c = Estado.todasCartas().find((x) => x.id === 'makima'); if (c) darCarta(c, 5, 10); }],
+        ['Reiniciar todos os eventos (Makima, Esmeraldas, Omnitrix)', () => { delete d.mk; delete d.esm; delete d.omni; }],
+      ]],
+      ['📊 Estatísticas e histórico', [
+        ['Zerar estatísticas', () => { delete d.est; }],
+        ['Limpar histórico de batalhas', () => { d.historico = []; }],
+        ['Tempo dos baús: fila cheia de ouro', () => { d.baus = (d.baus || []).map(() => ({ tipo: 'ouro', inicio: 1 })); }],
+      ]],
+      ['💾 Save', [
+        ['Copiar meu save (JSON)', () => { const t = JSON.stringify(d); const plano = () => prompt('Copie o save:', t); try { navigator.clipboard.writeText(t).then(() => UI.toast('Save copiado! 📋'), plano); } catch (e) { plano(); } }],
+        ['Colar um save (JSON)', () => { const t = prompt('Cole o save em JSON:'); if (!t) return; try { const o = JSON.parse(t); if (!o || !o.colecao) throw 0; Estado.importar(o); Estado.salvar(); UI.toast('Save carregado!'); } catch (e) { UI.toast('JSON inválido'); } }],
+      ]],
     ];
   }
 
@@ -58,12 +121,15 @@ const Mod = (() => {
       titulo: '🛠️ Mod menu do criador',
       classe: 'modal-mod',
       html: `<p class="aviso">Só você vê isto. Contas que usam o mod ficam fora do top global.</p>
-        ${acoes().map(([titulo, btns], gi) => `<div class="mod-grupo"><b>${titulo}</b><div class="mod-botoes">${btns.map(([t], bi) => `<button class="btn-peq" data-a="${gi}-${bi}">${t}</button>`).join('')}</div></div>`).join('')}
+        <input class="mod-busca" id="mod-busca" placeholder="🔎 Buscar ação (ex.: troféus, makima, loja)" autocomplete="off" />
+        ${acoes().map(([titulo, btns], gi) => `<details class="mod-grupo mod-det"${gi < 2 ? ' open' : ''}><summary><b>${titulo}</b><small>${btns.length}</small></summary><div class="mod-botoes">${btns.map(([t], bi) => `<button class="btn-peq" data-a="${gi}-${bi}">${t}</button>`).join('')}</div></details>`).join('')}
         <div class="mod-grupo"><b>⚔️ Batalha</b>
           ${interruptor('elixirInfinito', 'Elixir infinito')}
           ${interruptor('torresInvenciveis', 'Minhas torres invencíveis')}
           ${interruptor('danoX5', 'Minhas tropas com dano x5')}
           ${interruptor('iaParada', 'Oponente parado')}
+          ${interruptor('tropasInvenciveis', 'Minhas tropas invencíveis')}
+          ${interruptor('recargaZero', 'Habilidades sem recarga')}
           <div class="mod-vel">Velocidade da batalha: ${[1, 2, 3].map((v) => `<button class="btn-peq ${flags.vel === v ? 'ativo' : ''}" data-vel="${v}">${v}x</button>`).join('')}</div>
           <button class="btn-peq" id="mod-vencer">👑 Vencer a batalha agora</button>
         </div>
@@ -76,6 +142,15 @@ const Mod = (() => {
     });
     const el = m.el;
     const lista = acoes();
+    const busca = el.querySelector('#mod-busca');
+    busca.oninput = () => {
+      const q = norm(busca.value);
+      el.querySelectorAll('.mod-det').forEach((g) => {
+        let alguem = false;
+        g.querySelectorAll('[data-a]').forEach((b) => { const ok = !q || norm(b.textContent).includes(q) || norm(g.querySelector('summary').textContent).includes(q); b.style.display = ok ? '' : 'none'; if (ok) alguem = true; });
+        g.style.display = alguem ? '' : 'none'; if (q && alguem) g.open = true;
+      });
+    };
     el.querySelectorAll('[data-a]').forEach((b) => (b.onclick = () => {
       const [g, i] = b.dataset.a.split('-').map(Number);
       lista[g][1][i][1]();

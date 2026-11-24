@@ -150,3 +150,11 @@ html.leve .carta.ultra .ultra-tex { animation: none; opacity: .6; }
 
 /* "Qual progresso manter?" aparece por cima da tela de login (antes ficava escondido atrás dela) */
 .modal-fundo:has(.modal-escolha){z-index:200}
+
+/* ---- Mod menu: grupos e busca ---- */
+.mod-busca{width:100%;box-sizing:border-box;padding:10px 12px;border-radius:12px;border:2px solid rgba(255,255,255,.2);background:rgba(0,0,0,.25);color:inherit;font:inherit;margin:4px 0 8px}
+.mod-det{border:1px solid rgba(255,255,255,.14);border-radius:12px;padding:6px 10px;margin:6px 0;background:rgba(255,255,255,.04)}
+.mod-det summary{display:flex;justify-content:space-between;align-items:center;cursor:pointer;list-style:none}
+.mod-det summary::-webkit-details-marker{display:none}
+.mod-det summary small{opacity:.6;background:rgba(255,255,255,.12);border-radius:10px;padding:1px 8px}
+.mod-det[open] summary{margin-bottom:6px}
