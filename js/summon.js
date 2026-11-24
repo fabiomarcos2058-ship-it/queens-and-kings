@@ -190,6 +190,28 @@ const Summon = (() => {
     chances: { ultra: 0.025, lendaria: 0.2, epica: 0.775 },
     // garantia do destaque: Gohan & Trunks vem com certeza na 180ª invocação sem ele neste banner
     pityDestaque: 180,
+  }, {
+    id: 'ultras',
+    nome: 'ULTRAS',
+    sub: 'O poder máximo dos guerreiros',
+    tema: 'db',
+    logo: 'db',
+    fim: new Date(2026, 11, 25, 23, 59, 59), // 25/12/2026
+    arte: 'assets/summon/ultras.jpg',
+    titulo: 'assets/titulo/ultras.jpg',
+    mini: 'assets/summon/ultras_mini.jpg',
+    centro: 'ul_gogeta_ssj4',
+    destaque: ['ul_gogeta_ssj4', 'ul_gogeta_blue_extremo', 'ul_vegito_blue', 'ul_goku_ui', 'ul_broly'],
+    pool: {
+      ultra: ['ul_black_rose', 'ul_goku_ui', 'ul_goku_namek', 'ul_vegito_blue', 'ul_gogeta_ssj', 'ul_vegito_ssj', 'ul_goku_ssj', 'ul_gogeta_blue_pronto', 'ul_majin_vegeta', 'ul_gogeta_blue_extremo', 'ul_turles', 'ul_hit', 'ul_freeza', 'ul_janemba', 'ul_vegeta_ssj4', 'ul_cooler', 'ul_cell', 'ul_omega', 'ul_broly', 'ul_freeza_dourado', 'ul_gogeta_ssj4', 'ul_zamasu', 'ul_vegeta_saga'],
+      lendaria: ['gogeta_ssj4', 'vegito_ssj', 'goku_ssj4', 'vegeta_ssj4', 'gogeta_ssjz', 'vegito_ex'],
+      epica: ['goku_ssj2', 'goku_ssj3', 'vegeta_ssj', 'trunks_ssj', 'vegeta_base'],
+    },
+    // os fortões e as fusões são mais difíceis de vir
+    pesos: { ul_gogeta_ssj4: 1, ul_gogeta_blue_extremo: 1.2, ul_vegito_blue: 1.5, ul_goku_ui: 1.5, ul_broly: 1.5, ul_black_rose: 2, ul_gogeta_ssj: 2, ul_vegito_ssj: 2, ul_gogeta_blue_pronto: 2, ul_vegeta_ssj4: 2.5, ul_omega: 2.5, ul_hit: 2.5, ul_freeza_dourado: 2.5, ul_goku_namek: 3, ul_majin_vegeta: 3, ul_zamasu: 3, ul_janemba: 3 },
+    chances: { ultra: 0.05, lendaria: 0.25, epica: 0.70 },
+    // garantia do destaque: um dos 5 destaques vem com certeza na 150ª invocação sem nenhum deles neste banner
+    pityDestaque: 150,
   }];
   // só os banners que ainda não acabaram
   const ativos = () => BANNERS.filter((b) => b.fim.getTime() > Date.now() && (!b.inicio || b.inicio.getTime() <= Date.now()));

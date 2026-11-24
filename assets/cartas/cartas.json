@@ -5683,6 +5683,997 @@
     "seg": 8,
     "descricao": "Domina os 2 inimigos mais fortes perto dela por 8s: eles lutam do lado dela (sem atacar torres). Quem já foi dominado fica imune por um tempo."
    }
+  },
+  {
+   "id": "ul_black_rose",
+   "nome": "Goku Black Rosé (Ultra)",
+   "raridade": "ultra",
+   "custo": 6,
+   "tipo": "Ultra · Justiça Mortal",
+   "descricao": "A justiça de Zamasu em corpo de Saiyajin. Corta de longe, rouba vida e nunca erra o voo.",
+   "vida": 1400,
+   "dano": 265,
+   "velocidade": 96,
+   "alcance": 18,
+   "cadencia": 0.8,
+   "danoTorre": 0.55,
+   "passiva": {
+    "nome": "Justiça Mortal",
+    "tipo": "ultras_ul_black_rose",
+    "descricao": "Os cortes atravessam quem está atrás e roubam 10% do dano em vida."
+   },
+   "habilidade": {
+    "nome": "Lâmina de Ki",
+    "tipo": "golpes",
+    "custo": 3,
+    "recarga": 14,
+    "mult": 2.8,
+    "descricao": "Uma sequência de cortes rosados (2,8x de dano) no alvo mais perto."
+   },
+   "trofeus": 0,
+   "exclusivo": [],
+   "summon": true,
+   "alvo": "tudo",
+   "arena": 1,
+   "rosto": [
+    240,
+    575,
+    105
+   ],
+   "arte": [
+    0,
+    300,
+    736
+   ],
+   "novo": true
+  },
+  {
+   "id": "ul_goku_ui",
+   "nome": "Goku Instinto Superior (Ultra)",
+   "raridade": "ultra",
+   "custo": 6,
+   "tipo": "Ultra · Corpo Move Sozinho",
+   "descricao": "Domínio total do Instinto Superior: o corpo reage antes do pensamento.",
+   "vida": 1400,
+   "dano": 265,
+   "velocidade": 96,
+   "alcance": 18,
+   "cadencia": 0.8,
+   "danoTorre": 0.55,
+   "passiva": {
+    "nome": "Reflexo Perfeito",
+    "tipo": "ultras_ul_goku_ui",
+    "descricao": "Combos de 3 golpes, 20% de crítico e contra-ataque ao aparar."
+   },
+   "habilidade": {
+    "nome": "Esquiva Divina",
+    "tipo": "esquiva",
+    "custo": 3,
+    "recarga": 16,
+    "duracao": 5,
+    "chance": 0.85,
+    "furia": true,
+    "descricao": "Por 5s desvia de 85% dos golpes e entra em fúria."
+   },
+   "trofeus": 0,
+   "exclusivo": [],
+   "summon": true,
+   "alvo": "tudo",
+   "arena": 1,
+   "rosto": [
+    300,
+    270,
+    120
+   ],
+   "arte": [
+    0,
+    1,
+    720
+   ],
+   "novo": true
+  },
+  {
+   "id": "ul_goku_namek",
+   "nome": "Goku Namek Full Power",
+   "raridade": "ultra",
+   "custo": 6,
+   "tipo": "Ultra · Fúria de Namek",
+   "descricao": "O grito de Goku diante do impossível. Quanto mais machucado, mais forte.",
+   "vida": 1550,
+   "dano": 245,
+   "velocidade": 88,
+   "alcance": 18,
+   "cadencia": 0.9,
+   "danoTorre": 0.55,
+   "passiva": {
+    "nome": "Fúria Saiyajin",
+    "tipo": "ultras_ul_goku_namek",
+    "descricao": "Ataca até 35% mais rápido quanto menos vida tem e 20% de crítico."
+   },
+   "habilidade": {
+    "nome": "Grito de Guerra",
+    "tipo": "furia",
+    "custo": 2,
+    "recarga": 13,
+    "duracao": 7,
+    "descricao": "Entra em fúria por 7s: mais dano e mais velocidade."
+   },
+   "trofeus": 0,
+   "exclusivo": [],
+   "summon": true,
+   "alvo": "tudo",
+   "arena": 1,
+   "rosto": [
+    395,
+    395,
+    105
+   ],
+   "arte": [
+    0,
+    120,
+    736
+   ],
+   "novo": true
+  },
+  {
+   "id": "ul_vegito_blue",
+   "nome": "Vegito Blue",
+   "raridade": "ultra",
+   "custo": 6,
+   "tipo": "Ultra · Fusão Absoluta",
+   "descricao": "A fusão perfeita pelos brincos Potara. Escudo de ki e golpes que atravessam.",
+   "vida": 1550,
+   "dano": 245,
+   "velocidade": 88,
+   "alcance": 18,
+   "cadencia": 0.9,
+   "danoTorre": 0.55,
+   "passiva": {
+    "nome": "Fusão Potara",
+    "tipo": "ultras_ul_vegito_blue",
+    "descricao": "Começa com 20% de escudo e os golpes atravessam os inimigos."
+   },
+   "habilidade": {
+    "nome": "Kamehameha de Fusão",
+    "tipo": "kamehameha",
+    "custo": 4,
+    "recarga": 20,
+    "dano": 900,
+    "descricao": "Um Kamehameha gigante que atravessa tudo (metade do dano nas torres)."
+   },
+   "trofeus": 0,
+   "exclusivo": [],
+   "summon": true,
+   "alvo": "tudo",
+   "arena": 1,
+   "rosto": [
+    440,
+    545,
+    110
+   ],
+   "arte": [
+    0,
+    270,
+    736
+   ],
+   "novo": true
+  },
+  {
+   "id": "ul_gogeta_ssj",
+   "nome": "Gogeta Super Saiyajin",
+   "raridade": "ultra",
+   "custo": 6,
+   "tipo": "Ultra · Ataque Fantasma",
+   "descricao": "A fusão da dança: velocidade e confiança de sobra.",
+   "vida": 1400,
+   "dano": 265,
+   "velocidade": 96,
+   "alcance": 18,
+   "cadencia": 0.8,
+   "danoTorre": 0.55,
+   "passiva": {
+    "nome": "Dança da Fusão",
+    "tipo": "ultras_ul_gogeta_ssj",
+    "descricao": "Combos de 3 golpes e 25% de crítico."
+   },
+   "habilidade": {
+    "nome": "Ataque Fantasma",
+    "tipo": "golpes",
+    "custo": 3,
+    "recarga": 15,
+    "mult": 3,
+    "descricao": "Fantasmas de ki atacam em sequência (3x de dano)."
+   },
+   "trofeus": 0,
+   "exclusivo": [],
+   "summon": true,
+   "alvo": "tudo",
+   "arena": 1,
+   "rosto": [
+    390,
+    400,
+    85
+   ],
+   "arte": [
+    0,
+    125,
+    736
+   ],
+   "novo": true
+  },
+  {
+   "id": "ul_vegito_ssj",
+   "nome": "Vegito Super Saiyajin (Ultra)",
+   "raridade": "ultra",
+   "custo": 6,
+   "tipo": "Ultra · Poder Inigualável",
+   "descricao": "Os dois guerreiros num só. Desvia, devolve e pune quem encosta.",
+   "vida": 1550,
+   "dano": 245,
+   "velocidade": 88,
+   "alcance": 18,
+   "cadencia": 0.9,
+   "danoTorre": 0.55,
+   "passiva": {
+    "nome": "Guarda Cruzada",
+    "tipo": "ultras_ul_vegito_ssj",
+    "descricao": "Escudo de 15% da vida e contra-ataque ao aparar."
+   },
+   "habilidade": {
+    "nome": "Punição da Alma",
+    "tipo": "soulPunisher",
+    "custo": 4,
+    "recarga": 22,
+    "mult": 2.4,
+    "descricao": "Um golpe que castiga a alma do alvo (2,4x de dano)."
+   },
+   "trofeus": 0,
+   "exclusivo": [],
+   "summon": true,
+   "alvo": "tudo",
+   "arena": 1,
+   "rosto": [
+    275,
+    470,
+    75
+   ],
+   "arte": [
+    0,
+    262,
+    555
+   ],
+   "novo": true
+  },
+  {
+   "id": "ul_goku_ssj",
+   "nome": "Goku Super Saiyajin (Ultra)",
+   "raridade": "ultra",
+   "custo": 6,
+   "tipo": "Ultra · O Lendário de Namek",
+   "descricao": "O primeiro Super Saiyajin. A raiva que virou ouro.",
+   "vida": 1550,
+   "dano": 245,
+   "velocidade": 88,
+   "alcance": 18,
+   "cadencia": 0.9,
+   "danoTorre": 0.55,
+   "passiva": {
+    "nome": "Raiva Dourada",
+    "tipo": "ultras_ul_goku_ssj",
+    "descricao": "Ataca até 30% mais rápido machucado e regenera vida devagar."
+   },
+   "habilidade": {
+    "nome": "Aura Dourada",
+    "tipo": "furia",
+    "custo": 2,
+    "recarga": 12,
+    "duracao": 6,
+    "descricao": "Entra em fúria por 6s."
+   },
+   "trofeus": 0,
+   "exclusivo": [],
+   "summon": true,
+   "alvo": "tudo",
+   "arena": 1,
+   "rosto": [
+    340,
+    520,
+    95
+   ],
+   "arte": [
+    0,
+    251,
+    720
+   ],
+   "novo": true
+  },
+  {
+   "id": "ul_gogeta_blue_pronto",
+   "nome": "Gogeta Blue: Pronto para Combate",
+   "raridade": "ultra",
+   "custo": 6,
+   "tipo": "Ultra · Postura de Guerra",
+   "descricao": "A pose de quem vai terminar a luta. Ágil, firme e certeiro.",
+   "vida": 1550,
+   "dano": 245,
+   "velocidade": 88,
+   "alcance": 18,
+   "cadencia": 0.9,
+   "danoTorre": 0.55,
+   "passiva": {
+    "nome": "Postura Impecável",
+    "tipo": "ultras_ul_gogeta_blue_pronto",
+    "descricao": "Começa com 20% de escudo e 20% de crítico (x2,1)."
+   },
+   "habilidade": {
+    "nome": "Punho Divino",
+    "tipo": "punhoDeus",
+    "custo": 3,
+    "recarga": 18,
+    "mult": 2.5,
+    "descricao": "Um soco de ki divino (2,5x de dano)."
+   },
+   "trofeus": 0,
+   "exclusivo": [],
+   "summon": true,
+   "alvo": "tudo",
+   "arena": 1,
+   "rosto": [
+    335,
+    470,
+    85
+   ],
+   "arte": [
+    0,
+    195,
+    736
+   ],
+   "novo": true
+  },
+  {
+   "id": "ul_majin_vegeta",
+   "nome": "Majin Vegeta (Ultra)",
+   "raridade": "ultra",
+   "custo": 6,
+   "tipo": "Ultra · Orgulho Sombrio",
+   "descricao": "Sacrificou o orgulho para ter poder. Cai levando todo mundo junto.",
+   "vida": 1750,
+   "dano": 225,
+   "velocidade": 78,
+   "alcance": 18,
+   "cadencia": 0.95,
+   "danoTorre": 0.55,
+   "passiva": {
+    "nome": "Explosão Final",
+    "tipo": "ultras_ul_majin_vegeta",
+    "descricao": "Ao cair explode em área (3x de dano) e ataca mais rápido machucado."
+   },
+   "habilidade": {
+    "nome": "Galick Majin",
+    "tipo": "esmagar",
+    "custo": 3,
+    "recarga": 17,
+    "mult": 2.8,
+    "descricao": "Esmaga o alvo com uma onda de ki (2,8x de dano)."
+   },
+   "trofeus": 0,
+   "exclusivo": [],
+   "summon": true,
+   "alvo": "tudo",
+   "arena": 1,
+   "rosto": [
+    385,
+    235,
+    110
+   ],
+   "arte": [
+    0,
+    0,
+    736
+   ],
+   "novo": true
+  },
+  {
+   "id": "ul_gogeta_blue_extremo",
+   "nome": "Gogeta Blue Extremo",
+   "raridade": "ultra",
+   "custo": 6,
+   "tipo": "Ultra · Big Bang Kamehameha",
+   "descricao": "O ataque final da fusão azul. Empurra e atravessa quem estiver na frente.",
+   "vida": 1550,
+   "dano": 245,
+   "velocidade": 88,
+   "alcance": 18,
+   "cadencia": 0.9,
+   "danoTorre": 0.55,
+   "passiva": {
+    "nome": "Impacto Extremo",
+    "tipo": "ultras_ul_gogeta_blue_extremo",
+    "descricao": "Golpes que atravessam, empurram e 25% de crítico (x2,2)."
+   },
+   "habilidade": {
+    "nome": "Big Bang Kamehameha",
+    "tipo": "finalFlash",
+    "custo": 4,
+    "recarga": 20,
+    "mult": 2.72,
+    "descricao": "Um disparo gigantesco de ki em linha reta (2,72x de dano)."
+   },
+   "trofeus": 0,
+   "exclusivo": [],
+   "summon": true,
+   "alvo": "tudo",
+   "arena": 1,
+   "rosto": [
+    465,
+    465,
+    95
+   ],
+   "arte": [
+    0,
+    190,
+    736
+   ],
+   "novo": true
+  },
+  {
+   "id": "ul_turles",
+   "nome": "Turles",
+   "raridade": "ultra",
+   "custo": 5,
+   "tipo": "Ultra · Fruto do Poder",
+   "descricao": "Comeu o fruto da Árvore do Poder e ficou muito mais perigoso.",
+   "vida": 1288,
+   "dano": 251,
+   "velocidade": 96,
+   "alcance": 18,
+   "cadencia": 0.8,
+   "danoTorre": 0.55,
+   "passiva": {
+    "nome": "Fruto Proibido",
+    "tipo": "ultras_ul_turles",
+    "descricao": "Rouba 12% do dano em vida e regenera devagar."
+   },
+   "habilidade": {
+    "nome": "Fruto da Árvore",
+    "tipo": "cura",
+    "custo": 2,
+    "recarga": 14,
+    "descricao": "Come o fruto e recupera uma boa parte da vida."
+   },
+   "trofeus": 0,
+   "exclusivo": [],
+   "summon": true,
+   "alvo": "tudo",
+   "arena": 1,
+   "rosto": [
+    365,
+    195,
+    85
+   ],
+   "arte": [
+    0,
+    0,
+    720
+   ],
+   "novo": true
+  },
+  {
+   "id": "ul_hit",
+   "nome": "Hit",
+   "raridade": "ultra",
+   "custo": 6,
+   "tipo": "Ultra · Salto no Tempo",
+   "descricao": "O assassino que pula o tempo. Poucos golpes, todos mortais.",
+   "vida": 1400,
+   "dano": 265,
+   "velocidade": 96,
+   "alcance": 18,
+   "cadencia": 0.8,
+   "danoTorre": 0.55,
+   "passiva": {
+    "nome": "Assassino Perfeito",
+    "tipo": "ultras_ul_hit",
+    "descricao": "Combos de 3 golpes e 30% de crítico (x2,4)."
+   },
+   "habilidade": {
+    "nome": "Salto no Tempo",
+    "tipo": "investidaInv",
+    "custo": 3,
+    "recarga": 18,
+    "mult": 2.8,
+    "descricao": "Some e reaparece no alvo, causando 2,8x de dano."
+   },
+   "trofeus": 0,
+   "exclusivo": [],
+   "summon": true,
+   "alvo": "tudo",
+   "arena": 1,
+   "rosto": [
+    215,
+    225,
+    100
+   ],
+   "arte": [
+    0,
+    0,
+    736
+   ],
+   "novo": true
+  },
+  {
+   "id": "ul_freeza",
+   "nome": "Freeza Forma Final",
+   "raridade": "ultra",
+   "custo": 6,
+   "tipo": "Ultra · Imperador do Universo",
+   "descricao": "O terror do universo no auge. Resistente e cruel.",
+   "vida": 1750,
+   "dano": 225,
+   "velocidade": 78,
+   "alcance": 18,
+   "cadencia": 0.95,
+   "danoTorre": 0.55,
+   "passiva": {
+    "nome": "Pele de Imperador",
+    "tipo": "ultras_ul_freeza",
+    "descricao": "Escudo de 20% da vida e 20% de chance de atordoar (0,5s)."
+   },
+   "habilidade": {
+    "nome": "Death Ball",
+    "tipo": "kamehameha",
+    "custo": 4,
+    "recarga": 20,
+    "dano": 860,
+    "descricao": "Dispara uma esfera de morte que atravessa tudo."
+   },
+   "trofeus": 0,
+   "exclusivo": [],
+   "summon": true,
+   "alvo": "tudo",
+   "arena": 1,
+   "rosto": [
+    405,
+    235,
+    95
+   ],
+   "arte": [
+    0,
+    0,
+    736
+   ],
+   "novo": true
+  },
+  {
+   "id": "ul_janemba",
+   "nome": "Janemba Super",
+   "raridade": "ultra",
+   "custo": 6,
+   "tipo": "Ultra · Espada Demoníaca",
+   "descricao": "Um demônio com uma espada que corta a realidade.",
+   "vida": 1400,
+   "dano": 265,
+   "velocidade": 96,
+   "alcance": 18,
+   "cadencia": 0.8,
+   "danoTorre": 0.55,
+   "passiva": {
+    "nome": "Fúria Demoníaca",
+    "tipo": "ultras_ul_janemba",
+    "descricao": "Cortes atravessam, rouba 10% em vida e ataca mais rápido machucado."
+   },
+   "habilidade": {
+    "nome": "Chuva de Lâminas",
+    "tipo": "misseis",
+    "custo": 4,
+    "recarga": 20,
+    "mult": 1,
+    "n": 8,
+    "descricao": "Lança 8 lâminas de ki que perseguem os inimigos."
+   },
+   "trofeus": 0,
+   "exclusivo": [],
+   "summon": true,
+   "alvo": "tudo",
+   "arena": 1,
+   "rosto": [
+    290,
+    585,
+    70
+   ],
+   "arte": [
+    0,
+    299,
+    676
+   ],
+   "novo": true
+  },
+  {
+   "id": "ul_vegeta_ssj4",
+   "nome": "Vegeta SSJ4 (Ultra)",
+   "raridade": "ultra",
+   "custo": 6,
+   "tipo": "Ultra · Orgulho Primitivo",
+   "descricao": "O príncipe no poder primitivo. Sangue Saiyajin em estado puro.",
+   "vida": 1750,
+   "dano": 225,
+   "velocidade": 78,
+   "alcance": 18,
+   "cadencia": 0.95,
+   "danoTorre": 0.55,
+   "passiva": {
+    "nome": "Poder Primitivo",
+    "tipo": "ultras_ul_vegeta_ssj4",
+    "descricao": "Ataca até 25% mais rápido machucado e rouba 8% em vida."
+   },
+   "habilidade": {
+    "nome": "Big Bang Attack",
+    "tipo": "kamehameha",
+    "custo": 4,
+    "recarga": 20,
+    "dano": 840,
+    "descricao": "Uma esfera de ki que atravessa tudo em linha reta."
+   },
+   "trofeus": 0,
+   "exclusivo": [],
+   "summon": true,
+   "alvo": "tudo",
+   "arena": 1,
+   "rosto": [
+    500,
+    400,
+    110
+   ],
+   "arte": [
+    0,
+    125,
+    736
+   ],
+   "novo": true
+  },
+  {
+   "id": "ul_cooler",
+   "nome": "Cooler Forma Final",
+   "raridade": "ultra",
+   "custo": 5,
+   "tipo": "Ultra · Irmão do Imperador",
+   "descricao": "O irmão mais velho do Freeza: ainda mais forte e orgulhoso.",
+   "vida": 1610,
+   "dano": 213,
+   "velocidade": 78,
+   "alcance": 18,
+   "cadencia": 0.95,
+   "danoTorre": 0.55,
+   "passiva": {
+    "nome": "Armadura Cooler",
+    "tipo": "ultras_ul_cooler",
+    "descricao": "Escudo de 25% da vida e golpes que empurram."
+   },
+   "habilidade": {
+    "nome": "Supernova do Cooler",
+    "tipo": "esmagar",
+    "custo": 3,
+    "recarga": 18,
+    "mult": 2.6,
+    "descricao": "Uma explosão de ki que esmaga o alvo (2,6x de dano)."
+   },
+   "trofeus": 0,
+   "exclusivo": [],
+   "summon": true,
+   "alvo": "tudo",
+   "arena": 1,
+   "rosto": [
+    270,
+    375,
+    90
+   ],
+   "arte": [
+    0,
+    100,
+    736
+   ],
+   "novo": true
+  },
+  {
+   "id": "ul_cell",
+   "nome": "Cell Perfeito",
+   "raridade": "ultra",
+   "custo": 5,
+   "tipo": "Ultra · Perfeição Biológica",
+   "descricao": "A forma perfeita: se regenera sozinho e quase nunca cai.",
+   "vida": 1610,
+   "dano": 213,
+   "velocidade": 78,
+   "alcance": 18,
+   "cadencia": 0.95,
+   "danoTorre": 0.55,
+   "passiva": {
+    "nome": "Regeneração Perfeita",
+    "tipo": "ultras_ul_cell",
+    "descricao": "Escudo de 15% da vida e regenera 1,5% por segundo."
+   },
+   "habilidade": {
+    "nome": "Regenerar",
+    "tipo": "cura",
+    "custo": 2,
+    "recarga": 12,
+    "descricao": "Se regenera e recupera uma boa parte da vida."
+   },
+   "trofeus": 0,
+   "exclusivo": [],
+   "summon": true,
+   "alvo": "tudo",
+   "arena": 1,
+   "rosto": [
+    370,
+    175,
+    90
+   ],
+   "arte": [
+    11,
+    0,
+    718
+   ],
+   "novo": true
+  },
+  {
+   "id": "ul_omega",
+   "nome": "Omega Shenron",
+   "raridade": "ultra",
+   "custo": 6,
+   "tipo": "Ultra · Dragão Sombrio",
+   "descricao": "O pior dos dragões: esmaga tudo e não cai fácil.",
+   "vida": 1750,
+   "dano": 225,
+   "velocidade": 78,
+   "alcance": 18,
+   "cadencia": 0.95,
+   "danoTorre": 0.55,
+   "passiva": {
+    "nome": "Escamas das Esferas",
+    "tipo": "ultras_ul_omega",
+    "descricao": "Escudo de 20%, regenera devagar e 25% de chance de atordoar."
+   },
+   "habilidade": {
+    "nome": "Fúria do Dragão",
+    "tipo": "furiaViltrum",
+    "custo": 4,
+    "recarga": 22,
+    "mult": 3,
+    "descricao": "Uma sequência brutal de golpes (3x de dano)."
+   },
+   "trofeus": 0,
+   "exclusivo": [],
+   "summon": true,
+   "alvo": "tudo",
+   "arena": 1,
+   "rosto": [
+    385,
+    210,
+    100
+   ],
+   "arte": [
+    0,
+    0,
+    736
+   ],
+   "novo": true
+  },
+  {
+   "id": "ul_broly",
+   "nome": "Broly Lendário",
+   "raridade": "ultra",
+   "custo": 6,
+   "tipo": "Ultra · Fúria Incontrolável",
+   "descricao": "O Super Saiyajin Lendário: ninguém para essa fúria.",
+   "vida": 1750,
+   "dano": 225,
+   "velocidade": 78,
+   "alcance": 18,
+   "cadencia": 0.95,
+   "danoTorre": 0.55,
+   "passiva": {
+    "nome": "Fúria Lendária",
+    "tipo": "ultras_ul_broly",
+    "descricao": "Ataca até 40% mais rápido machucado, empurra e 25% de atordoar."
+   },
+   "habilidade": {
+    "nome": "Esmagar Lendário",
+    "tipo": "esmagar",
+    "custo": 4,
+    "recarga": 22,
+    "mult": 3.2,
+    "descricao": "Esmaga tudo na frente (3,2x de dano)."
+   },
+   "trofeus": 0,
+   "exclusivo": [],
+   "summon": true,
+   "alvo": "tudo",
+   "arena": 1,
+   "rosto": [
+    300,
+    255,
+    90
+   ],
+   "arte": [
+    0,
+    2,
+    675
+   ],
+   "novo": true
+  },
+  {
+   "id": "ul_freeza_dourado",
+   "nome": "Freeza Dourado",
+   "raridade": "ultra",
+   "custo": 6,
+   "tipo": "Ultra · Ressurreição Dourada",
+   "descricao": "Treinou por 4 meses para se vingar. Brilha e machuca.",
+   "vida": 1400,
+   "dano": 265,
+   "velocidade": 96,
+   "alcance": 18,
+   "cadencia": 0.8,
+   "danoTorre": 0.55,
+   "passiva": {
+    "nome": "Brilho Dourado",
+    "tipo": "ultras_ul_freeza_dourado",
+    "descricao": "25% de crítico (x2,2) e rouba 8% do dano em vida."
+   },
+   "habilidade": {
+    "nome": "Raios Dourados",
+    "tipo": "rajadaViltrum",
+    "custo": 3,
+    "recarga": 16,
+    "golpes": 5,
+    "mult": 1.7,
+    "descricao": "5 raios dourados em sequência (1,7x de dano cada)."
+   },
+   "trofeus": 0,
+   "exclusivo": [],
+   "summon": true,
+   "alvo": "tudo",
+   "arena": 1,
+   "rosto": [
+    565,
+    180,
+    75
+   ],
+   "arte": [
+    0,
+    0,
+    735
+   ],
+   "novo": true
+  },
+  {
+   "id": "ul_gogeta_ssj4",
+   "nome": "Gogeta SSJ4 (Ultra)",
+   "raridade": "ultra",
+   "custo": 6,
+   "tipo": "Ultra · Poder Absoluto",
+   "descricao": "O guerreiro mais poderoso de Dragon Ball GT.",
+   "vida": 1750,
+   "dano": 225,
+   "velocidade": 78,
+   "alcance": 18,
+   "cadencia": 0.95,
+   "danoTorre": 0.55,
+   "passiva": {
+    "nome": "Poder Primitivo Fundido",
+    "tipo": "ultras_ul_gogeta_ssj4",
+    "descricao": "Ataca mais rápido machucado, rouba 10% em vida e escudo de 15%."
+   },
+   "habilidade": {
+    "nome": "Kamehameha Supremo",
+    "tipo": "kamehameha",
+    "custo": 4,
+    "recarga": 20,
+    "dano": 920,
+    "descricao": "O Kamehameha mais forte do jogo (metade do dano nas torres)."
+   },
+   "trofeus": 0,
+   "exclusivo": [],
+   "summon": true,
+   "alvo": "tudo",
+   "arena": 1,
+   "rosto": [
+    345,
+    350,
+    100
+   ],
+   "arte": [
+    0,
+    75,
+    736
+   ],
+   "novo": true
+  },
+  {
+   "id": "ul_zamasu",
+   "nome": "Zamasu Fusão",
+   "raridade": "ultra",
+   "custo": 6,
+   "tipo": "Ultra · Justiça Imortal",
+   "descricao": "A fusão imortal que quer apagar a humanidade.",
+   "vida": 1550,
+   "dano": 245,
+   "velocidade": 88,
+   "alcance": 18,
+   "cadencia": 0.9,
+   "danoTorre": 0.55,
+   "passiva": {
+    "nome": "Corpo Imortal",
+    "tipo": "ultras_ul_zamasu",
+    "descricao": "Rouba 15% em vida, regenera 1%/s e voa."
+   },
+   "habilidade": {
+    "nome": "Imortalidade Divina",
+    "tipo": "fenix",
+    "custo": 3,
+    "recarga": 18,
+    "duracao": 10,
+    "descricao": "Fica imortal por 10s."
+   },
+   "trofeus": 0,
+   "exclusivo": [],
+   "summon": true,
+   "alvo": "tudo",
+   "arena": 1,
+   "rosto": [
+    500,
+    760,
+    95
+   ],
+   "arte": [
+    0,
+    485,
+    736
+   ],
+   "novo": true
+  },
+  {
+   "id": "ul_vegeta_saga",
+   "nome": "Vegeta Príncipe Saiyajin",
+   "raridade": "ultra",
+   "custo": 6,
+   "tipo": "Ultra · Orgulho de Príncipe",
+   "descricao": "O príncipe no auge da arrogância e da luta.",
+   "vida": 1550,
+   "dano": 245,
+   "velocidade": 88,
+   "alcance": 18,
+   "cadencia": 0.9,
+   "danoTorre": 0.55,
+   "passiva": {
+    "nome": "Orgulho Saiyajin",
+    "tipo": "ultras_ul_vegeta_saga",
+    "descricao": "20% de crítico (x2) e ataca mais rápido machucado."
+   },
+   "habilidade": {
+    "nome": "Galick Gun",
+    "tipo": "kamehameha",
+    "custo": 3,
+    "recarga": 18,
+    "dano": 780,
+    "descricao": "Dispara o Galick Gun em linha reta."
+   },
+   "trofeus": 0,
+   "exclusivo": [],
+   "summon": true,
+   "alvo": "tudo",
+   "arena": 1,
+   "rosto": [
+    555,
+    545,
+    85
+   ],
+   "arte": [
+    0,
+    276,
+    720
+   ],
+   "novo": true
   }
  ]
 }
