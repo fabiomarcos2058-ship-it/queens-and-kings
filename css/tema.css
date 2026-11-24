@@ -147,3 +147,6 @@ html.leve .carta.ultra .ultra-tex { animation: none; opacity: .6; }
 
 /* Avisos (toast) longos quebram linha em vez de vazar pela tela */
 .toast{white-space:normal!important;width:max-content;max-width:calc(100% - 28px);text-align:center;line-height:1.3;box-shadow:0 6px 18px #0008}
+
+/* "Qual progresso manter?" aparece por cima da tela de login (antes ficava escondido atrás dela) */
+.modal-fundo:has(.modal-escolha){z-index:200}

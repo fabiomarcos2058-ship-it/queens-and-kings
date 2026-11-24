@@ -95,6 +95,7 @@ const Conta = (() => {
     const resumo = (x) => `<b>${x.nome}</b><br>🏆 ${x.trofeus} troféus · nível ${x.nivel}<br>🃏 ${Object.values(x.colecao).filter((c) => c.tem).length} cartas`;
     return new Promise((ok) => UI.modal({
       titulo: 'Qual progresso manter?',
+      classe: 'modal-escolha',
       html: `<p>Essa conta já tem um progresso salvo, e este celular também tem um.</p>
         <div class="escolha-progresso"><div><small>☁️ Na conta</small>${resumo(nuvem)}</div><div><small>📱 Neste celular</small>${resumo(local)}</div></div>
         <p class="aviso">O que você não escolher será substituído.</p>`,
@@ -135,7 +136,7 @@ const Conta = (() => {
   async function aoEntrar(u, { perguntar = false } = {}) {
     usuario = u;
     let nuvem = null;
-    try { nuvem = await baixarDaNuvem(); } catch (e) { console.warn('Erro ao ler a nuvem:', e.code || e); }
+    try { nuvem = await comPrazo(baixarDaNuvem(), 10000); } catch (e) { console.warn('Erro ao ler a nuvem:', e.code || e); }
     if (nuvem) {
       const local = JSON.parse(JSON.stringify(Estado.d));
       const mesma = mesmaConta(local);
@@ -233,10 +234,15 @@ const Conta = (() => {
       const carregando = (sim) => { el.querySelectorAll('button').forEach((b) => (b.disabled = sim)); el.classList.toggle('carregando', sim); };
       const entrou = async (u, nome) => {
         if (nome) { try { await fb.updateProfile(u, { displayName: nome }); } catch (e) { /* tudo bem */ } }
-        await aoEntrar(u, { perguntar: true });
-        if (nome) { Estado.d.nome = nome; Estado.salvar(); }
-        UI.toast(`Conectado como ${email()} 💕`);
-        fechar();
+        try {
+          await aoEntrar(u, { perguntar: true });
+          if (nome) { Estado.d.nome = nome; Estado.salvar(); }
+          UI.toast(`Conectado como ${email()} 💕`);
+        } catch (err) {
+          console.warn('Erro ao carregar a conta:', err);
+        } finally {
+          fechar(); // já está logado: a tela de login nunca pode ficar presa
+        }
       };
 
       form.onsubmit = async (e) => {
